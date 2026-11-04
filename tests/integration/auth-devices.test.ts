@@ -56,3 +56,4 @@ describe('/api/auth/devices', () => {
     expect(json.loggedOut).toBe(true);
   });
 });
+

@@ -22,3 +22,4 @@ export async function GET(req: NextRequest): Promise<Response> {
     return handleApiError(err);
   }
 }
+
