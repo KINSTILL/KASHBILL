@@ -7,8 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
 enum Role {
   USER
+  SUPPORT
   ADMIN
 }
 
@@ -31,6 +36,7 @@ enum SubSource {
   NOTCH_PAY
   ADMIN_GIFT
   REFERRAL
+  TRIAL
 }
 
 enum Locale {
@@ -46,6 +52,23 @@ enum ReferralStatus {
   REJECTED
 }
 
+enum FraudSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum FraudStatus {
+  PENDING
+  CONFIRMED
+  DISMISSED
+}
+
+// ─────────────────────────────────────────────
+// MODÈLES
+// ─────────────────────────────────────────────
+
 model User {
   id              String    @id @default(cuid())
   phone           String    @unique
@@ -59,18 +82,57 @@ model User {
   proUntil        DateTime?
   pendingProDays  Int       @default(0)
   referralCode    String    @unique
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
 
-  devices          Device[]
-  deviceApprovals  DeviceApproval[]
-  recoveryCodes    RecoveryCode[]
-  clients          Client[]
-  documents        Document[]
-  subscriptions    Subscription[]
-  auditLogs        AuditLog[]
-  referralsMade    Referral[] @relation("ReferralParrain")
-  referralReceived Referral?  @relation("ReferralFilleul")
+  // ─── Freemium ───
+  duplicationsThisMonth   Int      @default(0)
+  renumerationsThisMonth  Int      @default(0)
+  monthlyCountersResetAt  DateTime @default(now())
+  productPhotosCount      Int      @default(0)
+
+  // ─── Anti-fraude ───
+  bannedAt         DateTime?
+  bannedById       String?
+  banReason        String?
+  suspendedUntil   DateTime?
+  suspendReason    String?
+  flaggedForReview Boolean  @default(false)
+  lastAdminLoginAt DateTime?
+
+  // ─── Informations légales (panafricain) ───
+  country      String  @default("CM")
+  legalName    String?
+  taxId        String?
+  rccm         String?
+  legalAddress String?
+  logoUrl      String?
+  signatureUrl String?
+  stampUrl     String?
+  headerText   String?
+  footerText   String?
+  cgvText      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ─── Relations ───
+  devices            Device[]
+  deviceApprovals    DeviceApproval[]
+  recoveryCodes      RecoveryCode[]
+  clients            Client[]
+  documents          Document[]
+  documentSequences  DocumentSequence[]
+  subscriptions      Subscription[]
+  auditLogs          AuditLog[]        @relation("TargetLogs")
+  auditLogsAsActor   AuditLog[]        @relation("ActorLogs")
+  referralsMade      Referral[]        @relation("ReferralParrain")
+  referralReceived   Referral?         @relation("ReferralFilleul")
+  fraudFlags         FraudFlag[]       @relation("FraudFlagUser")
+  fraudFlagsReviewed FraudFlag[]       @relation("FraudFlagReviewer")
+  blacklistEntries   BlacklistEntry[]
+  thresholdsUpdated  FraudThreshold[]
+
+  @@index([country])
+  @@index([flaggedForReview])
 }
 
 model Device {
@@ -144,11 +206,42 @@ model Document {
   pdfPath           String?
   watermarked       Boolean   @default(true)
   sentViaWhatsAppAt DateTime?
+  contentHash       String?
+  qrCodeUrl         String?
+  editCount         Int       @default(0)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  verification    DocumentVerification?
+  fraudFlags      FraudFlag[]
+
   @@index([userId, createdAt])
   @@index([userId, type])
+  @@index([contentHash])
+}
+
+model DocumentSequence {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  docType    DocType
+  year       Int
+  lastNumber Int     @default(0)
+
+  @@unique([userId, docType, year])
+}
+
+model DocumentVerification {
+  id            String    @id @default(cuid())
+  documentId    String    @unique
+  document      Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  publicToken   String    @unique
+  isAuthentic   Boolean   @default(true)
+  revokedAt     DateTime?
+  revokedReason String?
+  createdAt     DateTime  @default(now())
+
+  @@index([publicToken])
 }
 
 model Subscription {
@@ -182,10 +275,77 @@ model Referral {
   @@index([filleulId])
 }
 
+model CountryTaxConfig {
+  id                    String   @id @default(cuid())
+  countryCode           String   @unique
+  countryNameFr         String
+  countryNameEn         String
+  currency              String
+  taxIdLabel            String
+  rccmLabel             String
+  vatRate               Decimal? @db.Decimal(5, 2)
+  requiredFields        Json
+  legalMentionsTemplate String
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model FraudThreshold {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Int
+  description String
+  floor       Int
+  ceiling     Int
+  updatedById String?
+  updatedBy   User?    @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+model FraudFlag {
+  id           String        @id @default(cuid())
+  userId       String?
+  user         User?         @relation("FraudFlagUser", fields: [userId], references: [id], onDelete: SetNull)
+  documentId   String?
+  document     Document?     @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  reason       String
+  details      Json?
+  severity     FraudSeverity @default(MEDIUM)
+  status       FraudStatus   @default(PENDING)
+  autoDetected Boolean       @default(true)
+  reviewedById String?
+  reviewedBy   User?         @relation("FraudFlagReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt   DateTime?
+  reviewNote   String?
+  createdAt    DateTime      @default(now())
+
+  @@index([status, severity, createdAt])
+  @@index([userId, status])
+  @@index([documentId])
+}
+
+model BlacklistEntry {
+  id          String   @id @default(cuid())
+  type        String   // "PHONE" | "TAX_ID" | "DOCUMENT_HASH"
+  value       String
+  reason      String
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime @default(now())
+
+  @@unique([type, value])
+  @@index([type])
+}
+
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user      User?    @relation("TargetLogs", fields: [userId], references: [id], onDelete: SetNull)
+  actorId   String?
+  actor     User?    @relation("ActorLogs", fields: [actorId], references: [id], onDelete: SetNull)
+  targetId  String?
   action    String
   meta      Json?
   ip        String?
@@ -193,5 +353,7 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([targetId, createdAt])
   @@index([action, createdAt])
 }
