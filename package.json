@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
+    "@react-pdf/renderer": "^4.9.0",
     "clsx": "^2.1.1",
     "idb": "^8.0.4",
     "jose": "^6.2.15",
@@ -33,6 +34,7 @@
     "react-dom": "19.1.0",
     "tailwind-merge": "^3.7.0",
     "ulid": "^3.0.2",
+    "vaul": "^1.1.2",
     "zod": "^4.6.7"
   },
   "devDependencies": {
