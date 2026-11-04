@@ -1,12 +1,14 @@
 import type { Role, User } from '@prisma/client';
 
 export type AdminAction =
+  // SUPPORT + ADMIN
   | 'view_users'
   | 'view_user_detail'
   | 'unblock_device'
   | 'reset_pin'
   | 'flag_user'
   | 'view_countries'
+  // ADMIN uniquement
   | 'ban_user'
   | 'unban_user'
   | 'suspend_user'
@@ -19,10 +21,10 @@ export type AdminAction =
   | 'manage_blacklist'
   | 'manage_thresholds'
   | 'view_audit'
-  | 'view_countries_admin'
-  | 'create_country'
-  | 'update_country'
-  | 'deactivate_country';
+  | 'manage_countries'
+  | 'create_support'
+  | 'revoke_support'
+  | 'list_supports';
 
 const SUPPORT_ACTIONS: AdminAction[] = [
   'view_users',
@@ -47,10 +49,10 @@ const ADMIN_ACTIONS: AdminAction[] = [
   'manage_blacklist',
   'manage_thresholds',
   'view_audit',
-  'view_countries_admin',
-  'create_country',
-  'update_country',
-  'deactivate_country',
+  'manage_countries',
+  'create_support',
+  'revoke_support',
+  'list_supports',
 ];
 
 export function canDo(role: Role, action: AdminAction): boolean {
@@ -63,25 +65,20 @@ export function isAdmin(user: Pick<User, 'role'>): boolean {
   return user.role === 'ADMIN' || user.role === 'SUPPORT';
 }
 
-export function isSupportOrAdmin(role: Role): boolean {
-  return role === 'ADMIN' || role === 'SUPPORT';
-}
-
-/**
- * Actions qui nécessitent une ré-authentification PIN.
- */
 export function requiresReauth(action: AdminAction): boolean {
   return (
+    action === 'reset_pin' || // ← AJOUT CRITIQUE
     action === 'ban_user' ||
+    action === 'unban_user' ||
     action === 'suspend_user' ||
     action === 'grant_pro' ||
     action === 'modify_subscription' ||
     action === 'confirm_fraud' ||
+    action === 'dismiss_fraud' ||
     action === 'manage_blacklist' ||
     action === 'manage_thresholds' ||
-    action === 'create_country' ||
-    action === 'update_country' ||
-    action === 'deactivate_country'
+    action === 'manage_countries' ||
+    action === 'create_support' ||
+    action === 'revoke_support'
   );
 }
-
