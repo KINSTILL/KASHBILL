@@ -13,9 +13,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
-    "test:run": "vitest --run",
-    "test:coverage": "vitest --run --coverage",
+    "test": "dotenv -e .env.test -- vitest",
+    "test:run": "dotenv -e .env.test -- vitest --run",
+    "test:coverage": "dotenv -e .env.test -- vitest --run --coverage",
+    "test:setup": "dotenv -e .env.test -- pnpm prisma migrate deploy",
     "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts",
     "db:reset": "pnpm prisma migrate reset --force",
     "db:studio": "pnpm prisma studio"

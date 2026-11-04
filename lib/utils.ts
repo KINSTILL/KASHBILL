@@ -17,7 +17,7 @@ export function formatFCFA(amount: number): string {
   });
   const formatted = formatter.format(Math.round(amount));
   const withNbsp = formatted.replace(/\s/g, '\u202F');
-  return `${withNbsp} FCFA`;
+  return `${withNbsp}\u202FFCFA`;
 }
 
 /**

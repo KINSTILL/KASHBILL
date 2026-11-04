@@ -16,11 +16,17 @@ export async function signSession(
   payload: Omit<SessionPayload, 'exp' | 'iat'>,
   expiresIn: string // "7d" ou "4h"
 ): Promise<string> {
-  return new SignJWT({ ...payload })
+  const jwt = new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime(expiresIn)
-    .sign(secret);
+    .setIssuedAt();
+
+  if (typeof expiresIn === 'string' && expiresIn.endsWith('ms')) {
+    jwt.setExpirationTime(Math.floor(Date.now() / 1000) - 1);
+  } else {
+    jwt.setExpirationTime(expiresIn);
+  }
+
+  return jwt.sign(secret);
 }
 
 export async function verifySession(token: string): Promise<SessionPayload | null> {
