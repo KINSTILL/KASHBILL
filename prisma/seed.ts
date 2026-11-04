@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { PrismaClient, Role } from '@prisma/client';
 import { hash } from '@node-rs/argon2';
 import { randomInt } from 'node:crypto';

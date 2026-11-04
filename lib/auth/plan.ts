@@ -1,0 +1,84 @@
+import type { User } from '@prisma/client';
+import {
+  FREE_CLIENTS_LIMIT,
+  FREE_DUPLICATIONS_PER_MONTH,
+  FREE_EDITS_PER_DOCUMENT,
+  FREE_HISTORY_DAYS,
+  FREE_LOGO_GRACE_DAYS,
+  FREE_PRODUCT_PHOTOS_LIMIT,
+  FREE_RENUMERATIONS_PER_MONTH,
+  TRIAL_DURATION_DAYS,
+} from '@/lib/constants';
+
+export function isPro(user: Pick<User, 'proUntil'>): boolean {
+  return user.proUntil !== null && user.proUntil > new Date();
+}
+
+export function isInTrial(user: Pick<User, 'proUntil' | 'createdAt'>): boolean {
+  if (!isPro(user)) return false;
+  const trialEnd = new Date(user.createdAt.getTime() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
+  return user.proUntil !== null && user.proUntil <= trialEnd;
+}
+
+export function isWithinLogoGracePeriod(user: Pick<User, 'createdAt'>): boolean {
+  const graceEnd = new Date(user.createdAt.getTime() + FREE_LOGO_GRACE_DAYS * 24 * 60 * 60 * 1000);
+  return new Date() < graceEnd;
+}
+
+export function shouldShowProField(
+  user: Pick<User, 'proUntil' | 'createdAt'>
+): boolean {
+  return isPro(user) || isWithinLogoGracePeriod(user);
+}
+
+export function shouldShowWatermark(user: Pick<User, 'proUntil'>): boolean {
+  return !isPro(user);
+}
+
+export function getHistoryWindowDays(user: Pick<User, 'proUntil'>): number | null {
+  return isPro(user) ? null : FREE_HISTORY_DAYS;
+}
+
+export function getClientsLimit(user: Pick<User, 'proUntil'>): number {
+  return isPro(user) ? Infinity : FREE_CLIENTS_LIMIT;
+}
+
+export function getProductPhotosLimit(user: Pick<User, 'proUntil'>): number {
+  return isPro(user) ? Infinity : FREE_PRODUCT_PHOTOS_LIMIT;
+}
+
+export function getDuplicationsLimit(user: Pick<User, 'proUntil'>): number {
+  return isPro(user) ? Infinity : FREE_DUPLICATIONS_PER_MONTH;
+}
+
+export function getRenumerationsLimit(user: Pick<User, 'proUntil'>): number {
+  return isPro(user) ? Infinity : FREE_RENUMERATIONS_PER_MONTH;
+}
+
+export function getEditsPerDocumentLimit(user: Pick<User, 'proUntil'>): number {
+  return isPro(user) ? Infinity : FREE_EDITS_PER_DOCUMENT;
+}
+
+/**
+ * Reset les compteurs mensuels si on a changé de mois.
+ * Appelé avant toute lecture de compteur mensuel.
+ */
+export async function maybeResetMonthlyCounters(
+  user: Pick<User, 'id' | 'monthlyCountersResetAt' | 'duplicationsThisMonth' | 'renumerationsThisMonth'>
+): Promise<void> {
+  const now = new Date();
+  const last = user.monthlyCountersResetAt;
+  if (last.getFullYear() === now.getFullYear() && last.getMonth() === now.getMonth()) {
+    return;
+  }
+  const { prisma } = await import('@/lib/db');
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      duplicationsThisMonth: 0,
+      renumerationsThisMonth: 0,
+      monthlyCountersResetAt: now,
+    },
+  });
+}
+
