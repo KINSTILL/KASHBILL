@@ -10,23 +10,34 @@ import {
   TRIAL_DURATION_DAYS,
 } from '@/lib/constants';
 
-export function isPro(user: Pick<User, 'proUntil'>): boolean {
-  return user.proUntil !== null && user.proUntil > new Date();
+export type PlanUser = {
+  proUntil?: Date | string | null;
+  createdAt?: Date | string;
+};
+
+export function isPro(user: Pick<User, 'proUntil'> | PlanUser): boolean {
+  if (!user.proUntil) return false;
+  const d = typeof user.proUntil === 'string' ? new Date(user.proUntil) : user.proUntil;
+  return d > new Date();
 }
 
-export function isInTrial(user: Pick<User, 'proUntil' | 'createdAt'>): boolean {
-  if (!isPro(user)) return false;
-  const trialEnd = new Date(user.createdAt.getTime() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
-  return user.proUntil !== null && user.proUntil <= trialEnd;
+export function isInTrial(user: Pick<User, 'proUntil' | 'createdAt'> | PlanUser): boolean {
+  if (!isPro(user) || !user.createdAt) return false;
+  const createdAtDate = typeof user.createdAt === 'string' ? new Date(user.createdAt) : user.createdAt;
+  const trialEnd = new Date(createdAtDate.getTime() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
+  const proDate = typeof user.proUntil === 'string' ? new Date(user.proUntil) : user.proUntil;
+  return proDate !== null && proDate !== undefined && proDate <= trialEnd;
 }
 
-export function isWithinLogoGracePeriod(user: Pick<User, 'createdAt'>): boolean {
-  const graceEnd = new Date(user.createdAt.getTime() + FREE_LOGO_GRACE_DAYS * 24 * 60 * 60 * 1000);
+export function isWithinLogoGracePeriod(user: Pick<User, 'createdAt'> | { createdAt?: Date | string }): boolean {
+  if (!user.createdAt) return false;
+  const createdAtDate = typeof user.createdAt === 'string' ? new Date(user.createdAt) : user.createdAt;
+  const graceEnd = new Date(createdAtDate.getTime() + FREE_LOGO_GRACE_DAYS * 24 * 60 * 60 * 1000);
   return new Date() < graceEnd;
 }
 
 export function shouldShowProField(
-  user: Pick<User, 'proUntil' | 'createdAt'>
+  user: (Pick<User, 'proUntil' | 'createdAt'> | PlanUser)
 ): boolean {
   return isPro(user) || isWithinLogoGracePeriod(user);
 }

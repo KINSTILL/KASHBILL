@@ -46,6 +46,7 @@ export type PdfClient = {
 };
 
 export type PdfDocument = {
+  id?: string;
   number: string;
   type: DocType;
   locale: Locale;

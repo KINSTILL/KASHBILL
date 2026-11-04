@@ -8,6 +8,8 @@ export function formatXaf(amount: number, currency = 'FCFA'): string {
   return `${formatted}\u202F${currency}`;
 }
 
+export const formatCurrency = formatXaf;
+
 export function formatDateShort(d: Date): string {
   return new Intl.DateTimeFormat('fr-CM', {
     timeZone: 'Africa/Douala',

@@ -1,0 +1,320 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "loading": "Loading…",
+    "error": "Error",
+    "success": "Success",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "search": "Search",
+    "add": "Add",
+    "remove": "Remove",
+    "optional": "optional"
+  },
+  "nav": {
+    "new": "New",
+    "history": "History",
+    "clients": "Clients",
+    "profile": "Profile",
+    "devices": "Devices",
+    "settings": "Settings",
+    "referrals": "Referrals",
+    "upgrade": "Go Pro",
+    "admin": "Admin",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Create account"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Enter your phone and PIN",
+      "phone": "Phone number",
+      "pin": "PIN code",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "createAccount": "Create an account",
+      "forgotPin": "Forgot PIN?"
+    },
+    "register": {
+      "title": "Create account",
+      "phone": "Phone number",
+      "pin": "PIN code (6 digits)",
+      "confirmPin": "Confirm PIN",
+      "name": "Name",
+      "businessName": "Business name",
+      "city": "City",
+      "mode": "Usage mode",
+      "modeEcommerce": "E-commerce (product sales)",
+      "modePrestation": "Service (services, crafts)",
+      "submit": "Create my account",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in",
+      "pinMismatch": "PINs do not match",
+      "acceptTerms": "I have read and accept the Terms of Service, including the limitation of liability clause.",
+      "acceptTermsRequired": "You must accept the Terms to continue"
+    },
+    "recovery": {
+      "title": "Account recovery",
+      "subtitle": "Use one of your recovery codes",
+      "phone": "Phone number",
+      "code": "Recovery code",
+      "newPin": "New PIN",
+      "submit": "Recover my account"
+    },
+    "errors": {
+      "invalidCredentials": "Incorrect phone or PIN",
+      "rateLimited": "Too many attempts. Try again in a few minutes.",
+      "deviceLimitReached": "Device limit reached",
+      "deviceLimitHelp": "You have 2 active devices. Revoke one to continue.",
+      "recoveryCodeInvalid": "Invalid or already-used recovery code",
+      "validationError": "Please check your information",
+      "internal": "An error occurred. Please retry.",
+      "csrfFailed": "Security error. Reload the page.",
+      "planLimitReached": "Free limit reached",
+      "reauthRequired": "Re-authentication required",
+      "documentBlocked": "Document blocked by fraud detection"
+    },
+    "recoveryCodes": {
+      "title": "Your recovery codes",
+      "warning": "Keep these codes safe. They will never be shown again.",
+      "saved": "I've saved my codes",
+      "copyAll": "Copy all codes",
+      "download": "Download",
+      "downloadFilename": "cashbill-recovery-codes.txt"
+    }
+  },
+  "devices": {
+    "title": "My devices",
+    "current": "Current device",
+    "lastSeen": "Last seen",
+    "revoke": "Revoke",
+    "revokeConfirm": "Revoke this device? You will need to sign in again on it.",
+    "approveNew": "Approve a new device",
+    "pendingApprovals": "Pending approvals",
+    "approve": "Approve",
+    "approveHelp": "Share this code on the new device:",
+    "noDevices": "No active device.",
+    "waitingApproval": "Waiting for approval…",
+    "approvalSuccess": "Device approved"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "welcomeBack": "Welcome back",
+    "quickActions": "Quick actions",
+    "recentDocuments": "Recent documents",
+    "noDocuments": "No documents yet",
+    "noDocumentsHelp": "Create your first quote or invoice in seconds.",
+    "createFirst": "Create my first document",
+    "trialBanner": "Pro trial: {days} days left",
+    "upgradeBanner": "Go Pro to remove the watermark and add your logo.",
+    "referralCount": "{count} activated referral(s)"
+  },
+  "documents": {
+    "new": {
+      "title": "New document",
+      "type": "Document type",
+      "client": "Client",
+      "selectClient": "Select a client",
+      "noClient": "No client",
+      "addClient": "Add a client",
+      "lines": "Items / services",
+      "description": "Description",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "lineTotal": "Total",
+      "addLine": "Add a line",
+      "removeLine": "Remove",
+      "vat": "VAT (%)",
+      "deposit": "Deposit (%)",
+      "delivery": "Delivery fee",
+      "notes": "Notes (optional)",
+      "subtotal": "Subtotal",
+      "vatAmount": "VAT",
+      "depositAmount": "Deposit",
+      "total": "Total",
+      "format": "Document format",
+      "formatTicket": "Ticket 80mm",
+      "formatA4": "A4 Pro",
+      "generate": "Generate document",
+      "saving": "Saving…",
+      "draftSaved": "Draft saved at {time}",
+      "draftRestored": "Draft restored",
+      "resumeDraft": "Resume the draft?",
+      "resumeDraftHelp": "You have a document in progress.",
+      "resume": "Resume",
+      "discard": "Discard",
+      "addPhoto": "Add a photo (Pro)",
+      "photoLimitReached": "10-photo limit reached. Go Pro for unlimited."
+    },
+    "preview": {
+      "title": "Preview",
+      "send": "Send",
+      "download": "Download PDF",
+      "markSent": "Mark as sent"
+    },
+    "list": {
+      "title": "History",
+      "empty": "No documents yet",
+      "emptyHelp": "Your documents will appear here.",
+      "historyLimited": "Documents older than 7 days are hidden (free plan).",
+      "upgradeToSeeAll": "Go Pro to see full history"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "new": "New client",
+    "edit": "Edit client",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "note": "Note",
+    "empty": "No clients yet",
+    "emptyHelp": "Add your first client to save time.",
+    "limitReached": "Free limit reached (3 clients). Go Pro for unlimited.",
+    "pickFromContacts": "Pick from contacts (Pro)",
+    "scanNfc": "Scan an NFC tag (Pro)",
+    "deleteConfirm": "Delete this client? Related documents won't be deleted."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "mode": "Mode",
+    "business": "Legal information",
+    "businessHelp": "This information will appear on your documents.",
+    "country": "Country",
+    "legalName": "Legal name",
+    "taxId": "Tax ID",
+    "rccm": "RCCM number",
+    "legalAddress": "Legal address",
+    "logo": "Logo",
+    "signature": "Signature",
+    "stamp": "Stamp",
+    "headerText": "Custom header",
+    "footerText": "Footer",
+    "cgvText": "Terms and Conditions",
+    "upload": "Upload",
+    "remove": "Remove",
+    "preview": "Preview",
+    "proRequired": "Pro feature",
+    "proRequiredHelp": "Go Pro to display this field on your documents.",
+    "save": "Save",
+    "saved": "Saved"
+  },
+  "upgrade": {
+    "title": "Go Pro",
+    "subtitle": "2,000 FCFA / 30 days. All features.",
+    "features": "What you get",
+    "featureNoWatermark": "No watermark",
+    "featureLogo": "Logo + signature + stamp",
+    "featureUnlimitedClients": "Unlimited clients",
+    "featureUnlimitedHistory": "Unlimited history",
+    "feature2Devices": "2 devices",
+    "featureNfc": "NFC + Contacts Picker",
+    "featureUsbPrint": "USB printing",
+    "pay": "Pay with Mobile Money",
+    "or": "or",
+    "refer": "Refer a friend — +7 free days",
+    "currentStatus": "Current status",
+    "statusFree": "Free",
+    "statusTrial": "Pro trial",
+    "statusPro": "Pro",
+    "expiresOn": "Expires on {date}"
+  },
+  "referrals": {
+    "title": "Referrals",
+    "subtitle": "Each activated referral gives you +7 Pro days.",
+    "yourCode": "Your code",
+    "yourLink": "Your link",
+    "copyLink": "Copy link",
+    "shareWhatsApp": "Share on WhatsApp",
+    "stats": "Your stats",
+    "filleulsTotal": "Referrals signed up",
+    "filleulsActivated": "Referrals activated",
+    "proDaysEarned": "Pro days earned",
+    "empty": "No referrals yet",
+    "emptyHelp": "Share your link to start earning Pro days.",
+    "history": "History"
+  },
+  "share": {
+    "modal": {
+      "title": "Send document",
+      "tone": {
+        "label": "Message tone",
+        "transparency": "Transparency",
+        "pro": "Pro",
+        "casual": "Casual"
+      },
+      "message": {
+        "label": "Message",
+        "hint": "You can edit this message. It will be remembered for next time.",
+        "customBadge": "Custom",
+        "resetButton": "Reset to template"
+      },
+      "actions": {
+        "whatsapp": "Send on WhatsApp",
+        "share": "Share otherwise",
+        "download": "Download PDF",
+        "cancel": "Cancel"
+      },
+      "shareNotSupported": "Native sharing is not available on this device.",
+      "userCancelled": "Sharing cancelled"
+    },
+    "messages": {
+      "DEVIS_PROFORMA": {
+        "transparency": "Hi! So we're aligned on the details, I've made this clean quote for you. Take a look and let me know if everything works before we confirm!",
+        "pro": "Hello, following our discussions, here is the detailed proposal. I remain available if you have any questions.",
+        "casual": "Hey! Here's the draft of our deal. Check that I haven't missed anything!"
+      },
+      "FACTURE_BON_COMMANDE": {
+        "transparency": "Hi! As agreed, here is the official document with all my details and the exact breakdown. Once it's good on your side, we move forward!",
+        "pro": "Hello, here is your detailed digital invoice. Thank you for your trust and see you soon!",
+        "casual": "Hey! Here's the clean and precise order summary for your records."
+      },
+      "RECU_TICKET": {
+        "transparency": "Payment received, thanks a lot! Here's your receipt to keep a record on your phone.",
+        "pro": "Hello, we confirm receipt of your payment. Please find your receipt attached.",
+        "casual": "All good on my side! Here's your digital receipt. Let me know when you receive the package!"
+      }
+    }
+  },
+  "pwa": {
+    "install": "Install CashBill",
+    "installHelp": "Add CashBill to your home screen for quick access.",
+    "iosInstallHelp": "On iPhone: tap Share then “Add to Home Screen”.",
+    "offline": "Offline — drafts saved locally",
+    "online": "Connection restored",
+    "updateAvailable": "Update available. Reload to get the latest."
+  },
+  "pro": {
+    "badge": "Pro",
+    "locked": "Pro feature",
+    "expirySoon": "Your Pro trial ends in {days} days",
+    "expiryToday": "Last day of Pro",
+    "expired": "Your Pro trial has ended",
+    "expiredHelp": "Two options: pay 2,000 FCFA/30 days, or refer a friend for +7 free days.",
+    "upgradeNow": "Go Pro",
+    "referFriend": "Refer a friend"
+  },
+  "verify": {
+    "authentic": "Authentic document",
+    "issuedBy": "Issued by",
+    "docNumber": "Document No.",
+    "docType": "Type",
+    "issuedOn": "Issued on",
+    "notFound": "Unrecognized document",
+    "notFoundHelp": "This document was not issued by CashBill. It may be a fake.",
+    "fraudulent": "Fraudulent document",
+    "fraudulentHelp": "This document was flagged as fraudulent by CashBill. Do not use it.",
+    "noCommercialData": "This verification does not reveal any commercial data."
+  }
+}
+

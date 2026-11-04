@@ -1,0 +1,352 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "loading": "Chargement…",
+    "error": "Erreur",
+    "success": "Succès",
+    "back": "Retour",
+    "next": "Suivant",
+    "yes": "Oui",
+    "no": "Non",
+    "search": "Rechercher",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "optional": "facultatif"
+  },
+  "nav": {
+    "new": "Nouveau",
+    "history": "Historique",
+    "clients": "Clients",
+    "profile": "Profil",
+    "devices": "Appareils",
+    "settings": "Paramètres",
+    "referrals": "Parrainage",
+    "upgrade": "Passer Pro",
+    "admin": "Admin",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "register": "Créer un compte"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Entrez votre numéro et votre PIN",
+      "phone": "Numéro de téléphone",
+      "pin": "Code PIN",
+      "submit": "Se connecter",
+      "noAccount": "Pas encore de compte ?",
+      "createAccount": "Créer un compte",
+      "forgotPin": "PIN oublié ?"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "phone": "Numéro de téléphone",
+      "pin": "Code PIN (6 chiffres)",
+      "confirmPin": "Confirmer le PIN",
+      "name": "Nom",
+      "businessName": "Nom de l'entreprise",
+      "city": "Ville",
+      "mode": "Mode d'utilisation",
+      "modeEcommerce": "E-commerce (vente de produits)",
+      "modePrestation": "Prestation (services, artisanat)",
+      "submit": "Créer mon compte",
+      "hasAccount": "Déjà un compte ?",
+      "login": "Se connecter",
+      "pinMismatch": "Les deux PIN ne correspondent pas",
+      "acceptTerms": "J'ai lu et j'accepte les Conditions Générales d'Utilisation, notamment la clause de limitation de responsabilité.",
+      "acceptTermsRequired": "Vous devez accepter les CGU pour continuer"
+    },
+    "recovery": {
+      "title": "Récupération de compte",
+      "subtitle": "Utilisez un de vos codes de secours",
+      "phone": "Numéro de téléphone",
+      "code": "Code de récupération",
+      "newPin": "Nouveau PIN",
+      "submit": "Récupérer mon compte"
+    },
+    "errors": {
+      "invalidCredentials": "Numéro ou PIN incorrect",
+      "rateLimited": "Trop de tentatives. Réessayez dans quelques minutes.",
+      "deviceLimitReached": "Limite d'appareils atteinte",
+      "deviceLimitHelp": "Vous avez 2 appareils actifs. Révoquez-en un pour continuer.",
+      "recoveryCodeInvalid": "Code de récupération invalide ou déjà utilisé",
+      "validationError": "Veuillez vérifier vos informations",
+      "internal": "Une erreur est survenue. Réessayez.",
+      "csrfFailed": "Erreur de sécurité. Rechargez la page.",
+      "planLimitReached": "Limite gratuite atteinte",
+      "reauthRequired": "Ré-authentification requise",
+      "documentBlocked": "Document bloqué par la détection de fraude"
+    },
+    "recoveryCodes": {
+      "title": "Vos codes de récupération",
+      "warning": "Conservez ces codes en lieu sûr. Ils ne seront plus jamais affichés.",
+      "saved": "J'ai sauvegardé mes codes",
+      "copyAll": "Copier tous les codes",
+      "download": "Télécharger",
+      "downloadFilename": "cashbill-recovery-codes.txt"
+    }
+  },
+  "devices": {
+    "title": "Mes appareils",
+    "current": "Appareil actuel",
+    "lastSeen": "Dernière connexion",
+    "revoke": "Révoquer",
+    "revokeConfirm": "Révoquer cet appareil ? Vous devrez vous reconnecter dessus.",
+    "approveNew": "Approuver un nouvel appareil",
+    "pendingApprovals": "Demandes en attente",
+    "approve": "Approuver",
+    "approveHelp": "Communiquez ce code sur le nouvel appareil :",
+    "noDevices": "Aucun appareil actif.",
+    "waitingApproval": "En attente d'approbation…",
+    "approvalSuccess": "Appareil approuvé"
+  },
+  "dashboard": {
+    "welcome": "Bienvenue",
+    "welcomeBack": "Bon retour",
+    "quickActions": "Actions rapides",
+    "recentDocuments": "Documents récents",
+    "noDocuments": "Aucun document encore",
+    "noDocumentsHelp": "Créez votre premier devis ou facture en quelques secondes.",
+    "createFirst": "Créer mon premier document",
+    "trialBanner": "Essai Pro : {days} jours restants",
+    "upgradeBanner": "Passez Pro pour retirer le filigrane et ajouter votre logo.",
+    "referralCount": "{count} filleul(s) activé(s)"
+  },
+  "documents": {
+    "new": {
+      "title": "Nouveau document",
+      "type": "Type de document",
+      "client": "Client",
+      "selectClient": "Sélectionner un client",
+      "noClient": "Aucun client",
+      "addClient": "Ajouter un client",
+      "lines": "Articles / prestations",
+      "description": "Description",
+      "quantity": "Qté",
+      "unitPrice": "Prix unitaire",
+      "lineTotal": "Total",
+      "addLine": "Ajouter une ligne",
+      "removeLine": "Retirer",
+      "vat": "TVA (%)",
+      "deposit": "Acompte (%)",
+      "delivery": "Frais de livraison",
+      "notes": "Notes (facultatif)",
+      "subtotal": "Sous-total",
+      "vatAmount": "TVA",
+      "depositAmount": "Acompte",
+      "total": "Total",
+      "format": "Format du document",
+      "formatTicket": "Ticket 80mm",
+      "formatA4": "A4 Pro",
+      "generate": "Générer le document",
+      "saving": "Enregistrement…",
+      "draftSaved": "Brouillon sauvegardé à {time}",
+      "draftRestored": "Brouillon restauré",
+      "resumeDraft": "Reprendre le brouillon ?",
+      "resumeDraftHelp": "Vous avez un document en cours.",
+      "resume": "Reprendre",
+      "discard": "Ignorer",
+      "addPhoto": "Ajouter une photo (Pro)",
+      "photoLimitReached": "Limite de 10 photos atteinte. Passez Pro pour un usage illimité."
+    },
+    "preview": {
+      "title": "Aperçu",
+      "send": "Envoyer",
+      "download": "Télécharger le PDF",
+      "markSent": "Marquer comme envoyé"
+    },
+    "list": {
+      "title": "Historique",
+      "empty": "Aucun document encore",
+      "emptyHelp": "Vos documents apparaîtront ici.",
+      "historyLimited": "Les documents de plus de 7 jours sont masqués (offre gratuite).",
+      "upgradeToSeeAll": "Passez Pro pour voir tout l'historique"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "new": "Nouveau client",
+    "edit": "Modifier le client",
+    "name": "Nom",
+    "phone": "Téléphone",
+    "email": "Email",
+    "address": "Adresse",
+    "note": "Note",
+    "empty": "Aucun client encore",
+    "emptyHelp": "Ajoutez votre premier client pour gagner du temps.",
+    "limitReached": "Limite gratuite atteinte (3 clients). Passez Pro pour des clients illimités.",
+    "pickFromContacts": "Choisir depuis les contacts (Pro)",
+    "scanNfc": "Scanner un tag NFC (Pro)",
+    "deleteConfirm": "Supprimer ce client ? Les documents associés ne seront pas supprimés."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "mode": "Mode",
+    "business": "Informations légales",
+    "businessHelp": "Ces informations apparaîtront sur vos documents.",
+    "country": "Pays",
+    "legalName": "Raison sociale",
+    "taxId": "Numéro d'identifiant fiscal",
+    "rccm": "Numéro RCCM",
+    "legalAddress": "Adresse légale",
+    "logo": "Logo",
+    "signature": "Signature",
+    "stamp": "Cachet",
+    "headerText": "En-tête personnalisé",
+    "footerText": "Pied de page",
+    "cgvText": "Conditions Générales de Vente",
+    "upload": "Téléverser",
+    "remove": "Retirer",
+    "preview": "Aperçu",
+    "proRequired": "Fonctionnalité Pro",
+    "proRequiredHelp": "Passez Pro pour afficher ce champ sur vos documents.",
+    "save": "Enregistrer",
+    "saved": "Enregistré"
+  },
+  "upgrade": {
+    "title": "Passer Pro",
+    "subtitle": "2 000 FCFA / 30 jours. Toutes les fonctions.",
+    "features": "Ce que vous obtenez",
+    "featureNoWatermark": "Sans filigrane",
+    "featureLogo": "Logo + signature + cachet",
+    "featureUnlimitedClients": "Clients illimités",
+    "featureUnlimitedHistory": "Historique illimité",
+    "feature2Devices": "2 appareils",
+    "featureNfc": "NFC + Contacts Picker",
+    "featureUsbPrint": "Impression USB",
+    "pay": "Payer avec Mobile Money",
+    "or": "ou",
+    "refer": "Parrainer un ami — +7 jours gratuits",
+    "currentStatus": "Statut actuel",
+    "statusFree": "Gratuit",
+    "statusTrial": "Essai Pro",
+    "statusPro": "Pro",
+    "expiresOn": "Expire le {date}"
+  },
+  "referrals": {
+    "title": "Parrainage",
+    "subtitle": "Chaque filleul activé vous donne +7 jours Pro.",
+    "yourCode": "Votre code",
+    "yourLink": "Votre lien",
+    "copyLink": "Copier le lien",
+    "shareWhatsApp": "Partager sur WhatsApp",
+    "stats": "Vos statistiques",
+    "filleulsTotal": "Filleuls inscrits",
+    "filleulsActivated": "Filleuls activés",
+    "proDaysEarned": "Jours Pro gagnés",
+    "empty": "Aucun parrainage encore",
+    "emptyHelp": "Partagez votre lien pour commencer à gagner des jours Pro.",
+    "history": "Historique"
+  },
+  "share": {
+    "modal": {
+      "title": "Envoyer le document",
+      "tone": {
+        "label": "Ton du message",
+        "transparency": "Transparence",
+        "pro": "Pro",
+        "casual": "Pratique"
+      },
+      "distance": {
+        "label": "Distance sociale",
+        "tu": "Tu",
+        "vous": "Vous"
+      },
+      "message": {
+        "label": "Message",
+        "hint": "Vous pouvez modifier ce message. Il sera mémorisé pour la prochaine fois.",
+        "customBadge": "Personnalisé",
+        "resetButton": "Réinitialiser au modèle"
+      },
+      "actions": {
+        "whatsapp": "Envoyer sur WhatsApp",
+        "share": "Partager autrement",
+        "download": "Télécharger le PDF",
+        "cancel": "Annuler"
+      },
+      "shareNotSupported": "Le partage natif n'est pas disponible sur cet appareil.",
+      "userCancelled": "Partage annulé"
+    },
+    "messages": {
+      "DEVIS_PROFORMA": {
+        "transparency": {
+          "tu": "Salut ! Pour qu'on soit bien alignés sur les détails, je t'ai fait ce petit devis au propre. Regarde et dis-moi si tout te va avant qu'on valide !",
+          "vous": "Bonjour ! Pour que nous soyons bien alignés sur les détails, je vous ai préparé ce devis détaillé. Regardez et dites-moi si tout vous convient avant validation."
+        },
+        "pro": {
+          "tu": "Bonjour, suite à nos échanges, voici la proposition détaillée. Je reste disponible si tu as des questions.",
+          "vous": "Bonjour, suite à nos échanges, voici la proposition détaillée. Je reste disponible si vous avez des questions."
+        },
+        "casual": {
+          "tu": "Hello ! Voici le brouillon de notre affaire. Vérifie que je n'ai rien oublié !",
+          "vous": "Hello ! Voici le brouillon de notre affaire. Vérifiez que je n'ai rien oublié !"
+        }
+      },
+      "FACTURE_BON_COMMANDE": {
+        "transparency": {
+          "tu": "Salut ! Comme convenu, voici le document officiel avec toutes mes coordonnées et le détail exact. Dès que c'est bon pour toi, on avance !",
+          "vous": "Bonjour ! Comme convenu, voici le document officiel avec toutes mes coordonnées et le détail exact. Dès que c'est validé de votre côté, nous avançons."
+        },
+        "pro": {
+          "tu": "Bonjour, voici ta facture numérique détaillée. Merci pour ta confiance et à très vite !",
+          "vous": "Bonjour, voici votre facture numérique détaillée. Merci pour votre confiance et à très vite !"
+        },
+        "casual": {
+          "tu": "Hello ! Voici le récapitulatif net et précis de la commande pour tes archives.",
+          "vous": "Hello ! Voici le récapitulatif net et précis de la commande pour vos archives."
+        }
+      },
+      "RECU_TICKET": {
+        "transparency": {
+          "tu": "Paiement bien reçu, merci pour la force ! Voici ton ticket pour garder une trace sur ton téléphone.",
+          "vous": "Paiement bien reçu, merci pour votre confiance ! Voici votre reçu pour garder une trace sur votre téléphone."
+        },
+        "pro": {
+          "tu": "Bonjour, nous confirmons la bonne réception de ton paiement. Veuillez trouver ton reçu ci-joint.",
+          "vous": "Bonjour, nous confirmons la bonne réception de votre paiement. Veuillez trouver votre reçu ci-joint."
+        },
+        "casual": {
+          "tu": "C'est tout bon de mon côté ! Voici ton reçu numérique. Fais-moi signe quand tu reçois le colis !",
+          "vous": "C'est tout bon de notre côté ! Voici votre reçu numérique. Faites-nous signe quand vous recevez le colis !"
+        }
+      }
+    }
+  },
+  "pwa": {
+    "install": "Installer CashBill",
+    "installHelp": "Ajoutez CashBill à votre écran d'accueil pour un accès rapide.",
+    "iosInstallHelp": "Sur iPhone : appuyez sur Partager puis « Sur l'écran d'accueil ».",
+    "offline": "Hors ligne — vos brouillons sont sauvegardés localement",
+    "online": "Connexion rétablie",
+    "updateAvailable": "Mise à jour disponible. Rechargez pour profiter des nouveautés."
+  },
+  "pro": {
+    "badge": "Pro",
+    "locked": "Fonctionnalité Pro",
+    "expirySoon": "Votre essai Pro se termine dans {days} jours",
+    "expiryToday": "Dernier jour de Pro",
+    "expired": "Votre essai Pro est terminé",
+    "expiredHelp": "Deux options : payer 2 000 FCFA/30 jours, ou parrainer un ami pour +7 jours gratuits.",
+    "upgradeNow": "Passer Pro",
+    "referFriend": "Parrainer un ami"
+  },
+  "verify": {
+    "authentic": "Document authentique",
+    "issuedBy": "Émis par",
+    "docNumber": "Document N°",
+    "docType": "Type",
+    "issuedOn": "Émis le",
+    "notFound": "Document non reconnu",
+    "notFoundHelp": "Ce document n'a pas été émis par CashBill. Il peut s'agir d'un faux.",
+    "fraudulent": "Document frauduleux",
+    "fraudulentHelp": "Ce document a été signalé comme frauduleux par CashBill. Ne l'utilisez pas.",
+    "noCommercialData": "Cette vérification ne révèle aucune donnée commerciale du document."
+  }
+}
+

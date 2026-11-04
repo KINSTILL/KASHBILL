@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 
 export type ErrorCode =
+  | 'BAD_REQUEST'
   | 'VALIDATION_ERROR'
   | 'INVALID_CREDENTIALS'
   | 'UNAUTHORIZED'
