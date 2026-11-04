@@ -41,15 +41,48 @@ export async function createSessionCookie(
   };
 }
 
-export async function setSessionCookie(userId: string, deviceId: string, role: Role) {
-  const { name, value, options } = await createSessionCookie(userId, deviceId, role);
-  const store = await cookies();
-  store.set(name, value, options);
+export function serializeCookie(
+  name: string,
+  value: string,
+  options: ReturnType<typeof getSessionCookieOptions>
+): string {
+  let cookie = `${name}=${value}; Path=${options.path}; Max-Age=${options.maxAge}; SameSite=${options.sameSite}`;
+  if (options.httpOnly) cookie += '; HttpOnly';
+  if (options.secure) cookie += '; Secure';
+  return cookie;
 }
 
-export async function clearSessionCookie() {
-  const store = await cookies();
-  store.delete(SESSION_COOKIE);
+export async function setSessionCookie(
+  userId: string,
+  deviceId: string,
+  role: Role,
+  res?: Response
+) {
+  const { name, value, options } = await createSessionCookie(userId, deviceId, role);
+  if (res) {
+    res.headers.set('Set-Cookie', serializeCookie(name, value, options));
+  }
+  try {
+    const store = await cookies();
+    store.set(name, value, options);
+  } catch {
+    // dans un contexte de test sans requestAsyncStorage
+  }
+}
+
+export async function clearSessionCookie(res?: Response) {
+  if (res) {
+    res.headers.set(
+      'Set-Cookie',
+      `${SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax; HttpOnly`
+    );
+  }
+  try {
+    const store = await cookies();
+    store.delete(SESSION_COOKIE);
+  } catch {
+    // dans un contexte de test sans requestAsyncStorage
+  }
 }
 
 export type CurrentUser = { user: User; deviceId: string };
@@ -59,10 +92,17 @@ export async function getCurrentUserFromRequest(req: NextRequest): Promise<Curre
   return resolveUserFromToken(token);
 }
 
-export async function getCurrentUser(): Promise<CurrentUser | null> {
-  const store = await cookies();
-  const token = store.get(SESSION_COOKIE)?.value;
-  return resolveUserFromToken(token);
+export async function getCurrentUser(req?: NextRequest): Promise<CurrentUser | null> {
+  if (req) {
+    return getCurrentUserFromRequest(req);
+  }
+  try {
+    const store = await cookies();
+    const token = store.get(SESSION_COOKIE)?.value;
+    return resolveUserFromToken(token);
+  } catch {
+    return null;
+  }
 }
 
 async function resolveUserFromToken(token?: string): Promise<CurrentUser | null> {

@@ -1,0 +1,85 @@
+import { NextResponse, type NextRequest } from 'next/server';
+import { SESSION_COOKIE } from '@/lib/constants';
+
+const SUPPORTED_LOCALES = ['fr', 'en'] as const;
+const DEFAULT_LOCALE = 'fr';
+
+const PROTECTED_PREFIXES = [
+  '/dashboard',
+  '/devices',
+  '/settings',
+  '/referrals',
+  '/upgrade',
+  '/documents',
+  '/clients',
+  '/admin',
+];
+
+const AUTH_PAGES = ['/login', '/register', '/recovery'];
+
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Skip API + assets statiques
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/icons') ||
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/sw.js' ||
+    pathname === '/favicon.ico' ||
+    /\.(png|jpg|jpeg|svg|webp|woff2?|ttf|otf)$/.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
+  // Locale routing
+  const segments = pathname.split('/').filter(Boolean);
+  const hasLocale =
+    segments.length > 0 &&
+    SUPPORTED_LOCALES.includes(segments[0] as (typeof SUPPORTED_LOCALES)[number]);
+
+  if (!hasLocale) {
+    const cookieLocale = req.cookies.get('NEXT_LOCALE')?.value;
+    const locale = SUPPORTED_LOCALES.includes(
+      cookieLocale as (typeof SUPPORTED_LOCALES)[number]
+    )
+      ? cookieLocale!
+      : DEFAULT_LOCALE;
+    const url = req.nextUrl.clone();
+    url.pathname = `/${locale}${pathname === '/' ? '' : pathname}`;
+    return NextResponse.redirect(url);
+  }
+
+  const locale = segments[0]!;
+  const rest = segments.slice(1);
+  const restPath = `/${rest.join('/')}`;
+  const isProtected = PROTECTED_PREFIXES.some(
+    (p) => restPath === p || restPath.startsWith(`${p}/`)
+  );
+  const isAuthPage = AUTH_PAGES.some(
+    (p) => restPath === p || restPath.startsWith(`${p}/`)
+  );
+
+  const hasSession = Boolean(req.cookies.get(SESSION_COOKIE)?.value);
+
+  if (isProtected && !hasSession) {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${locale}/login`;
+    return NextResponse.redirect(url);
+  }
+
+  if (isAuthPage && hasSession) {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${locale}/dashboard`;
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|sw.js|icons|manifest.webmanifest|.*\\..*).*)',
+  ],
+};
