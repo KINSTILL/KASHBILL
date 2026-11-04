@@ -2,6 +2,9 @@
   "name": "cashbill",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "seed": "dotenv -e .env.local -- tsx prisma/seed.ts"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -12,7 +15,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest --run",
-    "test:coverage": "vitest --run --coverage"
+    "test:coverage": "vitest --run --coverage",
+    "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts",
+    "db:reset": "pnpm prisma migrate reset --force",
+    "db:studio": "pnpm prisma studio"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
@@ -33,6 +39,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^5.1.0",
+    "dotenv-cli": "^11.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.28",
     "prettier": "^3.9.10",

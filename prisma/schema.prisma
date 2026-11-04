@@ -1,15 +1,197 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Mode {
+  ECOMMERCE
+  PRESTATION
+}
+
+enum DocType {
+  TICKET
+  BON_COMMANDE
+  BORDEREAU
+  DEVIS
+  PROFORMA
+  FACTURE
+  RECU
+}
+
+enum SubSource {
+  NOTCH_PAY
+  ADMIN_GIFT
+  REFERRAL
+}
+
+enum Locale {
+  FR
+  EN
+}
+
+enum ReferralStatus {
+  PENDING
+  ACTIVATED
+  REWARDED
+  FLAGGED
+  REJECTED
+}
+
+model User {
+  id              String    @id @default(cuid())
+  phone           String    @unique
+  pinHash         String
+  name            String?
+  businessName    String?
+  city            String?
+  locale          Locale    @default(FR)
+  role            Role      @default(USER)
+  mode            Mode      @default(ECOMMERCE)
+  proUntil        DateTime?
+  pendingProDays  Int       @default(0)
+  referralCode    String    @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  devices          Device[]
+  deviceApprovals  DeviceApproval[]
+  recoveryCodes    RecoveryCode[]
+  clients          Client[]
+  documents        Document[]
+  subscriptions    Subscription[]
+  auditLogs        AuditLog[]
+  referralsMade    Referral[] @relation("ReferralParrain")
+  referralReceived Referral?  @relation("ReferralFilleul")
+}
+
+model Device {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId    String
+  userAgent   String?
+  lastIp      String?
+  lastSeenAt  DateTime  @default(now())
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, deviceId])
+  @@index([userId, revokedAt])
+}
+
+model DeviceApproval {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash     String
+  expiresAt    DateTime
+  consumed     Boolean   @default(false)
+  newDeviceId  String
+  userAgent    String?
+  ip           String?
+  createdAt    DateTime  @default(now())
+
+  @@index([userId, consumed, expiresAt])
+}
+
+model RecoveryCode {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash   String
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId, usedAt])
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  documents Document[]
+
+  @@index([userId])
+}
+
+model Document {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId          String?
+  client            Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  type              DocType
+  mode              Mode
+  number            String    @unique
+  locale            Locale
+  payload           Json
+  pdfPath           String?
+  watermarked       Boolean   @default(true)
+  sentViaWhatsAppAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, type])
+}
+
+model Subscription {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source      SubSource
+  startsAt    DateTime
+  endsAt      DateTime
+  providerRef String?
+  amountXaf   Int?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, endsAt])
+}
+
+model Referral {
+  id                String         @id @default(cuid())
+  parrainId         String
+  parrain           User           @relation("ReferralParrain", fields: [parrainId], references: [id], onDelete: Cascade)
+  filleulId         String         @unique
+  filleul           User           @relation("ReferralFilleul", fields: [filleulId], references: [id], onDelete: Cascade)
+  status            ReferralStatus @default(PENDING)
+  parrainRewardedAt DateTime?
+  filleulRewardedAt DateTime?
+  triggeredAt       DateTime?
+  fraudFlags        Json?
+  createdAt         DateTime       @default(now())
+
+  @@index([parrainId, status])
+  @@index([filleulId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  meta      Json?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
 }
