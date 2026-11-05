@@ -37,8 +37,21 @@
   },
   "auth": {
     "login": {
-      "title": "Login",
-      "subtitle": "Enter your phone and PIN",
+      "title": "Sign In",
+      "subtitle": "Enter your phone number and PIN to access your account.",
+      "phone_label": "Phone Number",
+      "phone_placeholder": "699 00 00 00",
+      "pin_label": "PIN Code (6 digits)",
+      "pin_show": "Show",
+      "pin_hide": "Hide",
+      "forgot_pin": "Forgot PIN?",
+      "submit_button": "Sign In",
+      "submitting": "Signing in...",
+      "no_account": "Don't have an account?",
+      "create_account": "Create an account",
+      "error_phone_invalid": "Please enter a valid 9-digit phone number.",
+      "error_pin_incomplete": "The PIN must be exactly 6 digits.",
+      "error_default": "Invalid phone number or PIN. Please try again.",
       "phone": "Phone number",
       "pin": "PIN code",
       "submit": "Sign in",
@@ -46,6 +59,7 @@
       "createAccount": "Create an account",
       "forgotPin": "Forgot PIN?"
     },
+    "footer": "© 2026 MyCashBill • 100% Mobile • 100% Offline",
     "register": {
       "title": "Create account",
       "phone": "Phone number",

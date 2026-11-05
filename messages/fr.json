@@ -38,7 +38,20 @@
   "auth": {
     "login": {
       "title": "Connexion",
-      "subtitle": "Entrez votre numéro et votre PIN",
+      "subtitle": "Entrez votre numéro et votre code PIN pour accéder à votre espace.",
+      "phone_label": "Numéro de téléphone",
+      "phone_placeholder": "699 00 00 00",
+      "pin_label": "Code PIN (6 chiffres)",
+      "pin_show": "Afficher",
+      "pin_hide": "Masquer",
+      "forgot_pin": "PIN oublié ?",
+      "submit_button": "Se connecter",
+      "submitting": "Connexion en cours...",
+      "no_account": "Pas encore de compte ?",
+      "create_account": "Créer un compte",
+      "error_phone_invalid": "Veuillez entrer un numéro valide à 9 chiffres.",
+      "error_pin_incomplete": "Le code PIN doit comporter exactement 6 chiffres.",
+      "error_default": "Numéro ou code PIN incorrect. Veuillez réessayer.",
       "phone": "Numéro de téléphone",
       "pin": "Code PIN",
       "submit": "Se connecter",
@@ -46,6 +59,7 @@
       "createAccount": "Créer un compte",
       "forgotPin": "PIN oublié ?"
     },
+    "footer": "© 2026 MyCashBill • 100% Mobile • 100% Hors-ligne",
     "register": {
       "title": "Créer un compte",
       "phone": "Numéro de téléphone",

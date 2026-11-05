@@ -1,33 +1,50 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
+import { getTranslations } from 'next-intl/server';
+import { LocaleToggle } from '@/components/layout/LocaleToggle';
+import { ShieldCheck } from '@/components/ui/icons';
 
 export const metadata: Metadata = {
   title: 'MyCashBill - Authentification',
 };
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const t = await getTranslations('auth');
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-      <header className="flex items-center justify-between px-6 py-4">
+      <header className="flex w-full items-center justify-between px-6 py-4">
         <Link
           href={'/' as Route}
-          className="text-xl font-bold tracking-tight text-sage-700"
+          className="group flex items-center gap-2.5 transition-transform active:scale-95"
+          aria-label="MyCashBill"
         >
-          MyCashBill
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sage-600 text-white shadow-md shadow-sage-600/20 transition-colors group-hover:bg-sage-700">
+            <ShieldCheck className="h-6 w-6" strokeWidth={2.2} />
+          </span>
+          <span className="flex flex-col">
+            <span className="text-xl font-bold leading-none tracking-tight text-slate-900">
+              My<span className="text-sage-600">CashBill</span>
+            </span>
+            <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Facturation Pro
+            </span>
+          </span>
         </Link>
-        <LocaleSwitcher />
+        <LocaleToggle />
       </header>
       <main className="flex flex-1 items-center justify-center p-4">
         <div className="w-full max-w-md">{children}</div>
       </main>
-      <footer className="py-4 text-center text-xs text-slate-600">
-        &copy; {new Date().getFullYear()} MyCashBill &bull; Facturation hors-ligne &amp; Bouclier Social
+      <footer className="w-full py-4 text-center">
+        <p className="text-xs font-medium tracking-wide text-slate-400">
+          {t('footer')}
+        </p>
       </footer>
     </div>
   );
