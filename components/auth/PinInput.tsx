@@ -122,7 +122,7 @@ export function PinInput({
             onChange={(e) => handleChange(idx, e.target.value)}
             onKeyDown={(e) => handleKeyDown(idx, e)}
             autoComplete={idx === 0 ? 'one-time-code' : 'off'}
-            aria-label={`Chiffre ${idx + 1}`}
+            aria-label={`PIN ${idx + 1}`}
             className="aspect-square w-full rounded-xl border border-slate-300 bg-slate-50 text-center text-lg font-bold text-slate-900 transition-all focus:border-sage-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage-600/20 disabled:opacity-50"
           />
         ))}

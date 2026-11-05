@@ -139,13 +139,12 @@ function RegisterForm() {
   };
 
   const handleDownloadCodes = () => {
+    const isEn = locale === 'en';
     const blob = new Blob(
       [
-        `Codes de récupération MyCashBill\n`,
-        `Numéro: ${phone}\n`,
-        `Date: ${new Date().toISOString()}\n\n`,
-        recoveryCodes.join('\n'),
-        `\n\nConservez ces codes précieusement.`,
+        isEn
+          ? `MyCashBill Recovery Codes\nNumber: ${phone}\nDate: ${new Date().toISOString()}\n\n${recoveryCodes.join('\n')}\n\nKeep these codes safe.`
+          : `Codes de récupération MyCashBill\nNuméro: ${phone}\nDate: ${new Date().toISOString()}\n\n${recoveryCodes.join('\n')}\n\nConservez ces codes précieusement.`,
       ],
       { type: 'text/plain;charset=utf-8' }
     );
@@ -483,9 +482,10 @@ function RegisterForm() {
 }
 
 export default function RegisterPage() {
+  const t = useTranslations('common');
   return (
     <Suspense
-      fallback={<div className="p-8 text-center text-slate-500">Chargement…</div>}
+      fallback={<div className="p-8 text-center text-slate-500">{t('loading')}</div>}
     >
       <RegisterForm />
     </Suspense>

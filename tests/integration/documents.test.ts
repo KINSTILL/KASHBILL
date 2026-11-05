@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { POST as registerRoute } from '@/app/api/auth/register/route';
 import { POST as createDocRoute } from '@/app/api/documents/route';
 import { POST as markSentRoute } from '@/app/api/documents/[id]/mark-sent/route';
-import { DELETE as deleteDocRoute } from '@/app/api/documents/[id]/route';
 import { clearDatabase } from '../helpers/db';
 import { resetUserCounter } from '../helpers/factories';
 import { prisma } from '@/lib/db';

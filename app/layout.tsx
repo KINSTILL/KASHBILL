@@ -1,5 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { Inter, Inter_Tight, JetBrains_Mono } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -23,10 +24,13 @@ export const metadata: Metadata = {
   description: 'Générez des factures et devis professionnels en 30 secondes.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const headerList = await headers();
+  const locale = headerList.get('x-next-intl-locale') || 'fr';
+
   return (
     <html
-      lang="fr"
+      lang={locale}
       className={`${inter.variable} ${interDisplay.variable} ${jetbrainsMono.variable}`}
     >
       <body className="min-h-screen text-ink">{children}</body>

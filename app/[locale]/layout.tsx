@@ -20,7 +20,7 @@ export default async function LocaleLayout({
   if (!locales.includes(locale as (typeof locales)[number])) notFound();
   setRequestLocale(locale);
 
-  const messages = await getMessages();
+  const messages = await getMessages({ locale });
   const current = await getCurrentUser();
 
   const initialUser = current
@@ -50,7 +50,7 @@ export default async function LocaleLayout({
     : null;
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <SessionProvider initialUser={initialUser}>
         <ToastProvider>
           <OfflineBanner />

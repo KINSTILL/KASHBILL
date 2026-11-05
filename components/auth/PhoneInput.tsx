@@ -45,7 +45,7 @@ export function PhoneInput({
       </label>
       <div className="flex rounded-xl border border-slate-300 bg-white transition-all focus-within:border-sage-600 focus-within:ring-2 focus-within:ring-sage-600/20">
         <span className="inline-flex select-none items-center gap-1.5 rounded-l-xl border-r border-slate-200 bg-slate-50/80 px-3.5 text-sm font-semibold text-slate-700">
-          <span className="text-base" role="img" aria-label="Cameroun">
+          <span className="text-base" aria-hidden="true">
             🇨🇲
           </span>
           <span>+237</span>

@@ -36,6 +36,9 @@
     "register": "Create account"
   },
   "auth": {
+    "metaTitle": "Authentication",
+    "brandSubtitle": "Pro Invoicing",
+    "browserFallback": "Browser",
     "login": {
       "title": "Sign In",
       "subtitle": "Enter your phone number and PIN to access your account.",

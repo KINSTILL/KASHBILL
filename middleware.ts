@@ -75,7 +75,17 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-next-intl-locale', locale);
+
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+  response.headers.set('x-next-intl-locale', locale);
+
+  return response;
 }
 
 export const config = {

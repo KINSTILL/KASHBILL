@@ -36,6 +36,9 @@
     "register": "Créer un compte"
   },
   "auth": {
+    "metaTitle": "Authentification",
+    "brandSubtitle": "Facturation Pro",
+    "browserFallback": "Navigateur",
     "login": {
       "title": "Connexion",
       "subtitle": "Entrez votre numéro et votre code PIN pour accéder à votre espace.",

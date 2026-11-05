@@ -25,6 +25,7 @@ const PIN_LENGTH = 6;
 
 export default function LoginPage() {
   const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const params = useParams();
   const locale = (params?.locale as string) || 'fr';
@@ -234,7 +235,7 @@ export default function LoginPage() {
             {activeDevices.map((dev, idx) => (
               <div key={idx} className="p-3 text-sm">
                 <div className="font-medium text-slate-800">
-                  {dev.userAgent || 'Navigateur'}
+                  {dev.userAgent || t('browserFallback')}
                 </div>
                 <div className="text-xs text-slate-400">
                   {new Date(dev.lastSeenAt).toLocaleString(locale)}
@@ -260,7 +261,7 @@ export default function LoginPage() {
               className="w-full"
               onClick={() => setDeviceLimitSheetOpen(false)}
             >
-              Fermer
+              {tCommon('close')}
             </Button>
           </div>
         </div>

@@ -5,22 +5,33 @@ import { getTranslations } from 'next-intl/server';
 import { LocaleToggle } from '@/components/layout/LocaleToggle';
 import { ShieldCheck } from '@/components/ui/icons';
 
-export const metadata: Metadata = {
-  title: 'MyCashBill - Authentification',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'auth' });
+  return {
+    title: `MyCashBill - ${t('metaTitle')}`,
+  };
+}
 
 export default async function AuthLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  const t = await getTranslations('auth');
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'auth' });
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <header className="flex w-full items-center justify-between px-6 py-4">
         <Link
-          href={'/' as Route}
+          href={`/${locale}` as Route}
           className="group flex items-center gap-2.5 transition-transform active:scale-95"
           aria-label="MyCashBill"
         >
@@ -32,7 +43,7 @@ export default async function AuthLayout({
               My<span className="text-sage-600">CashBill</span>
             </span>
             <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Facturation Pro
+              {t('brandSubtitle')}
             </span>
           </span>
         </Link>
@@ -49,4 +60,3 @@ export default async function AuthLayout({
     </div>
   );
 }
-
