@@ -3,7 +3,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 import type { DocType } from '@prisma/client';
 
-const DB_NAME = 'cashbill_local';
+const DB_NAME = 'mycashbill_local';
 const DB_VERSION = 1;
 
 export type Draft = {

@@ -22,7 +22,7 @@ async function main() {
   console.log('Register status:', regRes.status);
   const regJson = await regRes.json();
   const userId = regJson.user.id;
-  const cookie = regRes.headers.get('set-cookie')?.match(/cashbill_session=([^;]+)/)?.[1] ?? '';
+  const cookie = regRes.headers.get('set-cookie')?.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
   console.log('User registered:', userId, 'Initial proUntil:', regJson.user.proUntil);
 
   // 2. Création de la subscription (comme lors d'une initialisation)

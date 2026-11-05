@@ -22,7 +22,7 @@ async function registerAndGetCookie(phone: string, deviceId: string): Promise<st
   });
   const res = await registerRoute(req);
   const setCookie = res.headers.get('set-cookie') ?? '';
-  const match = setCookie.match(/cashbill_session=([^;]+)/);
+  const match = setCookie.match(/mycashbill_session=([^;]+)/);
   return match ? match[1]! : '';
 }
 
@@ -30,7 +30,7 @@ describe('/api/auth/devices', () => {
   it('liste les appareils actifs avec isCurrent', async () => {
     const cookie = await registerAndGetCookie('699444444', 'device-x');
     const req = new NextRequest('http://localhost/api/auth/devices', {
-      headers: { cookie: `cashbill_session=${cookie}` },
+      headers: { cookie: `mycashbill_session=${cookie}` },
     });
     const res = await devicesRoute(req);
     expect(res.status).toBe(200);
@@ -44,7 +44,7 @@ describe('/api/auth/devices', () => {
     const req = new NextRequest('http://localhost/api/auth/devices/device-y', {
       method: 'DELETE',
       headers: {
-        cookie: `cashbill_session=${cookie}`,
+        cookie: `mycashbill_session=${cookie}`,
         'x-requested-with': 'fetch',
       },
     });

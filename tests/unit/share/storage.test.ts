@@ -21,13 +21,13 @@ describe('loadSharePrefs', () => {
   });
 
   it('retourne les valeurs par défaut si JSON corrompu', () => {
-    localStorage.setItem('cashbill:share-prefs:v1', 'not-json');
+    localStorage.setItem('mycashbill:share-prefs:v1', 'not-json');
     const prefs = loadSharePrefs();
     expect(prefs.lastTone).toBe('transparency');
   });
 
   it('retourne les valeurs par défaut si version inconnue', () => {
-    localStorage.setItem('cashbill:share-prefs:v1', JSON.stringify({ version: 99 }));
+    localStorage.setItem('mycashbill:share-prefs:v1', JSON.stringify({ version: 99 }));
     const prefs = loadSharePrefs();
     expect(prefs.lastTone).toBe('transparency');
   });

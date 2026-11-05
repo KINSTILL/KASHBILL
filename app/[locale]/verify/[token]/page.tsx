@@ -21,7 +21,7 @@ export default async function VerifyPage({ params }: Props) {
           <div className="mb-4 text-6xl">❌</div>
           <h1 className="mb-2 text-xl font-bold text-slate-900">Document non reconnu</h1>
           <p className="text-sm text-slate-600">
-            {"Ce document n'a pas été émis par CashBill. Il peut s'agir d'un faux."}
+            {"Ce document n'a pas été émis par MyCashBill. Il peut s'agir d'un faux."}
           </p>
         </div>
       </main>
@@ -35,7 +35,7 @@ export default async function VerifyPage({ params }: Props) {
           <div className="mb-4 text-6xl">⚠️</div>
           <h1 className="mb-2 text-xl font-bold text-red-700">Document frauduleux</h1>
           <p className="text-sm text-slate-600">
-            {"Ce document a été signalé comme frauduleux par CashBill. Ne l'utilisez pas."}
+            {"Ce document a été signalé comme frauduleux par MyCashBill. Ne l'utilisez pas."}
           </p>
         </div>
       </main>

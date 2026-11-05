@@ -4,7 +4,7 @@ import type { Route } from 'next';
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
 
 export const metadata: Metadata = {
-  title: 'CashBill - Authentification',
+  title: 'MyCashBill - Authentification',
 };
 
 export default function AuthLayout({
@@ -19,7 +19,7 @@ export default function AuthLayout({
           href={'/' as Route}
           className="text-xl font-bold tracking-tight text-sage-700"
         >
-          CashBill
+          MyCashBill
         </Link>
         <LocaleSwitcher />
       </header>
@@ -27,7 +27,7 @@ export default function AuthLayout({
         <div className="w-full max-w-md">{children}</div>
       </main>
       <footer className="py-4 text-center text-xs text-slate-600">
-        &copy; {new Date().getFullYear()} CashBill &bull; Facturation hors-ligne &amp; Bouclier Social
+        &copy; {new Date().getFullYear()} MyCashBill &bull; Facturation hors-ligne &amp; Bouclier Social
       </footer>
     </div>
   );

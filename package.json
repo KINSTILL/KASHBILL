@@ -1,5 +1,5 @@
 {
-  "name": "cashbill",
+  "name": "mycashbill",
   "version": "0.1.0",
   "private": true,
   "prisma": {
@@ -24,12 +24,14 @@
     "audit:security": "node scripts/security-audit.js",
     "audit:lighthouse": "lhci autorun",
     "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts",
+    "db:seed:prod": "dotenv -e .env.production -- tsx prisma/seed.ts",
     "db:reset": "pnpm prisma migrate reset --force",
     "db:studio": "pnpm prisma studio",
     "cli:create-admin": "dotenv -e .env.production -- tsx scripts/cli/create-admin.ts",
     "cli:export-user": "dotenv -e .env.production -- tsx scripts/cli/export-user.ts",
     "cli:modify-threshold": "dotenv -e .env.production -- tsx scripts/cli/modify-threshold.ts",
-    "cli:remove-blacklist": "dotenv -e .env.production -- tsx scripts/cli/remove-blacklist.ts"
+    "cli:remove-blacklist": "dotenv -e .env.production -- tsx scripts/cli/remove-blacklist.ts",
+    "domain:set": "bash scripts/set-domain.sh"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",

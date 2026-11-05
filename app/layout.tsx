@@ -5,7 +5,7 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'CashBill — Facturation & Devis Rapides',
+  title: 'MyCashBill — Facturation & Devis Rapides',
   description: 'Générez des factures et devis professionnels en 30 secondes.',
 };
 

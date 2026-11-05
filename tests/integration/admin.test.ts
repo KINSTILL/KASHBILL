@@ -41,7 +41,7 @@ describe('Admin routes', () => {
       headers: {
         'content-type': 'application/json',
         'x-requested-with': 'fetch',
-        cookie: `cashbill_session=${support.cookie}`,
+        cookie: `mycashbill_session=${support.cookie}`,
       },
       body: JSON.stringify({ reason: 'Tentative de ban par support' }),
     });
@@ -62,7 +62,7 @@ describe('Admin routes', () => {
       headers: {
         'content-type': 'application/json',
         'x-requested-with': 'fetch',
-        cookie: `cashbill_session=${admin.cookie}`,
+        cookie: `mycashbill_session=${admin.cookie}`,
       },
       body: JSON.stringify({ reason: 'Ban sans reauth' }),
     });
@@ -84,7 +84,7 @@ describe('Admin routes', () => {
         'content-type': 'application/json',
         'x-requested-with': 'fetch',
         'x-reauth-token': reauthToken,
-        cookie: `cashbill_session=${admin.cookie}`,
+        cookie: `mycashbill_session=${admin.cookie}`,
       },
       body: JSON.stringify({ reason: 'Utilisateur frauduleux confirmé' }),
     });
@@ -124,7 +124,7 @@ describe('Admin routes', () => {
         'content-type': 'application/json',
         'x-requested-with': 'fetch',
         'x-reauth-token': reauthToken,
-        cookie: `cashbill_session=${admin.cookie}`,
+        cookie: `mycashbill_session=${admin.cookie}`,
       },
       body: JSON.stringify({ value: 5, reason: 'Test baisse sous plancher' }),
     });
@@ -157,7 +157,7 @@ describe('Admin routes', () => {
         'content-type': 'application/json',
         'x-requested-with': 'fetch',
         'x-reauth-token': reauthToken,
-        cookie: `cashbill_session=${admin.cookie}`,
+        cookie: `mycashbill_session=${admin.cookie}`,
       },
       body: JSON.stringify({
         reason: 'Fraude avérée sur les devis',
@@ -200,7 +200,7 @@ describe('Admin routes', () => {
 
     const req = new NextRequest('http://localhost/api/admin/audit', {
       method: 'GET',
-      headers: { cookie: `cashbill_session=${admin.cookie}` },
+      headers: { cookie: `mycashbill_session=${admin.cookie}` },
     });
 
     const res = await auditRoute(req);

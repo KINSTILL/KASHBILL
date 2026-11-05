@@ -73,11 +73,11 @@ export function A4Document({
         <Footer doc={doc} compact={false} />
         {options.showWatermark && (
           <Text style={styles.watermark} fixed>
-            Créé avec CashBill{doc.referralCode ? `\n\ncashbill.cm/r/${doc.referralCode}` : ''}
+            {doc.locale === 'EN' ? 'Created with MyCashBill' : 'Créé avec MyCashBill'}
+            {doc.referralCode ? `\n\nmycashbill.app/r/${doc.referralCode}` : ''}
           </Text>
         )}
       </Page>
     </Document>
   );
 }
-

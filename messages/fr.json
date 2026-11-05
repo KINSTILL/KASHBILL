@@ -16,7 +16,10 @@
     "search": "Rechercher",
     "add": "Ajouter",
     "remove": "Retirer",
-    "optional": "facultatif"
+    "optional": "facultatif",
+    "appName": "MyCashBill",
+    "appUrl": "mycashbill.app",
+    "pdfMention": "Émis via MyCashBill"
   },
   "nav": {
     "new": "Nouveau",
@@ -319,8 +322,8 @@
     }
   },
   "pwa": {
-    "install": "Installer CashBill",
-    "installHelp": "Ajoutez CashBill à votre écran d'accueil pour un accès rapide.",
+    "install": "Installer MyCashBill",
+    "installHelp": "Ajoutez MyCashBill à votre écran d'accueil pour un accès rapide.",
     "iosInstallHelp": "Sur iPhone : appuyez sur Partager puis « Sur l'écran d'accueil ».",
     "offline": "Hors ligne — vos brouillons sont sauvegardés localement",
     "online": "Connexion rétablie",
@@ -343,10 +346,9 @@
     "docType": "Type",
     "issuedOn": "Émis le",
     "notFound": "Document non reconnu",
-    "notFoundHelp": "Ce document n'a pas été émis par CashBill. Il peut s'agir d'un faux.",
+    "notFoundHelp": "Ce document n'a pas été émis par MyCashBill. Il peut s'agir d'un faux.",
     "fraudulent": "Document frauduleux",
-    "fraudulentHelp": "Ce document a été signalé comme frauduleux par CashBill. Ne l'utilisez pas.",
+    "fraudulentHelp": "Ce document a été signalé comme frauduleux par MyCashBill. Ne l'utilisez pas.",
     "noCommercialData": "Cette vérification ne révèle aucune donnée commerciale du document."
   }
 }
-

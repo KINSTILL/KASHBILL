@@ -3,7 +3,7 @@
 import type { DocType } from '@prisma/client';
 import type { PdfFormat } from './types';
 
-const STORAGE_KEY = 'cashbill:pdf-format-preference:v1';
+const STORAGE_KEY = 'mycashbill:pdf-format-preference:v1';
 
 export function getDefaultFormat(docType: DocType): PdfFormat {
   return docType === 'TICKET' || docType === 'RECU' ? 'ticket' : 'a4';

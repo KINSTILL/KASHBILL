@@ -4,7 +4,7 @@ import { computeContentHash } from '@/lib/documents/hash';
 const baseInput = {
   userId: 'user_123',
   docType: 'FACTURE',
-  number: 'CB-2026-000001',
+  number: 'MCB-2026-000001',
   locale: 'FR',
   payload: { items: [{ name: 'Item 1', qty: 2 }], total: 1000 },
   createdAt: '2026-01-01T00:00:00.000Z',
@@ -42,7 +42,7 @@ describe('computeContentHash', () => {
 
   it('change si le numéro change', () => {
     const h1 = computeContentHash(baseInput);
-    const h2 = computeContentHash({ ...baseInput, number: 'CB-2026-000002' });
+    const h2 = computeContentHash({ ...baseInput, number: 'MCB-2026-000002' });
     expect(h1).not.toBe(h2);
   });
 });

@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import { PrismaClient } from '@prisma/client';
 
 export default async function globalSetup() {
-  const dbUrl = (process.env.DATABASE_URL || 'postgresql://cashbill:cashbill@localhost:5433/cashbill').replace(/\/[^/]+$/, '/cashbill_test');
+  const dbUrl = (process.env.DATABASE_URL || 'postgresql://mycashbill:mycashbill@localhost:5433/mycashbill').replace(/\/[^/]+$/, '/mycashbill_test');
   process.env.DATABASE_URL = dbUrl;
 
   try {

@@ -82,7 +82,7 @@ describe('session cookies', () => {
 
   it('crée un cookie de session pour user et admin', async () => {
     const userCookie = await createSessionCookie('u1', 'd1', 'USER');
-    expect(userCookie.name).toBe('cashbill_session');
+    expect(userCookie.name).toBe('mycashbill_session');
     expect(userCookie.value).toBeTruthy();
 
     const adminCookie = await createSessionCookie('u2', 'd2', 'ADMIN');

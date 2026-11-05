@@ -31,7 +31,7 @@ export function AdminSidebar() {
       <aside className="hidden w-64 shrink-0 border-r bg-white md:block">
         <div className="border-b p-4 flex items-center justify-between">
           <Link href={`/${locale}/admin` as Route} className="text-lg font-bold text-sage-900">
-            CashBill Admin
+            MyCashBill Admin
           </Link>
           <span className="text-xs px-2 py-0.5 rounded bg-sage-100 text-sage-800 font-semibold">
             {user?.role}
@@ -64,7 +64,7 @@ export function AdminSidebar() {
       <div className="border-b bg-white p-3 md:hidden sticky top-0 z-20">
         <div className="flex items-center justify-between mb-2">
           <Link href={`/${locale}/admin` as Route} className="font-bold text-sage-900">
-            CashBill Admin
+            MyCashBill Admin
           </Link>
           <span className="text-xs px-2 py-0.5 rounded bg-sage-100 text-sage-800 font-semibold">
             {user?.role}

@@ -28,7 +28,7 @@ async function registerAndGetUserId(phone: string): Promise<{ userId: string; co
     })
   );
   const json = await res.json();
-  const cookie = res.headers.get('set-cookie')?.match(/cashbill_session=([^;]+)/)?.[1] ?? '';
+  const cookie = res.headers.get('set-cookie')?.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
   return { userId: json.user.id, cookie };
 }
 

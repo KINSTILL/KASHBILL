@@ -1,4 +1,4 @@
-# Icônes CashBill
+# Icônes MyCashBill
 
 Trois PNG à fournir :
 - `icon-192.png` (192x192)

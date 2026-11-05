@@ -4,7 +4,7 @@ import { usePWAInstall } from '@/lib/hooks/usePWAInstall';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 
-const DISMISS_KEY = 'cashbill:install-prompt-dismissed';
+const DISMISS_KEY = 'mycashbill:install-prompt-dismissed';
 
 export function InstallPrompt() {
   const t = useTranslations('pwa');

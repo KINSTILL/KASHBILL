@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'CashBill',
-    short_name: 'CashBill',
+    name: 'MyCashBill',
+    short_name: 'MyCashBill',
     description: 'Facturation et devis pour le Cameroun',
     start_url: '/fr',
     scope: '/',

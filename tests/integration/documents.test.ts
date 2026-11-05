@@ -19,7 +19,7 @@ async function registerAndGetCookie(phone: string): Promise<string> {
     body: JSON.stringify({ phone, pin: '123456', deviceId: 'device-1', locale: 'FR' }),
   });
   const res = await registerRoute(req);
-  return res.headers.get('set-cookie')?.match(/cashbill_session=([^;]+)/)?.[1] ?? '';
+  return res.headers.get('set-cookie')?.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
 }
 
 const basePayload = {
@@ -39,12 +39,12 @@ describe('POST /api/documents', () => {
     const cookie = await registerAndGetCookie('699333333');
     const res = await createDocRoute(new NextRequest('http://localhost/api/documents', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `cashbill_session=${cookie}` },
+      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
       body: JSON.stringify(basePayload),
     }));
     expect(res.status).toBe(201);
     const json = await res.json();
-    expect(json.number).toMatch(/^CB-\d{4}-\d{6}$/);
+    expect(json.number).toMatch(/^MCB-\d{4}-\d{6}$/);
     expect(json.publicToken).toBeDefined();
 
     const doc = await prisma.document.findUnique({ where: { id: json.documentId } });
@@ -55,7 +55,7 @@ describe('POST /api/documents', () => {
     const cookie = await registerAndGetCookie('699444444');
     const makeReq = () => new NextRequest('http://localhost/api/documents', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `cashbill_session=${cookie}` },
+      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
       body: JSON.stringify(basePayload),
     });
     const r1 = await (await createDocRoute(makeReq())).json();
@@ -68,7 +68,7 @@ describe('POST /api/documents', () => {
     const cookie = await registerAndGetCookie('699555555');
     const createRes = await createDocRoute(new NextRequest('http://localhost/api/documents', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `cashbill_session=${cookie}` },
+      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
       body: JSON.stringify(basePayload),
     }));
     const { documentId } = await createRes.json();
@@ -76,7 +76,7 @@ describe('POST /api/documents', () => {
     const res = await markSentRoute(
       new NextRequest(`http://localhost/api/documents/${documentId}/mark-sent`, {
         method: 'POST',
-        headers: { 'x-requested-with': 'fetch', cookie: `cashbill_session=${cookie}` },
+        headers: { 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
       }),
       { params: Promise.resolve({ id: documentId }) }
     );
