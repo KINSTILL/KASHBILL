@@ -16,9 +16,12 @@ export function ReauthSheet({
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }) {
-  const [pin, setPin] = useState('');
+  const [pin, setPin] = useState<string[]>(Array(6).fill(''));
+  const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const pinString = pin.join('');
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -27,7 +30,7 @@ export function ReauthSheet({
       const res = await fetch('/api/admin/reauth/issue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ pin }),
+        body: JSON.stringify({ pin: pinString }),
       });
       if (!res.ok) {
         haptic('heavy');
@@ -37,7 +40,7 @@ export function ReauthSheet({
       const { reauthToken, expiresInSeconds } = await res.json();
       setReauthToken(reauthToken, expiresInSeconds);
       haptic('medium');
-      setPin('');
+      setPin(Array(6).fill(''));
       onOpenChange(false);
       onSuccess();
     } finally {
@@ -52,14 +55,23 @@ export function ReauthSheet({
         <p className="text-sm text-slate-600">
           Pour cette action critique, saisissez votre PIN.
         </p>
-        <PinInput value={pin} onChange={setPin} />
+        <PinInput
+          label="Code PIN"
+          value={pin}
+          onChange={setPin}
+          show={showPin}
+          onToggleShow={() => setShowPin((v) => !v)}
+          showLabel="Afficher"
+          hideLabel="Masquer"
+          disabled={loading}
+        />
         {error && <p className="text-sm text-red-600">{error}</p>}
         <Button
           fullWidth
           size="lg"
           onClick={handleSubmit}
           isLoading={loading}
-          disabled={pin.length !== 6}
+          disabled={pinString.length !== 6}
         >
           Confirmer
         </Button>
@@ -67,4 +79,3 @@ export function ReauthSheet({
     </Sheet>
   );
 }
-
