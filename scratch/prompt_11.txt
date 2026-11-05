@@ -1,0 +1,67 @@
+<USER_REQUEST>
+en attendant execute d'abord ce prompt
+
+ÉTAPE 11 — DÉPLOIEMENT MYCASHBILL (v2 — domaine .app provisoire)
+Changement : le domaine passe de mycashbill.cm (définitif) à mycashbill.app (provisoire). Comme le domaine est appelé à changer, ce prompt ajoute scripts/set-domain.sh — un script de bascule qui permet de rejouer le déploiement avec le vrai domaine sans réécrire le prompt. Le reste de la structure (deterministic + bilingue FR/EN) est conservé.
+
+⚠️ Note critique sur .app : le TLD .app est sur la HSTS preload list (Google). Conséquence : les navigateurs refusent toute connexion en HTTP. Si Caddy n'arrive pas à obtenir le certificat Let's Encrypt, le site est totalement inaccessible (pas de fallback HTTP). Le 🤖 ANALYSER de la partie 3.5 est donc critique : un DNS non propagé ne se manifeste pas par "site en HTTP", il se manifeste par "site injoignable".
+
+LÉGENDE DES MARQUEURS (inchangée)
+Marqueur	Signification	Coût token
+▶ EXÉCUTER	Copier-coller, ne pas réfléchir	0
+🤖 ANALYSER	L'IA examine le contexte (guidance fournie)	Faible
+✅ VALIDER	Sortie attendue, comparer	0
+🛑 STOP	Si échoue, ne pas continuer	0
+🔁 BILINGUE	Exécuter en FR et EN	0
+CONTEXTE IMMUABLE (mis à jour)
+Constante	Valeur
+Nom de l'app	MyCashBill (identique FR et EN)
+Domaine (provisoire)	mycashbill.app
+Dossier VPS	/var/www/mycashbill
+Utilisateur système	deploy
+Base de données	mycashbill
+Préfixe documents	MCB- (ex: MCB-2026-000001)
+Cookie session	mycashbill_session
+Repo GitHub	github.com/<ORG>/<REPO>
+IP VPS	SERVER_IP
+Admin seed	ADMIN_PHONE / ADMIN_PIN (définis en 3.2)
+Si le domaine change plus tard (décision finale), exécuter PARTIE 7 en fin de prompt — aucun autre changement n'est nécessaire.
+
+PARTIE 0 — RENOMMAGE + SCRIPT DE DOMAINE 🔁 BILINGUE
+0.0 — ▶ EXÉCUTER : créer scripts/set-domain.sh (bascule domaine)
+Ce script remplace toutes les occurrences du domaine courant par un nouveau, dans tous les fichiers de config (hors prisma/migrations, node_modules, .env.production qui 
+<truncated 21800 bytes>
+ re-déployé. 12+5 validations repassées sur <nouveau>. »
+
+RÉPONSES AUX 3 QUESTIONS
+1. « Très détaillé, peu de tokens, liberté d'analyse — possible ? »
+Oui : 9 zones ▶ EXÉCUTER (0 token) + 1 zone 🤖 ANALYSER par partie (guidance 3 lignes). Le marqueur dit explicitement à l'IA quand copier-coller vs quand réfléchir. Gain : -25 % de tokens d'exécution vs prompt libre.
+
+2. « Version anglaise si l'utilisateur change de langue »
+Couvert par 5 mécanismes : (a) messages/en.json renommé en 0.1 ; (b) parité FR/EN bloquante en 0.5 et 6.2 ; (c) validation /en en 6.2 ; (d) MyCashBill identique dans les deux langues (pas de traduction du nom) ; (e) mention PDF "Issued via MyCashBill" en EN. Aucune string FR ne peut fuiter dans l'UI EN.
+
+3. « MyCashBill partout »
+Couvert par 4 gates : 0.3 (6 grep → 0), 0.6 (12 fichiers visuels), 6.1 ligne 12 (grep sur VPS → 0), 6.2 (page FR + page EN). Si un seul CashBill subsiste, le déploiement est bloqué.
+
+CE QUI CHANGE PAR RAPPORT À LA v1
+Élément	v1 (.cm)	v2 (.app)
+Domaine	mycashbill.cm	mycashbill.app
+Script bascule	❌	✅ scripts/set-domain.sh
+Section bascule	❌	✅ PARTIE 7
+Note HSTS .app	❌	✅ (pas de fallback HTTP)
+www redirect	❌	✅ (dans Caddyfile)
+Validation /en	✅	✅ (renforcée)
+Structure déterministe	✅	✅
+Zones 🤖 ANALYSER	8	9 (ajout 7.1)
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-05T11:37:43+01:00.
+
+The user's current state is as follows:
+Other open documents:
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\tsconfig.json (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\app\[locale]\(admin)\admin\users\page.tsx (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\app\[locale]\(auth)\register\page.tsx (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\app\[locale]\(auth)\recovery\page.tsx (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\app\[locale]\(auth)\login\page.tsx (LANGUAGE_UNSPECIFIED)
+</ADDITIONAL_METADATA>

@@ -1,0 +1,529 @@
+<USER_REQUEST>
+en attendant execute d'abord ce prompt
+
+ÉTAPE 11 — DÉPLOIEMENT MYCASHBILL (v2 — domaine .app provisoire)
+Changement : le domaine passe de mycashbill.cm (définitif) à mycashbill.app (provisoire). Comme le domaine est appelé à changer, ce prompt ajoute scripts/set-domain.sh — un script de bascule qui permet de rejouer le déploiement avec le vrai domaine sans réécrire le prompt. Le reste de la structure (deterministic + bilingue FR/EN) est conservé.
+
+⚠️ Note critique sur .app : le TLD .app est sur la HSTS preload list (Google). Conséquence : les navigateurs refusent toute connexion en HTTP. Si Caddy n'arrive pas à obtenir le certificat Let's Encrypt, le site est totalement inaccessible (pas de fallback HTTP). Le 🤖 ANALYSER de la partie 3.5 est donc critique : un DNS non propagé ne se manifeste pas par "site en HTTP", il se manifeste par "site injoignable".
+
+LÉGENDE DES MARQUEURS (inchangée)
+Marqueur	Signification	Coût token
+▶ EXÉCUTER	Copier-coller, ne pas réfléchir	0
+🤖 ANALYSER	L'IA examine le contexte (guidance fournie)	Faible
+✅ VALIDER	Sortie attendue, comparer	0
+🛑 STOP	Si échoue, ne pas continuer	0
+🔁 BILINGUE	Exécuter en FR et EN	0
+CONTEXTE IMMUABLE (mis à jour)
+Constante	Valeur
+Nom de l'app	MyCashBill (identique FR et EN)
+Domaine (provisoire)	mycashbill.app
+Dossier VPS	/var/www/mycashbill
+Utilisateur système	deploy
+Base de données	mycashbill
+Préfixe documents	MCB- (ex: MCB-2026-000001)
+Cookie session	mycashbill_session
+Repo GitHub	github.com/<ORG>/<REPO>
+IP VPS	SERVER_IP
+Admin seed	ADMIN_PHONE / ADMIN_PIN (définis en 3.2)
+Si le domaine change plus tard (décision finale), exécuter PARTIE 7 en fin de prompt — aucun autre changement n'est nécessaire.
+
+PARTIE 0 — RENOMMAGE + SCRIPT DE DOMAINE 🔁 BILINGUE
+0.0 — ▶ EXÉCUTER : créer scripts/set-domain.sh (bascule domaine)
+Ce script remplace toutes les occurrences du domaine courant par un nouveau, dans tous les fichiers de config (hors prisma/migrations, node_modules, .env.production qui doit être édité manuellement pour éviter d'écraser les secrets par erreur).
+
+Créer scripts/set-domain.sh :
+
+bash
+#!/usr/bin/env bash
+# Usage: ./scripts/set-domain.sh mycashbill.app newdomain.tld
+set -euo pipefail
+
+OLD_DOMAIN="${1:-}"
+NEW_DOMAIN="${2:-}"
+
+if [ -z "$OLD_DOMAIN" ] || [ -z "$NEW_DOMAIN" ]; then
+  echo "Usage: $0 <OLD_DOMAIN> <NEW_DOMAIN>"
+  echo "Exemple: $0 mycashbill.app mycashbill.cm"
+  exit 1
+fi
+
+if [ "$OLD_DOMAIN" = "$NEW_DOMAIN" ]; then
+  echo "❌ OLD_DOMAIN = NEW_DOMAIN"
+  exit 1
+fi
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Bascule domaine : $OLD_DOMAIN → $NEW_DOMAIN"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "⚠️  Ce script NE MODIFIE PAS :"
+echo "    - .env.production (à éditer manuellement pour préserver les secrets)"
+echo "    - .env.local (à éditer manuellement)"
+echo "    - prisma/migrations (ne pas toucher)"
+echo ""
+read -p "Continuer ? [y/N] " confirm
+if [ "$confirm" != "y" ]; then echo "Annulé."; exit 1; fi
+
+echo ""
+echo "Fichiers à modifier (aperçu) :"
+grep -rl "$OLD_DOMAIN" \
+  --include="*.ts" --include="*.tsx" --include="*.json" --include="*.md" \
+  --include="*.yml" --include="*.yaml" --include="*.example" --include="Caddyfile" \
+  . 2>/dev/null | grep -v node_modules | grep -v ".next/" | grep -v "prisma/migrations/" | grep -v ".env.production" | grep -v ".env.local" || true
+
+echo ""
+read -p "Appliquer les remplacements ? [y/N] " confirm2
+if [ "$confirm2" != "y" ]; then echo "Annulé."; exit 1; fi
+
+# Remplacement par fichier (sed BSD/GNU compatible)
+grep -rl "$OLD_DOMAIN" \
+  --include="*.ts" --include="*.tsx" --include="*.json" --include="*.md" \
+  --include="*.yml" --include="*.yaml" --include="*.example" --include="Caddyfile" \
+  . 2>/dev/null | grep -v node_modules | grep -v ".next/" | grep -v "prisma/migrations/" | grep -v ".env.production" | grep -v ".env.local" | while IFS= read -r file; do
+  sed -i "s|${OLD_DOMAIN}|${NEW_DOMAIN}|g" "$file"
+  echo "  ✏️  $file"
+done
+
+echo ""
+echo "✅ Remplacements appliqués dans les fichiers listés."
+echo ""
+echo "⚠️  ACTIONS MANUELLES RESTANTES :"
+echo "  1. Éditer .env.production : remplacer $OLD_DOMAIN par $NEW_DOMAIN dans APP_URL et NEXT_PUBLIC_APP_URL"
+echo "  2. Sur le VPS : mettre à jour /etc/caddy/Caddyfile (remplacer $OLD_DOMAIN par $NEW_DOMAIN)"
+echo "  3. Sur le VPS : systemctl restart caddy"
+echo "  4. Sur le VPS : pm2 restart mycashbill --update-env"
+echo "  5. DNS : pointer $NEW_DOMAIN vers l'IP du VPS (attendre propagation, dig +short $NEW_DOMAIN)"
+echo "  6. UptimeRobot : mettre à jour l'URL du monitor"
+echo ""
+echo "  7. Vérifier : grep -r '$OLD_DOMAIN' --include='*.ts' --include='*.tsx' --include='*.json' . | grep -v node_modules | grep -v .next/ | grep -v prisma/migrations/ | wc -l"
+echo "     doit retourner 0"
+Rendre exécutable :
+
+bash
+chmod +x scripts/set-domain.sh
+✅ VALIDER : bash scripts/set-domain.sh 2>&1 | head -2 affiche Usage: ... (car sans arguments).
+
+0.1 — ▶ EXÉCUTER : script de renommage (inchangé de la v1)
+Créer scripts/rename-app.ts — identique à la version précédente (voir étape 11 v1). Aucun changement.
+
+0.2 — ▶ EXÉCUTER : lancer le renommage
+bash
+git checkout main
+git pull origin main
+git checkout -b chore/rename-mycashbill
+pnpm tsx scripts/rename-app.ts
+✅ VALIDER : ✅ N fichier(s) modifié(s) + liste. Aucun prisma/migrations/, .env.local, .env.production.
+
+0.3 — ▶ EXÉCUTER : vérification FR (6 commandes, chacune → 0)
+bash
+grep -rP "(?<!My)CashBill" --include="*.ts" --include="*.tsx" --include="*.json" --include="*.md" --include="*.css" --include="*.yml" --include="*.yaml" --include="*.prisma" . 2>/dev/null | grep -v node_modules | grep -v ".next/" | grep -v "prisma/migrations/" | wc -l
+grep -rP "(?<!MY)CASHBILL" --include="*.ts" --include="*.tsx" --include="*.json" --include="*.md" . 2>/dev/null | grep -v node_modules | grep -v ".next/" | wc -l
+grep -rP "(?<!my)cashbill" --include="*.ts" --include="*.tsx" --include="*.json" --include="*.md" --include="*.css" . 2>/dev/null | grep -v node_modules | grep -v ".next/" | grep -v "prisma/migrations/" | wc -l
+grep -rP "CB-\d" --include="*.ts" --include="*.tsx" . 2>/dev/null | grep -v node_modules | grep -v "MCB-" | wc -l
+grep -r "cashbill.cm\|cashbill.app" --include="*.ts" --include="*.tsx" --include="*.json" . 2>/dev/null | grep -v node_modules | grep -v "mycashbill" | wc -l
+grep -r "cashbill_session" --include="*.ts" --include="*.tsx" . 2>/dev/null | grep -v node_modules | wc -l
+✅ VALIDER : 6 × 0.
+
+0.4 — 🔁 BILINGUE : vérifier la couverture EN
+bash
+grep -q '"MyCashBill"' messages/fr.json && echo "✅ FR: MyCashBill"
+grep -q '"MyCashBill"' messages/en.json && echo "✅ EN: MyCashBill"
+grep -q 'Émis via MyCashBill' messages/fr.json && echo "✅ FR: mention PDF"
+grep -q 'Issued via MyCashBill' messages/en.json || echo "⚠️  EN: mention PDF manquante"
+grep -q 'mycashbill.app' messages/en.json && echo "✅ EN: URL .app"
+grep -q 'mycashbill.app' messages/fr.json && echo "✅ FR: URL .app"
+✅ VALIDER : 5 ✅ (ou 1 ⚠️ à corriger dans messages/en.json avant de continuer).
+
+0.5 — 🔁 BILINGUE : parité des clés FR ↔ EN
+bash
+node -e "
+const fr = require('./messages/fr.json');
+const en = require('./messages/en.json');
+function flat(o, p='') { let out=[]; for (const k in o) { const v=o[k], np=p?p+'.'+k:k; if(v&&typeof v==='object'&&!Array.isArray(v)) out=out.concat(flat(v,np)); else out.push(np); } return out; }
+const frK=new Set(flat(fr)), enK=new Set(flat(en));
+const missing=[...frK].filter(k=>!enK.has(k));
+const extra=[...enK].filter(k=>!frK.has(k));
+if(missing.length) console.log('❌ Manquantes dans en.json:', missing);
+if(extra.length) console.log('❌ En trop dans en.json:', extra);
+if(!missing.length && !extra.length) console.log('✅ Parité FR/EN OK ('+frK.size+' clés)');
+process.exit(missing.length||extra.length?1:0);
+"
+✅ VALIDER : ✅ Parité FR/EN OK (N clés). 🛑 STOP si désynchronisé.
+
+0.6 — 🤖 ANALYSER : 12 fichiers sensibles
+Guidance : ouvrir et confirmer visuellement. Si faux, corriger à la main.
+
+Fichier	Valeur attendue
+lib/constants.ts	APP_NAME = 'MyCashBill', DOCUMENT_NUMBER_PREFIX = 'MCB', SESSION_COOKIE = 'mycashbill_session'
+app/manifest.ts	name: 'MyCashBill', short_name: 'MyCashBill'
+messages/fr.json	"Émis via MyCashBill", "mycashbill.app"
+messages/en.json	"Issued via MyCashBill", "mycashbill.app"
+lib/pdf/templates/TicketTemplate.tsx	"Émis via MyCashBill"
+lib/pdf/templates/A4Template.tsx	"Émis via MyCashBill"
+lib/share/storage.ts	'mycashbill:share-prefs:v1'
+lib/pdf/format-preference.ts	'mycashbill:pdf-format-preference:v1'
+components/pwa/InstallPrompt.tsx	'mycashbill:install-prompt-dismissed'
+components/pwa/DraftReminder.tsx	'mycashbill:last-draft-notified'
+.env.example	APP_URL="https://mycashbill.app", NEXT_PUBLIC_APP_URL="https://mycashbill.app"
+next.config.ts	PWA config inchangée
+0.7 — ▶ EXÉCUTER : rebuild + tests
+bash
+pnpm install --frozen-lockfile
+pnpm prisma generate
+pnpm typecheck && pnpm lint && pnpm test:run
+✅ VALIDER : 0 erreur, 0 test rouge.
+
+0.8 — ▶ EXÉCUTER : commit + merge
+bash
+git add -A
+git commit -m "chore: rename CashBill → MyCashBill + domain mycashbill.app (app, docs, tests, i18n FR/EN, set-domain.sh)"
+git push origin chore/rename-mycashbill
+GitHub → PR → CI verte → merge → git checkout main && git pull.
+
+🛑 STOP partie 0 : grep -rP "(?<!My)CashBill" . sur main → 0.
+
+PARTIE 1 — PATCHES PRÉ-DÉPLOIEMENT (inchangée, seule l'URL change)
+1.1 — ▶ EXÉCUTER : .gitignore
+gitignore
+.env.production
+.env.production.*
+.env.prod
+uploads/
+.pm2/
+1.2 — ▶ EXÉCUTER : lib/uploads/image.ts
+Remplacer par : const UPLOADS_DIR = process.env.UPLOADS_DIR ?? path.join(process.cwd(), 'uploads');
+
+1.3 — ▶ EXÉCUTER : package.json (scripts)
+Ajouter dans scripts :
+
+json
+"db:seed:prod": "dotenv -e .env.production -- tsx prisma/seed.ts",
+"cli:create-admin": "dotenv -e .env.production -- tsx scripts/cli/create-admin.ts",
+"cli:export-user": "dotenv -e .env.production -- tsx scripts/cli/export-user.ts",
+"cli:modify-threshold": "dotenv -e .env.production -- tsx scripts/cli/modify-threshold.ts",
+"cli:remove-blacklist": "dotenv -e .env.production -- tsx scripts/cli/remove-blacklist.ts",
+"domain:set": "bash scripts/set-domain.sh"
+1.4 — ▶ EXÉCUTER : .env.example
+env
+APP_URL="https://mycashbill.app"
+NEXT_PUBLIC_APP_URL="https://mycashbill.app"
+UPLOADS_DIR="./uploads"
+1.5 — ▶ EXÉCUTER : validation + commit
+bash
+grep -E "\.env\.production|uploads/" .gitignore && echo "✅ gitignore"
+grep -q "process.env.UPLOADS_DIR" lib/uploads/image.ts && echo "✅ uploads"
+grep -q "db:seed:prod" package.json && echo "✅ scripts"
+test -x scripts/set-domain.sh && echo "✅ set-domain.sh exécutable"
+pnpm typecheck && pnpm lint && echo "✅ build"
+git add .gitignore lib/uploads/image.ts package.json .env.example scripts/set-domain.sh
+git commit -m "chore: pre-deployment patches (gitignore, uploads dir, scripts, set-domain)"
+git push origin main
+✅ VALIDER : 5 ✅.
+
+PARTIE 2 — PROVISIONING VPS (root, inchangée sauf URLs)
+Prérequis : DNS A record pour mycashbill.app ET www.mycashbill.app → SERVER_IP. Vérifier dig +short mycashbill.app → SERVER_IP. 🛑 STOP sinon. Rappel .app : pas de fallback HTTP, le DNS doit être propagé avant Caddy.
+
+2.1 → 2.9 (identiques à la v1)
+Exécuter exactement les mêmes commandes que la v1 (sections 2.1 à 2.9). Aucun changement (les commandes ne contiennent pas le domaine).
+
+🛑 STOP partie 2 : 2.4, 2.6, 2.7, 2.8, 2.9 validés.
+
+PARTIE 3 — DÉPLOIEMENT APP (deploy)
+3.1 — ▶ EXÉCUTER : clone (inchangé)
+3.2 — ▶ EXÉCUTER : .env.production (URL changée)
+bash
+JWT_SECRET=$(openssl rand -hex 32)
+NOTCHPAY_PUBLIC_KEY="<pk_live_xxx>"
+NOTCHPAY_HASH_KEY="<sk_live_xxx>"
+NOTCHPAY_WEBHOOK_HASH="<whsec_xxx>"
+ADMIN_PHONE="<+237XXXXXXXXX>"
+ADMIN_PIN="<PIN_6_CHIFFRES>"
+
+sudo -u deploy tee /var/www/mycashbill/.env.production > /dev/null <<EOF
+NODE_ENV=production
+DATABASE_URL="postgresql://mycashbill:${DB_PASSWORD}@127.0.0.1:5432/mycashbill"
+JWT_SECRET="${JWT_SECRET}"
+JWT_EXPIRES_DAYS=7
+ADMIN_PHONE="${ADMIN_PHONE}"
+ADMIN_PIN="${ADMIN_PIN}"
+APP_URL="https://mycashbill.app"
+APP_NAME="MyCashBill"
+NEXT_PUBLIC_APP_URL="https://mycashbill.app"
+NOTCHPAY_PUBLIC_KEY="${NOTCHPAY_PUBLIC_KEY}"
+NOTCHPAY_HASH_KEY="${NOTCHPAY_HASH_KEY}"
+NOTCHPAY_WEBHOOK_HASH="${NOTCHPAY_WEBHOOK_HASH}"
+NOTCHPAY_BASE_URL="https://api.notchpay.co"
+UPLOADS_DIR="/var/www/mycashbill/uploads"
+EOF
+
+sudo -u deploy chmod 600 /var/www/mycashbill/.env.production
+sudo -u deploy mkdir -p /var/www/mycashbill/uploads
+✅ VALIDER : grep -c '=' /var/www/mycashbill/.env.production → 14.
+
+3.3 — ▶ EXÉCUTER : migrations + seed + build (inchangé)
+3.4 — ▶ EXÉCUTER : PM2 (inchangé)
+3.5 — ▶ EXÉCUTER : Caddyfile (URL changée + www redirect)
+Vérifier DNS :
+
+bash
+dig +short mycashbill.app
+✅ VALIDER : SERVER_IP. 🛑 STOP sinon. Rappel .app : sans DNS propagé, Let's Encrypt échoue et le site sera totalement inaccessible (pas de fallback HTTP).
+
+bash
+cat > /etc/caddy/Caddyfile <<'EOF'
+www.mycashbill.app {
+    redir https://mycashbill.app{uri} permanent
+}
+
+mycashbill.app {
+    encode gzip zstd
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+    @static path /_next/static/*
+    header @static Cache-Control "public, max-age=31536000, immutable"
+    reverse_proxy 127.0.0.1:3000 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    log {
+        output file /var/log/caddy/mycashbill.access.log
+        format json
+    }
+}
+EOF
+caddy validate --config /etc/caddy/Caddyfile
+systemctl restart caddy
+sleep 15
+
+if curl -fsS -m 20 "https://mycashbill.app/api/health" | grep -q '"status":"ok"'; then
+  echo "✅ HTTPS opérationnel (.app)"
+else
+  echo "❌ HTTPS échoue — TLD .app : pas de fallback HTTP. Vérifier :"
+  echo "  1. dig +short mycashbill.app → doit = SERVER_IP"
+  echo "  2. journalctl -u caddy -n 80"
+  echo "  3. Firewall Contabo (port 443 ouvert ?)"
+  echo "  4. Rate limit Let's Encrypt (5 échecs/h → attendre 1h)"
+  exit 1
+fi
+🤖 ANALYSER si HTTPS échoue : 4 causes possibles — (1) DNS non propagé → attendre 15 min, dig à nouveau ; (2) port 443 bloqué par Contabo → vérifier le panel ; (3) rate limit LE → attendre 1h ; (4) .app HSTS strict → aucune solution HTTP, il faut résoudre SSL. Ne pas modifier le Caddyfile sans avoir identifié la cause.
+
+✅ VALIDER : ✅ HTTPS opérationnel (.app) + curl -sI https://mycashbill.app/ → HTTP/2 200.
+
+🛑 STOP partie 3 : 3.3, 3.4, 3.5 validés.
+
+PARTIE 4 — CI/CD GITHUB ACTIONS (inchangée)
+4.1 → 4.4 (identiques à la v1, seule valeur de secret change)
+GitHub Secrets :
+
+Nom	Valeur
+SSH_HOST	SERVER_IP
+SSH_USER	deploy
+SSH_PRIVATE_KEY	Contenu de ~/.ssh/mycashbill_ci
+APP_DIR	/var/www/mycashbill
+DOMAIN	mycashbill.app
+Le workflow deploy.yml reste identique (il utilise ${{ secrets.DOMAIN }}).
+
+✅ VALIDER : CI + Deploy verts.
+
+PARTIE 5 — SCRIPTS CLI + MONITORING (inchangée)
+5.1 → 5.6 identiques à la v1.
+Note UptimeRobot (5.6) : URL = https://mycashbill.app/api/health.
+
+PARTIE 6 — VALIDATION FINALE BILINGUE 🔁
+6.1 — ▶ EXÉCUTER : 12 validations techniques (URL changée)
+bash
+curl -fsS https://mycashbill.app/api/health | grep -q '"status":"ok"' && echo "✅ 1 Health"
+curl -sI https://mycashbill.app/ | grep -qi "strict-transport-security" && echo "✅ 2 HSTS"
+curl -sI https://mycashbill.app/ | grep -qi "x-frame-options" && echo "✅ 3 X-Frame"
+curl -sI https://mycashbill.app/ | grep -q "HTTP/2 200" && echo "✅ 4 HTTP/2"
+sudo -u deploy pm2 status | grep -q "mycashbill.*online" && echo "✅ 5 PM2"
+sudo -u deploy bash -c "cd /var/www/mycashbill && source .env.production && psql \$DATABASE_URL -c 'SELECT 1;'" | grep -q "1 row" && echo "✅ 6 DB"
+sudo -u deploy bash -c "cd /var/www/mycashbill && source .env.production && pnpm prisma migrate status" | grep -q "up to date" && echo "✅ 7 Migrations"
+ls /var/backups/mycashbill/mycashbill_*.dump > /dev/null 2>&1 && echo "✅ 8 Backups"
+sudo ufw status | grep -q "Status: active" && echo "✅ 9 UFW"
+sudo fail2ban-client status sshd | grep -q "Status for the jail" && echo "✅ 10 Fail2ban"
+test -f /var/www/mycashbill/docs/DEPLOYMENT.md && echo "✅ 11 Doc"
+grep -rP "(?<!My)CashBill" /var/www/mycashbill --include="*.ts" --include="*.tsx" --include="*.json" 2>/dev/null | grep -v node_modules | grep -v ".next/" | grep -v "prisma/migrations/" | wc -l | grep -q "^0$" && echo "✅ 12 Rename propre"
+✅ VALIDER : 12 × ✅.
+
+6.2 — 🔁 BILINGUE : validation FR + EN
+bash
+curl -s https://mycashbill.app/fr 2>/dev/null | grep -q "MyCashBill" && echo "✅ FR page"
+curl -s https://mycashbill.app/en 2>/dev/null | grep -q "MyCashBill" && echo "✅ EN page"
+test -f /var/www/mycashbill/messages/fr.json && test -f /var/www/mycashbill/messages/en.json && echo "✅ FR + EN présents"
+node -e "
+const fr = require('/var/www/mycashbill/messages/fr.json');
+const en = require('/var/www/mycashbill/messages/en.json');
+function flat(o, p='') { let out=[]; for (const k in o) { const v=o[k], np=p?p+'.'+k:k; if(v&&typeof v==='object'&&!Array.isArray(v)) out=out.concat(flat(v,np)); else out.push(np); } return out; }
+const fk=flat(fr).sort(), ek=flat(en).sort();
+if(JSON.stringify(fk)===JSON.stringify(ek)) console.log('✅ Parité FR/EN ('+fk.length+' clés)');
+else { console.log('❌ Désynchronisation FR/EN'); process.exit(1); }
+"
+grep -r "mycashbill.app" /var/www/mycashbill/.env.production && echo "✅ .env.production pointe .app"
+✅ VALIDER : 5 ✅.
+
+6.3 — 🤖 ANALYSER : smoke test manuel 7 étapes
+Guidance : identique à la v1, avec https://mycashbill.app au lieu de .cm. Inclure bascule FR ↔ EN à l'étape 2.
+
+✅ VALIDER : 7/7.
+
+6.4 — ▶ EXÉCUTER : commit final
+bash
+git commit --allow-empty -m "chore: MyCashBill v1.0.0 deployed to https://mycashbill.app (FR + EN)"
+git push origin main
+PARTIE 7 — CHANGER DE DOMAINE PLUS TARD (quand le vrai domaine est connu)
+Contexte : mycashbill.app est provisoire. Quand le domaine définitif est décidé, exécuter cette partie. Aucun autre changement n'est nécessaire.
+
+7.1 — ▶ EXÉCUTER (machine locale) : bascule automatique
+bash
+git checkout main && git pull origin main
+git checkout -b chore/change-domain
+pnpm domain:set mycashbill.app <NOUVEAU_DOMAINE>
+Remplacer <NOUVEAU_DOMAINE> par la valeur finale (ex: mycashbill.cm, mycashbill.cm, mycashbill.io).
+
+🤖 ANALYSER si le script affiche des fichiers : vérifier visuellement la liste. Aucun .env.production ni .env.local ne doit apparaître (le script les exclut). Confirmer y à chaque prompt.
+
+7.2 — ▶ EXÉCUTER : validation
+bash
+# Aucune occurrence de l'ancien domaine
+grep -r "mycashbill.app" --include="*.ts" --include="*.tsx" --include="*.json" --include="*.md" --include="*.yml" --include="*.yaml" . 2>/dev/null | grep -v node_modules | grep -v ".next/" | grep -v "prisma/migrations/" | wc -l
+# → doit retourner 0
+
+# Le nouveau domaine est bien présent
+grep -r "<NOUVEAU_DOMAINE>" --include="*.ts" --include="*.tsx" --include="*.json" --include="*.md" . 2>/dev/null | grep -v node_modules | grep -v ".next/" | wc -l
+# → doit retourner > 0
+
+pnpm typecheck && pnpm lint && pnpm test:run
+✅ VALIDER : 0, > 0, tests verts.
+
+7.3 — ▶ EXÉCUTER : commit + push
+bash
+git add -A
+git commit -m "chore: change domain mycashbill.app → <NOUVEAU_DOMAINE>"
+git push origin chore/change-domain
+PR → CI verte → merge → git checkout main && git pull.
+
+7.4 — ▶ EXÉCUTER (VPS) : mise à jour manuelle des 3 éléments hors repo
+Le script 7.1 exclut volontairement .env.production, /etc/caddy/Caddyfile et UptimeRobot (pour ne pas écraser les secrets / configs système). À faire manuellement :
+
+bash
+# 1. .env.production
+sudo -u deploy sed -i 's/mycashbill\.app/<NOUVEAU_DOMAINE>/g' /var/www/mycashbill/.env.production
+sudo -u deploy grep -E "APP_URL|NEXT_PUBLIC_APP_URL" /var/www/mycashbill/.env.production
+# → doit afficher les 2 URLs avec <NOUVEAU_DOMAINE>
+
+# 2. Caddyfile
+sudo sed -i 's/mycashbill\.app/<NOUVEAU_DOMAINE>/g' /etc/caddy/Caddyfile
+sudo caddy validate --config /etc/caddy/Caddyfile
+sudo systemctl restart caddy
+sleep 15
+
+# 3. Redémarrer PM2 avec le nouvel env
+sudo -u deploy pm2 restart mycashbill --update-env
+✅ VALIDER :
+
+bash
+curl -fsS "https://<NOUVEAU_DOMAINE>/api/health" | grep -q '"status":"ok"' && echo "✅ Santé OK sur nouveau domaine"
+curl -sI "https://<NOUVEAU_DOMAINE>/" | grep -q "HTTP/2 200" && echo "✅ HTTPS OK"
+Attendu : 2 ✅.
+
+7.5 — ▶ EXÉCUTER (DNS) : pointer le nouveau domaine
+Côté registrar DNS (pas une commande shell) :
+
+Enregistrement A : <NOUVEAU_DOMAINE> → SERVER_IP
+
+Enregistrement A : www.<NOUVEAU_DOMAINE> → SERVER_IP
+
+Attendre propagation (5–30 min) : dig +short <NOUVEAU_DOMAINE> → SERVER_IP
+
+✅ VALIDER : dig +short <NOUVEAU_DOMAINE> = SERVER_IP.
+
+7.6 — ▶ EXÉCUTER : mettre à jour UptimeRobot (manuel)
+Action utilisateur : modifier l'URL du monitor UptimeRobot existant → https://<NOUVEAU_DOMAINE>/api/health.
+
+7.7 — ▶ EXÉCUTER : re-déployer via CI/CD
+bash
+git commit --allow-empty -m "chore: redeploy with new domain <NOUVEAU_DOMAINE>"
+git push origin main
+✅ VALIDER : CI + Deploy verts sur GitHub. Puis :
+
+bash
+curl -fsS "https://<NOUVEAU_DOMAINE>/fr" | grep -q "MyCashBill" && echo "✅ FR sur nouveau domaine"
+curl -fsS "https://<NOUVEAU_DOMAINE>/en" | grep -q "MyCashBill" && echo "✅ EN sur nouveau domaine"
+Attendu : 2 ✅.
+
+7.8 — ▶ EXÉCUTER : validation finale
+Reprendre la PARTIE 6 (12 validations + 5 bilingues) en remplaçant mycashbill.app par <NOUVEAU_DOMAINE>. Toutes doivent passer.
+
+🛑 STOP final : si une validation échoue, revenir à la PARTIE 7.4 et corriger manuellement.
+
+RÉCAPITULATIF DES VALEURS CODÉES EN DUR
+#	Valeur	Fichier	Défaut
+1	mycashbill.app (provisoire)	.env.production, Caddyfile, messages/*.json	✅
+2	PORT=3000	ecosystem.config.cjs	✅
+3	max_memory_restart='1G'	ecosystem.config.cjs	✅
+4	NODE_OPTIONS='--max-old-space-size=2048'	3.3	✅
+5	Swap 2G	2.9	✅
+6	Backup rétention 7j	mycashbill-backup.sh	✅
+7	Backup cron 03:00	/etc/cron.d/mycashbill-backup	✅
+8	Healthcheck cron 5 min	/etc/cron.d/mycashbill-healthcheck	✅
+9	Caddy HSTS max-age=63072000	Caddyfile	✅
+10	Caddy cache assets 31536000s	Caddyfile	✅
+ZONES D'ANALYSE (5 % du prompt — les seules où l'IA réfléchit)
+Zone	Condition	Guidance
+0.7	Test échoue CB- vs MCB-	Corriger le test
+3.1	Repo privé	Deploy Key ou HTTPS token
+3.3	Build OOM	Swap 4G ou force-dynamic
+3.5	HTTPS échoue (.app = pas de fallback HTTP)	DNS / firewall / LE rate limit
+4.4	Deploy échoue	SSH key / APP_DIR / pm2
+5.1	Scripts CLI contiennent cashbill	Corriger manuellement
+6.2	/en 404	Vérifier middleware.ts
+6.3	Smoke test manuel	Actions utilisateur
+7.1	Bascule domaine	Vérifier visuellement la liste
+CE QUE TU ME DIS QUAND C'EST VALIDÉ
+Déploiement initial (mycashbill.app) :
+
+« Étape 11 validée (v2). Parties 0 à 6 exécutées. Parité FR/EN OK. 12 validations techniques ✅. 5 bilingues ✅. Smoke test 7/7. Site live sur https://mycashbill.app. »
+
+Changement de domaine plus tard :
+
+« Partie 7 exécutée. pnpm domain:set mycashbill.app <nouveau> appliqué. 3 éléments VPS mis à jour manuellement. DNS propagé. CI/CD re-déployé. 12+5 validations repassées sur <nouveau>. »
+
+RÉPONSES AUX 3 QUESTIONS
+1. « Très détaillé, peu de tokens, liberté d'analyse — possible ? »
+Oui : 9 zones ▶ EXÉCUTER (0 token) + 1 zone 🤖 ANALYSER par partie (guidance 3 lignes). Le marqueur dit explicitement à l'IA quand copier-coller vs quand réfléchir. Gain : -25 % de tokens d'exécution vs prompt libre.
+
+2. « Version anglaise si l'utilisateur change de langue »
+Couvert par 5 mécanismes : (a) messages/en.json renommé en 0.1 ; (b) parité FR/EN bloquante en 0.5 et 6.2 ; (c) validation /en en 6.2 ; (d) MyCashBill identique dans les deux langues (pas de traduction du nom) ; (e) mention PDF "Issued via MyCashBill" en EN. Aucune string FR ne peut fuiter dans l'UI EN.
+
+3. « MyCashBill partout »
+Couvert par 4 gates : 0.3 (6 grep → 0), 0.6 (12 fichiers visuels), 6.1 ligne 12 (grep sur VPS → 0), 6.2 (page FR + page EN). Si un seul CashBill subsiste, le déploiement est bloqué.
+
+CE QUI CHANGE PAR RAPPORT À LA v1
+Élément	v1 (.cm)	v2 (.app)
+Domaine	mycashbill.cm	mycashbill.app
+Script bascule	❌	✅ scripts/set-domain.sh
+Section bascule	❌	✅ PARTIE 7
+Note HSTS .app	❌	✅ (pas de fallback HTTP)
+www redirect	❌	✅ (dans Caddyfile)
+Validation /en	✅	✅ (renforcée)
+Structure déterministe	✅	✅
+Zones 🤖 ANALYSER	8	9 (ajout 7.1)
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-05T11:37:43+01:00.
+
+The user's current state is as follows:
+Other open documents:
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\tsconfig.json (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\app\[locale]\(admin)\admin\users\page.tsx (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\app\[locale]\(auth)\register\page.tsx (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\app\[locale]\(auth)\recovery\page.tsx (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\app\[locale]\(auth)\login\page.tsx (LANGUAGE_UNSPECIFIED)
+</ADDITIONAL_METADATA>
