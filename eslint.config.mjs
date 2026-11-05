@@ -18,6 +18,7 @@ const eslintConfig = [
       'scripts/**',
       'test-results/**',
       'playwright-report/**',
+      '.lighthouseci/**',
     ],
   },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
