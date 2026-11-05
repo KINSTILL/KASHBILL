@@ -443,16 +443,20 @@ export function DocumentForm({
         </div>
       </Card>
 
-      <Card>
+      <Card className="border-none bg-gradient-to-br from-sage-500 to-sage-600 text-white">
         {hidePriceInput ? (
-          <div className="flex justify-between text-lg font-bold">
-            <span>{t('totalItemsDelivered')} :</span>
-            <span className="text-sage-800">{totalQuantity}</span>
+          <div className="flex items-center justify-between">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.06em] text-white/80">
+              {t('totalItemsDelivered')}
+            </p>
+            <p className="money-lg text-[26px] text-white">{totalQuantity}</p>
           </div>
         ) : (
-          <div className="flex justify-between text-lg font-bold">
-            <span>{isReceipt ? t('totalReceived') : t('total')} :</span>
-            <span className="money-lg text-terracotta">{formatFCFA(total)}</span>
+          <div className="flex items-center justify-between">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.06em] text-white/80">
+              {isReceipt ? t('totalReceived') : t('total')}
+            </p>
+            <p className="money-lg text-[26px] text-white">{formatFCFA(total)}</p>
           </div>
         )}
       </Card>

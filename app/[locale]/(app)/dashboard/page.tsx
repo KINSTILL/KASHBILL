@@ -6,12 +6,12 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { prisma } from '@/lib/db';
 import { isPro, isInTrial } from '@/lib/auth/plan';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { UpgradeCTA } from '@/components/ui/UpgradeCTA';
 import { ProBadge } from '@/components/ui/ProBadge';
-import { formatCurrency } from '@/lib/pdf/shared/format';
+import { HeroCard } from '@/components/ui/HeroCard';
+import { StatCard } from '@/components/ui/StatCard';
+import { DocumentCard } from '@/components/documents/DocumentCard';
 
 export default async function DashboardPage({
   params,
@@ -28,13 +28,15 @@ export default async function DashboardPage({
   const { user } = current;
   const t = await getTranslations();
 
-  const [recentDocs, activatedReferralsCount] = await Promise.all([
+  const [recentDocs, documentsCount, clientsCount, activatedReferralsCount] = await Promise.all([
     prisma.document.findMany({
       where: { userId: user.id },
       take: 5,
       orderBy: { createdAt: 'desc' },
       include: { client: true },
     }),
+    prisma.document.count({ where: { userId: user.id } }),
+    prisma.client.count({ where: { userId: user.id } }),
     prisma.referral.count({
       where: {
         parrainId: user.id,
@@ -54,107 +56,64 @@ export default async function DashboardPage({
     );
   }
 
-  const displayName = user.name || user.businessName || user.phone;
+  const displayName = user.businessName || user.name || user.phone;
+
+  const heroSubtitle = userInTrial
+    ? t('dashboard.trialBanner', { days: trialDaysLeft })
+    : !userIsPro
+      ? t('dashboard.upgradeBanner')
+      : t('dashboard.referralCount', { count: activatedReferralsCount });
 
   return (
-    <div className="space-y-6">
-      {/* Salutation & Status header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              {t('dashboard.welcome')}, {displayName}
-            </h1>
+    <div className="space-y-4">
+      <HeroCard
+        eyebrow={t('dashboard.welcomeBack')}
+        title={
+          <span className="flex items-center gap-2">
+            {displayName}
             {userIsPro && <ProBadge />}
-          </div>
-          <p className="mt-1 text-sm text-slate-500">
-            {t('dashboard.referralCount', { count: activatedReferralsCount })}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Link href={`/${locale}/documents/new` as Route}>
-            <Button variant="primary" className="thumb-zone">
+          </span>
+        }
+        subtitle={heroSubtitle}
+        action={
+          <Link href={`/${locale}/documents/new` as Route} className="block">
+            <Button size="lg" variant="secondary" fullWidth>
               + {t('nav.new')}
             </Button>
           </Link>
-        </div>
+        }
+      />
+
+      {!userIsPro && <UpgradeCTA reason="removeWatermark" />}
+
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard
+          label={t('dashboard.stats.documents')}
+          value={documentsCount}
+          hint={t('dashboard.stats.documentsHint')}
+          icon="📄"
+          accent="sage"
+        />
+        <StatCard
+          label={t('dashboard.stats.clients')}
+          value={clientsCount}
+          hint={t('dashboard.stats.clientsHint')}
+          icon="👥"
+          accent="brass"
+        />
       </div>
 
-      {/* Trial banner */}
-      {userInTrial && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 shadow-sm flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">⏳</span>
-            <div>
-              <p className="font-semibold text-sm">
-                {t('dashboard.trialBanner', { days: trialDaysLeft })}
-              </p>
-              <p className="text-xs text-amber-700">
-                Profitez de toutes les fonctionnalités Pro sans filigrane.
-              </p>
-            </div>
-          </div>
-          <Link href={`/${locale}/upgrade` as Route}>
-            <Button size="sm" variant="outline" className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100">
-              {t('nav.upgrade')}
-            </Button>
-          </Link>
-        </div>
-      )}
-
-      {/* Upgrade CTA if not Pro and not in trial */}
-      {!userIsPro && (
-        <UpgradeCTA reason="removeWatermark" />
-      )}
-
-      {/* Quick stats or action cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Link href={`/${locale}/documents/new` as Route} className="group">
-          <Card className="p-4 transition group-hover:border-sage-300 group-hover:shadow-sm">
-            <div className="text-2xl mb-1">📄</div>
-            <div className="font-semibold text-sm text-slate-900">Nouveau devis</div>
-            <div className="text-xs text-slate-500">Facture ou reçu</div>
-          </Card>
-        </Link>
-
-        <Link href={`/${locale}/clients/new` as Route} className="group">
-          <Card className="p-4 transition group-hover:border-sage-300 group-hover:shadow-sm">
-            <div className="text-2xl mb-1">👤</div>
-            <div className="font-semibold text-sm text-slate-900">Nouveau client</div>
-            <div className="text-xs text-slate-500">Carnet d&apos;adresses</div>
-          </Card>
-        </Link>
-
-        <Link href={`/${locale}/referrals` as Route} className="group">
-          <Card className="p-4 transition group-hover:border-sage-300 group-hover:shadow-sm">
-            <div className="text-2xl mb-1">🎁</div>
-            <div className="font-semibold text-sm text-slate-900">Parrainage</div>
-            <div className="text-xs text-slate-500">+7 jours offerts</div>
-          </Card>
-        </Link>
-
-        <Link href={`/${locale}/settings/business` as Route} className="group">
-          <Card className="p-4 transition group-hover:border-sage-300 group-hover:shadow-sm">
-            <div className="text-2xl mb-1">⚙️</div>
-            <div className="font-semibold text-sm text-slate-900">Entreprise</div>
-            <div className="text-xs text-slate-500">Logo &amp; mentions</div>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Recent documents section */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900">
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-[13px] font-semibold uppercase tracking-[0.06em] text-slate-500">
             {t('dashboard.recentDocuments')}
           </h2>
           {recentDocs.length > 0 && (
             <Link
               href={`/${locale}/documents` as Route}
-              className="text-xs font-medium text-sage-600 hover:text-sage-700"
+              className="text-[12px] font-semibold text-sage-600 hover:text-sage-700"
             >
-              Voir tout ({recentDocs.length})
+              {t('dashboard.seeAll')}
             </Link>
           )}
         </div>
@@ -165,56 +124,28 @@ export default async function DashboardPage({
             description={t('dashboard.noDocumentsHelp')}
             action={
               <Link href={`/${locale}/documents/new` as Route}>
-                <Button variant="primary">
-                  {t('dashboard.createFirst')}
-                </Button>
+                <Button variant="primary">{t('dashboard.createFirst')}</Button>
               </Link>
             }
           />
         ) : (
-          <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            {recentDocs.map((doc) => {
-              const payload = doc.payload as { total?: number } | null;
-              const total = payload?.total ?? 0;
-              const status = doc.sentViaWhatsAppAt ? 'SENT' : 'DRAFT';
-              const statusVariant = status === 'SENT' ? 'info' : 'neutral';
-
-              return (
-                <Link
-                  key={doc.id}
-                  href={`/${locale}/documents/${doc.id}` as Route}
-                  className="flex items-center justify-between p-4 transition hover:bg-slate-50"
-                >
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-slate-900">
-                        {doc.number}
-                      </span>
-                      <Badge variant={statusVariant} size="sm">
-                        {doc.type}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-slate-500">
-                      {doc.client?.name || 'Client sans nom'} &bull;{' '}
-                      {new Date(doc.createdAt).toLocaleDateString(locale)}
-                    </p>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="money text-sm text-ink">
-                      {formatCurrency(total, 'FCFA')}
-                    </span>
-                    <p className="text-[11px] text-slate-400">
-                      {status}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="space-y-2">
+            {recentDocs.map((doc) => (
+              <DocumentCard
+                key={doc.id}
+                id={doc.id}
+                number={doc.number}
+                type={doc.type}
+                clientName={doc.client?.name ?? null}
+                total={(doc.payload as { total?: number } | null)?.total ?? 0}
+                createdAt={doc.createdAt}
+                sentViaWhatsAppAt={doc.sentViaWhatsAppAt}
+                watermarked={doc.watermarked}
+              />
+            ))}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
-

@@ -1,5 +1,4 @@
 {
-  
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -119,7 +118,14 @@
     "createFirst": "Créer mon premier document",
     "trialBanner": "Essai Pro : {days} jours restants",
     "upgradeBanner": "Passez Pro pour retirer le filigrane et ajouter votre logo.",
-    "referralCount": "{count} filleul(s) activé(s)"
+    "referralCount": "{count} filleul(s) activé(s)",
+    "seeAll": "Tout voir",
+    "stats": {
+      "documents": "Documents",
+      "documentsHint": "Total émis",
+      "clients": "Clients",
+      "clientsHint": "Enregistrés"
+    }
   },
   "documents": {
     "new": {
@@ -282,7 +288,9 @@
       "empty": "Aucun document encore",
       "emptyHelp": "Vos documents apparaîtront ici.",
       "historyLimited": "Les documents de plus de 7 jours sont masqués (offre gratuite).",
-      "upgradeToSeeAll": "Passez Pro pour voir tout l'historique"
+      "upgradeToSeeAll": "Passez Pro pour voir tout l'historique",
+      "sent": "Envoyé",
+      "createFirst": "Créer mon premier document"
     }
   },
   "clients": {

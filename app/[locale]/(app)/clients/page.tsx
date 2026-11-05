@@ -9,6 +9,7 @@ import { FREE_CLIENTS_LIMIT } from '@/lib/constants';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { UpgradeCTA } from '@/components/ui/UpgradeCTA';
+import { ClientCard } from '@/components/clients/ClientCard';
 
 export default async function ClientsPage({
   params,
@@ -29,6 +30,7 @@ export default async function ClientsPage({
   const clients = await prisma.client.findMany({
     where: { userId: user.id },
     orderBy: { updatedAt: 'desc' },
+    include: { _count: { select: { documents: true } } },
   });
 
   const limitReached = !pro && clients.length >= FREE_CLIENTS_LIMIT;
@@ -68,23 +70,16 @@ export default async function ClientsPage({
           }
         />
       ) : (
-        <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="space-y-2">
           {clients.map((client) => (
-            <Link
+            <ClientCard
               key={client.id}
-              href={`/${locale}/clients/${client.id}` as Route}
-              className="flex items-center justify-between p-4 transition hover:bg-slate-50"
-            >
-              <div>
-                <h3 className="font-semibold text-sm text-slate-900">
-                  {client.name}
-                </h3>
-                <p className="text-xs text-slate-500">
-                  {client.phone || 'Pas de numéro'} {client.address ? `• ${client.address}` : ''}
-                </p>
-              </div>
-              <span className="text-slate-400 text-sm">&rarr;</span>
-            </Link>
+              id={client.id}
+              name={client.name}
+              phone={client.phone ?? null}
+              note={client.note ?? null}
+              documentsCount={client._count.documents}
+            />
           ))}
         </div>
       )}

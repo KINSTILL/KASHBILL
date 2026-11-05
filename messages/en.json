@@ -118,7 +118,14 @@
     "createFirst": "Create my first document",
     "trialBanner": "Pro trial: {days} days left",
     "upgradeBanner": "Go Pro to remove the watermark and add your logo.",
-    "referralCount": "{count} activated referral(s)"
+    "referralCount": "{count} activated referral(s)",
+    "seeAll": "See all",
+    "stats": {
+      "documents": "Documents",
+      "documentsHint": "Total issued",
+      "clients": "Clients",
+      "clientsHint": "Saved"
+    }
   },
   "documents": {
     "new": {
@@ -281,7 +288,9 @@
       "empty": "No documents yet",
       "emptyHelp": "Your documents will appear here.",
       "historyLimited": "Documents older than 7 days are hidden (free plan).",
-      "upgradeToSeeAll": "Go Pro to see full history"
+      "upgradeToSeeAll": "Go Pro to see full history",
+      "sent": "Sent",
+      "createFirst": "Create my first document"
     }
   },
   "clients": {

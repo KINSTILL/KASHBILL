@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { HTMLAttributes, ReactNode } from 'react';
 
-type Props = HTMLAttributes<HTMLDivElement> & {
+type Props = Omit<HTMLAttributes<HTMLDivElement>, 'title'> & {
   eyebrow?: string;
   title: ReactNode;
   subtitle?: ReactNode;

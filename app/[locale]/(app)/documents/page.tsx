@@ -7,9 +7,8 @@ import { prisma } from '@/lib/db';
 import { isPro, getHistoryWindowDays } from '@/lib/auth/plan';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { formatCurrency } from '@/lib/pdf/shared/format';
+import { DocumentCard } from '@/components/documents/DocumentCard';
 
 export default async function DocumentsPage({
   params,
@@ -85,45 +84,20 @@ export default async function DocumentsPage({
           }
         />
       ) : (
-        <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          {documents.map((doc) => {
-            const payload = doc.payload as { total?: number } | null;
-            const total = payload?.total ?? 0;
-            const status = doc.sentViaWhatsAppAt ? 'SENT' : 'DRAFT';
-            const statusVariant = status === 'SENT' ? 'info' : 'neutral';
-
-            return (
-              <Link
-                key={doc.id}
-                href={`/${locale}/documents/${doc.id}` as Route}
-                className="flex items-center justify-between p-4 transition hover:bg-slate-50"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-slate-900">
-                      {doc.number}
-                    </span>
-                    <Badge variant={statusVariant} size="sm">
-                      {doc.type}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-slate-500">
-                    {doc.client?.name || 'Sans client'} &bull;{' '}
-                    {new Date(doc.createdAt).toLocaleDateString(locale)}
-                  </p>
-                </div>
-
-                <div className="text-right">
-                  <div className="money text-sm text-ink">
-                    {formatCurrency(total, 'FCFA')}
-                  </div>
-                  <div className="text-[11px] text-slate-400">
-                    {status}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="space-y-2">
+          {documents.map((doc) => (
+            <DocumentCard
+              key={doc.id}
+              id={doc.id}
+              number={doc.number}
+              type={doc.type}
+              clientName={doc.client?.name ?? null}
+              total={(doc.payload as { total?: number } | null)?.total ?? 0}
+              createdAt={doc.createdAt}
+              sentViaWhatsAppAt={doc.sentViaWhatsAppAt}
+              watermarked={doc.watermarked}
+            />
+          ))}
         </div>
       )}
     </div>
