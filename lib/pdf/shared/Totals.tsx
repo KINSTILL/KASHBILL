@@ -1,8 +1,25 @@
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
+import type { Locale } from '@prisma/client';
 import type { PdfPayload } from '../types';
 import { formatXaf } from './format';
 
-export function Totals({ payload, compact, currency }: { payload: PdfPayload; compact: boolean; currency: string }) {
+export function Totals({
+  payload,
+  compact,
+  currency,
+  showVat = false,
+  hidePrices = false,
+  locale = 'FR',
+}: {
+  payload: PdfPayload;
+  compact: boolean;
+  currency: string;
+  showVat?: boolean;
+  hidePrices?: boolean;
+  locale?: Locale;
+}) {
+  const isEn = locale === 'EN';
+
   const styles = StyleSheet.create({
     block: { marginTop: 8, alignItems: 'flex-end' },
     line: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 2 },
@@ -13,27 +30,43 @@ export function Totals({ payload, compact, currency }: { payload: PdfPayload; co
     totalValue: { fontSize: compact ? 14 : 18, fontWeight: 'bold', color: '#C98773' },
   });
 
+  if (hidePrices) {
+    const totalQty = payload.lines.reduce((acc, l) => acc + l.quantity, 0);
+    return (
+      <View style={styles.block}>
+        <View style={styles.totalRow}>
+          <Text style={styles.totalLabel}>
+            {isEn ? 'TOTAL ITEMS DELIVERED' : 'TOTAL COLIS / ARTICLES LIVRÉS'}
+          </Text>
+          <Text style={styles.totalValue}>{totalQty}</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.block}>
       <View style={styles.line}>
-        <Text style={styles.label}>Sous-total</Text>
+        <Text style={styles.label}>{isEn ? 'Subtotal' : 'Sous-total'}</Text>
         <Text style={styles.value}>{formatXaf(payload.subtotal, currency)}</Text>
       </View>
-      {payload.vatAmount !== null && payload.vatRate !== null && (
+      {showVat && payload.vatAmount !== null && payload.vatRate !== null ? (
         <View style={styles.line}>
-          <Text style={styles.label}>TVA ({payload.vatRate}%)</Text>
+          <Text style={styles.label}>
+            {isEn ? 'VAT' : 'TVA'} ({payload.vatRate}%)
+          </Text>
           <Text style={styles.value}>{formatXaf(payload.vatAmount, currency)}</Text>
         </View>
-      )}
+      ) : null}
       {payload.deliveryFee !== null && payload.deliveryFee > 0 && (
         <View style={styles.line}>
-          <Text style={styles.label}>Livraison</Text>
+          <Text style={styles.label}>{isEn ? 'Delivery' : 'Livraison'}</Text>
           <Text style={styles.value}>{formatXaf(payload.deliveryFee, currency)}</Text>
         </View>
       )}
       {payload.depositAmount !== null && payload.depositAmount > 0 && (
         <View style={styles.line}>
-          <Text style={styles.label}>Acompte</Text>
+          <Text style={styles.label}>{isEn ? 'Deposit' : 'Acompte'}</Text>
           <Text style={styles.value}>−{formatXaf(payload.depositAmount, currency)}</Text>
         </View>
       )}
@@ -44,4 +77,3 @@ export function Totals({ payload, compact, currency }: { payload: PdfPayload; co
     </View>
   );
 }
-

@@ -1,5 +1,6 @@
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { prisma } from '@/lib/db';
 import { DocumentForm } from '@/components/documents/DocumentForm';
@@ -16,6 +17,8 @@ export default async function NewDocumentPage({
     redirect(`/${locale}/login` as Route);
   }
 
+  const t = await getTranslations('documents.new');
+
   const clients = await prisma.client.findMany({
     where: { userId: current.user.id },
     select: { id: true, name: true },
@@ -25,10 +28,9 @@ export default async function NewDocumentPage({
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-        Nouveau document
+        {t('title')}
       </h1>
       <DocumentForm clients={clients} />
     </div>
   );
 }
-

@@ -1,4 +1,5 @@
 import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
+import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import type { PdfDocument, PdfRenderOptions } from '../types';
 import { CompanyHeader } from '../shared/CompanyHeader';
 import { ItemsTable } from '../shared/ItemsTable';
@@ -34,16 +35,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const DOC_LABELS: Record<string, string> = {
-  TICKET: 'TICKET',
-  RECU: 'REÇU',
-  DEVIS: 'DEVIS',
-  PROFORMA: 'PROFORMA',
-  FACTURE: 'FACTURE',
-  BON_COMMANDE: 'BON DE COMMANDE',
-  BORDEREAU: 'BORDEREAU',
-};
-
 export function TicketDocument({
   doc,
   options,
@@ -51,29 +42,57 @@ export function TicketDocument({
   doc: PdfDocument;
   options: PdfRenderOptions;
 }) {
+  const config = DOC_TYPE_CONFIG[doc.type];
+  const isEn = doc.locale === 'EN';
+  const hidePrices = doc.type === 'BORDEREAU' && doc.payload.total === 0;
+
   return (
     <Document>
       <Page size={{ width: 226.77, height: 600 }} style={styles.page}>
         <View style={styles.header}>
-          <CompanyHeader company={doc.company} compact />
+          <CompanyHeader company={doc.company} compact locale={doc.locale} />
         </View>
-        <Text style={styles.docTitle}>{DOC_LABELS[doc.type] ?? doc.type}</Text>
+        <Text style={styles.docTitle}>{isEn ? config.labelEn : config.label}</Text>
         <Text style={styles.docNumber}>
           N° {doc.number} · {formatDateShort(doc.createdAt)}
         </Text>
         {doc.client && (
           <View style={styles.clientBlock}>
-            <Text style={styles.clientLabel}>Client</Text>
+            <Text style={styles.clientLabel}>
+              {doc.type === 'BORDEREAU'
+                ? isEn
+                  ? 'Recipient'
+                  : 'Destinataire'
+                : doc.type === 'RECU'
+                ? isEn
+                  ? 'Payer'
+                  : 'Payeur'
+                : 'Client'}
+            </Text>
             <Text style={styles.clientName}>{doc.client.name}</Text>
             {doc.client.phone && <Text style={{ fontSize: 8 }}>{doc.client.phone}</Text>}
           </View>
         )}
-        <ItemsTable lines={doc.payload.lines} compact currency={doc.company.currency} />
-        <Totals payload={doc.payload} compact currency={doc.company.currency} />
+        <ItemsTable
+          lines={doc.payload.lines}
+          compact
+          currency={doc.company.currency}
+          showVat={config.showVat}
+          hidePrices={hidePrices}
+          locale={doc.locale}
+        />
+        <Totals
+          payload={doc.payload}
+          compact
+          currency={doc.company.currency}
+          showVat={config.showVat}
+          hidePrices={hidePrices}
+          locale={doc.locale}
+        />
         <Footer doc={doc} compact />
         {options.showWatermark && (
           <Text style={styles.watermark} fixed>
-            {doc.locale === 'EN' ? 'Created with MyCashBill' : 'Créé avec MyCashBill'}
+            {isEn ? 'Created with MyCashBill' : 'Créé avec MyCashBill'}
             {doc.referralCode ? ` — mycashbill.app/r/${doc.referralCode}` : ''}
           </Text>
         )}

@@ -31,6 +31,7 @@ describe('Public /verify/[token]', () => {
           depositPercentage: null,
           deliveryFee: null,
           notes: null,
+          validityDays: 30,
         },
       }),
     }));

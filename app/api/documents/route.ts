@@ -1,18 +1,10 @@
 import type { NextRequest } from 'next/server';
-import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
-import { documentPayloadSchema } from '@/lib/documents/payload';
+import { createDocumentSchema } from '@/lib/validators/documents';
 import { createDocument } from '@/lib/documents/create';
 import { isPro, getHistoryWindowDays } from '@/lib/auth/plan';
-
-const createDocumentSchema = z.object({
-  clientId: z.string().optional().nullable(),
-  type: z.enum(['TICKET', 'BON_COMMANDE', 'BORDEREAU', 'DEVIS', 'PROFORMA', 'FACTURE', 'RECU']),
-  locale: z.enum(['FR', 'EN']).default('FR'),
-  payload: documentPayloadSchema,
-});
 
 export async function GET(req: NextRequest): Promise<Response> {
   try {
@@ -63,6 +55,11 @@ export async function POST(req: NextRequest): Promise<Response> {
       });
 
       if (!result.ok) {
+        if (result.reason === 'MISSING_COMPANY_FIELDS') {
+          return jsonError('VALIDATION_ERROR', result.message, 422, {
+            missingFields: result.missingFields,
+          });
+        }
         await writeAudit({
           actorId: user.id,
           targetId: user.id,

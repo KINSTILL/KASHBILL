@@ -1,4 +1,5 @@
 import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
+import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import type { PdfDocument, PdfRenderOptions } from '../types';
 import { CompanyHeader } from '../shared/CompanyHeader';
 import { ItemsTable } from '../shared/ItemsTable';
@@ -34,16 +35,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const DOC_LABELS: Record<string, string> = {
-  TICKET: 'TICKET',
-  RECU: 'REÇU',
-  DEVIS: 'DEVIS',
-  PROFORMA: 'FACTURE PROFORMA',
-  FACTURE: 'FACTURE',
-  BON_COMMANDE: 'BON DE COMMANDE',
-  BORDEREAU: 'BORDEREAU DE LIVRAISON',
-};
-
 export function A4Document({
   doc,
   options,
@@ -51,29 +42,79 @@ export function A4Document({
   doc: PdfDocument;
   options: PdfRenderOptions;
 }) {
+  const config = DOC_TYPE_CONFIG[doc.type];
+  const isEn = doc.locale === 'EN';
+  const hidePrices = doc.type === 'BORDEREAU' && doc.payload.total === 0;
+
+  const clientBlockLabel =
+    doc.type === 'BORDEREAU'
+      ? isEn
+        ? 'Delivered to'
+        : 'Livré à'
+      : doc.type === 'RECU'
+      ? isEn
+        ? 'Received from'
+        : 'Reçu de'
+      : isEn
+      ? 'Billed to'
+      : 'Facturé à';
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <CompanyHeader company={doc.company} compact={false} />
-        <Text style={styles.docTitle}>{DOC_LABELS[doc.type] ?? doc.type}</Text>
+        <CompanyHeader company={doc.company} compact={false} locale={doc.locale} />
+        <Text style={styles.docTitle}>{isEn ? config.labelEn : config.label}</Text>
+        {config.showValidity && doc.payload.validityDays ? (
+          <Text style={{ fontSize: 9, color: '#64748B', marginTop: 4 }}>
+            {isEn
+              ? `Valid for ${doc.payload.validityDays} days`
+              : `Valable ${doc.payload.validityDays} jours`}
+          </Text>
+        ) : null}
         <Text style={styles.docNumber}>
           N° {doc.number} · {formatDateShort(doc.createdAt)}
         </Text>
         {doc.client && (
           <View style={styles.clientBlock}>
-            <Text style={styles.clientLabel}>Facturé à</Text>
+            <Text style={styles.clientLabel}>{clientBlockLabel}</Text>
             <Text style={styles.clientName}>{doc.client.name}</Text>
             {doc.client.address && <Text style={styles.clientLine}>{doc.client.address}</Text>}
             {doc.client.phone && <Text style={styles.clientLine}>{doc.client.phone}</Text>}
           </View>
         )}
-        <ItemsTable lines={doc.payload.lines} compact={false} currency={doc.company.currency} />
-        <Totals payload={doc.payload} compact={false} currency={doc.company.currency} />
-        {doc.payload.notes && <Text style={styles.notes}>Note : {doc.payload.notes}</Text>}
+        <ItemsTable
+          lines={doc.payload.lines}
+          compact={false}
+          currency={doc.company.currency}
+          showVat={config.showVat}
+          hidePrices={hidePrices}
+          locale={doc.locale}
+        />
+        <Totals
+          payload={doc.payload}
+          compact={false}
+          currency={doc.company.currency}
+          showVat={config.showVat}
+          hidePrices={hidePrices}
+          locale={doc.locale}
+        />
+        {doc.payload.notes && (
+          <Text style={styles.notes}>
+            {isEn ? 'Note' : 'Note'} : {doc.payload.notes}
+          </Text>
+        )}
+        {config.showRecipientSignature ? (
+          <View style={{ marginTop: 30, borderTopWidth: 0.5, borderColor: '#CBD5E1', paddingTop: 8 }}>
+            <Text style={{ fontSize: 9, color: '#64748B' }}>
+              {isEn ? 'Recipient signature and stamp' : 'Signature et cachet du destinataire'}
+            </Text>
+            <View style={{ marginTop: 40, borderTopWidth: 0.5, borderColor: '#0F172A', width: 200 }} />
+          </View>
+        ) : null}
         <Footer doc={doc} compact={false} />
         {options.showWatermark && (
           <Text style={styles.watermark} fixed>
-            {doc.locale === 'EN' ? 'Created with MyCashBill' : 'Créé avec MyCashBill'}
+            {isEn ? 'Created with MyCashBill' : 'Créé avec MyCashBill'}
             {doc.referralCode ? `\n\nmycashbill.app/r/${doc.referralCode}` : ''}
           </Text>
         )}

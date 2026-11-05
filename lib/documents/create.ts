@@ -7,6 +7,7 @@ import { evaluateDocument, detectRepeatedRoundAmounts } from '@/lib/fraud/rules'
 import { generatePublicToken } from './verification';
 import { generateQrCode } from './integrity';
 import { env } from '@/lib/env';
+import { checkRequiredCompanyFields } from '@/lib/validators/documents';
 
 export type CreateDocumentInput = {
   user: User;
@@ -19,11 +20,31 @@ export type CreateDocumentInput = {
 
 export type CreateDocumentResult =
   | { ok: true; documentId: string; number: string; publicToken: string; qrCodeDataUrl: string }
-  | { ok: false; reason: 'BLOCKED'; blockedReasons: string[]; flags: Array<{ reason: string; severity: string }> };
+  | { ok: false; reason: 'BLOCKED'; blockedReasons: string[]; flags: Array<{ reason: string; severity: string }> }
+  | { ok: false; reason: 'MISSING_COMPANY_FIELDS'; missingFields: string[]; message: string };
 
 export async function createDocument(input: CreateDocumentInput): Promise<CreateDocumentResult> {
   const computed = computePayload(input.payload);
   const year = new Date().getFullYear();
+
+  // Vérifie les champs entreprise requis
+  const missing = checkRequiredCompanyFields(input.type, {
+    taxId: input.user.taxId,
+    rccm: input.user.rccm,
+    legalName: input.user.legalName,
+    legalAddress: input.user.legalAddress,
+  });
+
+  if (missing.length > 0) {
+    const { DOC_TYPE_CONFIG } = await import('@/lib/documents/doc-type-config');
+    const config = DOC_TYPE_CONFIG[input.type];
+    return {
+      ok: false,
+      reason: 'MISSING_COMPANY_FIELDS',
+      missingFields: missing,
+      message: `Complétez votre profil entreprise (${missing.join(', ')}) pour émettre un ${config.label}.`,
+    };
+  }
 
   // Vérifier fraude AVANT la création
   const fraudEval = await evaluateDocument({
@@ -47,7 +68,9 @@ export async function createDocument(input: CreateDocumentInput): Promise<Create
 
   // Transaction : numérotation + hash + insert
   const result = await prisma.$transaction(async (tx) => {
-    const number = await generateDocumentNumber(tx, input.user.id, input.type, year);
+    const { getDocTypeConfig } = await import('@/lib/documents/doc-type-config');
+    const config = getDocTypeConfig(input.type);
+    const number = await generateDocumentNumber(tx, input.user.id, config.numberPrefix, year);
 
     const contentHash = computeContentHash({
       userId: input.user.id,

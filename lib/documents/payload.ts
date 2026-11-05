@@ -13,6 +13,7 @@ export const documentPayloadSchema = z.object({
   depositPercentage: z.number().min(0).max(100).nullable().default(null),
   deliveryFee: z.number().nonnegative().nullable().default(null),
   notes: z.string().max(1000).nullable().default(null),
+  validityDays: z.number().int().positive().max(365).nullable().default(null),
 });
 
 export type DocumentPayloadInput = z.infer<typeof documentPayloadSchema>;
@@ -25,6 +26,7 @@ export type ComputedPayload = {
   depositAmount: number | null;
   deliveryFee: number | null;
   notes: string | null;
+  validityDays: number | null;
   total: number;
 };
 
@@ -61,6 +63,7 @@ export function computePayload(input: DocumentPayloadInput): ComputedPayload {
     depositAmount,
     deliveryFee,
     notes: input.notes,
+    validityDays: input.validityDays ?? null,
     total,
   };
 }

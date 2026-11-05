@@ -19,6 +19,11 @@ async function registerAndGetCookie(phone: string): Promise<string> {
     body: JSON.stringify({ phone, pin: '123456', deviceId: 'device-1', locale: 'FR' }),
   });
   const res = await registerRoute(req);
+  const data = await res.json();
+  await prisma.user.update({
+    where: { id: data.user.id },
+    data: { taxId: 'M012345678900A', rccm: 'RC/DLA/2026/B/1234' },
+  });
   return res.headers.get('set-cookie')?.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
 }
 
@@ -27,10 +32,11 @@ const basePayload = {
   locale: 'FR' as const,
   payload: {
     lines: [{ description: 'Service', quantity: 1, unitPrice: 50000 }],
-    vatRate: null,
+    vatRate: 19.25,
     depositPercentage: null,
     deliveryFee: null,
     notes: null,
+    validityDays: null,
   },
 };
 
@@ -44,7 +50,7 @@ describe('POST /api/documents', () => {
     }));
     expect(res.status).toBe(201);
     const json = await res.json();
-    expect(json.number).toMatch(/^MCB-\d{4}-\d{6}$/);
+    expect(json.number).toMatch(/^MCB-F-\d{4}-\d{6}$/);
     expect(json.publicToken).toBeDefined();
 
     const doc = await prisma.document.findUnique({ where: { id: json.documentId } });

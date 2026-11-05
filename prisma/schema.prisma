@@ -224,11 +224,12 @@ model DocumentSequence {
   id         String  @id @default(cuid())
   userId     String
   user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  docType    DocType
+  prefix     String  // ex: "F", "DV", "BC"
   year       Int
   lastNumber Int     @default(0)
 
-  @@unique([userId, docType, year])
+  @@unique([userId, prefix, year])
+  @@index([userId, prefix])
 }
 
 model DocumentVerification {

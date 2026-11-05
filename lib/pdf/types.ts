@@ -19,6 +19,7 @@ export type PdfPayload = {
   deliveryFee: number | null;
   total: number;
   notes: string | null;
+  validityDays?: number | null;
 };
 
 export type PdfCompany = {
