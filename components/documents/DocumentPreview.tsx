@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { renderPdfToBlob } from '@/lib/pdf/render';
 import type { PdfDocument, PdfFormat } from '@/lib/pdf/types';
 import { ShareSheet } from '@/components/share/ShareSheet';
+import { PdfViewer } from './PdfViewer';
 import { haptic } from '@/lib/device/haptics';
 
 export function DocumentPreview({
@@ -19,6 +20,7 @@ export function DocumentPreview({
   const t = useTranslations('documents.preview');
   const [blob, setBlob] = useState<Blob | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
 
   const options = useMemo(
@@ -36,9 +38,14 @@ export function DocumentPreview({
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+    setError(null);
+    setBlob(null);
     renderPdfToBlob(pdfDoc, initialFormat, options)
       .then((b) => {
         if (mounted) setBlob(b);
+      })
+      .catch((e) => {
+        if (mounted) setError(e instanceof Error ? e.message : 'PDF generation failed');
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -52,17 +59,18 @@ export function DocumentPreview({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-slate-200 bg-white p-2">
-        {blob && (
-          <object data={URL.createObjectURL(blob)} type="application/pdf" className="h-[60vh] w-full">
-            <p>PDF preview not available</p>
-          </object>
-        )}
-      </div>
+      {error ? (
+        <div className="rounded-lg border border-error bg-red-50 p-4 text-sm text-error">
+          {t('pdfError')}
+        </div>
+      ) : (
+        <PdfViewer blob={blob} filename={`${pdfDoc.number}.pdf`} />
+      )}
       <div className="space-y-2">
         <Button
           fullWidth
           size="lg"
+          disabled={!blob}
           onClick={() => {
             haptic('medium');
             setShareOpen(true);

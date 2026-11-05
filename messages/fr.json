@@ -1,4 +1,5 @@
 {
+  
   "common": {
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -257,7 +258,24 @@
       "title": "Aperçu",
       "send": "Envoyer",
       "download": "Télécharger le PDF",
-      "markSent": "Marquer comme envoyé"
+      "markSent": "Marquer comme envoyé",
+      "loadingPdf": "Préparation de l'aperçu…",
+      "iosPreviewHelp": "Sur iPhone, l'aperçu intégré n'est pas disponible. Ouvrez le PDF dans un nouvel onglet.",
+      "openPdf": "Ouvrir le PDF",
+      "openInNewTab": "Ouvrir dans un nouvel onglet",
+      "pdfError": "Erreur lors de la génération du PDF. Réessayez."
+    },
+    "email": {
+      "title": "Envoyer par email",
+      "subtitle": "Envoyez ce document en pièce jointe à votre client.",
+      "emailLabel": "Adresse email du destinataire",
+      "emailPlaceholder": "client@exemple.com",
+      "localeLabel": "Langue de l'email",
+      "messageLabel": "Message personnalisé (facultatif)",
+      "messagePlaceholder": "Ajoutez un message qui accompagnera votre document…",
+      "send": "Envoyer l'email",
+      "sendSuccess": "Email envoyé",
+      "sendError": "Erreur lors de l'envoi de l'email"
     },
     "list": {
       "title": "Historique",
@@ -365,10 +383,12 @@
       },
       "actions": {
         "whatsapp": "Envoyer sur WhatsApp",
+        "email": "Envoyer par email",
         "share": "Partager autrement",
         "download": "Télécharger le PDF",
         "cancel": "Annuler"
       },
+      "premiumOnly": "Fonctionnalité Pro. Passez Pro pour envoyer par email, Bluetooth ou AirDrop.",
       "shareNotSupported": "Le partage natif n'est pas disponible sur cet appareil.",
       "userCancelled": "Partage annulé"
     },

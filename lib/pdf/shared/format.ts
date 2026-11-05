@@ -1,11 +1,13 @@
 export function formatXaf(amount: number, currency = 'FCFA'): string {
-  const formatted = new Intl.NumberFormat('fr-CM', {
+  const rounded = Math.round(amount);
+  const formatted = new Intl.NumberFormat('fr-FR', {
     style: 'decimal',
     maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   })
-    .format(Math.round(amount))
-    .replace(/\s/g, '\u202F');
-  return `${formatted}\u202F${currency}`;
+    .format(rounded)
+    .replace(/\s/g, '\u00A0');
+  return `${formatted}\u00A0${currency}`;
 }
 
 export const formatCurrency = formatXaf;

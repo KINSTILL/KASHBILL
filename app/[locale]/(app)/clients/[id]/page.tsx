@@ -86,7 +86,7 @@ export default async function ClientDetailPage({
                       {new Date(doc.createdAt).toLocaleDateString(locale)}
                     </p>
                   </div>
-                  <div className="font-bold text-slate-900">
+                  <div className="money text-sm text-ink">
                     {formatCurrency(total, 'FCFA')}
                   </div>
                 </Link>

@@ -1,59 +1,124 @@
-@import "tailwindcss";
-@config "../tailwind.config.ts";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Zone de pouce */
-.thumb-zone { min-height: 48px; }
-.thumb-zone-lg { min-height: 54px; }
-
-/* Bottom sheet backdrop */
-.sheet-backdrop { background: rgba(15, 23, 42, 0.5); }
-
-/* Safe area iPhone */
-.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-
-/* Ripple effect */
-.ripple {
-  position: relative;
-  overflow: hidden;
-}
-.ripple::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, rgba(0,0,0,0.15) 10%, transparent 10.01%);
-  background-repeat: no-repeat;
-  background-position: 50%;
-  transform: scale(10);
-  opacity: 0;
-  transition: transform 0.4s, opacity 0.8s;
-}
 .ripple:active::after {
   transform: scale(0);
   opacity: 0.3;
   transition: 0s;
+}
+
+/* ═══════════════════════════════════════════════════
+   MODERN CASH — Signature MyCashBill 2026
+   ═══════════════════════════════════════════════════ */
+
+body {
+  color: #0b1220;
+  background-color: #fafbfc;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Montants signature — JetBrains Mono tabular */
+.money {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+.money-lg {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+/* Surface de carte moderne */
+.surface {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  transition:
+    border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.surface:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(11, 18, 32, 0.06);
+}
+
+/* Hero card — signature moderne MyCashBill */
+.hero-card {
+  background: linear-gradient(135deg, #4c9a6b 0%, #3d8159 55%, #2f6849 100%);
+  border-radius: 20px;
+  color: #ffffff;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(212, 240, 224, 0.35) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Focus universel */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #fafbfc, 0 0 0 4px #4c9a6b;
+}
+
+/* Header flouté */
+.header-blur {
+  background-color: rgba(250, 251, 252, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+/* BottomNav flottante */
+.bottomnav-floating {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 22px;
+  box-shadow:
+    0 12px 28px -6px rgba(11, 18, 32, 0.12),
+    0 6px 12px -6px rgba(11, 18, 32, 0.06);
+}
+
+/* Transitions universelles */
+.transition-smooth {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Badge Pro — accent brass dégradé */
+.pro-badge {
+  background: linear-gradient(135deg, #d4b584 0%, #b8935a 100%);
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .transition-smooth,
+  .surface,
+  .ripple::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  .surface:hover {
+    transform: none !important;
+  }
 }

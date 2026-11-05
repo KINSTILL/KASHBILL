@@ -10,19 +10,25 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        ink: {
+          DEFAULT: '#0B1220',
+          soft: '#334155',
+        },
         sage: {
-          50: '#F4F7F5',
-          100: '#E6ECE8',
-          200: '#CFDBD2',
+          50: '#EDF7F0',
+          100: '#D4F0E0',
+          200: '#A8E0C1',
           300: '#B0C4B5',
           400: '#8FA996',
-          500: '#6E8F77',
-          600: '#55725D',
-          700: '#435A49',
+          500: '#4C9A6B',
+          600: '#3D8159',
+          700: '#2F6849',
           800: '#344538',
-          900: '#27342B',
+          900: '#1F4732',
         },
         terracotta: {
+          DEFAULT: '#B5613D',
+          light: '#D4886B',
           50: '#FDF6F3',
           100: '#F9ECE5',
           200: '#F3D5C5',
@@ -34,6 +40,11 @@ const config: Config = {
           800: '#73331C',
           900: '#5B2918',
         },
+        brass: {
+          DEFAULT: '#B8935A',
+          light: '#D4B584',
+          dark: '#9A7A47',
+        },
         whatsapp: { DEFAULT: '#25D366', dark: '#20BA5A' },
         orangeMoney: { DEFAULT: '#EA580C', light: '#FFEDD5' },
         momo: { DEFAULT: '#EAB308', light: '#FEF9C3' },
@@ -41,6 +52,21 @@ const config: Config = {
         warning: '#EA580C',
         error: '#DC2626',
         info: '#1E40AF',
+      },
+      fontFamily: {
+        display: ['var(--font-display)', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
+      },
+      borderRadius: {
+        btn: '14px',
+        card: '18px',
+        sheet: '24px',
+        hero: '20px',
+      },
+      boxShadow: {
+        card: '0 1px 2px rgba(11,18,32,0.04)',
+        'card-hover': '0 4px 12px rgba(11,18,32,0.06)',
+        float: '0 12px 28px -6px rgba(11,18,32,0.12), 0 6px 12px -6px rgba(11,18,32,0.06)',
       },
       minHeight: {
         touch: '48px',
@@ -52,4 +78,3 @@ const config: Config = {
 };
 
 export default config;
-

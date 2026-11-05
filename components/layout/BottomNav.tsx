@@ -19,7 +19,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white pb-safe md:hidden">
+    <nav className="bottomnav-floating transition-smooth fixed inset-x-0 bottom-0 z-40 mx-3 mb-3 pb-safe md:hidden">
       <div className="grid grid-cols-4">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -27,18 +27,20 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href as Route}
-              className="flex flex-col items-center justify-center"
-            >
-              <button
-                type="button"
                 className={cn(
-                  'flex flex-col items-center justify-center py-2 text-xs w-full',
-                  active ? 'text-sage-700 font-semibold' : 'text-slate-500'
+                'transition-smooth flex flex-col items-center justify-center rounded-[18px] py-2.5 text-[11px]',
+                active ? 'font-bold text-sage-600' : 'text-slate-500 hover:text-slate-700'
                 )}
               >
-                <span className="text-lg">{item.icon}</span>
-                <span className="mt-0.5">{item.label}</span>
-              </button>
+              <span
+                className={cn(
+                  'mb-0.5 text-lg leading-none transition-smooth',
+                  active && 'scale-110'
+                )}
+              >
+                {item.icon}
+              </span>
+              <span className="mt-0.5">{item.label}</span>
             </Link>
           );
         })}
@@ -46,3 +48,4 @@ export function BottomNav() {
     </nav>
   );
 }
+

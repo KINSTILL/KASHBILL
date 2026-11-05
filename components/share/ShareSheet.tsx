@@ -17,6 +17,10 @@ import {
 } from '@/lib/share/storage';
 import { resolveShareMessage } from '@/lib/share/messages';
 import { buildWhatsAppUrl, shareNative } from '@/lib/share/whatsapp';
+import { useCurrentUser } from '@/components/providers/SessionProvider';
+import { isPro } from '@/lib/auth/plan';
+import { EmailSendSheet } from '@/components/documents/EmailSendSheet';
+import { ProBadge } from '@/components/ui/ProBadge';
 import type { DocType } from '@prisma/client';
 
 export type ShareSheetProps = {
@@ -46,7 +50,10 @@ export function ShareSheet({
   const toast = useToast();
   const locale = useLocale() as 'fr' | 'en';
   const group = getShareGroup(docType);
+  const { user } = useCurrentUser();
+  const userIsPro = user ? isPro({ proUntil: user.proUntil }) : false;
 
+  const [emailOpen, setEmailOpen] = useState(false);
   const [prefs, setPrefs] = useState(loadSharePrefs());
   const [message, setMessage] = useState('');
   const [isCustom, setIsCustom] = useState(false);
@@ -226,9 +233,38 @@ export function ShareSheet({
           <Button fullWidth variant="whatsapp" size="lg" onClick={handleWhatsApp} disabled={!clientPhone}>
             {t('modal.actions.whatsapp')}
           </Button>
+          <Button
+            fullWidth
+            variant="secondary"
+            className="relative"
+            disabled={!userIsPro || !documentId}
+            onClick={() => {
+              if (!userIsPro) {
+                toast.show(t('modal.premiumOnly'), 'info');
+                return;
+              }
+              setEmailOpen(true);
+            }}
+          >
+            {t('modal.actions.email')}
+            {!userIsPro && <ProBadge />}
+          </Button>
           {canShare && (
-            <Button fullWidth variant="secondary" onClick={handleNativeShare}>
+            <Button
+              fullWidth
+              variant="secondary"
+              className="relative"
+              disabled={!userIsPro}
+              onClick={() => {
+                if (!userIsPro) {
+                  toast.show(t('modal.premiumOnly'), 'info');
+                  return;
+                }
+                handleNativeShare();
+              }}
+            >
               {t('modal.actions.share')}
+              {!userIsPro && <ProBadge />}
             </Button>
           )}
           <Button fullWidth variant="ghost" onClick={handleDownload}>
@@ -236,6 +272,15 @@ export function ShareSheet({
           </Button>
         </div>
       </div>
+      {emailOpen && userIsPro && documentId && (
+        <EmailSendSheet
+          open={emailOpen}
+          onOpenChange={setEmailOpen}
+          documentId={documentId}
+          defaultEmail={null}
+          defaultLocale={locale}
+        />
+      )}
     </Sheet>
   );
 }

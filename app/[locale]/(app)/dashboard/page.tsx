@@ -201,7 +201,7 @@ export default async function DashboardPage({
                   </div>
 
                   <div className="text-right">
-                    <span className="font-bold text-sm text-slate-900">
+                    <span className="money text-sm text-ink">
                       {formatCurrency(total, 'FCFA')}
                     </span>
                     <p className="text-[11px] text-slate-400">

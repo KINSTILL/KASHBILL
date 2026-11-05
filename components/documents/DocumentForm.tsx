@@ -363,7 +363,8 @@ export function DocumentForm({
             <div className="flex items-center justify-between text-sm">
               {!hidePriceInput ? (
                 <span>
-                  {t('lineTotal')} : <strong>{formatFCFA(line.quantity * line.unitPrice)}</strong>
+                  {t('lineTotal')} :{' '}
+                  <strong className="money">{formatFCFA(line.quantity * line.unitPrice)}</strong>
                 </span>
               ) : (
                 <span className="text-xs text-slate-500">
@@ -451,7 +452,7 @@ export function DocumentForm({
         ) : (
           <div className="flex justify-between text-lg font-bold">
             <span>{isReceipt ? t('totalReceived') : t('total')} :</span>
-            <span className="text-terracotta">{formatFCFA(total)}</span>
+            <span className="money-lg text-terracotta">{formatFCFA(total)}</span>
           </div>
         )}
       </Card>

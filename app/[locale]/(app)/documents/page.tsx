@@ -114,7 +114,7 @@ export default async function DocumentsPage({
                 </div>
 
                 <div className="text-right">
-                  <div className="font-bold text-sm text-slate-900">
+                  <div className="money text-sm text-ink">
                     {formatCurrency(total, 'FCFA')}
                   </div>
                   <div className="text-[11px] text-slate-400">

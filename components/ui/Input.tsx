@@ -17,7 +17,7 @@ export const Input = forwardRef<HTMLInputElement, Props>(function Input(
   return (
     <div className="w-full">
       {label && (
-        <label htmlFor={inputId} className="mb-1 block text-sm font-medium text-slate-700">
+        <label htmlFor={inputId} className="mb-1.5 block text-[13px] font-medium text-ink-soft">
           {label}
         </label>
       )}
@@ -26,14 +26,20 @@ export const Input = forwardRef<HTMLInputElement, Props>(function Input(
         id={inputId}
         {...rest}
         className={cn(
-          'thumb-zone w-full rounded-lg border bg-slate-50 px-3 text-base text-slate-900',
-          'placeholder:text-slate-400 focus:outline-none focus:ring-2',
-          error ? 'border-error focus:border-error focus:ring-red-100' : 'border-slate-300 focus:border-sage-500 focus:ring-sage-100',
+          'transition-smooth focus-ring',
+          'thumb-zone w-full rounded-btn border bg-white px-3.5 text-[15px] text-ink',
+          'placeholder:text-slate-400',
+          'focus:outline-none',
+          error
+            ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+            : 'border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-100',
           className
         )}
       />
-      {error && <p className="mt-1 text-sm text-error">{error}</p>}
-      {helperText && !error && <p className="mt-1 text-xs text-slate-500">{helperText}</p>}
+      {error && <p className="mt-1.5 text-[13px] text-red-600">{error}</p>}
+      {helperText && !error && (
+        <p className="mt-1.5 text-xs text-slate-500">{helperText}</p>
+      )}
     </div>
   );
 });

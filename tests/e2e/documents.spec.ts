@@ -32,8 +32,8 @@ test.describe('Documents', () => {
     await page.click('button:has-text("Générer le document")');
     await page.waitForURL(/\/fr\/documents\/(?!new)[^/]+/);
 
-    // Aperçu PDF
-    await expect(page.locator('object[type="application/pdf"]')).toBeVisible({ timeout: 20_000 });
+        // Aperçu PDF
+    await expect(page.locator('iframe[title$=".pdf"]')).toBeVisible({ timeout: 20_000 });
 
     // Ouvrir ShareSheet
     await page.click('button:has-text("Envoyer")');

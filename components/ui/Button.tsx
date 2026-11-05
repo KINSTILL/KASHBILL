@@ -40,21 +40,28 @@ export function Button({
       onClick={handleClick}
       disabled={disabled || effectiveLoading}
       className={cn(
-        'ripple inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+        'transition-smooth focus-ring ripple rounded-btn',
+        'inline-flex items-center justify-center gap-2 font-semibold tracking-[-0.01em]',
+        'disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:active:scale-100',
+        'active:scale-[0.98]',
         {
-          'bg-sage-500 text-white hover:bg-sage-700 focus-visible:ring-sage-500': variant === 'primary',
-          'bg-slate-800 text-white hover:bg-slate-900 focus-visible:ring-slate-800': variant === 'secondary',
-          'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-400': variant === 'outline',
-          'bg-transparent text-slate-900 hover:bg-slate-100 focus-visible:ring-slate-400': variant === 'ghost',
-          'bg-error text-white hover:bg-red-700 focus-visible:ring-error': variant === 'danger',
-          'bg-whatsapp text-white hover:bg-whatsapp-dark focus-visible:ring-whatsapp': variant === 'whatsapp',
-          'h-9 px-3 text-sm': size === 'sm',
-          'thumb-zone h-12 px-4 text-base': size === 'md',
-          'thumb-zone-lg h-[54px] px-6 text-lg': size === 'lg',
-          'w-full': fullWidth,
+          'bg-gradient-to-b from-sage-500 to-sage-600 text-white shadow-sm hover:from-sage-600 hover:to-sage-700 hover:shadow-md':
+            variant === 'primary',
+          'bg-white text-ink border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm':
+            variant === 'secondary',
+          'border border-slate-300 bg-white text-ink hover:bg-slate-50': variant === 'outline',
+          'bg-transparent text-ink hover:bg-slate-100 active:bg-slate-200': variant === 'ghost',
+          'bg-gradient-to-b from-red-500 to-red-600 text-white shadow-sm hover:from-red-600 hover:to-red-700 hover:shadow-md':
+            variant === 'danger',
+          'bg-gradient-to-b from-whatsapp to-whatsapp-dark text-white shadow-sm hover:shadow-md':
+            variant === 'whatsapp',
         },
+        {
+          'h-9 px-3 text-sm': size === 'sm',
+          'thumb-zone h-12 px-4 text-[15px]': size === 'md',
+          'thumb-zone-lg h-[54px] px-6 text-base': size === 'lg',
+        },
+        fullWidth && 'w-full',
         className
       )}
     >
@@ -63,3 +70,4 @@ export function Button({
     </button>
   );
 }
+

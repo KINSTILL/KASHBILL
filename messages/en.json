@@ -257,7 +257,24 @@
       "title": "Preview",
       "send": "Send",
       "download": "Download PDF",
-      "markSent": "Mark as sent"
+      "markSent": "Mark as sent",
+      "loadingPdf": "Preparing preview…",
+      "iosPreviewHelp": "On iPhone, the integrated preview is not available. Open the PDF in a new tab.",
+      "openPdf": "Open PDF",
+      "openInNewTab": "Open in new tab",
+      "pdfError": "Failed to generate PDF. Please try again."
+    },
+    "email": {
+      "title": "Send by email",
+      "subtitle": "Send this document as an attachment to your client.",
+      "emailLabel": "Recipient email address",
+      "emailPlaceholder": "client@example.com",
+      "localeLabel": "Email language",
+      "messageLabel": "Custom message (optional)",
+      "messagePlaceholder": "Add a message to accompany your document…",
+      "send": "Send email",
+      "sendSuccess": "Email sent",
+      "sendError": "Failed to send email"
     },
     "list": {
       "title": "History",
@@ -360,10 +377,12 @@
       },
       "actions": {
         "whatsapp": "Send on WhatsApp",
+        "email": "Send by email",
         "share": "Share otherwise",
         "download": "Download PDF",
         "cancel": "Cancel"
       },
+      "premiumOnly": "Pro feature. Upgrade to send by email, Bluetooth or AirDrop.",
       "shareNotSupported": "Native sharing is not available on this device.",
       "userCancelled": "Sharing cancelled",
       "distance": {
