@@ -1,0 +1,90 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: cashbill_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/cashbill_test
+      JWT_SECRET: test-secret-32-characters-minimum-length-required
+      ADMIN_PHONE: '+237699000000'
+      ADMIN_PIN: '000000'
+      APP_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_ENV: test
+      NOTCHPAY_PUBLIC_KEY: pk_test_x
+      NOTCHPAY_HASH_KEY: sk_test_x
+      NOTCHPAY_WEBHOOK_HASH: whsec_test_x
+      NOTCHPAY_BASE_URL: https://api.notchpay.co
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+      - run: pnpm prisma migrate deploy
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test:run
+      - run: pnpm build
+
+  deploy:
+    name: Deploy
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          ssh -i ~/.ssh/deploy_key "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" bash <<'DEPLOY'
+            set -euo pipefail
+            cd "${{ secrets.APP_DIR }}"
+            git fetch origin
+            BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            git reset --hard "origin/$BRANCH"
+            export $(grep -v '^#' .env.production | xargs)
+            pnpm install --frozen-lockfile
+            pnpm prisma generate
+            pnpm prisma migrate deploy
+            pnpm build
+            pm2 reload cashbill
+            pm2 save
+          DEPLOY
+
+      - name: Smoke test
+        run: |
+          sleep 5
+          curl -fsS "https://${{ secrets.DOMAIN }}/api/health" | grep -q '"status":"ok"'

@@ -25,7 +25,11 @@
     "audit:lighthouse": "lhci autorun",
     "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts",
     "db:reset": "pnpm prisma migrate reset --force",
-    "db:studio": "pnpm prisma studio"
+    "db:studio": "pnpm prisma studio",
+    "cli:create-admin": "dotenv -e .env.production -- tsx scripts/cli/create-admin.ts",
+    "cli:export-user": "dotenv -e .env.production -- tsx scripts/cli/export-user.ts",
+    "cli:modify-threshold": "dotenv -e .env.production -- tsx scripts/cli/modify-threshold.ts",
+    "cli:remove-blacklist": "dotenv -e .env.production -- tsx scripts/cli/remove-blacklist.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
