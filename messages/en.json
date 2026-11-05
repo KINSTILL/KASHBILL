@@ -290,7 +290,12 @@
       "historyLimited": "Documents older than 7 days are hidden (free plan).",
       "upgradeToSeeAll": "Go Pro to see full history",
       "sent": "Sent",
-      "createFirst": "Create my first document"
+      "createFirst": "Create my first document",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this document? This action cannot be undone.",
+      "cancelDelete": "Cancel",
+      "deleted": "Document deleted",
+      "deleteError": "Failed to delete the document"
     }
   },
   "clients": {

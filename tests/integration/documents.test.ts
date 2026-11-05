@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { POST as registerRoute } from '@/app/api/auth/register/route';
 import { POST as createDocRoute } from '@/app/api/documents/route';
 import { POST as markSentRoute } from '@/app/api/documents/[id]/mark-sent/route';
+import { DELETE as deleteDocRoute } from '@/app/api/documents/[id]/route';
 import { clearDatabase } from '../helpers/db';
 import { resetUserCounter } from '../helpers/factories';
 import { prisma } from '@/lib/db';
@@ -93,3 +94,68 @@ describe('POST /api/documents', () => {
   });
 });
 
+
+describe('DELETE /api/documents/:id', () => {
+  async function createDoc(cookie: string): Promise<string> {
+    const res = await createDocRoute(
+      new NextRequest('http://localhost/api/documents', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-requested-with': 'fetch',
+          cookie: `mycashbill_session=${cookie}`,
+        },
+        body: JSON.stringify(basePayload),
+      })
+    );
+    const data = await res.json();
+    return data.documentId as string;
+  }
+
+  it('supprime un document appartenant a son proprietaire', async () => {
+    const cookie = await registerAndGetCookie('699666666');
+    const documentId = await createDoc(cookie);
+
+    const res = await deleteDocRoute(
+      new NextRequest(`http://localhost/api/documents/${documentId}`, {
+        method: 'DELETE',
+        headers: { 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
+      }),
+      { params: Promise.resolve({ id: documentId }) }
+    );
+    expect(res.status).toBe(200);
+
+    const doc = await prisma.document.findUnique({ where: { id: documentId } });
+    expect(doc).toBeNull();
+  });
+
+  it('retourne 404 si le document est introuvable', async () => {
+    const cookie = await registerAndGetCookie('699666667');
+    const res = await deleteDocRoute(
+      new NextRequest('http://localhost/api/documents/inexistant', {
+        method: 'DELETE',
+        headers: { 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
+      }),
+      { params: Promise.resolve({ id: 'inexistant' }) }
+    );
+    expect(res.status).toBe(404);
+  });
+
+  it("refuse la suppression d'un document d'autrui", async () => {
+    const ownerCookie = await registerAndGetCookie('699666668');
+    const documentId = await createDoc(ownerCookie);
+
+    const otherCookie = await registerAndGetCookie('699666669');
+    const res = await deleteDocRoute(
+      new NextRequest(`http://localhost/api/documents/${documentId}`, {
+        method: 'DELETE',
+        headers: { 'x-requested-with': 'fetch', cookie: `mycashbill_session=${otherCookie}` },
+      }),
+      { params: Promise.resolve({ id: documentId }) }
+    );
+    expect(res.status).toBe(404);
+
+    const doc = await prisma.document.findUnique({ where: { id: documentId } });
+    expect(doc).not.toBeNull();
+  });
+});

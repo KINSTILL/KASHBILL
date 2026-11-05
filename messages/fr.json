@@ -290,7 +290,12 @@
       "historyLimited": "Les documents de plus de 7 jours sont masqués (offre gratuite).",
       "upgradeToSeeAll": "Passez Pro pour voir tout l'historique",
       "sent": "Envoyé",
-      "createFirst": "Créer mon premier document"
+      "createFirst": "Créer mon premier document",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer ce document ? Cette action est définitive.",
+      "cancelDelete": "Annuler",
+      "deleted": "Document supprimé",
+      "deleteError": "Erreur lors de la suppression"
     }
   },
   "clients": {
