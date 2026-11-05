@@ -1,140 +1,131 @@
 'use client';
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useTranslations } from 'next-intl';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { useCurrentUser } from '@/components/providers/SessionProvider';
-import { isPro, isInTrial } from '@/lib/auth/plan';
+import { Card } from '@/components/ui/Card';
 
 export default function UpgradePage() {
   const t = useTranslations('upgrade');
-  const { user } = useCurrentUser();
-  const [notice, setNotice] = useState<string | null>(null);
+  const search = useSearchParams();
+  const [loading, setLoading] = useState<'orange' | 'mtn' | null>(null);
+  const [status, setStatus] = useState<{ proUntil: string | null; role: string } | null>(null);
+  const [pollCount, setPollCount] = useState(0);
 
-  const pro = user ? isPro(user) : false;
-  const inTrial = user ? isInTrial(user) : false;
+  const ref = search.get('ref');
 
-  const handlePayClick = () => {
-    setNotice(
-      "L'intégration paiement direct (Orange Money / MTN MoMo via Notch Pay) arrive à l'Étape 9 ! En attendant, partagez votre lien de parrainage pour obtenir +7 jours Pro par ami activé."
-    );
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.user) {
+          setStatus({ proUntil: d.user.proUntil, role: d.user.role });
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Si on revient du paiement (ref dans l'URL), on poll /api/auth/me toutes les 3s pendant 60s
+  useEffect(() => {
+    if (!ref) return;
+    let cancelled = false;
+    const interval = setInterval(async () => {
+      if (cancelled || pollCount >= 20) {
+        clearInterval(interval);
+        return;
+      }
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user?.proUntil && new Date(data.user.proUntil) > new Date()) {
+            setStatus({ proUntil: data.user.proUntil, role: data.user.role });
+            clearInterval(interval);
+          }
+        }
+      } catch {}
+      setPollCount((c) => c + 1);
+    }, 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [ref, pollCount]);
+
+  const startPayment = async (channel: 'cm.orange' | 'cm.mtn') => {
+    setLoading(channel === 'cm.orange' ? 'orange' : 'mtn');
+    try {
+      const res = await fetch('/api/payments/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
+        body: JSON.stringify({ channel }),
+      });
+      if (!res.ok) {
+        alert("Erreur lors de l'initialisation du paiement");
+        return;
+      }
+      const { authorizationUrl } = await res.json();
+      window.location.href = authorizationUrl;
+    } finally {
+      setLoading(null);
+    }
   };
 
-  const features = [
-    { name: t('featureNoWatermark'), free: false, pro: true },
-    { name: t('featureLogo'), free: false, pro: true },
-    { name: t('featureUnlimitedClients'), free: '3 clients', pro: 'Illimité' },
-    { name: t('featureUnlimitedHistory'), free: '7 jours', pro: 'Illimité' },
-    { name: t('feature2Devices'), free: '1 appareil', pro: '2 appareils' },
-    { name: t('featureNfc'), free: false, pro: true },
-    { name: t('featureUsbPrint'), free: false, pro: true },
-  ];
+  const proUntil = status?.proUntil;
+  const isActive = proUntil && new Date(proUntil) > new Date();
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <div className="text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-          {t('title')}
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          {t('subtitle')}
-        </p>
-      </div>
+    <div className="space-y-4 max-w-lg mx-auto">
+      <h1 className="text-2xl font-bold">{t('title')}</h1>
+      <p className="text-slate-600">{t('subtitle')}</p>
 
-      {/* Current status card */}
-      <Card className="p-4 flex items-center justify-between bg-slate-50">
-        <div>
-          <span className="text-xs font-semibold text-slate-500 uppercase">
-            {t('currentStatus')}
-          </span>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="font-bold text-slate-900">
-              {inTrial ? t('statusTrial') : pro ? t('statusPro') : t('statusFree')}
-            </span>
-            <Badge variant={pro ? 'success' : 'neutral'} size="sm">
-              {pro ? 'Actif' : 'Gratuit'}
-            </Badge>
-          </div>
-        </div>
-
-        {user?.proUntil && (
-          <div className="text-right text-xs text-slate-500">
-            {t('expiresOn', {
-              date: new Date(user.proUntil).toLocaleDateString(),
-            })}
-          </div>
-        )}
-      </Card>
-
-      {notice && (
-        <div
-          role="alert"
-          className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-xs font-medium text-amber-900 leading-relaxed"
-        >
-          {notice}
-        </div>
+      {isActive && (
+        <Card className="p-4">
+          <p className="text-sm text-slate-500">{t('currentStatus')}</p>
+          <p className="text-lg font-bold text-sage-700">
+            {t('statusPro')} — {t('expiresOn', { date: new Date(proUntil).toLocaleDateString('fr-CM') })}
+          </p>
+        </Card>
       )}
 
-      {/* Feature comparison table */}
-      <Card className="overflow-hidden">
-        <div className="bg-slate-100 p-4 font-bold text-sm text-slate-800">
-          {t('features')}
-        </div>
-        <div className="divide-y divide-slate-100 text-sm">
-          {features.map((feat, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3.5">
-              <span className="text-slate-800 font-medium">{feat.name}</span>
-              <div className="flex items-center gap-6 text-xs">
-                <span className="text-slate-400 w-20 text-center">
-                  {typeof feat.free === 'boolean'
-                    ? feat.free
-                      ? '✓'
-                      : '—'
-                    : feat.free}
-                </span>
-                <span className="font-semibold text-sage-700 w-20 text-center">
-                  {typeof feat.pro === 'boolean' ? '✓ Inclus' : feat.pro}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+      <Card className="p-4">
+        <h2 className="mb-3 text-lg font-semibold">{t('features')}</h2>
+        <ul className="space-y-1 text-sm">
+          <li>✓ {t('featureNoWatermark')}</li>
+          <li>✓ {t('featureLogo')}</li>
+          <li>✓ {t('featureUnlimitedClients')}</li>
+          <li>✓ {t('featureUnlimitedHistory')}</li>
+          <li>✓ {t('feature2Devices')}</li>
+          <li>✓ {t('featureNfc')}</li>
+          <li>✓ {t('featureUsbPrint')}</li>
+        </ul>
       </Card>
 
-      {/* Payment Action */}
-      <div className="space-y-3">
-        <Button
-          type="button"
-          onClick={handlePayClick}
-          className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold thumb-zone flex items-center justify-center gap-2"
-        >
-          <span>💳</span>
-          <span>{t('pay')}</span>
+      <div className="space-y-2">
+        <Button fullWidth size="lg" onClick={() => startPayment('cm.orange')} isLoading={loading === 'orange'}>
+          💳 Orange Money — 2 000 FCFA
         </Button>
+        <Button fullWidth size="lg" onClick={() => startPayment('cm.mtn')} isLoading={loading === 'mtn'}>
+          💳 MTN MoMo — 2 000 FCFA
+        </Button>
+      </div>
 
-        <div className="relative flex items-center justify-center">
-          <div className="border-t border-slate-200 w-full" />
-          <span className="bg-slate-50 px-3 text-xs text-slate-400 uppercase">
-            {t('or')}
-          </span>
-          <div className="border-t border-slate-200 w-full" />
-        </div>
+      {ref && (
+        <Card className="p-4">
+          <p className="text-sm text-slate-600">
+            Paiement en cours de vérification… ({pollCount}/20)
+          </p>
+        </Card>
+      )}
 
-        <Link href={'/referrals' as Route} className="block">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full border-sage-300 text-sage-800 hover:bg-sage-50 font-semibold thumb-zone"
-          >
-            🎁 {t('refer')}
-          </Button>
+      <div className="border-t pt-4 text-center text-sm text-slate-500">
+        {t('or')}{' '}
+        <Link href={'/referrals' as Route} className="text-sage-700 underline">
+          {t('refer')}
         </Link>
       </div>
     </div>
   );
 }
-

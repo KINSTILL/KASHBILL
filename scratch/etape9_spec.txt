@@ -1,0 +1,920 @@
+<USER_REQUEST>
+ÉTAPE 9 — Paiement Notch Pay + PWA + Service Worker
+Prérequis : étapes 1 à 8 validées. Routes admin et parrainage fonctionnels.
+
+Objectif : permettre à un utilisateur Pro d'acheter 30 jours pour 2 000 FCFA via Notch Pay (Orange Money / MTN MoMo), recevoir les webhooks signés côté serveur, vérifier leur authenticité et activer l'abonnement de façon idempotente. Puis finaliser la PWA (manifest, service worker, offline, install prompt, notification brouillon).
+
+Décisions figées : Tarif unique 2 000 FCFA / 30 jours. Notch Pay uniquement. Vérification webhook côté serveur, jamais côté client. Idempotence par providerRef.
+
+9.1 — Variables d'environnement
+Ajoute dans .env.example, .env.local, .env.test :
+
+env
+# Notch Pay
+NOTCHPAY_PUBLIC_KEY="pk_test_xxxxxxxxxxxx"
+NOTCHPAY_HASH_KEY="sk_test_xxxxxxxxxxxx"
+NOTCHPAY_WEBHOOK_HASH="whsec_xxxxxxxxxxxx"
+NOTCHPAY_BASE_URL="https://api.notchpay.co"
+Notes :
+
+NOTCHPAY_PUBLIC_KEY : clé publique, utilisée côté serveur pour initialiser les paiements (Notch Pay utilise en fait cette clé comme identifiant dans le header Authorization).
+
+NOTCHPAY_HASH_KEY : clé secrète, jamais exposée au client.
+
+NOTCHPAY_WEBHOOK_HASH : secret utilisé pour signer les webhooks (visible dans le dashboard Notch Pay, section "Webhook signature").
+
+En production : pk_live_* et sk_live_* et un webhook hash de prod.
+
+Mets à jour lib/env.ts pour valider ces 4 variables :
+
+ts
+NOTCHPAY_PUBLIC_KEY: z.string().min(1),
+NOTCHPAY_HASH_KEY: z.string().min(1),
+NOTCHPAY_WEBHOOK_HASH: z.string().min(1),
+NOTCHPAY_BASE_URL: z.string().url().default('https://api.notchpay.co'),
+9.2 — Client Notch Pay serveur
+Crée lib/payments/notchpay.ts :
+
+ts
+import { env } from '@/lib/env';
+import { createHmac, timingSafeEqual } from 'node:crypto';
+
+const BASE = env.NOTCHPAY_BASE_URL;
+
+export type NotchPayInitResult =
+  | { ok: true; reference: string; authorizationUrl: string; providerRef: string }
+  | { ok: false; reason: 'PROVIDER_ERROR'; status?: number; details?: unknown };
+
+export type NotchPayInitInput = {
+  amountXaf: number;
+  currency: 'XAF';
+  reference: string;           // notre ID de transaction (Subscription.id à créer)
+  description: string;
+  customerPhone: string;       // +237XXXXXXXX
+  customerName: string;
+  callbackUrl: string;         // URL de retour côté app
+};
+
+/**
+ * Initialise un paiement Notch Pay.
+ * https://notchpay.dev/docs
+ */
+export async function initNotchPayPayment(input: NotchPayInitInput): Promise<NotchPayInitResult> {
+  const body = {
+    amount: input.amountXaf,
+    currency: input.currency,
+    reference: input.reference,
+    description: input.description,
+    customer: {
+      name: input.customerName,
+      phone: input.customerPhone,
+    },
+    callback: input.callbackUrl,
+    // Canaux acceptés : Orange Money CM + MTN MoMo CM
+    channels: ['cm.orange', 'cm.mtn'],
+  };
+
+  try {
+    const res = await fetch(`${BASE}/payments/initialize`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: env.NOTCHPAY_PUBLIC_KEY,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      const details = await res.json().catch(() => ({}));
+      return { ok: false, reason: 'PROVIDER_ERROR', status: res.status, details };
+    }
+
+    const json = await res.json();
+    const authorizationUrl = json?.authorization_url;
+    const providerRef = json?.transaction?.reference ?? json?.reference;
+
+    if (!authorizationUrl || !providerRef) {
+      return { ok: false, reason: 'PROVIDER_ERROR', details: json };
+    }
+
+    return { ok: true, reference: input.reference, authorizationUrl, providerRef };
+  } catch (err) {
+    return { ok: false, reason: 'PROVIDER_ERROR', details: err };
+  }
+}
+
+/**
+ * Vérifie la signature HMAC SHA-256 du webhook Notch Pay.
+ * Header : X-Notchpay-Signature (hex)
+ * Secret : NOTCHPAY_WEBHOOK_HASH
+ */
+export function verifyNotchPaySignature(rawBody: string, signatureHeader: string | null): boolean {
+  if (!signatureHeader) return false;
+  const expected = createHmac('sha256', env.NOTCHPAY_WEBHOOK_HASH)
+    .update(rawBody, 'utf8')
+    .digest('hex');
+
+  // Comparaison timing-safe
+  const a = Buffer.from(signatureHeader, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  if (a.length !== b.length) return false;
+  try {
+    return timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+9.3 — POST /api/payments/initialize
+Crée app/api/payments/initialize/route.ts :
+
+ts
+import type { NextRequest } from 'next/server';
+import { z } from 'zod';
+import { prisma } from '@/lib/db';
+import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
+import { requireAuth, writeAudit } from '@/lib/api/server';
+import { initNotchPayPayment } from '@/lib/payments/notchpay';
+import { PRO_PRICE_FCFA, PRO_DURATION_DAYS } from '@/lib/constants';
+import { env } from '@/lib/env';
+import { isPro } from '@/lib/auth/plan';
+
+const schema = z.object({
+  channel: z.enum(['cm.orange', 'cm.mtn']).optional(),
+});
+
+export async function POST(req: NextRequest): Promise<Response> {
+  try {
+    return await requireAuth(req, async (req2, { user, ip, userAgent }) => {
+      // Vérifie que le user n'est pas déjà Pro loin dans le futur
+      const now = new Date();
+      if (user.proUntil && isPro(user) && user.proUntil > new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000)) {
+        return jsonError('CONFLICT', 'Vous avez déjà plus de 60 jours de Pro actifs', 409);
+      }
+
+      const body = await req2.json().catch(() => ({}));
+      schema.parse(body);
+
+      // Créer la Subscription en PENDING (id utilisé comme référence Notch Pay)
+      const subscription = await prisma.subscription.create({
+        data: {
+          userId: user.id,
+          source: 'NOTCH_PAY',
+          startsAt: now,
+          endsAt: new Date(now.getTime() + PRO_DURATION_DAYS * 24 * 60 * 60 * 1000),
+          amountXaf: PRO_PRICE_FCFA,
+          providerRef: null, // rempli plus tard par le webhook
+        },
+      });
+
+      const reference = `CB-${subscription.id.slice(-12).toUpperCase()}`;
+
+      const result = await initNotchPayPayment({
+        amountXaf: PRO_PRICE_FCFA,
+        currency: 'XAF',
+        reference,
+        description: `CashBill Pro — 30 jours`,
+        customerPhone: user.phone,
+        customerName: user.name ?? user.businessName ?? 'Utilisateur',
+        callbackUrl: `${env.APP_URL}/fr/upgrade?ref=${reference}`,
+      });
+
+      if (!result.ok) {
+        // Supprimer la subscription fantôme
+        await prisma.subscription.delete({ where: { id: subscription.id } });
+        await writeAudit({
+          actorId: user.id, targetId: user.id, action: 'payment_init_failed',
+          meta: { reason: result.reason, details: result.details }, ip, userAgent,
+        });
+        return jsonError('INTERNAL', 'Erreur lors de l\'initialisation du paiement', 500);
+      }
+
+      // Mettre à jour la subscription avec le providerRef
+      await prisma.subscription.update({
+        where: { id: subscription.id },
+        data: { providerRef: result.providerRef },
+      });
+
+      await writeAudit({
+        actorId: user.id, targetId: user.id, action: 'payment_init_success',
+        meta: { reference, providerRef: result.providerRef, amountXaf: PRO_PRICE_FCFA },
+        ip, userAgent,
+      });
+
+      return jsonOk({
+        reference,
+        authorizationUrl: result.authorizationUrl,
+        amountXaf: PRO_PRICE_FCFA,
+      });
+    });
+  } catch (err) {
+    return handleApiError(err);
+  }
+}
+9.4 — POST /api/webhooks/notchpay
+Crée app/api/webhooks/notchpay/route.ts :
+
+ts
+import type { NextRequest } from 'next/server';
+import { prisma } from '@/lib/db';
+import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
+import { verifyNotchPaySignature } from '@/lib/payments/notchpay';
+import { getClientIp, getUserAgent, writeAudit } from '@/lib/api/server';
+import { PRO_DURATION_DAYS } from '@/lib/constants';
+
+/**
+ * Webhook Notch Pay.
+ *
+ * Règles :
+ * - Vérification HMAC SHA-256 OBLIGATOIRE (header X-Notchpay-Signature)
+ * - Idempotence : si la subscription est déjà marquée active, ne rien faire
+ * - Ne jamais faire confiance au body : recalculer ce qui est nécessaire
+ * - Répondre 200 rapidement (Notch Pay retente si timeout > 5s)
+ */
+export async function POST(req: NextRequest): Promise<Response> {
+  try {
+    const rawBody = await req.text();
+    const signature = req.headers.get('x-notchpay-signature');
+
+    if (!verifyNotchPaySignature(rawBody, signature)) {
+      await writeAudit({
+        action: 'webhook_notchpay_invalid_signature',
+        ip: getClientIp(req), userAgent: getUserAgent(req),
+      });
+      return jsonError('FORBIDDEN', 'Signature invalide', 401);
+    }
+
+    const event = JSON.parse(rawBody) as {
+      event?: string;
+      data?: { reference?: string; status?: string; amount?: number; currency?: string };
+    };
+
+    const eventType = event.event;
+    const providerRef = event.data?.reference;
+    const status = event.data?.status;
+    const amount = event.data?.amount;
+
+    if (!providerRef) {
+      return jsonError('VALIDATION_ERROR', 'reference manquante', 400);
+    }
+
+    // Retrouver la subscription
+    const subscription = await prisma.subscription.findFirst({
+      where: { providerRef },
+      include: { user: true },
+    });
+
+    if (!subscription) {
+      // On accepte silencieusement (peut être un webhook de test ou une subscription supprimée)
+      await writeAudit({
+        action: 'webhook_notchpay_unknown_ref',
+        meta: { providerRef, eventType }, ip: getClientIp(req), userAgent: getUserAgent(req),
+      });
+      return jsonOk({ received: true, ignored: 'unknown_ref' });
+    }
+
+    // Idempotence : si déjà active pour ce providerRef, on ignore
+    if (subscription.startsAt.getTime() > Date.now() - 60_000 && eventType === 'payment.complete') {
+      return jsonOk({ received: true, ignored: 'already_processed' });
+    }
+
+    if (eventType === 'payment.complete' && status === 'complete') {
+      const now = new Date();
+      const currentPro =
+        subscription.user.proUntil && subscription.user.proUntil > now
+          ? subscription.user.proUntil
+          : now;
+      const newPro = new Date(currentPro.getTime() + PRO_DURATION_DAYS * 24 * 60 * 60 * 1000);
+
+      await prisma.$transaction(async (tx) => {
+        await tx.subscription.update({
+          where: { id: subscription.id },
+          data: { startsAt: now, endsAt: newPro },
+        });
+        await tx.user.update({
+          where: { id: subscription.userId },
+          data: { proUntil: newPro },
+        });
+      });
+
+      await writeAudit({
+        actorId: subscription.userId, targetId: subscription.userId,
+        action: 'payment_completed',
+        meta: { providerRef, amountXaf: amount, newProUntil: newPro.toISOString() },
+        ip: getClientIp(req), userAgent: getUserAgent(req),
+      });
+
+      return jsonOk({ received: true });
+    }
+
+    if (eventType === 'payment.failed' || eventType === 'payment.canceled') {
+      await writeAudit({
+        actorId: subscription.userId, targetId: subscription.userId,
+        action: 'payment_failed',
+        meta: { providerRef, status, eventType },
+        ip: getClientIp(req), userAgent: getUserAgent(req),
+      });
+      return jsonOk({ received: true, status: 'failed' });
+    }
+
+    // Autres événements : on les log mais on ne fait rien
+    await writeAudit({
+      action: 'webhook_notchpay_unhandled',
+      meta: { providerRef, eventType, status },
+      ip: getClientIp(req), userAgent: getUserAgent(req),
+    });
+    return jsonOk({ received: true, ignored: 'unhandled_event' });
+  } catch (err) {
+    return handleApiError(err);
+  }
+}
+
+// Notch Pay peut envoyer des GET de vérification à la configuration
+export async function GET(): Promise<Response> {
+  return jsonOk({ status: 'ok', endpoint: 'notchpay-webhook' });
+}
+9.5 — Page /upgrade fonctionnelle
+Remplace app/[locale]/(app)/upgrade/page.tsx par :
+
+tsx
+'use client';
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { adminFetch } from '@/lib/admin/client'; // réutilisable pour fetch standard
+
+export default function UpgradePage() {
+  const t = useTranslations('upgrade');
+  const router = useRouter();
+  const search = useSearchParams();
+  const [loading, setLoading] = useState<'orange' | 'mtn' | null>(null);
+  const [status, setStatus] = useState<{ proUntil: string | null; role: string } | null>(null);
+  const [pollCount, setPollCount] = useState(0);
+
+  const ref = search.get('ref');
+
+  useEffect(() => {
+    fetch('/api/auth/me').then((r) => r.json()).then((d) => setStatus({ proUntil: d.user.proUntil, role: d.user.role }));
+  }, []);
+
+  // Si on revient du paiement (ref dans l'URL), on poll /api/auth/me toutes les 3s pendant 60s
+  useEffect(() => {
+    if (!ref) return;
+    let cancelled = false;
+    const interval = setInterval(async () => {
+      if (cancelled || pollCount >= 20) {
+        clearInterval(interval);
+        return;
+      }
+      const res = await fetch('/api/auth/me');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user.proUntil && new Date(data.user.proUntil) > new Date()) {
+          setStatus({ proUntil: data.user.proUntil, role: data.user.role });
+          clearInterval(interval);
+        }
+      }
+      setPollCount((c) => c + 1);
+    }, 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [ref, pollCount]);
+
+  const startPayment = async (channel: 'cm.orange' | 'cm.mtn') => {
+    setLoading(channel === 'cm.orange' ? 'orange' : 'mtn');
+    try {
+      const res = await fetch('/api/payments/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
+        body: JSON.stringify({ channel }),
+      });
+      if (!res.ok) {
+        alert('Erreur lors de l\'initialisation du paiement');
+        return;
+      }
+      const { authorizationUrl } = await res.json();
+      window.location.href = authorizationUrl;
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const proUntil = status?.proUntil;
+  const isActive = proUntil && new Date(proUntil) > new Date();
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-2xl font-bold">{t('title')}</h1>
+      <p className="text-slate-600">{t('subtitle')}</p>
+
+      {isActive && (
+        <Card>
+          <p className="text-sm text-slate-500">{t('currentStatus')}</p>
+          <p className="text-lg font-bold text-sage-700">
+            {t('statusPro')} — {t('expiresOn', { date: new Date(proUntil).toLocaleDateString('fr-CM') })}
+          </p>
+        </Card>
+      )}
+
+      <Card>
+        <h2 className="mb-3 text-lg font-semibold">{t('features')}</h2>
+        <ul className="space-y-1 text-sm">
+          <li>✓ {t('featureNoWatermark')}</li>
+          <li>✓ {t('featureLogo')}</li>
+          <li>✓ {t('featureUnlimitedClients')}</li>
+          <li>✓ {t('featureUnlimitedHistory')}</li>
+          <li>✓ {t('feature2Devices')}</li>
+          <li>✓ {t('featureNfc')}</li>
+          <li>✓ {t('featureUsbPrint')}</li>
+        </ul>
+      </Card>
+
+      <div className="space-y-2">
+        <Button fullWidth size="lg" onClick={() => startPayment('cm.orange')} isLoading={loading === 'orange'}>
+          💳 Orange Money — 2 000 FCFA
+        </Button>
+        <Button fullWidth size="lg" onClick={() => startPayment('cm.mtn')} isLoading={loading === 'mtn'}>
+          💳 MTN MoMo — 2 000 FCFA
+        </Button>
+      </div>
+
+      {ref && (
+        <Card>
+          <p className="text-sm text-slate-600">
+            Paiement en cours de vérification… ({pollCount}/20)
+          </p>
+        </Card>
+      )}
+
+      <div className="border-t pt-4 text-center text-sm text-slate-500">
+        {t('or')}{' '}
+        <a href="../referrals" className="text-sage-700 underline">
+          {t('refer')}
+        </a>
+      </div>
+    </div>
+  );
+}
+9.6 — PWA : manifest + service worker
+9.6.1 — app/manifest.ts
+ts
+import type { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'CashBill',
+    short_name: 'CashBill',
+    description: 'Facturation et devis pour le Cameroun',
+    start_url: '/fr',
+    scope: '/',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#FFFFFF',
+    theme_color: '#91AC9A',
+    lang: 'fr',
+    categories: ['business', 'productivity', 'finance'],
+    icons: [
+      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
+  };
+}
+9.6.2 — Icônes placeholder
+Crée public/icons/README.md :
+
+md
+# Icônes CashBill
+
+Trois PNG à fournir :
+- `icon-192.png` (192x192)
+- `icon-512.png` (512x512)
+- `icon-maskable-512.png` (512x512, zone safe de 10% margin)
+
+Génère-les depuis le logo source avec `npx pwa-asset-generator`.
+En attendant, place ici 3 PNG temporaires (fond sage uni).
+Génère 3 PNG unis en attendant (via un script ou manuellement).
+
+9.6.3 — next.config.ts — activer PWA
+Remplace la config par :
+
+ts
+import type { NextConfig } from 'next';
+import withPWAInit from '@ducanh2912/next-pwa';
+
+const isProd = process.env.NODE_ENV === 'production';
+
+const withPWA = withPWAInit({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: !isProd,
+  cacheOnFrontEndNav: true,
+  reloadOnOnline: true,
+  workboxOptions: {
+    runtimeCaching: [
+      {
+        urlPattern: ({ url }) => url.pathname.startsWith('/api/auth/me'),
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'api-auth-me',
+          networkTimeoutSeconds: 5,
+          expiration: { maxEntries: 1, maxAgeSeconds: 300 },
+        },
+      },
+      {
+        urlPattern: ({ request }) => request.destination === 'image',
+        handler: 'StaleWhileRevalidate',
+        options: { cacheName: 'images', expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 } },
+      },
+      {
+        urlPattern: ({ request }) => request.destination === 'document',
+        handler: 'NetworkFirst',
+        options: { cacheName: 'pages', networkTimeoutSeconds: 5, expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 } },
+      },
+    ],
+  },
+});
+
+const securityHeaders = [
+  { key: 'Content-Security-Policy', value: isProd ? [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data:",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; ') : [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data:",
+    "connect-src 'self' ws: wss:",
+  ].join('; ') },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+];
+
+if (isProd) {
+  securityHeaders.push({ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' });
+}
+
+const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  experimental: { typedRoutes: true },
+  async headers() {
+    return [{ source: '/(.*)', headers: securityHeaders }];
+  },
+};
+
+export default withPWA(nextConfig);
+Note : disable: !isProd signifie que la PWA ne s'active qu'en production. En dev, on garde le HMR rapide. Pour tester localement, faire pnpm build && pnpm start.
+
+9.6.4 — Page offline
+Crée app/[locale]/offline/page.tsx :
+
+tsx
+export default function OfflinePage() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+      <div className="max-w-md rounded-lg bg-white p-6 text-center shadow">
+        <div className="mb-4 text-6xl">📡</div>
+        <h1 className="mb-2 text-xl font-bold text-slate-900">Hors ligne</h1>
+        <p className="text-sm text-slate-600">
+          Vous n'avez pas de connexion Internet. Vos brouillons sont sauvegardés localement.
+        </p>
+      </div>
+    </main>
+  );
+}
+9.7 — Détection d'install (hook déjà en étape 3, utiliser)
+components/pwa/InstallPrompt.tsx
+Crée components/pwa/InstallPrompt.tsx :
+
+tsx
+'use client';
+import { useEffect, useState } from 'react';
+import { usePWAInstall } from '@/lib/hooks/usePWAInstall';
+import { useTranslations } from 'next-intl';
+import { Button } from '@/components/ui/Button';
+
+const DISMISS_KEY = 'cashbill:install-prompt-dismissed';
+
+export function InstallPrompt() {
+  const t = useTranslations('pwa');
+  const { canInstall, isIOS, promptInstall } = usePWAInstall();
+  const [dismissed, setDismissed] = useState(true);
+
+  useEffect(() => {
+    try {
+      setDismissed(localStorage.getItem(DISMISS_KEY) === '1');
+    } catch {
+      setDismissed(false);
+    }
+  }, []);
+
+  if (dismissed) return null;
+  if (!canInstall && !isIOS) return null;
+
+  const dismiss = () => {
+    try { localStorage.setItem(DISMISS_KEY, '1'); } catch {}
+    setDismissed(true);
+  };
+
+  return (
+    <div className="fixed inset-x-2 bottom-20 z-50 rounded-lg border border-sage-300 bg-white p-3 shadow-lg md:hidden">
+      <p className="mb-2 text-sm font-medium">{t('install')}</p>
+      <p className="mb-3 text-xs text-slate-600">
+        {isIOS ? t('iosInstallHelp') : t('installHelp')}
+      </p>
+      <div className="flex gap-2">
+        {canInstall && !isIOS && (
+          <Button size="sm" onClick={promptInstall}>{t('install')}</Button>
+        )}
+        <Button size="sm" variant="ghost" onClick={dismiss}>{t('common.cancel') ?? 'Plus tard'}</Button>
+      </div>
+    </div>
+  );
+}
+Monte <InstallPrompt /> dans app/[locale]/layout.tsx.
+
+9.8 — Notification brouillon oublié
+components/pwa/DraftReminder.tsx
+Crée components/pwa/DraftReminder.tsx :
+
+tsx
+'use client';
+import { useEffect } from 'react';
+import { listDrafts } from '@/lib/storage/drafts';
+
+const REMINDER_AGE_MS = 24 * 60 * 60 * 1000; // 24h
+const LAST_NOTIFIED_KEY = 'cashbill:last-draft-notified';
+
+export function DraftReminder() {
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    (async () => {
+      try {
+        const drafts = await listDrafts();
+        const now = Date.now();
+        const stale = drafts.filter((d) => now - d.updatedAt > REMINDER_AGE_MS);
+        if (stale.length === 0) return;
+
+        const lastNotified = Number(localStorage.getItem(LAST_NOTIFIED_KEY) ?? '0');
+        if (now - lastNotified < 24 * 60 * 60 * 1000) return; // 1 notif max/jour
+
+        new Notification('CashBill — brouillon en attente', {
+          body: `Vous avez ${stale.length} brouillon(s) non finalisé(s). Reprenez-les maintenant.`,
+          icon: '/icons/icon-192.png',
+          tag: 'draft-reminder',
+        });
+        localStorage.setItem(LAST_NOTIFIED_KEY, String(now));
+      } catch {}
+    })();
+  }, []);
+
+  return null;
+}
+Monte <DraftReminder /> dans le layout app.
+
+Note : la permission notification est demandée à la première action de l'utilisateur (ex. après avoir cliqué "Enregistrer" sur un document). Ne pas demander à l'ouverture de l'app (bloquant).
+
+9.9 — Tests d'intégration
+tests/unit/payments/notchpay.test.ts
+ts
+import { describe, it, expect } from 'vitest';
+import { createHmac } from 'node:crypto';
+import { verifyNotchPaySignature } from '@/lib/payments/notchpay';
+import { env } from '@/lib/env';
+
+describe('verifyNotchPaySignature', () => {
+  const body = JSON.stringify({ event: 'payment.complete', data: { reference: 'test' } });
+  const validSig = createHmac('sha256', env.NOTCHPAY_WEBHOOK_HASH).update(body).digest('hex');
+
+  it('accepte une signature valide', () => {
+    expect(verifyNotchPaySignature(body, validSig)).toBe(true);
+  });
+
+  it('rejette une signature invalide', () => {
+    expect(verifyNotchPaySignature(body, 'deadbeef')).toBe(false);
+  });
+
+  it('rejette une signature absente', () => {
+    expect(verifyNotchPaySignature(body, null)).toBe(false);
+  });
+
+  it('rejette si le body a été modifié', () => {
+    const tampered = body.replace('test', 'hacked');
+    expect(verifyNotchPaySignature(tampered, validSig)).toBe(false);
+  });
+});
+tests/integration/payments.test.ts
+ts
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { createHmac } from 'node:crypto';
+import { POST as registerRoute } from '@/app/api/auth/register/route';
+import { POST as webhookRoute } from '@/app/api/webhooks/notchpay/route';
+import { clearDatabase } from '../helpers/db';
+import { resetUserCounter } from '../helpers/factories';
+import { prisma } from '@/lib/db';
+import { env } from '@/lib/env';
+import { NextRequest } from 'next/server';
+
+beforeEach(async () => {
+  await clearDatabase();
+  resetUserCounter();
+});
+
+async function registerAndGetUserId(phone: string): Promise<{ userId: string; cookie: string }> {
+  const res = await registerRoute(new NextRequest('http://localhost/api/auth/register', {
+    method: 'POST', headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch' },
+    body: JSON.stringify({ phone, pin: '123456', deviceId: 'dev-1', locale: 'FR' }),
+  }));
+  const json = await res.json();
+  const cookie = res.headers.get('set-cookie')?.match(/cashbill_session=([^;]+)/)?.[1] ?? '';
+  return { userId: json.user.id, cookie };
+}
+
+async function createSubscription(userId: string, providerRef: string) {
+  return prisma.subscription.create({
+    data: {
+      userId, source: 'NOTCH_PAY',
+      startsAt: new Date(), endsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      amountXaf: 2000, providerRef,
+    },
+  });
+}
+
+describe('POST /api/webhooks/notchpay', () => {
+  it('rejette une signature invalide', async () => {
+    const req = new NextRequest('http://localhost/api/webhooks/notchpay', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-notchpay-signature': 'invalid' },
+      body: JSON.stringify({ event: 'payment.complete', data: { reference: 'x' } }),
+    });
+    const res = await webhookRoute(req);
+    expect(res.status).toBe(401);
+  });
+
+  it('active le Pro si signature valide et event payment.complete', async () => {
+    const { userId } = await registerAndGetUserId('699111111');
+    await createSubscription(userId, 'PROVIDER_REF_1');
+
+    const body = JSON.stringify({
+      event: 'payment.complete',
+      data: { reference: 'PROVIDER_REF_1', status: 'complete', amount: 2000 },
+    });
+    const sig = createHmac('sha256', env.NOTCHPAY_WEBHOOK_HASH).update(body).digest('hex');
+
+    const req = new NextRequest('http://localhost/api/webhooks/notchpay', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-notchpay-signature': sig },
+      body,
+    });
+    const res = await webhookRoute(req);
+    expect(res.status).toBe(200);
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    expect(user?.proUntil).not.toBeNull();
+    expect(user!.proUntil!.getTime()).toBeGreaterThan(Date.now() + 20 * 24 * 60 * 60 * 1000);
+  });
+
+  it('est idempotent (2 webhooks identiques → 1 seule activation)', async () => {
+    const { userId } = await registerAndGetUserId('699222222');
+    await createSubscription(userId, 'PROVIDER_REF_2');
+
+    const body = JSON.stringify({ event: 'payment.complete', data: { reference: 'PROVIDER_REF_2', status: 'complete' } });
+    const sig = createHmac('sha256', env.NOTCHPAY_WEBHOOK_HASH).update(body).digest('hex');
+
+    const makeReq = () => new NextRequest('http://localhost/api/webhooks/notchpay', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-notchpay-signature': sig },
+      body,
+    });
+
+    await webhookRoute(makeReq());
+    const first = await prisma.user.findUnique({ where: { id: userId } });
+    const firstProUntil = first!.proUntil!.getTime();
+
+    await new Promise((r) => setTimeout(r, 100));
+    await webhookRoute(makeReq());
+    const second = await prisma.user.findUnique({ where: { id: userId } });
+    expect(second!.proUntil!.getTime()).toBe(firstProUntil);
+  });
+
+  it('log un échec sans activer le Pro', async () => {
+    const { userId } = await registerAndGetUserId('699333333');
+    await createSubscription(userId, 'PROVIDER_REF_3');
+
+    const body = JSON.stringify({ event: 'payment.failed', data: { reference: 'PROVIDER_REF_3', status: 'failed' } });
+    const sig = createHmac('sha256', env.NOTCHPAY_WEBHOOK_HASH).update(body).digest('hex');
+
+    const req = new NextRequest('http://localhost/api/webhooks/notchpay', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-notchpay-signature': sig },
+      body,
+    });
+    await webhookRoute(req);
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    // proUntil reste au trial (3 jours) créé à l'inscription
+    expect(user?.proUntil).not.toBeNull();
+  });
+});
+✅ VALIDATION DE L'ÉTAPE 9
+1. Build + tests
+bash
+pnpm typecheck
+pnpm lint
+pnpm build
+pnpm test:run
+Tous passent.
+
+2. Test manuel Notch Pay
+S'inscrire ou se connecter.
+
+Aller sur /fr/upgrade.
+
+Cliquer "Orange Money" → redirection vers Notch Pay.
+
+Payer en sandbox (carte test Notch Pay).
+
+Être redirigé vers /fr/upgrade?ref=... → polling démarre → bannière "Pro" apparaît.
+
+Vérifier en DB que user.proUntil a été mis à jour et qu'un Subscription est actif.
+
+Aller sur /fr/documents/new → vérifier qu'il n'y a plus de filigrane.
+
+3. Test manuel webhook
+Utilise ngrok ou cloudflared pour exposer localhost, configure l'URL dans le dashboard Notch Pay sandbox :
+
+text
+https://<ton-ngrok>/api/webhooks/notchpay
+Envoie un webhook de test depuis Notch Pay. Vérifie :
+
+La signature est validée.
+
+Le log AuditLog apparaît.
+
+Si payment.complete, proUntil est mis à jour.
+
+4. Test manuel PWA
+pnpm build && pnpm start (la PWA est désactivée en dev).
+
+Ouvrir http://localhost:3000 sur Chrome Android.
+
+Vérifier que le manifest est détecté (DevTools → Application → Manifest).
+
+Vérifier que le service worker est enregistré.
+
+Installer l'app → vérifier qu'elle s'ouvre en standalone.
+
+Couper le WiFi → naviguer dans l'app → la page offline s'affiche.
+
+Fermer la PWA, rouvrir → les brouillons sont conservés.
+
+5. Test manuel notification brouillon
+Créer un brouillon, fermer sans enregistrer.
+
+Modifier updatedAt dans IndexedDB (DevTools → Application → IndexedDB) pour simuler 24h.
+
+Recharger → notification apparaît (si permission accordée).
+
+Critère de sortie : build OK, tests OK, paiement sandbox → Pro activé, webhook signé validé, PWA installable, offline fonctionnel, notification brouillon.
+
+Ce que tu NE fais PAS dans cette étape
+❌ Pas de scripts CLI SSH (étape 11)
+
+❌ Pas de déploiement VPS (étape 11)
+
+❌ Pas de tests E2E Playwright (plus tard)
+
+❌ Pas de monitoring/alerting (étape 11)
+
+Ce que tu me dis quand c'est validé
+« Étape 9 validée. pnpm build, pnpm test:run → 0 erreur. Test sandbox Notch Pay : paiement Orange Money → Pro activé. Webhook signé testé (signature invalide → 401, signature valide → Pro activé, idempotence vérifiée). PWA : installable Chrome Android, offline fonctionne, brouillons conservés. Notification brouillon testée. »
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-04T23:28:57+01:00.
+
+The user's current state is as follows:
+Active Document: c:\Users\Famille Mouelnjock\Documents\KASHBILL\tsconfig.json (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 27
+Other open documents:
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\prisma\seed.ts (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\tests\integration\referrals.test.ts (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\lib\hooks\useAdminAction.ts (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\scratch\test_step8_workflow.js (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\tests\integration\admin.test.ts (LANGUAGE_UNSPECIFIED)
+</ADDITIONAL_METADATA>

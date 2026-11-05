@@ -10,6 +10,10 @@ const envSchema = z.object({
   APP_NAME: z.string().default('CashBill'),
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NOTCHPAY_PUBLIC_KEY: z.string().min(1),
+  NOTCHPAY_HASH_KEY: z.string().min(1),
+  NOTCHPAY_WEBHOOK_HASH: z.string().min(1),
+  NOTCHPAY_BASE_URL: z.string().url().default('https://api.notchpay.co'),
 });
 
 const parsed = envSchema.safeParse({
@@ -22,6 +26,10 @@ const parsed = envSchema.safeParse({
   APP_NAME: process.env.APP_NAME,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   NODE_ENV: process.env.NODE_ENV,
+  NOTCHPAY_PUBLIC_KEY: process.env.NOTCHPAY_PUBLIC_KEY,
+  NOTCHPAY_HASH_KEY: process.env.NOTCHPAY_HASH_KEY,
+  NOTCHPAY_WEBHOOK_HASH: process.env.NOTCHPAY_WEBHOOK_HASH,
+  NOTCHPAY_BASE_URL: process.env.NOTCHPAY_BASE_URL,
 });
 
 if (!parsed.success) {

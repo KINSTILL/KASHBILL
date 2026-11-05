@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { getCurrentUser } from '@/lib/auth/session';
 
@@ -51,6 +52,7 @@ export default async function LocaleLayout({
     <NextIntlClientProvider messages={messages}>
       <SessionProvider initialUser={initialUser}>
         <OfflineBanner />
+        <InstallPrompt />
         {children}
       </SessionProvider>
     </NextIntlClientProvider>

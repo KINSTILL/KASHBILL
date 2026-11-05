@@ -1,9 +1,49 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import withPWAInit from '@ducanh2912/next-pwa';
 
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const isProd = process.env.NODE_ENV === 'production';
+
+const withPWA = withPWAInit({
+  dest: 'public',
+  register: true,
+  disable: !isProd,
+  cacheOnFrontEndNav: true,
+  reloadOnOnline: true,
+  workboxOptions: {
+    skipWaiting: true,
+    runtimeCaching: [
+      {
+        urlPattern: ({ url }) => url.pathname.startsWith('/api/auth/me'),
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'api-auth-me',
+          networkTimeoutSeconds: 5,
+          expiration: { maxEntries: 1, maxAgeSeconds: 300 },
+        },
+      },
+      {
+        urlPattern: ({ request }) => request.destination === 'image',
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'images',
+          expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
+        },
+      },
+      {
+        urlPattern: ({ request }) => request.destination === 'document',
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'pages',
+          networkTimeoutSeconds: 5,
+          expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
+        },
+      },
+    ],
+  },
+});
 
 const securityHeaders = [
   {
@@ -20,8 +60,7 @@ const securityHeaders = [
           "base-uri 'self'",
           "form-action 'self'",
         ].join('; ')
-      : // Dev : permissif pour HMR
-        [
+      : [
           "default-src 'self'",
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
           "style-src 'self' 'unsafe-inline'",
@@ -51,4 +90,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withPWA(withNextIntl(nextConfig));

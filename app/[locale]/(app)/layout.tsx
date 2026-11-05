@@ -1,6 +1,7 @@
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { DraftReminder } from '@/components/pwa/DraftReminder';
 
 export default function AppLayout({
   children,
@@ -9,6 +10,7 @@ export default function AppLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+      <DraftReminder />
       <Header />
       <div className="mx-auto flex w-full max-w-7xl flex-1">
         <Sidebar />
