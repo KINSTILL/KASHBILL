@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { normalizeCameroonPhone } from './phone';
+import { normalizePhone } from './phone';
 import { isValidPin } from './pin';
 
 const phoneSchema = z
   .string()
-  .transform((v) => normalizeCameroonPhone(v))
+  .transform((v) => normalizePhone(v))
   .refine((v): v is string => v !== null, { message: 'Numéro de téléphone invalide' });
 
 const pinSchema = z
@@ -22,6 +22,8 @@ export const registerSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   businessName: z.string().max(200).optional(),
   city: z.string().max(120).optional(),
+  mode: z.enum(['ECOMMERCE', 'PRESTATION']).optional(),
+  country: z.string().min(2).max(3).optional(),
   locale: localeSchema,
   deviceId: deviceIdSchema,
   deviceName: deviceNameSchema,

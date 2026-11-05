@@ -13,6 +13,7 @@ import { PinInput } from '@/components/auth/PinInput';
 import { ShieldCheck, AlertCircle, Loader2, ArrowRight } from '@/components/ui/icons';
 import { getOrCreateDeviceId, getDeviceName } from '@/lib/device/client-id';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
+import { DEFAULT_COUNTRY, type DialCountry } from '@/lib/countries/dial-codes';
 
 interface ActiveDevice {
   deviceId: string;
@@ -33,6 +34,7 @@ export default function LoginPage() {
 
   const [isPending, startTransition] = useTransition();
 
+  const [country, setCountry] = useState<DialCountry>(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState('');
   const [pin, setPin] = useState<string[]>(Array(PIN_LENGTH).fill(''));
   const [showPin, setShowPin] = useState(false);
@@ -43,12 +45,13 @@ export default function LoginPage() {
   const [activeDevices, setActiveDevices] = useState<ActiveDevice[]>([]);
 
   const cleanPhone = phone.replace(/\s+/g, '');
-  const isFormValid = cleanPhone.length === 9 && pin.every((d) => d !== '');
+  const isFormValid =
+    cleanPhone.length >= country.minDigits && pin.every((d) => d !== '');
 
   const executeLogin = (fullPin: string) => {
     const phoneDigits = phone.replace(/\s+/g, '');
 
-    if (phoneDigits.length < 9) {
+    if (phoneDigits.length < country.minDigits) {
       setErrorMessage(t('login.error_phone_invalid'));
       return;
     }
@@ -70,7 +73,7 @@ export default function LoginPage() {
             'X-Requested-With': 'fetch',
           },
           body: JSON.stringify({
-            phone: `+237${phoneDigits}`,
+            phone: `${country.dialCode}${phoneDigits}`,
             pin: fullPin,
             deviceId,
             deviceName,
@@ -161,8 +164,10 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <PhoneInput
           label={t('login.phone_label')}
-          placeholder={t('login.phone_placeholder')}
+          placeholder=""
           value={phone}
+          countryCode={country.code}
+          onCountryChange={setCountry}
           onChange={(v) => {
             setPhone(v);
             if (errorMessage) setErrorMessage(null);

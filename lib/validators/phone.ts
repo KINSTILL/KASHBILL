@@ -21,3 +21,32 @@ export function isValidCameroonPhone(input: string): boolean {
   return normalizeCameroonPhone(input) !== null;
 }
 
+/**
+ * Normalise un numéro de téléphone international (E.164) ou camerounais.
+ * Retourne null si invalide.
+ */
+export function normalizePhone(input: string): string | null {
+  if (typeof input !== 'string') return null;
+  const cleaned = input.replace(/[\s\-().]/g, '');
+  if (!cleaned) return null;
+
+  // Format international E.164 (+ suivi d'un indicatif et de 6 à 14 chiffres)
+  if (/^\+[1-9]\d{6,14}$/.test(cleaned)) {
+    return cleaned;
+  }
+
+  // Compatibilité historique numéro camerounais (699..., 0699..., 237699...)
+  const cm = normalizeCameroonPhone(cleaned);
+  if (cm) return cm;
+
+  // Si indicatif sans '+' mais avec 8 à 15 chiffres
+  if (/^[1-9]\d{7,14}$/.test(cleaned)) {
+    return `+${cleaned}`;
+  }
+
+  return null;
+}
+
+export function isValidPhone(input: string): boolean {
+  return normalizePhone(input) !== null;
+}

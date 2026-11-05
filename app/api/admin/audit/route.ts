@@ -17,19 +17,39 @@ export async function GET(req: NextRequest): Promise<Response> {
         ...(targetId ? { targetId } : {}),
       };
 
-      const [logs, total] = await Promise.all([
+      const [rows, total] = await Promise.all([
         prisma.auditLog.findMany({
           where,
           orderBy: { createdAt: 'desc' },
           skip: (page - 1) * pageSize,
           take: pageSize,
-          include: {
-            user: { select: { phone: true, name: true } },
-            actor: { select: { phone: true, name: true, role: true } },
-          },
         }),
         prisma.auditLog.count({ where }),
       ]);
+
+      // Pas de clé étrangère : on résout les comptes encore existants à la main.
+      const ids = Array.from(
+        new Set(
+          rows.flatMap((r) => [r.userId, r.actorId]).filter((id): id is string => !!id)
+        )
+      );
+      const users = ids.length
+        ? await prisma.user.findMany({
+            where: { id: { in: ids } },
+            select: { id: true, phone: true, name: true, role: true },
+          })
+        : [];
+      const byId = new Map(users.map((u) => [u.id, u]));
+
+      const logs = rows.map((r) => {
+        const u = r.userId ? byId.get(r.userId) : undefined;
+        const a = r.actorId ? byId.get(r.actorId) : undefined;
+        return {
+          ...r,
+          user: u ? { phone: u.phone, name: u.name } : null,
+          actor: a ? { phone: a.phone, name: a.name, role: a.role } : null,
+        };
+      });
 
       return jsonOk({ logs, total, page, pageSize });
     });
@@ -37,4 +57,3 @@ export async function GET(req: NextRequest): Promise<Response> {
     return handleApiError(err);
   }
 }
-

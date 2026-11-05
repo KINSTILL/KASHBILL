@@ -122,8 +122,6 @@ model User {
   documents          Document[]
   documentSequences  DocumentSequence[]
   subscriptions      Subscription[]
-  auditLogs          AuditLog[]        @relation("TargetLogs")
-  auditLogsAsActor   AuditLog[]        @relation("ActorLogs")
   referralsMade      Referral[]        @relation("ReferralParrain")
   referralReceived   Referral?         @relation("ReferralFilleul")
   fraudFlags         FraudFlag[]       @relation("FraudFlagUser")
@@ -340,12 +338,12 @@ model BlacklistEntry {
   @@index([type])
 }
 
+/// Journal append-only : userId/actorId sont de simples identifiants (sans clé étrangère)
+/// afin que la suppression d'un compte ne modifie jamais les lignes d'audit.
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
-  user      User?    @relation("TargetLogs", fields: [userId], references: [id], onDelete: SetNull)
   actorId   String?
-  actor     User?    @relation("ActorLogs", fields: [actorId], references: [id], onDelete: SetNull)
   targetId  String?
   action    String
   meta      Json?

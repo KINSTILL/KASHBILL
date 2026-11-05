@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
+import { DeleteAccountSection } from '@/components/settings/DeleteAccountSection';
 
 export default function SettingsPage() {
   const t = useTranslations();
@@ -183,6 +184,9 @@ export default function SettingsPage() {
           {t('nav.logout')}
         </Button>
       </div>
+
+      {/* Delete account */}
+      <DeleteAccountSection />
     </div>
   );
 }

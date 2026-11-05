@@ -13,6 +13,7 @@ import { PinInput } from '@/components/auth/PinInput';
 import { AlertCircle, Loader2, ArrowRight, ShieldCheck } from '@/components/ui/icons';
 import { getOrCreateDeviceId, getDeviceName } from '@/lib/device/client-id';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
+import { DEFAULT_COUNTRY, type DialCountry } from '@/lib/countries/dial-codes';
 
 const PIN_LENGTH = 6;
 
@@ -26,6 +27,7 @@ function RegisterForm() {
 
   const refParam = searchParams.get('ref') || '';
 
+  const [country, setCountry] = useState<DialCountry>(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState('');
   const [pin, setPin] = useState<string[]>(Array(PIN_LENGTH).fill(''));
   const [confirmPin, setConfirmPin] = useState<string[]>(Array(PIN_LENGTH).fill(''));
@@ -49,7 +51,8 @@ function RegisterForm() {
   const pinString = pin.join('');
   const confirmString = confirmPin.join('');
   const isFormValid =
-    cleanPhone.length === 9 &&
+    cleanPhone.length >= country.minDigits &&
+    cleanPhone.length <= country.maxDigits &&
     pinString.length === PIN_LENGTH &&
     confirmString.length === PIN_LENGTH &&
     acceptTerms;
@@ -58,7 +61,7 @@ function RegisterForm() {
     e.preventDefault();
     setError(null);
 
-    if (cleanPhone.length !== 9) {
+    if (cleanPhone.length < country.minDigits) {
       setError(t('register.error_phone_invalid'));
       return;
     }
@@ -85,12 +88,13 @@ function RegisterForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
         body: JSON.stringify({
-          phone: `+237${cleanPhone}`,
+          phone: `${country.dialCode}${cleanPhone}`,
           pin: pinString,
           name: name.trim() || undefined,
           businessName: businessName.trim() || undefined,
           city: city.trim() || undefined,
           mode,
+          country: country.code,
           locale: locale.toUpperCase(),
           deviceId,
           deviceName,
@@ -194,8 +198,10 @@ function RegisterForm() {
 
             <PhoneInput
               label={t('register.phone_label')}
-              placeholder={t('register.phone_placeholder')}
+              placeholder=""
               value={phone}
+              countryCode={country.code}
+              onCountryChange={setCountry}
               onChange={(v) => {
                 setPhone(v);
                 if (error) setError(null);

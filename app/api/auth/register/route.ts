@@ -83,6 +83,8 @@ export async function POST(req: NextRequest): Promise<Response> {
           name: data.name ?? null,
           businessName: data.businessName ?? null,
           city: data.city ?? null,
+          mode: data.mode ?? 'ECOMMERCE',
+          country: data.country ?? 'CM',
           locale: data.locale,
           referralCode,
           proUntil: trialEnd,

@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   normalizeCameroonPhone,
   isValidCameroonPhone,
+  normalizePhone,
+  isValidPhone,
 } from '@/lib/validators/phone';
 
 describe('normalizeCameroonPhone', () => {
@@ -38,4 +40,29 @@ describe('isValidCameroonPhone', () => {
     expect(isValidCameroonPhone('12345')).toBe(false);
   });
 });
+
+describe('normalizePhone', () => {
+  it.each([
+    ['+237699123456', '+237699123456'],
+    ['+2250701020304', '+2250701020304'],
+    ['+221771234567', '+221771234567'],
+    ['+33612345678', '+33612345678'],
+    ['699123456', '+237699123456'],
+  ])('normalise international "%s" en "%s"', (input, expected) => {
+    expect(normalizePhone(input)).toBe(expected);
+  });
+
+  it.each([
+    ['', null],
+    ['abc', null],
+    ['123', null],
+  ])('rejette numéro invalide "%s"', (input, expected) => {
+    expect(normalizePhone(input)).toBe(expected);
+  });
+
+  it('retourne true pour un numéro international valide', () => {
+    expect(isValidPhone('+2250701020304')).toBe(true);
+  });
+});
+
 

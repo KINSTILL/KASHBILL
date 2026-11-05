@@ -1,7 +1,10 @@
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
-import { requireAuth } from '@/lib/api/server';
+import { requireAuth, writeAudit } from '@/lib/api/server';
+import { verifyPin } from '@/lib/auth/pin';
+import { clearSessionCookie } from '@/lib/auth/session';
+import { rateLimit } from '@/lib/rate-limit';
 import { prisma } from '@/lib/db';
 
 const updateProfileSchema = z.object({
@@ -52,6 +55,60 @@ export async function GET(req: NextRequest): Promise<Response> {
         },
         deviceId,
       });
+    });
+  } catch (err) {
+    return handleApiError(err);
+  }
+}
+
+const deleteAccountSchema = z.object({
+  pin: z.string().regex(/^\d{6}$/),
+});
+
+/**
+ * Suppression définitive du compte par l'utilisateur lui-même.
+ * Exige le PIN. Les données liées (documents, clients, appareils, etc.)
+ * sont supprimées en cascade par la base.
+ */
+export async function DELETE(req: NextRequest): Promise<Response> {
+  try {
+    return await requireAuth(req, async (_req, { user, ip, userAgent }) => {
+      if (user.role !== 'USER') {
+        return jsonError(
+          'FORBIDDEN',
+          'Les comptes administrateurs ne peuvent pas être supprimés ici',
+          403
+        );
+      }
+
+      const body = await req.json().catch(() => null);
+      const parsed = deleteAccountSchema.safeParse(body);
+      if (!parsed.success) {
+        return jsonError('BAD_REQUEST', 'PIN invalide', 400);
+      }
+
+      const rl = rateLimit(`delete-account:${user.id}`, 5, 15 * 60 * 1000);
+      if (!rl.allowed) {
+        return jsonError('RATE_LIMITED', 'Trop de tentatives, réessayez plus tard', 429);
+      }
+
+      const ok = await verifyPin(user.pinHash, parsed.data.pin);
+      if (!ok) {
+        return jsonError('INVALID_CREDENTIALS', 'PIN incorrect', 401);
+      }
+
+      await prisma.user.delete({ where: { id: user.id } });
+
+      await writeAudit({
+        action: 'account_deleted',
+        meta: { userId: user.id },
+        ip,
+        userAgent,
+      });
+
+      const response = jsonOk({ ok: true });
+      await clearSessionCookie(response);
+      return response;
     });
   } catch (err) {
     return handleApiError(err);

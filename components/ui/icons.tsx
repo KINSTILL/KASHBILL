@@ -98,3 +98,31 @@ export function ArrowRight(props: IconProps) {
     </svg>
   );
 }
+
+/** Chevron vers le bas. */
+export function ChevronDown(props: IconProps) {
+  return (
+    <svg {...common} {...props}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+/** Coche de sélection. */
+export function Check(props: IconProps) {
+  return (
+    <svg {...common} {...props}>
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+/** Loupe de recherche. */
+export function Search(props: IconProps) {
+  return (
+    <svg {...common} {...props}>
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
+}
