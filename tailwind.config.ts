@@ -45,7 +45,19 @@ const config: Config = {
           light: '#D4B584',
           dark: '#9A7A47',
         },
-        whatsapp: { DEFAULT: '#25D366', dark: '#20BA5A' },
+        slate: {
+          50: '#F8FAFC',
+          100: '#F1F5F9',
+          200: '#E2E8F0',
+          300: '#CBD5E1',
+          400: '#94A3B8',
+          500: '#64748B',
+          600: '#475569',
+          700: '#334155',
+          800: '#1E293B',
+          900: '#0F172A',
+        },
+        whatsapp: { DEFAULT: '#25D366', dark: '#1DA851' },
         orangeMoney: { DEFAULT: '#EA580C', light: '#FFEDD5' },
         momo: { DEFAULT: '#EAB308', light: '#FEF9C3' },
         success: '#059669',
@@ -56,6 +68,7 @@ const config: Config = {
       fontFamily: {
         display: ['var(--font-display)', 'sans-serif'],
         mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         btn: '14px',
