@@ -19,7 +19,7 @@ export function Header() {
           href={`/${locale}` as Route}
           className="group flex items-baseline gap-0.5 font-display text-[18px] font-extrabold tracking-[-0.03em] text-ink"
         >
-          mycashbill
+                    MyCashBill
           <span className="h-1.5 w-1.5 rounded-full bg-sage-500 transition-smooth group-hover:bg-terracotta" />
         </Link>
         <div className="flex items-center gap-2">

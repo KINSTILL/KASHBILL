@@ -63,8 +63,8 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     shortLabel: 'Ticket',
     shortLabelEn: 'Ticket',
     icon: '🧾',
-    description: 'Preuve d\'achat simplifiée pour vente au comptant',
-    descriptionEn: 'Simplified proof of purchase for cash sales',
+    description: 'Reçu simplifié pour une vente au comptant, sans TVA',
+    descriptionEn: 'Simplified cash-sale receipt, no VAT',
     numberPrefix: 'T',
     showVat: false,
     showValidity: false,
@@ -89,6 +89,10 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     shortLabel: 'Reçu',
     shortLabelEn: 'Receipt',
     icon: '✅',
+
+
+
+
     description: 'Preuve de paiement, éteint la dette',
     descriptionEn: 'Proof of payment settling a balance or deposit',
     numberPrefix: 'R',
@@ -167,8 +171,10 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     shortLabel: 'Bon cmde',
     shortLabelEn: 'Purchase order',
     icon: '📦',
-    description: 'Engagement d\'achat du client, base de la facturation',
-    descriptionEn: 'Client purchase commitment, basis for billing',
+
+
+    description: 'Engagement d\'achat du client, sert de base à la facturation',
+    descriptionEn: 'Client purchase commitment, the basis for invoicing',
     numberPrefix: 'BC',
     showVat: false,
     showValidity: false,
