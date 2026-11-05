@@ -41,7 +41,7 @@ export default function RecoveryPage() {
 
       const res = await fetch('/api/auth/recovery/use', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
         body: JSON.stringify({
           phone,
           recoveryCode: recoveryCode.trim(),
@@ -51,17 +51,19 @@ export default function RecoveryPage() {
       });
 
       const data = await res.json();
+      const errCode = data.code || data.error?.code;
+      const errMsg = data.message || data.error?.message;
 
       if (!res.ok) {
-        if (data.code === 'RECOVERY_CODE_INVALID') {
+        if (errCode === 'RECOVERY_CODE_INVALID') {
           setError(t('auth.errors.recoveryCodeInvalid'));
           return;
         }
-        if (data.code === 'RATE_LIMITED') {
+        if (errCode === 'RATE_LIMITED') {
           setError(t('auth.errors.rateLimited'));
           return;
         }
-        setError(data.message || t('auth.errors.internal'));
+        setError(errMsg || t('auth.errors.internal'));
         return;
       }
 
@@ -105,6 +107,7 @@ export default function RecoveryPage() {
           </label>
           <Input
             id="phone"
+            name="phone"
             type="tel"
             required
             placeholder="699 00 00 00"
@@ -123,6 +126,7 @@ export default function RecoveryPage() {
           </label>
           <Input
             id="recoveryCode"
+            name="recoveryCode"
             type="text"
             required
             placeholder="ABCD-1234"
@@ -142,6 +146,7 @@ export default function RecoveryPage() {
             </label>
             <Input
               id="newPin"
+              name="newPin"
               type="password"
               inputMode="numeric"
               maxLength={6}
@@ -161,6 +166,7 @@ export default function RecoveryPage() {
             </label>
             <Input
               id="confirmPin"
+              name="confirmPin"
               type="password"
               inputMode="numeric"
               maxLength={6}

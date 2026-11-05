@@ -43,11 +43,13 @@ export default function NewClientPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        if (data.code === 'PLAN_LIMIT_REACHED') {
-          setError("Limite de 3 clients atteinte pour l'offre gratuite. Passez Pro pour continuer.");
+        const errCode = data.code || data.error?.code;
+        const errMsg = data.message || data.error?.message;
+        if (errCode === 'PLAN_LIMIT_REACHED') {
+          setError(errMsg || "Limite gratuite atteinte (3 clients max). Passez Pro pour en ajouter davantage.");
           return;
         }
-        setError(data.message || t('common.error'));
+        setError(errMsg || t('common.error'));
         return;
       }
 
@@ -110,6 +112,7 @@ export default function NewClientPage() {
             </label>
             <Input
               id="name"
+              name="name"
               type="text"
               required
               placeholder="Ex: Entreprise Alpha ou Paul Biya"
@@ -125,6 +128,7 @@ export default function NewClientPage() {
             </label>
             <Input
               id="phone"
+              name="phone"
               type="tel"
               placeholder="+237 699 00 00 00"
               value={phone}

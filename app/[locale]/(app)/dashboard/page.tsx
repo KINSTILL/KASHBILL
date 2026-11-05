@@ -63,7 +63,7 @@ export default async function DashboardPage({
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              {t('dashboard.welcomeBack')}, {displayName}
+              {t('dashboard.welcome')}, {displayName}
             </h1>
             {userIsPro && <ProBadge />}
           </div>

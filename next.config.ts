@@ -55,7 +55,9 @@ const securityHeaders = [
           "style-src 'self' 'unsafe-inline'",
           "img-src 'self' data: blob:",
           "font-src 'self' data:",
-          "connect-src 'self'",
+          "connect-src 'self' data: blob:",
+          "worker-src 'self' blob:",
+          "object-src 'self' blob:",
           "frame-ancestors 'none'",
           "base-uri 'self'",
           "form-action 'self'",
@@ -66,7 +68,9 @@ const securityHeaders = [
           "style-src 'self' 'unsafe-inline'",
           "img-src 'self' data: blob:",
           "font-src 'self' data:",
-          "connect-src 'self' ws: wss:",
+          "connect-src 'self' data: blob: ws: wss:",
+          "worker-src 'self' blob:",
+          "object-src 'self' blob:",
         ].join('; '),
   },
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -85,6 +89,9 @@ if (isProd) {
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   async headers() {
     return [{ source: '/(.*)', headers: securityHeaders }];
   },

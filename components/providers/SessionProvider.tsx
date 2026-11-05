@@ -2,6 +2,22 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
+// Client-side CSRF header auto-injection for mutations
+if (typeof window !== 'undefined' && !(window as unknown as { __csrf_patched?: boolean }).__csrf_patched) {
+  (window as unknown as { __csrf_patched?: boolean }).__csrf_patched = true;
+  const originalFetch = window.fetch;
+  window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
+    if (init && init.method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(init.method.toUpperCase())) {
+      const headers = new Headers(init.headers || {});
+      if (!headers.has('X-Requested-With')) {
+        headers.set('X-Requested-With', 'fetch');
+      }
+      init.headers = headers;
+    }
+    return originalFetch.call(this, input, init);
+  };
+}
+
 export type SessionUser = {
   id: string;
   phone: string;

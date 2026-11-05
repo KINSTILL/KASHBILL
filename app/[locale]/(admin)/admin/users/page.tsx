@@ -54,6 +54,16 @@ export default function AdminUsersPage() {
     loadUsers(query, page);
   }, [query, page]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      startTransition(() => {
+        setPage(1);
+        setQuery(search.trim());
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     startTransition(() => {
@@ -70,6 +80,7 @@ export default function AdminUsersPage() {
         <h1 className="text-2xl font-bold text-slate-900">Utilisateurs ({total})</h1>
         <form onSubmit={handleSearch} className="flex gap-2">
           <Input
+            type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Téléphone, nom, boutique..."
@@ -117,7 +128,12 @@ export default function AdminUsersPage() {
                 return (
                   <tr key={u.id} className="hover:bg-slate-50/50">
                     <td className="px-4 py-3">
-                      <div className="font-semibold text-slate-900">{u.phone}</div>
+                      <Link
+                        href={`/${locale}/admin/users/${u.id}` as Route}
+                        className="font-semibold text-slate-900 hover:underline block"
+                      >
+                        {u.phone}
+                      </Link>
                       <div className="text-xs text-slate-500">
                         {u.name ?? 'Sans nom'}
                       </div>
@@ -125,7 +141,7 @@ export default function AdminUsersPage() {
                     <td className="px-4 py-3 text-xs text-slate-600">
                       <div>{u.businessName ?? '—'}</div>
                       <div className="text-slate-400">
-                        {u._count.documents} docs · {u._count.clients} clients
+                        {u._count?.documents ?? 0} docs · {u._count?.clients ?? 0} clients
                       </div>
                     </td>
                     <td className="px-4 py-3">

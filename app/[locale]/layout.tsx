@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { SessionProvider } from '@/components/providers/SessionProvider';
+import { ToastProvider } from '@/components/ui/Toast';
 import { getCurrentUser } from '@/lib/auth/session';
 
 const locales = ['fr', 'en'] as const;
@@ -51,9 +52,11 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider messages={messages}>
       <SessionProvider initialUser={initialUser}>
-        <OfflineBanner />
-        <InstallPrompt />
-        {children}
+        <ToastProvider>
+          <OfflineBanner />
+          <InstallPrompt />
+          {children}
+        </ToastProvider>
       </SessionProvider>
     </NextIntlClientProvider>
   );

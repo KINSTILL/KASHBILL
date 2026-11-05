@@ -27,13 +27,18 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href as Route}
-              className={cn(
-                'flex flex-col items-center justify-center py-2 text-xs',
-                active ? 'text-sage-700 font-semibold' : 'text-slate-500'
-              )}
+              className="flex flex-col items-center justify-center"
             >
-              <span className="text-lg">{item.icon}</span>
-              <span className="mt-0.5">{item.label}</span>
+              <button
+                type="button"
+                className={cn(
+                  'flex flex-col items-center justify-center py-2 text-xs w-full',
+                  active ? 'text-sage-700 font-semibold' : 'text-slate-500'
+                )}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span className="mt-0.5">{item.label}</span>
+              </button>
             </Link>
           );
         })}
@@ -41,4 +46,3 @@ export function BottomNav() {
     </nav>
   );
 }
-

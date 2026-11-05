@@ -26,7 +26,7 @@ export default function AuthLayout({
       <main className="flex flex-1 items-center justify-center p-4">
         <div className="w-full max-w-md">{children}</div>
       </main>
-      <footer className="py-4 text-center text-xs text-slate-400">
+      <footer className="py-4 text-center text-xs text-slate-600">
         &copy; {new Date().getFullYear()} CashBill &bull; Facturation hors-ligne &amp; Bouclier Social
       </footer>
     </div>

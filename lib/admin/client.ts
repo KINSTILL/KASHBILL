@@ -41,7 +41,7 @@ export async function adminFetch(url: string, options: AdminFetchOptions = {}): 
   const res = await fetch(url, {
     ...options,
     headers,
-    body: options.body ? JSON.stringify(options.body) : (options.body as BodyInit | null | undefined),
+    body: typeof options.body === 'string' ? options.body : options.body ? JSON.stringify(options.body) : undefined,
   });
 
   if (res.status === 401) {

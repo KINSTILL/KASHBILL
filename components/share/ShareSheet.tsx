@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Sheet } from '@/components/ui/Sheet';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
 import { haptic } from '@/lib/device/haptics';
 import {
   loadSharePrefs,
@@ -42,6 +43,7 @@ export function ShareSheet({
 }: ShareSheetProps) {
   const tRoot = useTranslations();
   const t = useTranslations('share');
+  const toast = useToast();
   const locale = useLocale() as 'fr' | 'en';
   const group = getShareGroup(docType);
 
@@ -130,11 +132,11 @@ export function ShareSheet({
       onSent();
       onOpenChange(false);
     } else if (result.reason === 'SHARE_NOT_SUPPORTED') {
-      alert(t('modal.shareNotSupported'));
+      toast.show(t('modal.shareNotSupported'), 'error');
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     finalize();
     const url = URL.createObjectURL(pdfBlob);
     const a = document.createElement('a');
@@ -144,6 +146,8 @@ export function ShareSheet({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    await markDocumentSent();
+    onSent();
     onOpenChange(false);
   };
 
@@ -193,7 +197,14 @@ export function ShareSheet({
         {/* Message éditable */}
         <div>
           <div className="mb-1 flex items-center justify-between">
-            <label className="text-sm font-medium text-slate-700">{t('modal.message.label')}</label>
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-slate-700">{t('modal.message.label')}</label>
+              {isCustom && (
+                <span className="rounded bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700">
+                  {t('modal.message.customBadge')}
+                </span>
+              )}
+            </div>
             {isCustom && (
               <button onClick={handleReset} className="text-xs text-sage-700 underline">
                 {t('modal.message.resetButton')}

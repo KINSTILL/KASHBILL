@@ -62,7 +62,7 @@ function RegisterForm() {
 
       const res = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
         body: JSON.stringify({
           phone,
           pin,
@@ -78,13 +78,15 @@ function RegisterForm() {
       });
 
       const data = await res.json();
+      const errCode = data.code || data.error?.code;
+      const errMsg = data.message || data.error?.message;
 
       if (!res.ok) {
-        if (data.code === 'RATE_LIMITED') {
+        if (errCode === 'RATE_LIMITED') {
           setError(t('auth.errors.rateLimited'));
           return;
         }
-        setError(data.message || t('auth.errors.internal'));
+        setError(errMsg || t('auth.errors.internal'));
         return;
       }
 
@@ -164,6 +166,7 @@ function RegisterForm() {
             </label>
             <Input
               id="phone"
+              name="phone"
               type="tel"
               required
               placeholder="699 00 00 00"
@@ -183,6 +186,7 @@ function RegisterForm() {
               </label>
               <Input
                 id="pin"
+                name="pin"
                 type="password"
                 inputMode="numeric"
                 maxLength={6}
@@ -202,6 +206,7 @@ function RegisterForm() {
               </label>
               <Input
                 id="confirmPin"
+                name="confirmPin"
                 type="password"
                 inputMode="numeric"
                 maxLength={6}
@@ -223,6 +228,7 @@ function RegisterForm() {
             </label>
             <Input
               id="name"
+              name="name"
               type="text"
               placeholder="Ex: Jean Dupont"
               value={name}
@@ -240,6 +246,7 @@ function RegisterForm() {
             </label>
             <Input
               id="businessName"
+              name="businessName"
               type="text"
               placeholder="Ex: Yaoundé Boutique"
               value={businessName}
@@ -257,6 +264,7 @@ function RegisterForm() {
             </label>
             <Input
               id="city"
+              name="city"
               type="text"
               placeholder="Ex: Douala, Yaoundé..."
               value={city}
@@ -316,6 +324,7 @@ function RegisterForm() {
           <div className="flex items-start gap-2 pt-2">
             <input
               id="terms"
+              name="acceptTerms"
               type="checkbox"
               required
               checked={acceptTerms}
@@ -371,7 +380,7 @@ function RegisterForm() {
                 key={index}
                 className="rounded-lg bg-slate-100 p-2 text-center font-mono text-sm font-semibold text-slate-800 tracking-wider border border-slate-200"
               >
-                {code}
+                <code>{code}</code>
               </div>
             ))}
           </div>

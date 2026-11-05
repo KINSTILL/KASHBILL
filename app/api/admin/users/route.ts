@@ -40,6 +40,12 @@ export async function GET(req: NextRequest): Promise<Response> {
             flaggedForReview: true,
             country: true,
             createdAt: true,
+            _count: {
+              select: {
+                documents: true,
+                clients: true,
+              },
+            },
           },
         }),
         prisma.user.count({ where }),

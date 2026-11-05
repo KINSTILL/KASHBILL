@@ -46,7 +46,7 @@ export default function LoginPage() {
 
       const res = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
         body: JSON.stringify({
           phone,
           pin,
@@ -56,25 +56,28 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
+      const errCode = data.code || data.error?.code;
+      const errMsg = data.message || data.error?.message;
+      const errDetails = data.details || data.error?.details;
 
       if (!res.ok) {
-        if (data.code === 'DEVICE_LIMIT_REACHED') {
-          setActiveDevices(data.details?.activeDevices || []);
+        if (errCode === 'DEVICE_LIMIT_REACHED') {
+          setActiveDevices(errDetails?.activeDevices || []);
           setDeviceLimitSheetOpen(true);
           return;
         }
 
-        if (data.code === 'RATE_LIMITED') {
+        if (errCode === 'RATE_LIMITED') {
           setError(t('auth.errors.rateLimited'));
           return;
         }
 
-        if (data.code === 'INVALID_CREDENTIALS') {
+        if (errCode === 'INVALID_CREDENTIALS') {
           setError(t('auth.errors.invalidCredentials'));
           return;
         }
 
-        setError(data.message || t('auth.errors.internal'));
+        setError(errMsg || t('auth.errors.internal'));
         return;
       }
 
@@ -118,6 +121,7 @@ export default function LoginPage() {
           </label>
           <Input
             id="phone"
+            name="phone"
             type="tel"
             autoComplete="tel"
             required
@@ -145,6 +149,7 @@ export default function LoginPage() {
           </div>
           <Input
             id="pin"
+            name="pin"
             type="password"
             inputMode="numeric"
             maxLength={6}

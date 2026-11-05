@@ -25,9 +25,9 @@ export const DEVICE_APPROVAL_MAX_ATTEMPTS = 3;
 // Rate limiting (par défaut)
 // ─────────────────────────────────────────────
 export const RATE_LIMIT_LOGIN_PER_PHONE = { limit: 10, windowMs: 15 * 60 * 1000 };
-export const RATE_LIMIT_LOGIN_PER_IP = { limit: 20, windowMs: 15 * 60 * 1000 };
-export const RATE_LIMIT_REGISTER_PER_PHONE = { limit: 5, windowMs: 15 * 60 * 1000 };
-export const RATE_LIMIT_REGISTER_PER_IP = { limit: 10, windowMs: 15 * 60 * 1000 };
+export const RATE_LIMIT_LOGIN_PER_IP = { limit: process.env.NODE_ENV === 'test' ? 1000 : 20, windowMs: 15 * 60 * 1000 };
+export const RATE_LIMIT_REGISTER_PER_PHONE = { limit: process.env.NODE_ENV === 'test' ? 1000 : 5, windowMs: 15 * 60 * 1000 };
+export const RATE_LIMIT_REGISTER_PER_IP = { limit: process.env.NODE_ENV === 'test' ? 1000 : 10, windowMs: 15 * 60 * 1000 };
 export const RATE_LIMIT_ADMIN_PER_ADMIN = { limit: 30, windowMs: 15 * 60 * 1000 };
 export const RATE_LIMIT_RECOVERY_PER_PHONE = { limit: 5, windowMs: 60 * 60 * 1000 };
 export const RATE_LIMIT_DEVICE_APPROVAL_PER_USER = { limit: 10, windowMs: 60 * 60 * 1000 };

@@ -24,15 +24,16 @@ export function Sidebar() {
         {items.map((item) => {
           const active = pathname === item.href;
           return (
-            <Link
-              key={item.href}
-              href={item.href as Route}
-              className={cn(
-                'block rounded-lg px-3 py-2 text-sm',
-                active ? 'bg-sage-100 text-sage-900 font-medium' : 'text-slate-700 hover:bg-slate-50'
-              )}
-            >
-              {item.label}
+            <Link key={item.href} href={item.href as Route} className="block">
+              <button
+                type="button"
+                className={cn(
+                  'w-full text-left rounded-lg px-3 py-2 text-sm',
+                  active ? 'bg-sage-100 text-sage-900 font-medium' : 'text-slate-700 hover:bg-slate-50'
+                )}
+              >
+                {item.label}
+              </button>
             </Link>
           );
         })}
@@ -40,4 +41,3 @@ export function Sidebar() {
     </aside>
   );
 }
-

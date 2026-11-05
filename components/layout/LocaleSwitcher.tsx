@@ -20,13 +20,13 @@ export function LocaleSwitcher() {
     <div className="flex items-center gap-1 rounded-lg border border-slate-200 p-0.5 text-xs">
       <button
         onClick={() => switchTo('fr')}
-        className={locale === 'fr' ? 'rounded bg-sage-500 px-2 py-1 text-white' : 'px-2 py-1'}
+        className={locale === 'fr' ? 'rounded bg-sage-700 px-2 py-1 text-white font-medium' : 'px-2 py-1 text-slate-700'}
       >
         FR
       </button>
       <button
         onClick={() => switchTo('en')}
-        className={locale === 'en' ? 'rounded bg-sage-500 px-2 py-1 text-white' : 'px-2 py-1'}
+        className={locale === 'en' ? 'rounded bg-sage-700 px-2 py-1 text-white font-medium' : 'px-2 py-1 text-slate-700'}
       >
         EN
       </button>

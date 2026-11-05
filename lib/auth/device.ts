@@ -5,8 +5,11 @@ import {
 } from '@/lib/constants';
 import type { Device, User } from '@prisma/client';
 
-export function getDeviceLimit(user: Pick<User, 'proUntil'>): number {
-  const isPro = user.proUntil !== null && user.proUntil > new Date();
+export function getDeviceLimit(user: { proUntil?: Date | null; role?: string }): number {
+  if (user.role === 'ADMIN' || user.role === 'SUPPORT') {
+    return 100;
+  }
+  const isPro = user.proUntil !== null && user.proUntil !== undefined && user.proUntil > new Date();
   return isPro ? MAX_ACTIVE_DEVICES_PRO : MAX_ACTIVE_DEVICES_FREE;
 }
 

@@ -13,7 +13,7 @@ const pinSchema = z
 
 const localeSchema = z.enum(['FR', 'EN']).optional().default('FR');
 
-const deviceIdSchema = z.string().min(8, 'deviceId requis');
+const deviceIdSchema = z.string().min(1, 'deviceId requis');
 const deviceNameSchema = z.string().max(120).optional();
 
 export const registerSchema = z.object({

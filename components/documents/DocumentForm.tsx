@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -10,6 +10,8 @@ import { Card } from '@/components/ui/Card';
 import { formatFCFA } from '@/lib/utils';
 import { haptic } from '@/lib/device/haptics';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
+import { getDraft, deleteDraft } from '@/lib/storage/drafts';
+import { useToast } from '@/components/ui/Toast';
 import { getPreferredFormat, savePreferredFormat } from '@/lib/pdf/format-preference';
 import type { DocType } from '@prisma/client';
 import type { PdfFormat } from '@/lib/pdf/types';
@@ -59,8 +61,27 @@ export function DocumentForm({
   });
 
   const [submitting, setSubmitting] = useState(false);
-  const draftId = useMemo(() => initialDraftId ?? `draft-${Date.now()}`, [initialDraftId]);
+  const toast = useToast();
+  const [existingDraft, setExistingDraft] = useState<DraftState | null>(null);
+  const draftId = useMemo(() => initialDraftId ?? 'default-document-draft', [initialDraftId]);
   const { status, lastSavedAt } = useAutoSave(draftId, state.type, state);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    getDraft(draftId)
+      .then((d) => {
+        if (d && d.payload) {
+          const payload = d.payload as DraftState;
+          const hasContent =
+            payload.lines?.some((l) => (l.description && l.description.trim() !== '') || l.unitPrice > 0) ||
+            Boolean(payload.notes);
+          if (hasContent) {
+            setExistingDraft(payload);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [draftId]);
 
   const subtotal = state.lines.reduce((a, l) => a + l.quantity * l.unitPrice, 0);
   const vatAmount = state.vatRate !== null ? Math.round((subtotal * state.vatRate) / 100) : 0;
@@ -106,10 +127,11 @@ export function DocumentForm({
 
       if (!res.ok) {
         const err = await res.json();
-        alert(err.error?.message ?? 'Erreur');
+        toast.show(err.error?.message ?? 'Erreur', 'error');
         return;
       }
 
+      await deleteDraft(draftId).catch(() => {});
       const { documentId } = await res.json();
       savePreferredFormat(state.format);
       router.push(`/${locale}/documents/${documentId}?format=${state.format}` as Route);
@@ -120,9 +142,45 @@ export function DocumentForm({
 
   return (
     <div className="space-y-4">
+      {existingDraft && (
+        <Card className="border border-sage-300 bg-sage-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-slate-900">{t('resumeDraft')}</p>
+              <p className="text-xs text-slate-600">{t('resumeDraftHelp')}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  deleteDraft(draftId).catch(() => {});
+                  setExistingDraft(null);
+                }}
+              >
+                {t('discard')}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setState(existingDraft);
+                  setExistingDraft(null);
+                }}
+              >
+                {t('resume')}
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
       <Card>
-        <label className="mb-1 block text-sm font-medium">{t('type')}</label>
+        <label htmlFor="docType" className="mb-1 block text-sm font-medium">{t('type')}</label>
         <select
+          id="docType"
+          name="type"
+          aria-label={t('type')}
           value={state.type}
           onChange={(e) => {
             const type = e.target.value as DocType;
@@ -139,8 +197,11 @@ export function DocumentForm({
       </Card>
 
       <Card>
-        <label className="mb-1 block text-sm font-medium">{t('client')}</label>
+        <label htmlFor="clientId" className="mb-1 block text-sm font-medium">{t('client')}</label>
         <select
+          id="clientId"
+          name="clientId"
+          aria-label={t('client')}
           value={state.clientId ?? ''}
           onChange={(e) => setState((s) => ({ ...s, clientId: e.target.value || null }))}
           className="thumb-zone w-full rounded-lg border bg-slate-50 p-2"
@@ -159,18 +220,21 @@ export function DocumentForm({
         {state.lines.map((line, i) => (
           <div key={i} className="mb-3 space-y-2 border-b pb-3 last:border-0">
             <Input
+              name={`description-${i}`}
               placeholder={t('description')}
               value={line.description}
               onChange={(e) => updateLine(i, 'description', e.target.value)}
             />
             <div className="grid grid-cols-2 gap-2">
               <Input
+                name={`quantity-${i}`}
                 inputMode="numeric"
                 placeholder={t('quantity')}
                 value={line.quantity}
                 onChange={(e) => updateLine(i, 'quantity', Number(e.target.value))}
               />
               <Input
+                name={`unitPrice-${i}`}
                 inputMode="numeric"
                 placeholder={t('unitPrice')}
                 value={line.unitPrice || ''}
@@ -240,7 +304,7 @@ export function DocumentForm({
             <button
               key={f}
               onClick={() => setState((s) => ({ ...s, format: f }))}
-              className={`px-3 py-1 rounded ${state.format === f ? 'bg-sage-500 text-white' : ''}`}
+              className={`px-3 py-1 rounded ${state.format === f ? 'bg-sage-700 text-white font-medium' : ''}`}
             >
               {f === 'ticket' ? t('formatTicket') : t('formatA4')}
             </button>
@@ -256,7 +320,7 @@ export function DocumentForm({
       </Card>
 
       {status === 'saved' && lastSavedAt && (
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-slate-600">
           {t('draftSaved', { time: new Date(lastSavedAt).toLocaleTimeString() })}
         </p>
       )}

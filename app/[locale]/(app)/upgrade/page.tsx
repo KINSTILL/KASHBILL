@@ -6,9 +6,11 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { useToast } from '@/components/ui/Toast';
 
 export default function UpgradePage() {
   const t = useTranslations('upgrade');
+  const toast = useToast();
   const search = useSearchParams();
   const [loading, setLoading] = useState<'orange' | 'mtn' | null>(null);
   const [status, setStatus] = useState<{ proUntil: string | null; role: string } | null>(null);
@@ -63,7 +65,7 @@ export default function UpgradePage() {
         body: JSON.stringify({ channel }),
       });
       if (!res.ok) {
-        alert("Erreur lors de l'initialisation du paiement");
+        toast.show("Erreur lors de l'initialisation du paiement", 'error');
         return;
       }
       const { authorizationUrl } = await res.json();

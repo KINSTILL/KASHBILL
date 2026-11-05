@@ -34,7 +34,10 @@ export function useAdminAction() {
     try {
       const result = await adminFetch(url, options);
       if (result.ok) resolve(result.data);
-      else reject(new Error('Ré-authentification échouée'));
+      else {
+        const err = result.error as { error?: { message?: string } } | undefined;
+        reject(new Error(err?.error?.message ?? 'Action échouée'));
+      }
     } catch (e) {
       reject(e);
     }

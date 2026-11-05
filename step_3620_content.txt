@@ -1,0 +1,1020 @@
+<USER_REQUEST>
+ÉTAPE 10 — Tests E2E Playwright + Audit sécurité + Finitions UI
+Prérequis : étapes 1 à 9 validées. Tous les parcours fonctionnent manuellement. pnpm test:run passe (tests unitaires + intégration).
+
+Objectif : verrouiller le produit avant le déploiement. Cette étape n'ajoute aucune feature métier — elle valide, sécurise, corrige les bugs, et prépare la mise en production.
+
+Principe : cette étape est itérative. Si un test échoue, on corrige le code dans cette étape, pas dans les précédentes. Une étape 10 validée = produit prêt à déployer.
+
+10.1 — Setup Playwright + fixtures
+10.1.1 — Installer Playwright
+bash
+pnpm add -D @playwright/test @axe-core/playwright
+pnpm exec playwright install chromium firefox webkit
+Note : webkit = Safari. Sur Linux, l'installation peut prendre du temps. Si bloquant, on peut se limiter à chromium + firefox pour le MVP et ajouter webkit plus tard.
+
+10.1.2 — playwright.config.ts
+Crée playwright.config.ts à la racine :
+
+ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: false,         // séquentiel : DB partagée
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: 1,                   // 1 worker pour éviter conflits DB
+  reporter: process.env.CI ? [['html'], ['github']] : [['list'], ['html', { open: 'never' }]],
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
+
+  use: {
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    locale: 'fr-FR',
+    timezoneId: 'Africa/Douala',
+  },
+
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'mobile', use: { ...devices['Pixel 5'] } },
+  ],
+
+  webServer: {
+    command: 'pnpm build && pnpm start',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 180_000,
+    env: {
+      NODE_ENV: 'production',
+      DATABASE_URL: process.env.DATABASE_URL!,
+      JWT_SECRET: process.env.JWT_SECRET!,
+      // ... toutes les variables .env.local
+    },
+  },
+});
+10.1.3 — Script package.json
+json
+"test:e2e": "dotenv -e .env.test -- playwright test",
+"test:e2e:ui": "dotenv -e .env.test -- playwright test --ui",
+"test:e2e:install": "playwright install --with-deps",
+"test:all": "pnpm test:run && pnpm test:e2e"
+10.1.4 — Base de test E2E
+Important : les tests E2E utilisent la même base cashbill_test que les tests d'intégration. Il faut la réinitialiser avant chaque run E2E, puis exécuter le seed (pays, seuils, admin).
+
+Crée tests/e2e/global-setup.ts :
+
+ts
+import { execSync } from 'node:child_process';
+import { PrismaClient } from '@prisma/client';
+
+export default async function globalSetup() {
+  process.env.DATABASE_URL = process.env.DATABASE_URL!.replace(/\/[^/]+$/, '/cashbill_test');
+
+  execSync('pnpm prisma migrate deploy', { stdio: 'inherit', env: process.env });
+
+  const prisma = new PrismaClient();
+  await prisma.$executeRawUnsafe(`
+    TRUNCATE TABLE
+      "AuditLog", "FraudFlag", "BlacklistEntry", "DocumentVerification",
+      "DocumentSequence", "Document", "Client", "Subscription", "Referral",
+      "RecoveryCode", "DeviceApproval", "Device", "User",
+      "CountryTaxConfig", "FraudThreshold"
+    RESTART IDENTITY CASCADE
+  `);
+  await prisma.$disconnect();
+
+  execSync('pnpm db:seed', { stdio: 'inherit', env: process.env });
+}
+Référence dans playwright.config.ts :
+
+ts
+globalSetup: require.resolve('./tests/e2e/global-setup.ts'),
+10.1.5 — Fixtures partagées
+Crée tests/e2e/fixtures.ts :
+
+ts
+import { test as base, expect, type Page } from '@playwright/test';
+
+let counter = 0;
+function uniquePhone(): string {
+  counter++;
+  return `699${String(counter).padStart(6, '0')}`;
+}
+
+export type TestUser = {
+  phone: string;
+  pin: string;
+  deviceId: string;
+  cookie: string;
+};
+
+async function registerUser(page: Page, options?: { pin?: string; useTrial?: boolean }): Promise<TestUser> {
+  const phone = uniquePhone();
+  const pin = options?.pin ?? '123456';
+  const deviceId = crypto.randomUUID();
+
+  await page.goto('/fr/register');
+  await page.fill('input[name="phone"]', phone);
+  await page.fill('input[name="pin"]', pin);
+  await page.fill('input[name="confirmPin"]', pin);
+  await page.fill('input[name="name"]', 'Test User');
+  await page.check('input[name="acceptTerms"]');
+  await page.click('button[type="submit"]');
+
+  // Attendre l'apparition des codes de récupération
+  await expect(page.getByText(/codes de récupération/i)).toBeVisible({ timeout: 15_000 });
+  await page.click('button:has-text("J\'ai sauvegardé")');
+
+  await page.waitForURL('**/dashboard');
+
+  const cookies = await page.context().cookies();
+  const sessionCookie = cookies.find((c) => c.name === 'cashbill_session');
+  return { phone, pin, deviceId, cookie: sessionCookie?.value ?? '' };
+}
+
+export const test = base.extend<{ user: TestUser }>({
+  user: async ({ page }, use) => {
+    const u = await registerUser(page);
+    await use(u);
+  },
+});
+
+export { expect, registerUser };
+10.2 — E2E Parcours Auth
+tests/e2e/auth.spec.ts
+ts
+import { test, expect, registerUser } from './fixtures';
+
+test.describe('Auth', () => {
+  test('inscription complète avec codes de récupération', async ({ page }) => {
+    const phone = `699${Date.now().toString().slice(-6)}`;
+    await page.goto('/fr/register');
+    await page.fill('input[name="phone"]', phone);
+    await page.fill('input[name="pin"]', '123456');
+    await page.fill('input[name="confirmPin"]', '123456');
+    await page.fill('input[name="name"]', 'Awa Bello');
+    await page.fill('input[name="businessName"]', 'Awa Couture');
+    await page.fill('input[name="city"]', 'Douala');
+    await page.check('input[name="acceptTerms"]');
+    await page.click('button[type="submit"]');
+
+    // Codes de récupération
+    await expect(page.getByText(/codes de récupération/i)).toBeVisible();
+    const codes = await page.locator('code').allTextContents();
+    expect(codes.length).toBe(8);
+    codes.forEach((c) => expect(c).toMatch(/^[2-9A-HJKMNP-Z]{4}-[2-9A-HJKMNP-Z]{4}$/));
+
+    await page.click('button:has-text("J\'ai sauvegardé")');
+    await expect(page).toHaveURL(/\/fr\/dashboard/);
+    await expect(page.getByText(/Bienvenue/i)).toBeVisible();
+  });
+
+  test('rejette un PIN invalide', async ({ page }) => {
+    await page.goto('/fr/register');
+    await page.fill('input[name="phone"]', '699999999');
+    await page.fill('input[name="pin"]', '123'); // trop court
+    await page.fill('input[name="confirmPin"]', '123');
+    await page.check('input[name="acceptTerms"]');
+    await page.click('button[type="submit"]');
+    await expect(page.getByText(/6 chiffres/i)).toBeVisible();
+  });
+
+  test('login sur device existant', async ({ page, user }) => {
+    await page.goto('/fr/login');
+    await page.fill('input[name="phone"]', user.phone);
+    await page.fill('input[name="pin"]', user.pin);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard');
+  });
+
+  test('device limit en gratuit', async ({ page, user }) => {
+    // Se connecter depuis un nouveau contexte = nouveau device
+    const newContext = await page.context().browser()!.newContext();
+    const p2 = await newContext.newPage();
+    await p2.goto('/fr/login');
+    await p2.fill('input[name="phone"]', user.phone);
+    await p2.fill('input[name="pin"]', user.pin);
+    await p2.click('button[type="submit"]');
+
+    // Doit afficher le Sheet DEVICE_LIMIT_REACHED
+    await expect(p2.getByText(/limite d'appareils/i)).toBeVisible();
+    await newContext.close();
+  });
+
+  test('recovery flow', async ({ page }) => {
+    const phone = `699${Date.now().toString().slice(-6)}`;
+    // Créer un compte manuellement
+    await page.goto('/fr/register');
+    await page.fill('input[name="phone"]', phone);
+    await page.fill('input[name="pin"]', '111111');
+    await page.fill('input[name="confirmPin"]', '111111');
+    await page.fill('input[name="name"]', 'Recovery Test');
+    await page.check('input[name="acceptTerms"]');
+    await page.click('button[type="submit"]');
+    await expect(page.getByText(/codes de récupération/i)).toBeVisible();
+    const codes = await page.locator('code').allTextContents();
+    const firstCode = codes[0]!;
+    await page.click('button:has-text("J\'ai sauvegardé")');
+
+    // Logout
+    await page.click('button:has-text("Profil")');
+    await page.click('button:has-text("Déconnexion")');
+    await page.waitForURL(/\/fr\/login/);
+
+    // Recovery
+    await page.click('a:has-text("PIN oublié")');
+    await page.fill('input[name="phone"]', phone);
+    await page.fill('input[name="recoveryCode"]', firstCode);
+    await page.fill('input[name="newPin"]', '999999');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard');
+
+    // Vérifier que le nouveau PIN fonctionne
+    await page.click('button:has-text("Profil")');
+    await page.click('button:has-text("Déconnexion")');
+    await page.fill('input[name="phone"]', phone);
+    await page.fill('input[name="pin"]', '999999');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard');
+  });
+});
+10.3 — E2E Parcours Documents + WhatsApp
+tests/e2e/documents.spec.ts
+ts
+import { test, expect } from './fixtures';
+
+test.describe('Documents', () => {
+  test('création client → devis → ShareSheet → WhatsApp', async ({ page, user }) => {
+    // Créer un client
+    await page.goto('/fr/clients/new');
+    await page.fill('input[name="name"]', 'Jean Dupont');
+    await page.fill('input[name="phone"]', '699888777');
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/clients');
+
+    // Créer un devis
+    await page.click('button:has-text("Nouveau")');
+    await page.selectOption('select[name="type"]', 'DEVIS');
+    await page.selectOption('select[name="clientId"]', { label: 'Jean Dupont' });
+
+    // 2 lignes
+    await page.fill('input[name="description-0"]', 'Confection robe');
+    await page.fill('input[name="quantity-0"]', '2');
+    await page.fill('input[name="unitPrice-0"]', '25000');
+    await page.click('button:has-text("Ajouter une ligne")');
+    await page.fill('input[name="description-1"]', 'Retouche');
+    await page.fill('input[name="quantity-1"]', '1');
+    await page.fill('input[name="unitPrice-1"]', '5000');
+
+    // Total = 55000
+    await expect(page.getByText('55 000 FCFA')).toBeVisible();
+
+    // Format par défaut = A4 pour devis
+    await expect(page.locator('button:has-text("A4 Pro")')).toHaveClass(/bg-sage-500/);
+
+    await page.click('button:has-text("Générer le document")');
+    await page.waitForURL(/\/fr\/documents\/[^/]+/);
+
+    // Aperçu PDF
+    await expect(page.locator('object[type="application/pdf"]')).toBeVisible({ timeout: 20_000 });
+
+    // Ouvrir ShareSheet
+    await page.click('button:has-text("Envoyer")');
+    await expect(page.getByText('Envoyer le document')).toBeVisible();
+
+    // Changer le ton
+    await page.click('button:has-text("Pratique")');
+    const textarea = page.locator('textarea');
+    await expect(textarea).toContainText(/Hello ! Voici le brouillon/i);
+
+    // Changer Tu/Vous
+    await page.click('button:has-text("Vous")');
+    await expect(textarea).toContainText(/Vérifiez/i);
+
+    // Éditer manuellement
+    await textarea.fill('Message personnalisé pour Jean');
+    await expect(page.getByText('Personnalisé')).toBeVisible();
+
+    // Télécharger le PDF
+    const downloadPromise = page.waitForEvent('download');
+    await page.click('button:has-text("Télécharger le PDF")');
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/^CB-\d{4}-\d{6}\.pdf$/);
+
+    // Vérifier taille du PDF < 100 Ko
+    const path = await download.path();
+    const fs = await import('node:fs');
+    const stats = fs.statSync(path!);
+    expect(stats.size).toBeLessThan(100 * 1024);
+  });
+
+  test('auto-save brouillon + reprise', async ({ page, user }) => {
+    await page.goto('/fr/documents/new');
+    await page.fill('input[name="description-0"]', 'Test brouillon');
+    await page.fill('input[name="unitPrice-0"]', '12345');
+    // Attendre l'auto-save (2s debounce)
+    await page.waitForTimeout(2500);
+    await expect(page.getByText(/Brouillon sauvegardé/i)).toBeVisible();
+
+    // Recharger la page
+    await page.reload();
+
+    // Doit proposer la reprise
+    await expect(page.getByText(/Reprendre le brouillon/i)).toBeVisible();
+    await page.click('button:has-text("Reprendre")');
+    await expect(page.locator('input[name="description-0"]')).toHaveValue('Test brouillon');
+    await expect(page.locator('input[name="unitPrice-0"]')).toHaveValue('12345');
+  });
+
+  test('limite 3 clients en gratuit', async ({ page, user }) => {
+    for (let i = 0; i < 3; i++) {
+      await page.goto('/fr/clients/new');
+      await page.fill('input[name="name"]', `Client ${i}`);
+      await page.click('button[type="submit"]');
+      await page.waitForURL('**/clients');
+    }
+    await page.goto('/fr/clients/new');
+    await page.fill('input[name="name"]', 'Client 4');
+    await page.click('button[type="submit"]');
+    await expect(page.getByText(/Limite gratuite atteinte/i)).toBeVisible();
+  });
+
+  test('sélecteur de format Ticket vs A4', async ({ page, user }) => {
+    await page.goto('/fr/documents/new');
+    await page.selectOption('select[name="type"]', 'RECU');
+    // Format par défaut = Ticket pour RECU
+    await expect(page.locator('button:has-text("Ticket 80mm")')).toHaveClass(/bg-sage-500/);
+    // Override manuel vers A4
+    await page.click('button:has-text("A4 Pro")');
+    await expect(page.locator('button:has-text("A4 Pro")')).toHaveClass(/bg-sage-500/);
+  });
+});
+10.4 — E2E Parcours Paiement + Parrainage
+tests/e2e/payment-referral.spec.ts
+ts
+import { test, expect, registerUser } from './fixtures';
+
+test.describe('Paiement + Parrainage', () => {
+  test('parrainage complet', async ({ page, browser }) => {
+    // Parrain (user1)
+    const parrain = await registerUser(page);
+    await page.goto('/fr/referrals');
+    const code = await page.locator('p.font-mono').first().textContent();
+    expect(code).toBeTruthy();
+
+    // Filleul (user2, nouveau contexte)
+    const ctx2 = await browser.newContext();
+    const page2 = await ctx2.newPage();
+    const filleul = await registerUser(page2);
+
+    // Le filleul crée et envoie un document
+    await page2.goto('/fr/documents/new');
+    await page2.fill('input[name="description-0"]', 'Test parrainage');
+    await page2.fill('input[name="unitPrice-0"]', '1000');
+    await page2.click('button:has-text("Générer le document")');
+    await page2.waitForURL(/\/documents\/[^/]+/);
+    await page2.click('button:has-text("Envoyer")');
+    await page2.click('button:has-text("Télécharger le PDF")');
+
+    // Le parrain doit voir +7 jours
+    await page.goto('/fr/dashboard');
+    // Vérifier via l'API que proUntil a été mis à jour
+    const res = await page.request.get('/api/auth/me');
+    const me = await res.json();
+    expect(new Date(me.user.proUntil).getTime()).toBeGreaterThan(Date.now() + 5 * 24 * 60 * 60 * 1000);
+
+    await ctx2.close();
+  });
+
+  test('page upgrade charge et boutons présents', async ({ page, user }) => {
+    await page.goto('/fr/upgrade');
+    await expect(page.getByText(/Passer Pro/i)).toBeVisible();
+    await expect(page.getByText(/2 000 FCFA/i)).toBeVisible();
+    await expect(page.locator('button:has-text("Orange Money")')).toBeVisible();
+    await expect(page.locator('button:has-text("MTN MoMo")')).toBeVisible();
+  });
+});
+10.5 — E2E Parcours Admin
+tests/e2e/admin.spec.ts
+ts
+import { test, expect } from '@playwright/test';
+import { registerUser } from './fixtures';
+
+test.describe('Admin', () => {
+  test('login admin + stats', async ({ page }) => {
+    await page.goto('/fr/login');
+    await page.fill('input[name="phone"]', process.env.ADMIN_PHONE!);
+    await page.fill('input[name="pin"]', process.env.ADMIN_PIN!);
+    await page.click('button[type="submit"]');
+    await page.waitForURL('**/dashboard');
+
+    await page.goto('/fr/admin');
+    await expect(page.getByText('Tableau de bord')).toBeVisible();
+    await expect(page.getByText('Utilisateurs')).toBeVisible();
+    await expect(page.getByText('Documents')).toBeVisible();
+  });
+
+  test('SUPPORT ne peut pas bannir', async ({ page }) => {
+    // Créer un SUPPORT via Prisma + login
+    // Vérifier que /admin/users/[id]/ban est inaccessible
+    // Test à compléter quand un SUPPORT est seedé
+  });
+
+  test('création SUPPORT + bannissement USER par ADMIN', async ({ page, browser }) => {
+    // 1. Login ADMIN
+    await page.goto('/fr/login');
+    await page.fill('input[name="phone"]', process.env.ADMIN_PHONE!);
+    await page.fill('input[name="pin"]', process.env.ADMIN_PIN!);
+    await page.click('button[type="submit"]');
+
+    // 2. Créer un USER cible dans un autre contexte
+    const ctx2 = await browser.newContext();
+    const p2 = await ctx2.newPage();
+    const victim = await registerUser(p2);
+
+    // 3. Aller dans /admin/users, chercher la victime, bannir
+    await page.goto('/fr/admin/users');
+    await page.fill('input[type="search"]', victim.phone);
+    await page.waitForTimeout(500);
+    await page.click(`a:has-text("${victim.phone}")`);
+    await page.click('button:has-text("Bannir")');
+
+    // Reauth Sheet
+    await expect(page.getByText(/Ré-authentification requise/i)).toBeVisible();
+    await page.fill('input[inputmode="numeric"]', process.env.ADMIN_PIN!);
+    await page.click('button:has-text("Confirmer")');
+
+    // Vérifier que la victime est bannie (tente de se connecter)
+    await p2.goto('/fr/login');
+    await p2.fill('input[name="phone"]', victim.phone);
+    await p2.fill('input[name="pin"]', victim.pin);
+    await p2.click('button[type="submit"]');
+    await expect(p2.getByText(/suspendu/i)).toBeVisible();
+
+    await ctx2.close();
+  });
+
+  test('seuils bornés côté API', async ({ page }) => {
+    await page.goto('/fr/login');
+    await page.fill('input[name="phone"]', process.env.ADMIN_PHONE!);
+    await page.fill('input[name="pin"]', process.env.ADMIN_PIN!);
+    await page.click('button[type="submit"]');
+
+    const res = await page.request.patch('/api/admin/thresholds/MAX_DOCS_PER_24H', {
+      headers: { 'X-Requested-With': 'fetch' },
+      data: { value: 5, reason: 'test' },
+    });
+    expect(res.status()).toBe(401); // REAUTH_REQUIRED
+
+    // Avec reauth
+    const reauth = await page.request.post('/api/admin/reauth/issue', {
+      headers: { 'X-Requested-With': 'fetch' },
+      data: { pin: process.env.ADMIN_PIN! },
+    });
+    const { reauthToken } = await reauth.json();
+
+    const res2 = await page.request.patch('/api/admin/thresholds/MAX_DOCS_PER_24H', {
+      headers: { 'X-Requested-With': 'fetch', 'X-Reauth-Token': reauthToken },
+      data: { value: 5, reason: 'test' },
+    });
+    expect(res2.status()).toBe(403); // valeur < floor 10
+  });
+});
+10.6 — Audit sécurité
+10.6.1 — Script scripts/security-audit.sh
+Crée scripts/security-audit.sh :
+
+bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_URL="${BASE_URL:-http://localhost:3000}"
+FAILURES=0
+
+check() {
+  local name="$1"
+  local expected="$2"
+  local actual="$3"
+
+  if [ "$expected" = "$actual" ]; then
+    echo "✅ $name → $actual"
+  else
+    echo "❌ $name → attendu $expected, reçu $actual"
+    FAILURES=$((FAILURES + 1))
+  fi
+}
+
+echo "═══════════════════════════════════════════════════════════"
+echo "AUDIT SÉCURITÉ CASHBILL"
+echo "═══════════════════════════════════════════════════════════"
+
+# 1. CSRF : mutation sans X-Requested-With → 403
+status=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{"phone":"699000000","pin":"123456","deviceId":"x","locale":"FR"}')
+check "CSRF sans header" "403" "$status"
+
+# 2. Rate limit login : 11 tentatives → la 11e = 429
+for i in $(seq 1 10); do
+  curl -s -o /dev/null -X POST "$BASE_URL/api/auth/login" \
+    -H "Content-Type: application/json" -H "X-Requested-With: fetch" \
+    -d '{"phone":"699000099","pin":"999999","deviceId":"x"}'
+done
+status=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/auth/login" \
+  -H "Content-Type: application/json" -H "X-Requested-With: fetch" \
+  -d '{"phone":"699000099","pin":"999999","deviceId":"x"}')
+check "Rate limit login" "429" "$status"
+
+# 3. Headers sécurité
+headers=$(curl -s -I "$BASE_URL/fr")
+check "X-Frame-Options" "DENY" "$(echo "$headers" | grep -i 'x-frame-options' | awk '{print $2}' | tr -d '\r')"
+check "X-Content-Type-Options" "nosniff" "$(echo "$headers" | grep -i 'x-content-type-options' | awk '{print $2}' | tr -d '\r')"
+csp=$(echo "$headers" | grep -i 'content-security-policy' | head -1)
+if echo "$csp" | grep -q "default-src 'self'"; then
+  echo "✅ Content-Security-Policy présent"
+else
+  echo "❌ Content-Security-Policy manquant ou invalide"
+  FAILURES=$((FAILURES + 1))
+fi
+
+# 4. Auth bypass : /api/auth/me sans cookie → 401
+status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/auth/me")
+check "Auth bypass /api/auth/me" "401" "$status"
+
+# 5. Auth bypass : /api/admin/users sans cookie → 401
+status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/admin/users")
+check "Auth bypass /api/admin/users" "401" "$status"
+
+# 6. Webhook signature invalide → 401
+status=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/webhooks/notchpay" \
+  -H "Content-Type: application/json" -H "X-Notchpay-Signature: invalid" \
+  -d '{"event":"payment.complete","data":{"reference":"x"}}')
+check "Webhook signature invalide" "401" "$status"
+
+# 7. Directory traversal uploads
+status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/uploads/..%2F..%2Fetc%2Fpasswd")
+check "Directory traversal uploads" "401" "$status"
+
+# 8. Health endpoint
+status=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/api/health")
+check "Health check" "200" "$status"
+
+echo "═══════════════════════════════════════════════════════════"
+if [ $FAILURES -eq 0 ]; then
+  echo "✅ AUDIT SÉCURITÉ : TOUS LES TESTS PASSENT"
+  exit 0
+else
+  echo "❌ AUDIT SÉCURITÉ : $FAILURES ÉCHEC(S)"
+  exit 1
+fi
+Rends-le exécutable : chmod +x scripts/security-audit.sh.
+
+Ajoute dans package.json :
+
+json
+"audit:security": "bash scripts/security-audit.sh"
+10.6.2 — Audit manuel XSS
+Teste manuellement ces payloads dans les champs nom client, description, notes :
+
+text
+<script>alert('xss')</script>
+<img src=x onerror=alert(1)>
+<svg onload=alert(1)>
+javascript:alert(1)
+"><script>alert(1)</script>
+Résultat attendu :
+
+Aucun alert() ne s'exécute
+
+Les valeurs sont échappées dans l'UI (React le fait par défaut)
+
+Les valeurs dans le PDF sont échappées aussi (@react-pdf/renderer échappe par défaut)
+
+10.6.3 — Audit manuel SQLi
+Teste dans les champs recherche (admin/users) :
+
+text
+' OR '1'='1
+'; DROP TABLE "User"; --
+1' UNION SELECT * FROM "User" --
+Résultat attendu : aucune erreur, aucune fuite. Prisma paramètre tout, donc pas d'injection possible par défaut. Vérifier qu'il n'y a aucun $queryRaw avec concaténation de string (audit code : grep -rn 'queryRaw' lib app → toutes les occurrences doivent utiliser $queryRaw\...`` avec template literal ou être justifiées).
+
+10.7 — Audit accessibilité
+tests/e2e/a11y.spec.ts
+ts
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+const pages = [
+  '/fr/login',
+  '/fr/register',
+  '/fr/recovery',
+  '/fr/dashboard',
+  '/fr/documents/new',
+  '/fr/clients',
+  '/fr/settings',
+  '/fr/upgrade',
+  '/fr/referrals',
+];
+
+test.describe('Accessibilité WCAG AA', () => {
+  for (const path of pages) {
+    test(`${path} sans violations critiques`, async ({ page, user }) => {
+      await page.goto(path);
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze();
+
+      const critical = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
+      if (critical.length > 0) {
+        console.error(`Violations sur ${path}:`, critical.map((v) => ({ id: v.id, nodes: v.nodes.length })));
+      }
+      expect(critical).toHaveLength(0);
+    });
+  }
+});
+Note : les user fixtures s'appliquent automatiquement grâce à l'extension Playwright. Si une page n'a pas besoin d'auth, ajoute un override test.skip ou utilise un contexte séparé.
+
+Checklist manuelle accessibilité
+□ Clavier : tabuler dans toutes les pages → focus visible, ordre logique, pas de piège.
+□ Contraste : utiliser DevTools → Accessibility → Contrast. Minimum AA = 4.5:1 pour le texte, 3:1 pour les grands textes.
+□ Labels : chaque input a un <label> associé (vérifier via l'inspecteur).
+□ Images : chaque <img> a un alt (ou aria-label).
+□ Modales : focus trap (Tab reste dans le Sheet), Esc ferme.
+□ Boutons icon-only : aria-label présent.
+□ Couleur seule : ne jamais utiliser la couleur seule pour signifier l'état (ajouter texte/icône).
+10.8 — Audit performance
+10.8.1 — Lighthouse CLI
+bash
+pnpm add -D @lhci/cli
+Crée .lighthouserc.json :
+
+json
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "http://localhost:3000/fr",
+        "http://localhost:3000/fr/dashboard",
+        "http://localhost:3000/fr/documents/new"
+      ],
+      "numberOfRuns": 3,
+      "settings": {
+        "preset": "desktop"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.85 }],
+        "categories:accessibility": ["error", { "minScore": 0.90 }],
+        "categories:best-practices": ["warn", { "minScore": 0.85 }],
+        "categories:seo": ["warn", { "minScore": 0.80 }]
+      }
+    },
+    "upload": { "target": "temporary-public-storage" }
+  }
+}
+Ajoute dans package.json :
+
+json
+"audit:lighthouse": "lhci autorun"
+Cible : performance ≥ 85 (desktop), accessibilité ≥ 90.
+
+10.8.2 — Audit taille bundle
+bash
+pnpm build
+Vérifie dans la sortie que :
+
+First Load JS sur /dashboard < 150 Ko
+
+First Load JS sur /documents/new < 200 Ko (car @react-pdf/renderer est en dynamic import, il ne doit pas être dans le bundle initial)
+
+PDF size < 100 Ko (vérifié dans le test E2E)
+
+Si un bundle dépasse, analyser avec :
+
+bash
+pnpm add -D @next/bundle-analyzer
+Puis ANALYZE=true pnpm build → ouvrir les rapports HTML.
+
+10.8.3 — Test PWA sur mobile bas de gamme
+Cible : simuler un téléphone d'entrée de gamme camerounais.
+
+Ouvrir Chrome DevTools → Performance → CPU throttling 4x slowdown.
+
+Network throttling Slow 4G.
+
+Naviguer dans l'app.
+
+Objectif : Time to Interactive < 5s sur /dashboard, < 8s sur /documents/new.
+
+Si trop lent :
+
+Compresser davantage les images de logo.
+
+Lazy-loader les composants lourds (PDF, ShareSheet).
+
+Réduire la taille du JS initial (split chunks).
+
+10.9 — Finitions UI + correction de bugs
+10.9.1 — Correction de bugs identifiés
+Passe en revue les bugs détectés pendant les tests E2E et le test manuel. Corrections typiques :
+
+Bouton désactivé pendant loading partout (double-clic évité).
+
+Toasts de succès/erreur cohérents (utiliser <Toast> de components/ui, pas alert()).
+
+Loading states sur tous les boutons async.
+
+Formatage FCFA uniforme (utiliser formatFCFA partout).
+
+Dates uniformes (utiliser formatDate partout).
+
+Retour arrière après création (pas de page blanche).
+
+Bouton "Retour" sur les pages qui n'en ont pas.
+
+10.9.2 — Remplacement alert() par Toast
+Audit :
+
+bash
+grep -rn "alert(" app components lib --include="*.tsx" --include="*.ts"
+Remplace tous les alert() par un toast. Ajoute components/ui/Toast.tsx si pas déjà fait :
+
+tsx
+'use client';
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+
+type Toast = { id: string; message: string; type: 'success' | 'error' | 'info' };
+const ToastContext = createContext<{ show: (msg: string, type?: Toast['type']) => void }>({
+  show: () => {},
+});
+
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const show = useCallback((message: string, type: Toast['type'] = 'info') => {
+    const id = crypto.randomUUID();
+    setToasts((t) => [...t, { id, message, type }]);
+    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4000);
+  }, []);
+
+  return (
+    <ToastContext.Provider value={{ show }}>
+      {children}
+      <div className="fixed bottom-20 left-1/2 z-[60] -translate-x-1/2 space-y-2 md:bottom-4">
+        {toasts.map((t) => (
+          <div key={t.id} className={`rounded-lg px-4 py-2 text-sm text-white shadow-lg ${
+            t.type === 'success' ? 'bg-success' : t.type === 'error' ? 'bg-error' : 'bg-slate-800'
+          }`}>
+            {t.message}
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
+}
+
+export function useToast() {
+  return useContext(ToastContext);
+}
+Monte <ToastProvider> dans app/[locale]/layout.tsx (dans SessionProvider).
+
+10.9.3 — Error boundaries
+Crée app/[locale]/error.tsx et app/[locale]/global-error.tsx :
+
+tsx
+// app/[locale]/error.tsx
+'use client';
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
+  return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+      <div className="mb-4 text-6xl">⚠️</div>
+      <h1 className="mb-2 text-xl font-bold">Une erreur est survenue</h1>
+      <p className="mb-4 text-sm text-slate-600">{error.message}</p>
+      <button onClick={reset} className="rounded-lg bg-sage-500 px-4 py-2 text-white">
+        Réessayer
+      </button>
+    </div>
+  );
+}
+10.9.4 — 404 page
+Crée app/[locale]/not-found.tsx :
+
+tsx
+export default function NotFound() {
+  return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+      <div className="mb-4 text-6xl">🔍</div>
+      <h1 className="mb-2 text-xl font-bold">Page introuvable</h1>
+      <a href="/fr" className="rounded-lg bg-sage-500 px-4 py-2 text-white">Retour à l'accueil</a>
+    </div>
+  );
+}
+10.9.5 — Nettoyage console
+Audit :
+
+bash
+grep -rn "console.log" app components lib --include="*.tsx" --include="*.ts"
+Retire tous les console.log (garder console.error et console.warn justifiés).
+
+10.9.6 — Vérifier les textes i18n
+Audit :
+
+bash
+# Rechercher les strings en dur dans les composants
+grep -rn '>[A-Z][a-z]' components app --include="*.tsx" | grep -v 't(' | grep -v 'className'
+Corriger les textes qui ne passent pas par t().
+
+10.10 — Checklist finale d'acceptation
+Crée docs/ACCEPTANCE.md et coche au fur et à mesure :
+
+markdown
+# ✅ Checklist d'acceptation CashBill
+
+## Auth
+- [ ] Inscription avec codes de récupération affichés et obligatoires
+- [ ] Login sur device existant
+- [ ] Device limit en gratuit (1) et Pro (2)
+- [ ] Approbation d'un nouvel appareil
+- [ ] Récupération de compte par code de secours
+- [ ] Logout
+- [ ] Session 7j user / 4h admin
+
+## Documents
+- [ ] Création DEVIS / PROFORMA / FACTURE / RECU / TICKET / BON_COMMANDE / BORDEREAU
+- [ ] Numérotation atomique (pas de doublon, pas de trou)
+- [ ] Hash d'intégrité calculé
+- [ ] QR code généré
+- [ ] PDF Ticket 80mm < 100 Ko
+- [ ] PDF A4 < 100 Ko
+- [ ] Filigrane en gratuit, absent en Pro
+- [ ] Logo / signature / cachet affichés en Pro
+- [ ] ShareSheet (3 tons + Tu/Vous + message éditable)
+- [ ] Envoi WhatsApp (wa.me)
+- [ ] Partage natif (navigator.share) sur mobile
+- [ ] Téléchargement PDF
+- [ ] Page /verify/<token> : authentique / frauduleux / inconnu
+- [ ] Mark-sent déclenche l'activation du parrainage
+
+## Clients
+- [ ] CRUD complet
+- [ ] Limite 3 en gratuit
+- [ ] Contacts Picker (Pro)
+- [ ] NFC (Pro)
+
+## Freemium
+- [ ] Trial 3 jours à l'inscription
+- [ ] Bannière J-2 / J-1 / J-0
+- [ ] Limite 7 jours d'historique
+- [ ] Limite 1 modification/document
+- [ ] Limite 3 duplications/mois
+- [ ] Limite 10 photos produit
+- [ ] Logo masqué > 30 jours, conservé en DB
+
+## Parrainage
+- [ ] Code unique par user
+- [ ] Lien `?ref=CODE` enregistre le parrain
+- [ ] +7j Pro au filleul immédiat
+- [ ] +7j Pro au parrain après activation
+- [ ] Plafond 30 jours
+- [ ] Anti-fraude (même IP, même device)
+
+## Paiement
+- [ ] Init Notch Pay Orange Money
+- [ ] Init Notch Pay MTN MoMo
+- [ ] Webhook signé (HMAC) validé
+- [ ] Idempotence webhook
+- [ ] Pro activé après paiement
+- [ ] Pro étendu si déjà Pro
+
+## Admin
+- [ ] Login admin
+- [ ] Stats dashboard
+- [ ] Liste users + recherche
+- [ ] Bannir / débannir
+- [ ] Suspendre
+- [ ] Réinitialiser PIN (reauth)
+- [ ] Accorder Pro
+- [ ] File de fraude + confirm/dismiss
+- [ ] Blacklist
+- [ ] Seuils bornés
+- [ ] Pays CRUD
+- [ ] Créer / révoquer SUPPORT
+- [ ] Audit log
+- [ ] 4 actions SSH only refusées (création ADMIN, export, baisse seuil sous floor, suppression blacklist)
+
+## Sécurité
+- [ ] CSRF sur toutes les mutations
+- [ ] Rate limiting sur auth + admin + paiement
+- [ ] Headers sécurité (CSP, HSTS, X-Frame, etc.)
+- [ ] Auth bypass impossible
+- [ ] XSS impossible (React escaping)
+- [ ] SQLi impossible (Prisma paramétré)
+- [ ] Webhook signature
+- [ ] Directory traversal uploads
+- [ ] AuditLog immuable (trigger DB)
+- [ ] Dernier ADMIN protégé (trigger DB)
+- [ ] Aucun `any` non justifié
+- [ ] Aucun `process.env` hors `lib/env.ts`
+- [ ] Aucun secret commité
+
+## PWA
+- [ ] Manifest accessible
+- [ ] Service worker enregistré en prod
+- [ ] Installable Chrome Android
+- [ ] Offline : page /offline
+- [ ] Brouillons conservés hors ligne
+- [ ] Bannière offline
+- [ ] Notification brouillon
+
+## Accessibilité
+- [ ] axe-core : 0 violation critical/serious sur toutes les pages
+- [ ] Navigation clavier complète
+- [ ] Focus visible
+- [ ] Labels sur tous les inputs
+- [ ] Contraste AA
+- [ ] Modales : focus trap + Esc
+
+## Performance
+- [ ] Lighthouse performance ≥ 85 (desktop)
+- [ ] Lighthouse accessibilité ≥ 90
+- [ ] First Load JS < 200 Ko
+- [ ] PDF < 100 Ko
+- [ ] Test 4x CPU slowdown → interactif < 8s
+
+## UX
+- [ ] Aucun `alert()` (toasts uniquement)
+- [ ] Aucun `console.log`
+- [ ] Tous les textes via `t()`
+- [ ] Loading states partout
+- [ ] Error boundaries
+- [ ] 404 page
+- [ ] Empty states partout
+- [ ] Boutons 48px+ sur mobile
+- [ ] BottomNav 4 onglets
+- [ ] Aucun menu burger
+
+## Tests
+- [ ] `pnpm test:run` : 100% vert
+- [ ] `pnpm test:e2e` : 100% vert
+- [ ] `pnpm test:coverage` : `lib/auth/**` ≥ 60%
+- [ ] `pnpm audit:security` : 0 échec
+- [ ] `pnpm build` : 0 warning
+✅ VALIDATION DE L'ÉTAPE 10
+1. Tous les tests passent
+bash
+pnpm test:run
+pnpm test:e2e
+→ 100% vert sur les deux.
+
+2. Audit sécurité
+bash
+pnpm audit:security
+→ ✅ AUDIT SÉCURITÉ : TOUS LES TESTS PASSENT
+
+3. Audit accessibilité
+bash
+pnpm test:e2e --grep "Accessibilité"
+→ 0 violation critical ou serious.
+
+4. Audit Lighthouse
+bash
+pnpm audit:lighthouse
+→ Performance ≥ 85, Accessibilité ≥ 90.
+
+5. Checklist acceptance
+Ouvre docs/ACCEPTANCE.md et coche tout. S'il reste des cases non cochées, corrige dans cette étape.
+
+Critère de sortie : tous les tests verts, tous les audits passent, checklist 100% cochée, aucun bug connu.
+
+Ce que tu NE fais PAS dans cette étape
+❌ Pas de nouvelles features métier
+
+❌ Pas de refonte UI
+
+❌ Pas de déploiement VPS (étape 11)
+
+❌ Pas de scripts CLI SSH (étape 11)
+
+❌ Pas de monitoring/alerting (étape 11)
+
+Ce que tu me dis quand c'est validé
+« Étape 10 validée. pnpm test:run + pnpm test:e2e → 100% vert. pnpm audit:security → 0 échec. pnpm audit:lighthouse → Perf 87, A11y 94. Checklist docs/ACCEPTANCE.md 100% cochée. Aucun bug connu. »
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-05T05:49:19+01:00.
+
+The user's current state is as follows:
+Active Document: c:\Users\Famille Mouelnjock\Documents\KASHBILL\tsconfig.json (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 27
+Other open documents:
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\prisma\seed.ts (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\scratch\test_step9_workflow.ts (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\tests\integration\payments.test.ts (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\lib\payments\notchpay.ts (LANGUAGE_UNSPECIFIED)
+- c:\Users\Famille Mouelnjock\Documents\KASHBILL\components\pwa\InstallPrompt.tsx (LANGUAGE_UNSPECIFIED)
+</ADDITIONAL_METADATA>

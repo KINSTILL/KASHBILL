@@ -197,7 +197,14 @@ export default function AdminUserDetailPage({
               variant="outline"
               size="sm"
               className="text-error border-error/30 hover:bg-red-50"
-              onClick={() => setActiveModal('ban')}
+              onClick={() =>
+                handleAction(() =>
+                  run(`/api/admin/users/${id}/ban`, {
+                    method: 'POST',
+                    body: JSON.stringify({ reason: 'Banni par administrateur' }),
+                  })
+                )
+              }
             >
               Bannir
             </Button>
