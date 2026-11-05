@@ -40,13 +40,13 @@ export async function POST(req: NextRequest): Promise<Response> {
         },
       });
 
-      const reference = `CB-${subscription.id.slice(-12).toUpperCase()}`;
+      const reference = `MCB-${subscription.id.slice(-12).toUpperCase()}`;
 
       const result = await initNotchPayPayment({
         amountXaf: PRO_PRICE_FCFA,
         currency: 'XAF',
         reference,
-        description: `CashBill Pro — 30 jours`,
+        description: `MyCashBill Pro — 30 jours`,
         customerPhone: user.phone,
         customerName: user.name ?? user.businessName ?? 'Utilisateur',
         callbackUrl: `${env.APP_URL}/fr/upgrade?ref=${reference}`,

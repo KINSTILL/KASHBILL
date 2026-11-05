@@ -57,7 +57,7 @@ test.describe('Documents', () => {
     const downloadPromise = page.waitForEvent('download');
     await page.click('button:has-text("Télécharger le PDF")');
     const download = await downloadPromise;
-    expect(download.suggestedFilename()).toMatch(/^CB-\d{4}-\d{6}\.pdf$/);
+    expect(download.suggestedFilename()).toMatch(/^MCB-\d{4}-\d{6}\.pdf$/);
 
     // Vérifier taille du PDF < 100 Ko
     const path = await download.path();

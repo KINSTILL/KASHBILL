@@ -52,7 +52,7 @@ async function registerUser(
   await page.waitForURL('**/dashboard');
 
   const cookies = await page.context().cookies();
-  const sessionCookie = cookies.find((c) => c.name === 'cashbill_session');
+  const sessionCookie = cookies.find((c) => c.name === 'mycashbill_session');
   return { phone, pin, deviceId, cookie: sessionCookie?.value ?? '' };
 }
 

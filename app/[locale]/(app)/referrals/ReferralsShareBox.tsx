@@ -26,7 +26,7 @@ export function ReferralsShareBox({
 
   const handleWhatsApp = () => {
     const text = encodeURIComponent(
-      `Rejoins-moi sur CashBill pour créer tes devis et factures professionnels hors-ligne ! Inscris-toi ici : ${link}`
+      `Rejoins-moi sur MyCashBill pour créer tes devis et factures professionnels hors-ligne ! Inscris-toi ici : ${link}`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };

@@ -1,4 +1,4 @@
-# Déploiement CashBill
+# Déploiement MyCashBill
 
 ## Prérequis
 - VPS Contabo Ubuntu 22.04
@@ -11,10 +11,10 @@
 - **PostgreSQL 16** : local (127.0.0.1:5432)
 - **Node 20** : via apt, pnpm via corepack
 - **Utilisateur** : `deploy` (non-root, SSH clé uniquement)
-- **App** : `/var/www/cashbill`
+- **App** : `/var/www/mycashbill`
 
 ## Variables d'env
-`/var/www/cashbill/.env.production` (chmod 600, owner deploy)
+`/var/www/mycashbill/.env.production` (chmod 600, owner deploy)
 
 ## Déploiement automatique
 Push sur `main` → GitHub Actions → CI (tests) → SSH deploy → `pm2 reload`.
@@ -22,12 +22,12 @@ Push sur `main` → GitHub Actions → CI (tests) → SSH deploy → `pm2 reload
 ## Déploiement manuel
 ```bash
 ssh deploy@SERVER_IP
-cd /var/www/cashbill
+cd /var/www/mycashbill
 git pull origin main
 pnpm install --frozen-lockfile
 pnpm prisma migrate deploy
 pnpm build
-pm2 reload cashbill
+pm2 reload mycashbill
 ```
 
 ## Rollback
@@ -36,7 +36,7 @@ git reset --hard HEAD~1
 pnpm install --frozen-lockfile
 pnpm prisma migrate deploy
 pnpm build
-pm2 reload cashbill
+pm2 reload mycashbill
 ```
 
 ## Scripts CLI SSH (actions critiques)
@@ -50,22 +50,22 @@ pnpm cli:remove-blacklist "PHONE" "+237XXXXXXXXX" "faux positif"
 ```
 
 ## Logs
-- App : `/var/log/cashbill/{out,error}.log`
+- App : `/var/log/mycashbill/{out,error}.log`
 - Caddy : `/var/log/caddy/*.log`
-- Backups : `/var/log/cashbill/backup.log`
+- Backups : `/var/log/mycashbill/backup.log`
 
 ## Backups
-- PostgreSQL : `/var/backups/cashbill/*.dump` (quotidien 3h, rotation 7j)
+- PostgreSQL : `/var/backups/mycashbill/*.dump` (quotidien 3h, rotation 7j)
 
 Restauration :
 ```bash
-sudo -u postgres pg_restore -d cashbill -c /var/backups/cashbill/cashbill_YYYYMMDD_HHMMSS.dump
+sudo -u postgres pg_restore -d mycashbill -c /var/backups/mycashbill/mycashbill_YYYYMMDD_HHMMSS.dump
 ```
 
 ## Monitoring
 - UptimeRobot : `https://${DOMAIN}/api/health` (5 min)
 - PM2 healthcheck : cron 5 min
-- Logs : `pm2 logs cashbill`
+- Logs : `pm2 logs mycashbill`
 
 ## Sécurité
 - SSH : clé uniquement, root désactivé

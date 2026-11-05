@@ -1,4 +1,4 @@
-# ✅ Checklist d'acceptation CashBill
+# ✅ Checklist d'acceptation MyCashBill
 
 ## Auth
 - [x] Inscription avec codes de récupération affichés et obligatoires

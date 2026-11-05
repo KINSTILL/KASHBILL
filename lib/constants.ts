@@ -1,13 +1,13 @@
 // ─────────────────────────────────────────────
 // App
 // ─────────────────────────────────────────────
-export const APP_NAME = 'CashBill';
+export const APP_NAME = 'MyCashBill';
 export const APP_URL_DEFAULT = 'http://localhost:3000';
 
 // ─────────────────────────────────────────────
 // Auth
 // ─────────────────────────────────────────────
-export const SESSION_COOKIE = 'cashbill_session';
+export const SESSION_COOKIE = 'mycashbill_session';
 export const JWT_EXPIRES_DAYS_USER = 7;
 export const JWT_EXPIRES_HOURS_ADMIN = 4;
 export const REAUTH_TOKEN_TTL_SECONDS = 120;
@@ -59,7 +59,7 @@ export const REFERRAL_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 // ─────────────────────────────────────────────
 // Documents
 // ─────────────────────────────────────────────
-export const DOCUMENT_NUMBER_PREFIX = 'CB';
+export const DOCUMENT_NUMBER_PREFIX = 'MCB';
 export const DOCUMENT_NUMBER_PADDING = 6;
 
 // ─────────────────────────────────────────────
@@ -73,6 +73,6 @@ export const ALLOWED_IMAGE_MIMES = ['image/png', 'image/jpeg'] as const;
 // ─────────────────────────────────────────────
 // Share (Bouclier Social)
 // ─────────────────────────────────────────────
-export const SHARE_PREFS_STORAGE_KEY = 'cashbill:share-prefs:v1';
+export const SHARE_PREFS_STORAGE_KEY = 'mycashbill:share-prefs:v1';
 export const SHARE_MESSAGE_MAX_LENGTH = 1500;
 

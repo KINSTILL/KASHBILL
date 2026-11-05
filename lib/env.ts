@@ -7,7 +7,7 @@ const envSchema = z.object({
   ADMIN_PHONE: z.string().regex(/^\+2376\d{8}$/, 'ADMIN_PHONE doit être au format +2376XXXXXXXX'),
   ADMIN_PIN: z.string().regex(/^\d{6}$/, 'ADMIN_PIN doit être 6 chiffres'),
   APP_URL: z.string().url(),
-  APP_NAME: z.string().default('CashBill'),
+  APP_NAME: z.string().default('MyCashBill'),
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   NOTCHPAY_PUBLIC_KEY: z.string().min(1),

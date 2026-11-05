@@ -17,11 +17,11 @@ describe('Public /verify/[token]', () => {
       headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch' },
       body: JSON.stringify({ phone: '699777777', pin: '123456', deviceId: 'device-1', locale: 'FR' }),
     }));
-    const cookie = regRes.headers.get('set-cookie')?.match(/cashbill_session=([^;]+)/)?.[1] ?? '';
+    const cookie = regRes.headers.get('set-cookie')?.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
 
     const docRes = await createDocRoute(new NextRequest('http://localhost/api/documents', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `cashbill_session=${cookie}` },
+      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
       body: JSON.stringify({
         type: 'DEVIS',
         locale: 'FR',

@@ -115,7 +115,7 @@ function RegisterForm() {
   const handleDownloadCodes = () => {
     const blob = new Blob(
       [
-        `Codes de récupération CashBill\n`,
+        `Codes de récupération MyCashBill\n`,
         `Numéro: ${phone}\n`,
         `Date: ${new Date().toISOString()}\n\n`,
         recoveryCodes.join('\n'),

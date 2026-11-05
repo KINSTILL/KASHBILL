@@ -31,7 +31,7 @@ describe('Parrainage complet', () => {
     expect(parrainRes.status).toBe(201);
     const parrain = await parrainRes.json();
     const parrainCookie =
-      parrainRes.headers.get('set-cookie')?.match(/cashbill_session=([^;]+)/)?.[1] ?? '';
+      parrainRes.headers.get('set-cookie')?.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
     const code = parrain.user.referralCode;
 
     // Filleul
@@ -51,7 +51,7 @@ describe('Parrainage complet', () => {
     expect(filleulRes.status).toBe(201);
     const filleul = await filleulRes.json();
     const cookie =
-      filleulRes.headers.get('set-cookie')?.match(/cashbill_session=([^;]+)/)?.[1] ?? '';
+      filleulRes.headers.get('set-cookie')?.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
 
     // Le filleul crée et envoie un document
     const docRes = await createDocRoute(
@@ -60,7 +60,7 @@ describe('Parrainage complet', () => {
         headers: {
           'content-type': 'application/json',
           'x-requested-with': 'fetch',
-          cookie: `cashbill_session=${cookie}`,
+          cookie: `mycashbill_session=${cookie}`,
         },
         body: JSON.stringify({
           type: 'DEVIS',
@@ -81,7 +81,7 @@ describe('Parrainage complet', () => {
     const markRes = await markSentRoute(
       new NextRequest(`http://localhost/api/documents/${documentId}/mark-sent`, {
         method: 'POST',
-        headers: { 'x-requested-with': 'fetch', cookie: `cashbill_session=${cookie}` },
+        headers: { 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
       }),
       { params: Promise.resolve({ id: documentId }) }
     );
@@ -103,7 +103,7 @@ describe('Parrainage complet', () => {
     // Vérifier GET /api/referrals/me pour le parrain
     const meRes = await referralsMeRoute(
       new NextRequest('http://localhost/api/referrals/me', {
-        headers: { cookie: `cashbill_session=${parrainCookie}` },
+        headers: { cookie: `mycashbill_session=${parrainCookie}` },
       })
     );
     expect(meRes.status).toBe(200);

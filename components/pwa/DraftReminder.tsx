@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { listDrafts } from '@/lib/storage/drafts';
 
 const REMINDER_AGE_MS = 24 * 60 * 60 * 1000; // 24h
-const LAST_NOTIFIED_KEY = 'cashbill:last-draft-notified';
+const LAST_NOTIFIED_KEY = 'mycashbill:last-draft-notified';
 
 export function DraftReminder() {
   useEffect(() => {
@@ -20,7 +20,7 @@ export function DraftReminder() {
         const lastNotified = Number(localStorage.getItem(LAST_NOTIFIED_KEY) ?? '0');
         if (now - lastNotified < 24 * 60 * 60 * 1000) return; // 1 notif max/jour
 
-        new Notification('CashBill — brouillon en attente', {
+        new Notification('MyCashBill — brouillon en attente', {
           body: `Vous avez ${stale.length} brouillon(s) non finalisé(s). Reprenez-les maintenant.`,
           icon: '/icons/icon-192.png',
           tag: 'draft-reminder',

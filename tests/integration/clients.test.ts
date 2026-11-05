@@ -19,7 +19,7 @@ async function registerAndGetCookie(phone: string): Promise<string> {
   });
   const res = await registerRoute(req);
   const setCookie = res.headers.get('set-cookie') ?? '';
-  return setCookie.match(/cashbill_session=([^;]+)/)?.[1] ?? '';
+  return setCookie.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
 }
 
 describe('POST /api/clients', () => {
@@ -27,7 +27,7 @@ describe('POST /api/clients', () => {
     const cookie = await registerAndGetCookie('699111111');
     const req = new NextRequest('http://localhost/api/clients', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `cashbill_session=${cookie}` },
+      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
       body: JSON.stringify({ name: 'Jean Dupont', phone: '699222222' }),
     });
     const res = await createClientRoute(req);
@@ -42,14 +42,14 @@ describe('POST /api/clients', () => {
     for (let i = 0; i < 3; i++) {
       const res = await createClientRoute(new NextRequest('http://localhost/api/clients', {
         method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `cashbill_session=${cookie}` },
+        headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
         body: JSON.stringify({ name: `Client ${i}` }),
       }));
       expect(res.status).toBe(201);
     }
     const res = await createClientRoute(new NextRequest('http://localhost/api/clients', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `cashbill_session=${cookie}` },
+      headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
       body: JSON.stringify({ name: 'Client 4' }),
     }));
     expect(res.status).toBe(403);

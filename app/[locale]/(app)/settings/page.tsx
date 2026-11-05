@@ -79,7 +79,7 @@ export default function SettingsPage() {
           {t('settings.language')}
         </label>
         <p className="text-xs text-slate-500">
-          Choisissez la langue d&apos;affichage de CashBill.
+          Choisissez la langue d&apos;affichage de MyCashBill.
         </p>
         <div className="pt-1">
           <LocaleSwitcher />

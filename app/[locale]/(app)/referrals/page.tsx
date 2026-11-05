@@ -42,7 +42,7 @@ export default function ReferralsPage() {
   if (!data) return <p className="p-4 text-slate-500">Chargement…</p>;
 
   const shareWhatsApp = () => {
-    const msg = `Découvre CashBill pour faire tes factures en 60 secondes : ${data.referralLink}`;
+    const msg = `Découvre MyCashBill pour faire tes factures en 60 secondes : ${data.referralLink}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 

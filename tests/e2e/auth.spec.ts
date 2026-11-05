@@ -48,9 +48,9 @@ test.describe('Auth', () => {
   test('device limit en gratuit', async ({ page, user }) => {
     // Expirer le Pro trial pour tester la limite gratuit (1 appareil)
     const { PrismaClient } = await import('@prisma/client');
-    const dbUrl = (process.env.DATABASE_URL || '').includes('cashbill_test')
+    const dbUrl = (process.env.DATABASE_URL || '').includes('mycashbill_test')
       ? process.env.DATABASE_URL
-      : 'postgresql://cashbill:cashbill@localhost:5433/cashbill_test';
+      : 'postgresql://mycashbill:mycashbill@localhost:5433/mycashbill_test';
     const prisma = new PrismaClient({ datasources: { db: { url: dbUrl } } });
     const normalizedPhone = user.phone.startsWith('+237') ? user.phone : `+237${user.phone}`;
     await prisma.user.update({

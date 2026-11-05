@@ -1,9 +1,9 @@
 export function getOrCreateDeviceId(): string {
   if (typeof window === 'undefined') return 'default-device-placeholder';
-  let did = localStorage.getItem('cashbill_device_id');
+  let did = localStorage.getItem('mycashbill_device_id');
   if (!did) {
     did = 'dev_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-    localStorage.setItem('cashbill_device_id', did);
+    localStorage.setItem('mycashbill_device_id', did);
   }
   return did;
 }

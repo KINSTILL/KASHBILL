@@ -73,11 +73,11 @@ export function TicketDocument({
         <Footer doc={doc} compact />
         {options.showWatermark && (
           <Text style={styles.watermark} fixed>
-            Créé avec CashBill{doc.referralCode ? ` — cashbill.cm/r/${doc.referralCode}` : ''}
+            {doc.locale === 'EN' ? 'Created with MyCashBill' : 'Créé avec MyCashBill'}
+            {doc.referralCode ? ` — mycashbill.app/r/${doc.referralCode}` : ''}
           </Text>
         )}
       </Page>
     </Document>
   );
 }
-

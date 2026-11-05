@@ -12,7 +12,7 @@ function check(name, expected, actual) {
 
 async function runAudit() {
   console.log('═══════════════════════════════════════════════════════════');
-  console.log('AUDIT SÉCURITÉ CASHBILL');
+  console.log('AUDIT SÉCURITÉ MYCASHBILL');
   console.log('═══════════════════════════════════════════════════════════');
 
   // 1. CSRF : mutation sans X-Requested-With → 403
