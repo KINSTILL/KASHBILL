@@ -24,6 +24,7 @@ export default function BusinessSettingsPage() {
   const [country, setCountry] = useState('CM');
   const [businessName, setBusinessName] = useState('');
   const [legalName, setLegalName] = useState('');
+  const [legalForm, setLegalForm] = useState('');
   const [taxId, setTaxId] = useState('');
   const [rccm, setRccm] = useState('');
   const [legalAddress, setLegalAddress] = useState('');
@@ -43,6 +44,7 @@ export default function BusinessSettingsPage() {
       setCountry(user.country || 'CM');
       setBusinessName(user.businessName || '');
       setLegalName(user.legalName || '');
+      setLegalForm(user.legalForm || '');
       setTaxId(user.taxId || '');
       setRccm(user.rccm || '');
       setLegalAddress(user.legalAddress || '');
@@ -68,6 +70,7 @@ export default function BusinessSettingsPage() {
           country,
           businessName: businessName.trim() || null,
           legalName: legalName.trim() || null,
+          legalForm: legalForm.trim() || null,
           taxId: taxId.trim() || null,
           rccm: rccm.trim() || null,
           legalAddress: legalAddress.trim() || null,
@@ -216,6 +219,21 @@ export default function BusinessSettingsPage() {
                 value={legalName}
                 onChange={(e) => setLegalName(e.target.value)}
                 placeholder="Ex: SARL KASHBILL"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between">
+                <label htmlFor="legalForm" className="block text-sm font-medium text-slate-700">
+                  {t('legalForm')}
+                </label>
+              </div>
+              <Input
+                id="legalForm"
+                value={legalForm}
+                onChange={(e) => setLegalForm(e.target.value)}
+                placeholder={t('legalFormPlaceholder')}
                 className="mt-1"
               />
             </div>

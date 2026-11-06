@@ -2,6 +2,8 @@ import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import type { PdfDocument, PdfRenderOptions } from '../types';
 import { CompanyHeader } from '../shared/CompanyHeader';
+import { ClientBlock } from '../shared/ClientBlock';
+import { DocumentMeta } from '../shared/DocumentMeta';
 import { ItemsTable } from '../shared/ItemsTable';
 import { Totals } from '../shared/Totals';
 import { Footer } from '../shared/Footer';
@@ -19,9 +21,6 @@ const styles = StyleSheet.create({
   header: { borderBottomWidth: 1, borderColor: '#0F172A', paddingBottom: 4, marginBottom: 6 },
   docTitle: { fontSize: 13, fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
   docNumber: { fontSize: 8, textAlign: 'center', color: '#64748B', marginBottom: 4 },
-  clientBlock: { marginBottom: 6 },
-  clientLabel: { fontSize: 7, color: '#64748B' },
-  clientName: { fontSize: 10, fontWeight: 'bold' },
   watermark: {
     position: 'absolute',
     top: '45%',
@@ -46,6 +45,19 @@ export function TicketDocument({
   const isEn = doc.locale === 'EN';
   const hidePrices = doc.type === 'BORDEREAU' && doc.payload.total === 0;
 
+  const clientLabel =
+    doc.type === 'BORDEREAU'
+      ? isEn
+        ? 'Recipient'
+        : 'Destinataire'
+      : doc.type === 'RECU'
+      ? isEn
+        ? 'Payer'
+        : 'Payeur'
+      : isEn
+      ? 'Client'
+      : 'Client';
+
   return (
     <Document>
       <Page size={{ width: 226.77, height: 600 }} style={styles.page}>
@@ -57,22 +69,14 @@ export function TicketDocument({
           N° {doc.number} · {formatDateShort(doc.createdAt)}
         </Text>
         {doc.client && (
-          <View style={styles.clientBlock}>
-            <Text style={styles.clientLabel}>
-              {doc.type === 'BORDEREAU'
-                ? isEn
-                  ? 'Recipient'
-                  : 'Destinataire'
-                : doc.type === 'RECU'
-                ? isEn
-                  ? 'Payer'
-                  : 'Payeur'
-                : 'Client'}
-            </Text>
-            <Text style={styles.clientName}>{doc.client.name}</Text>
-            {doc.client.phone && <Text style={{ fontSize: 8 }}>{doc.client.phone}</Text>}
-          </View>
+          <ClientBlock
+            client={doc.client}
+            compact
+            label={clientLabel}
+            locale={doc.locale}
+          />
         )}
+        <DocumentMeta doc={doc} compact />
         <ItemsTable
           lines={doc.payload.lines}
           compact

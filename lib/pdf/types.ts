@@ -20,6 +20,12 @@ export type PdfPayload = {
   total: number;
   notes: string | null;
   validityDays?: number | null;
+  dueDate?: string | null;
+  referenceNumber?: string | null;
+  paymentMethod?: 'CASH' | 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CHECK' | null;
+  paymentReference?: string | null;
+  deliveryDate?: string | null;
+  deliveryAddress?: string | null;
 };
 
 export type PdfCompany = {
@@ -36,6 +42,7 @@ export type PdfCompany = {
   headerText: string | null;
   footerText: string | null;
   cgvText: string | null;
+  legalForm?: string | null;
   country: string;
   currency: string;
 };
@@ -44,6 +51,7 @@ export type PdfClient = {
   name: string;
   phone: string | null;
   address: string | null;
+  taxId?: string | null;
 };
 
 export type PdfDocument = {

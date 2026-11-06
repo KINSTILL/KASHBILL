@@ -20,6 +20,7 @@ export default function NewClientPage() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [taxId, setTaxId] = useState('');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export default function NewClientPage() {
           name: name.trim(),
           phone: phone.trim() || null,
           address: address.trim() || null,
+          taxId: taxId.trim() || null,
           note: note.trim() || null,
         }),
       });
@@ -147,6 +149,20 @@ export default function NewClientPage() {
               placeholder="Ex: Douala, Akwa"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="taxId" className="block text-sm font-medium text-slate-700">
+              {t('clients.taxId')}
+            </label>
+            <Input
+              id="taxId"
+              type="text"
+              placeholder={t('clients.taxIdPlaceholder')}
+              value={taxId}
+              onChange={(e) => setTaxId(e.target.value)}
               className="mt-1"
             />
           </div>

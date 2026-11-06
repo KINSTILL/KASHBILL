@@ -2,6 +2,8 @@ import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import type { PdfDocument, PdfRenderOptions } from '../types';
 import { CompanyHeader } from '../shared/CompanyHeader';
+import { ClientBlock } from '../shared/ClientBlock';
+import { DocumentMeta } from '../shared/DocumentMeta';
 import { ItemsTable } from '../shared/ItemsTable';
 import { Totals } from '../shared/Totals';
 import { Footer } from '../shared/Footer';
@@ -17,11 +19,20 @@ const styles = StyleSheet.create({
   },
   docTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 8, marginBottom: 2 },
   docNumber: { fontSize: 10, color: '#64748B', marginBottom: 20 },
-  clientBlock: { marginBottom: 20, padding: 10, backgroundColor: '#F8FAFC', borderRadius: 4 },
-  clientLabel: { fontSize: 8, color: '#64748B', marginBottom: 2 },
-  clientName: { fontSize: 11, fontWeight: 'bold' },
-  clientLine: { fontSize: 9, color: '#475569' },
   notes: { marginTop: 12, fontSize: 9, color: '#475569', fontStyle: 'italic' },
+  signatureBlock: {
+    marginTop: 30,
+    borderTopWidth: 0.5,
+    borderColor: '#CBD5E1',
+    paddingTop: 8,
+  },
+  signatureLabel: { fontSize: 9, color: '#64748B' },
+  signatureLine: {
+    marginTop: 40,
+    borderTopWidth: 0.5,
+    borderColor: '#0F172A',
+    width: 200,
+  },
   watermark: {
     position: 'absolute',
     top: '50%',
@@ -64,24 +75,20 @@ export function A4Document({
       <Page size="A4" style={styles.page}>
         <CompanyHeader company={doc.company} compact={false} locale={doc.locale} />
         <Text style={styles.docTitle}>{isEn ? config.labelEn : config.label}</Text>
-        {config.showValidity && doc.payload.validityDays ? (
-          <Text style={{ fontSize: 9, color: '#64748B', marginTop: 4 }}>
-            {isEn
-              ? `Valid for ${doc.payload.validityDays} days`
-              : `Valable ${doc.payload.validityDays} jours`}
-          </Text>
-        ) : null}
         <Text style={styles.docNumber}>
           N° {doc.number} · {formatDateShort(doc.createdAt)}
         </Text>
+
         {doc.client && (
-          <View style={styles.clientBlock}>
-            <Text style={styles.clientLabel}>{clientBlockLabel}</Text>
-            <Text style={styles.clientName}>{doc.client.name}</Text>
-            {doc.client.address && <Text style={styles.clientLine}>{doc.client.address}</Text>}
-            {doc.client.phone && <Text style={styles.clientLine}>{doc.client.phone}</Text>}
-          </View>
+          <ClientBlock
+            client={doc.client}
+            compact={false}
+            label={clientBlockLabel}
+            locale={doc.locale}
+          />
         )}
+        <DocumentMeta doc={doc} compact={false} />
+
         <ItemsTable
           lines={doc.payload.lines}
           compact={false}
@@ -103,14 +110,14 @@ export function A4Document({
             {isEn ? 'Note' : 'Note'} : {doc.payload.notes}
           </Text>
         )}
-        {config.showRecipientSignature ? (
-          <View style={{ marginTop: 30, borderTopWidth: 0.5, borderColor: '#CBD5E1', paddingTop: 8 }}>
-            <Text style={{ fontSize: 9, color: '#64748B' }}>
+        {config.showRecipientSignature && (
+          <View style={styles.signatureBlock}>
+            <Text style={styles.signatureLabel}>
               {isEn ? 'Recipient signature and stamp' : 'Signature et cachet du destinataire'}
             </Text>
-            <View style={{ marginTop: 40, borderTopWidth: 0.5, borderColor: '#0F172A', width: 200 }} />
+            <View style={styles.signatureLine} />
           </View>
-        ) : null}
+        )}
         <Footer doc={doc} compact={false} />
         {options.showWatermark && (
           <Text style={styles.watermark} fixed>

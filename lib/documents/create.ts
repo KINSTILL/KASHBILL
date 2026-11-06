@@ -92,6 +92,7 @@ export async function createDocument(input: CreateDocumentInput): Promise<Create
         payload: computed,
         contentHash,
         watermarked: !input.user.proUntil || input.user.proUntil <= new Date(),
+        dueDate: input.payload.dueDate ? new Date(input.payload.dueDate) : null,
       },
     });
 

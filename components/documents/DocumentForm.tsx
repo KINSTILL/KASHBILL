@@ -32,6 +32,12 @@ type DraftState = {
   notes: string | null;
   validityDays: number | null;
   format: PdfFormat;
+  dueDate: string | null;
+  referenceNumber: string | null;
+  paymentMethod: 'CASH' | 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CHECK' | null;
+  paymentReference: string | null;
+  deliveryDate: string | null;
+  deliveryAddress: string | null;
 };
 
 export function DocumentForm({
@@ -57,6 +63,12 @@ export function DocumentForm({
     notes: null,
     validityDays: 30,
     format: 'a4',
+    dueDate: null,
+    referenceNumber: null,
+    paymentMethod: null,
+    paymentReference: null,
+    deliveryDate: null,
+    deliveryAddress: null,
   });
 
   const currentConfig = DOC_TYPE_CONFIG[state.type];
@@ -164,6 +176,12 @@ export function DocumentForm({
             deliveryFee: state.deliveryFee,
             notes: state.notes,
             validityDays: state.validityDays,
+            dueDate: state.dueDate,
+            referenceNumber: state.referenceNumber,
+            paymentMethod: state.paymentMethod,
+            paymentReference: state.paymentReference,
+            deliveryDate: state.deliveryDate,
+            deliveryAddress: state.deliveryAddress,
           },
         }),
       });
@@ -243,6 +261,12 @@ export function DocumentForm({
               depositPercentage: cfg.showDeposit ? s.depositPercentage : null,
               deliveryFee: cfg.showDelivery ? s.deliveryFee : null,
               validityDays: cfg.showValidity ? (s.validityDays ?? cfg.defaultValidityDays) : null,
+              dueDate: cfg.showDueDate ? s.dueDate : null,
+              referenceNumber: cfg.showReferenceNumber ? s.referenceNumber : null,
+              paymentMethod: cfg.showPaymentInfo ? s.paymentMethod : null,
+              paymentReference: cfg.showPaymentInfo ? s.paymentReference : null,
+              deliveryDate: cfg.showShipmentDetails ? s.deliveryDate : null,
+              deliveryAddress: cfg.showShipmentDetails ? s.deliveryAddress : null,
             }));
           }}
         />
@@ -417,6 +441,85 @@ export function DocumentForm({
               value={state.deliveryFee ?? ''}
               onChange={(e) => setState((s) => ({ ...s, deliveryFee: e.target.value ? Number(e.target.value) : null }))}
             />
+          )}
+          {DOC_TYPE_CONFIG[state.type].showDueDate && (
+            <Input
+              type="date"
+              label={t('dueDate')}
+              value={state.dueDate?.slice(0, 10) ?? ''}
+              onChange={(e) =>
+                setState((s) => ({
+                  ...s,
+                  dueDate: e.target.value ? new Date(e.target.value).toISOString() : null,
+                }))
+              }
+            />
+          )}
+          {DOC_TYPE_CONFIG[state.type].showReferenceNumber && (
+            <Input
+              label={t('referenceNumber')}
+              placeholder={t('referenceNumberPlaceholder')}
+              value={state.referenceNumber ?? ''}
+              onChange={(e) =>
+                setState((s) => ({ ...s, referenceNumber: e.target.value || null }))
+              }
+            />
+          )}
+          {DOC_TYPE_CONFIG[state.type].showPaymentInfo && (
+            <>
+              <div>
+                <label className="mb-1.5 block text-[13px] font-medium text-ink-soft">
+                  {t('paymentMethod')}
+                </label>
+                <select
+                  value={state.paymentMethod ?? ''}
+                  onChange={(e) =>
+                    setState((s) => ({
+                      ...s,
+                      paymentMethod: (e.target.value || null) as DraftState['paymentMethod'],
+                    }))
+                  }
+                  className="thumb-zone w-full rounded-btn border border-slate-200 bg-white px-3.5 text-[15px]"
+                >
+                  <option value="">—</option>
+                  <option value="CASH">{t('paymentCash')}</option>
+                  <option value="MOBILE_MONEY">{t('paymentMobileMoney')}</option>
+                  <option value="BANK_TRANSFER">{t('paymentBankTransfer')}</option>
+                  <option value="CHECK">{t('paymentCheck')}</option>
+                </select>
+              </div>
+              <Input
+                label={t('paymentReference')}
+                placeholder={t('paymentReferencePlaceholder')}
+                value={state.paymentReference ?? ''}
+                onChange={(e) =>
+                  setState((s) => ({ ...s, paymentReference: e.target.value || null }))
+                }
+              />
+            </>
+          )}
+          {DOC_TYPE_CONFIG[state.type].showShipmentDetails && (
+            <>
+              <Input
+                type="date"
+                label={t('deliveryDate')}
+                value={state.deliveryDate?.slice(0, 10) ?? ''}
+                onChange={(e) =>
+                  setState((s) => ({
+                    ...s,
+                    deliveryDate: e.target.value ? new Date(e.target.value).toISOString() : null,
+                  }))
+                }
+              />
+              <Input
+                label={t('deliveryAddress')}
+                placeholder={t('deliveryAddressPlaceholder')}
+                value={state.deliveryAddress ?? ''}
+                onChange={(e) =>
+                  setState((s) => ({ ...s, deliveryAddress: e.target.value || null }))
+                }
+              />
+            </>
           )}
           <Input
             label={t(`typeContext.${state.type}.notesLabel`)}

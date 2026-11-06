@@ -36,6 +36,7 @@ export default async function LocaleLayout({
         referralCode: current.user.referralCode,
         country: current.user.country,
         legalName: current.user.legalName,
+        legalForm: current.user.legalForm,
         taxId: current.user.taxId,
         rccm: current.user.rccm,
         legalAddress: current.user.legalAddress,

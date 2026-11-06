@@ -60,6 +60,7 @@ export default async function DocumentDetailPage({
       headerText: doc.user.headerText,
       footerText: doc.user.footerText,
       cgvText: doc.user.cgvText,
+      legalForm: doc.user.legalForm,
       country: doc.user.country,
       currency: 'FCFA',
     },
@@ -68,6 +69,7 @@ export default async function DocumentDetailPage({
           name: doc.client.name,
           phone: doc.client.phone,
           address: doc.client.address,
+          taxId: doc.client.taxId ?? null,
         }
       : null,
     qrCodeDataUrl,

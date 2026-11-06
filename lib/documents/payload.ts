@@ -14,6 +14,12 @@ export const documentPayloadSchema = z.object({
   deliveryFee: z.number().nonnegative().nullable().default(null),
   notes: z.string().max(1000).nullable().default(null),
   validityDays: z.number().int().positive().max(365).nullable().default(null),
+  dueDate: z.string().datetime().nullable().default(null),
+  referenceNumber: z.string().max(50).nullable().default(null),
+  paymentMethod: z.enum(['CASH', 'MOBILE_MONEY', 'BANK_TRANSFER', 'CHECK']).nullable().default(null),
+  paymentReference: z.string().max(100).nullable().default(null),
+  deliveryDate: z.string().datetime().nullable().default(null),
+  deliveryAddress: z.string().max(300).nullable().default(null),
 });
 
 export type DocumentPayloadInput = z.infer<typeof documentPayloadSchema>;
@@ -28,6 +34,12 @@ export type ComputedPayload = {
   notes: string | null;
   validityDays: number | null;
   total: number;
+  dueDate: string | null;
+  referenceNumber: string | null;
+  paymentMethod: 'CASH' | 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CHECK' | null;
+  paymentReference: string | null;
+  deliveryDate: string | null;
+  deliveryAddress: string | null;
 };
 
 /**
@@ -65,6 +77,12 @@ export function computePayload(input: DocumentPayloadInput): ComputedPayload {
     notes: input.notes,
     validityDays: input.validityDays ?? null,
     total,
+    dueDate: input.dueDate,
+    referenceNumber: input.referenceNumber,
+    paymentMethod: input.paymentMethod,
+    paymentReference: input.paymentReference,
+    deliveryDate: input.deliveryDate,
+    deliveryAddress: input.deliveryAddress,
   };
 }
 

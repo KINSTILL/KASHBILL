@@ -10,6 +10,7 @@ const updateClientSchema = z.object({
   email: z.string().email().nullable().optional(),
   address: z.string().max(300).nullable().optional(),
   note: z.string().max(500).nullable().optional(),
+  taxId: z.string().max(50).nullable().optional(),
 });
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }): Promise<Response> {

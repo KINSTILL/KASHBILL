@@ -19,6 +19,7 @@ export function CompanyHeader({
     info: { flex: 1 },
     name: { fontSize: compact ? 12 : 16, fontWeight: 'bold', color: '#0F172A' },
     line: { fontSize: compact ? 7 : 9, color: '#475569', marginTop: 1 },
+    legalForm: { fontSize: compact ? 7 : 9, color: '#64748B', fontStyle: 'italic', marginTop: 1 },
   });
 
   return (
@@ -28,6 +29,7 @@ export function CompanyHeader({
         <Text style={styles.name}>
           {company.businessName ?? company.legalName ?? (isEn ? 'My Business' : 'Mon entreprise')}
         </Text>
+        {company.legalForm && <Text style={styles.legalForm}>{company.legalForm}</Text>}
         {company.legalAddress && <Text style={styles.line}>{company.legalAddress}</Text>}
         {company.city && <Text style={styles.line}>{company.city}</Text>}
         <Text style={styles.line}>{isEn ? 'Phone' : 'Tél'} : {company.phone}</Text>
@@ -37,3 +39,4 @@ export function CompanyHeader({
     </View>
   );
 }
+

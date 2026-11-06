@@ -33,6 +33,7 @@ export type SessionUser = {
   rccm?: string | null;
   legalAddress?: string | null;
   legalName?: string | null;
+  legalForm?: string | null;
   logoUrl?: string | null;
   signatureUrl?: string | null;
   stampUrl?: string | null;

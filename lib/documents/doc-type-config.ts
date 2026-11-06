@@ -54,6 +54,16 @@ export type DocTypeConfig = {
   shareGroup: 'DEVIS_PROFORMA' | 'FACTURE_BON_COMMANDE' | 'RECU_TICKET';
   /** Format PDF recommandé par défaut */
   defaultFormat: 'ticket' | 'a4';
+  /** Afficher l'échéance de paiement (FACTURE) */
+  showDueDate: boolean;
+  /** Afficher la référence BC/devis (FACTURE, BON_COMMANDE) */
+  showReferenceNumber: boolean;
+  /** Afficher le mode de règlement + référence transaction (RECU, TICKET) */
+  showPaymentInfo: boolean;
+  /** Afficher les détails de livraison (BON_COMMANDE, BORDEREAU) */
+  showShipmentDetails: boolean;
+  /** Afficher la mention « sans valeur comptable ou fiscale » (PROFORMA) */
+  showNonContractual: boolean;
 };
 
 export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
@@ -82,6 +92,11 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     showRecipientSignature: false,
     shareGroup: 'RECU_TICKET',
     defaultFormat: 'ticket',
+    showDueDate: false,
+    showReferenceNumber: false,
+    showPaymentInfo: true,
+    showShipmentDetails: false,
+    showNonContractual: false,
   },
   RECU: {
     label: 'REÇU',
@@ -112,6 +127,11 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     showRecipientSignature: false,
     shareGroup: 'RECU_TICKET',
     defaultFormat: 'ticket',
+    showDueDate: false,
+    showReferenceNumber: false,
+    showPaymentInfo: true,
+    showShipmentDetails: false,
+    showNonContractual: false,
   },
   DEVIS: {
     label: 'DEVIS',
@@ -138,6 +158,11 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     showRecipientSignature: false,
     shareGroup: 'DEVIS_PROFORMA',
     defaultFormat: 'a4',
+    showDueDate: false,
+    showReferenceNumber: false,
+    showPaymentInfo: false,
+    showShipmentDetails: false,
+    showNonContractual: false,
   },
   PROFORMA: {
     label: 'FACTURE PROFORMA',
@@ -164,6 +189,11 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     showRecipientSignature: false,
     shareGroup: 'DEVIS_PROFORMA',
     defaultFormat: 'a4',
+    showDueDate: false,
+    showReferenceNumber: false,
+    showPaymentInfo: false,
+    showShipmentDetails: false,
+    showNonContractual: true,
   },
   BON_COMMANDE: {
     label: 'BON DE COMMANDE',
@@ -192,6 +222,11 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     showRecipientSignature: false,
     shareGroup: 'FACTURE_BON_COMMANDE',
     defaultFormat: 'a4',
+    showDueDate: false,
+    showReferenceNumber: true,
+    showPaymentInfo: false,
+    showShipmentDetails: true,
+    showNonContractual: false,
   },
   BORDEREAU: {
     label: 'BORDEREAU DE LIVRAISON',
@@ -218,6 +253,11 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     showRecipientSignature: true,
     shareGroup: 'FACTURE_BON_COMMANDE',
     defaultFormat: 'a4',
+    showDueDate: false,
+    showReferenceNumber: false,
+    showPaymentInfo: false,
+    showShipmentDetails: true,
+    showNonContractual: false,
   },
   FACTURE: {
     label: 'FACTURE',
@@ -244,6 +284,11 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
     showRecipientSignature: false,
     shareGroup: 'FACTURE_BON_COMMANDE',
     defaultFormat: 'a4',
+    showDueDate: true,
+    showReferenceNumber: true,
+    showPaymentInfo: false,
+    showShipmentDetails: false,
+    showNonContractual: false,
   },
 };
 
