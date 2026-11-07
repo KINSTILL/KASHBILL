@@ -11,9 +11,9 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     include: ['tests/**/*.test.ts'],
-    // Certains tests DB utilisent Prisma → timeout plus long
-    testTimeout: 15000,
-    hookTimeout: 15000,
+    // Certains tests DB utilisent Prisma / PDF render → timeout plus long
+    testTimeout: 30000,
+    hookTimeout: 30000,
     // Évite les conflits de cache entre fichiers
     fileParallelism: false,
     maxWorkers: 1,

@@ -4,6 +4,7 @@ import { POST as createClientRoute } from '@/app/api/clients/route';
 import { clearDatabase } from '../helpers/db';
 import { resetUserCounter } from '../helpers/factories';
 import { prisma } from '@/lib/db';
+import { FREE_CLIENTS_LIMIT } from '@/lib/constants';
 import { NextRequest } from 'next/server';
 
 beforeEach(async () => {
@@ -34,12 +35,12 @@ describe('POST /api/clients', () => {
     expect(res.status).toBe(201);
   });
 
-  it('rejette le 4e client en gratuit', async () => {
+  it('rejette le client au-delà de la limite en gratuit', async () => {
     const cookie = await registerAndGetCookie('699111111');
     // Le compte nouvellement créé a un essai Pro par défaut. On retire le Pro pour tester la limite gratuite.
     await prisma.user.updateMany({ data: { proUntil: null } });
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < FREE_CLIENTS_LIMIT; i++) {
       const res = await createClientRoute(new NextRequest('http://localhost/api/clients', {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
@@ -50,7 +51,7 @@ describe('POST /api/clients', () => {
     const res = await createClientRoute(new NextRequest('http://localhost/api/clients', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-requested-with': 'fetch', cookie: `mycashbill_session=${cookie}` },
-      body: JSON.stringify({ name: 'Client 4' }),
+      body: JSON.stringify({ name: `Client ${FREE_CLIENTS_LIMIT + 1}` }),
     }));
     expect(res.status).toBe(403);
     const json = await res.json();

@@ -35,7 +35,10 @@ export const RATE_LIMIT_DEVICE_APPROVAL_PER_USER = { limit: 10, windowMs: 60 * 6
 // ─────────────────────────────────────────────
 // Freemium
 // ─────────────────────────────────────────────
-export const FREE_CLIENTS_LIMIT = 3;
+export const FREE_CLIENTS_LIMIT = 2;
+export const FREE_DOCS_PER_MONTH = 10;
+export const FREE_WHATSAPP_PER_MONTH = 5;
+export const FREE_EMAILS_PER_MONTH = 1;
 export const FREE_HISTORY_DAYS = 7;
 export const FREE_LOGO_GRACE_DAYS = 30;
 export const FREE_LOGO_GRACE_DOCS = 5;
@@ -43,7 +46,7 @@ export const FREE_PRODUCT_PHOTOS_LIMIT = 10;
 export const FREE_DUPLICATIONS_PER_MONTH = 3;
 export const FREE_RENUMERATIONS_PER_MONTH = 1;
 export const FREE_EDITS_PER_DOCUMENT = 1;
-export const TRIAL_DURATION_DAYS = 3;
+export const TRIAL_DURATION_DAYS = 5;
 export const PRO_PRICE_FCFA = 2000;
 export const PRO_DURATION_DAYS = 30;
 
