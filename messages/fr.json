@@ -33,7 +33,8 @@
     "admin": "Admin",
     "logout": "Déconnexion",
     "login": "Connexion",
-    "register": "Créer un compte"
+    "register": "Créer un compte",
+    "recurring": "Récurrents"
   },
   "auth": {
     "metaTitle": "Authentification",
@@ -170,7 +171,9 @@
       "documents": "Documents",
       "documentsHint": "Total émis",
       "clients": "Clients",
-      "clientsHint": "Enregistrés"
+      "clientsHint": "Enregistrés",
+      "recurring": "Récurrents",
+      "recurringHint": "Plannings actifs"
     }
   },
   "documents": {
@@ -336,7 +339,9 @@
       "iosPreviewHelp": "Sur iPhone, l'aperçu intégré n'est pas disponible. Ouvrez le PDF dans un nouvel onglet.",
       "openPdf": "Ouvrir le PDF",
       "openInNewTab": "Ouvrir dans un nouvel onglet",
-      "pdfError": "Erreur lors de la génération du PDF. Réessayez."
+      "pdfError": "Erreur lors de la génération du PDF. Réessayez.",
+      "schedule": "Programmer",
+      "sendBulk": "Envoyer en masse"
     },
     "email": {
       "title": "Envoyer par email",
@@ -561,5 +566,60 @@
     "fraudulent": "Document frauduleux",
     "fraudulentHelp": "Ce document a été signalé comme frauduleux par MyCashBill. Ne l'utilisez pas.",
     "noCommercialData": "Cette vérification ne révèle aucune donnée commerciale du document."
+  },
+  "recurring": {
+    "title": "Facturation récurrente",
+    "subtitle": "Générez et automatisez vos documents périodiques",
+    "emptyTitle": "Aucun planning récurrent",
+    "emptyHelp": "Ouvrez un document et cliquez sur \"Programmer\" pour créer une récurrence automatique.",
+    "sheetTitle": "Programmer ce document",
+    "sheetSubtitle": "Une copie sera générée automatiquement selon la fréquence choisie.",
+    "label": "Libellé du planning",
+    "labelPlaceholder": "Ex: Loyer mensuel, Maintenance...",
+    "frequency": "Fréquence d'exécution",
+    "freqDaily": "Quotidien (tous les jours)",
+    "freqWeekly": "Hebdomadaire (toutes les semaines)",
+    "freqMonthly": "Mensuel (tous les mois)",
+    "autoSendEmail": "Envoyer par email automatiquement (si le client a un email)",
+    "save": "Enregistrer le planning",
+    "saving": "Enregistrement...",
+    "success": "Planning programmé avec succès",
+    "error": "Erreur lors de la programmation",
+    "active": "Actif",
+    "paused": "En pause",
+    "pause": "Mettre en pause",
+    "resume": "Reprendre",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer définitivement ce planning récurrent ?",
+    "deleted": "Planning supprimé",
+    "updated": "Planning mis à jour",
+    "lastRun": "Dernière exécution",
+    "nextRun": "Prochaine exécution",
+    "never": "Jamais",
+    "runsCount": "{count, plural, =0 {Aucune exécution} =1 {1 exécution} other {# exécutions}}",
+    "emailAutoBadge": "Email auto"
+  },
+  "bulk": {
+    "sheetTitle": "Envoyer en masse",
+    "sheetSubtitle": "Émettez ce document pour plusieurs clients simultanément.",
+    "proOnly": "L'envoi en masse est réservé aux utilisateurs Pro.",
+    "upgrade": "Passer Pro",
+    "selectClients": "Sélectionner les clients ({count} sélectionné(s))",
+    "selectAll": "Tout sélectionner",
+    "deselectAll": "Tout désélectionner",
+    "noClients": "Aucun client enregistré pour l'instant.",
+    "noPhone": "Pas de téléphone",
+    "noEmail": "Pas d'email",
+    "channel": "Canal d'envoi",
+    "channelEmail": "Email (envoi direct depuis le serveur)",
+    "channelWhatsApp": "WhatsApp (liens wa.me à cliquer)",
+    "send": "Lancer l'envoi en masse",
+    "sending": "Traitement en cours...",
+    "resultsTitle": "Résultats de l'envoi en masse",
+    "resultsSummary": "{success} réussi(s), {fail} échec(s)",
+    "openWhatsApp": "Ouvrir WhatsApp",
+    "close": "Fermer",
+    "error": "Erreur lors de l'envoi en masse",
+    "minOneClient": "Veuillez sélectionner au moins un client."
   }
 }

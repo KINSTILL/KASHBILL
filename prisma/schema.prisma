@@ -70,24 +70,24 @@ enum FraudStatus {
 // ─────────────────────────────────────────────
 
 model User {
-  id              String    @id @default(cuid())
-  phone           String    @unique
-  pinHash         String
-  name            String?
-  businessName    String?
-  city            String?
-  locale          Locale    @default(FR)
-  role            Role      @default(USER)
-  mode            Mode      @default(ECOMMERCE)
-  proUntil        DateTime?
-  pendingProDays  Int       @default(0)
-  referralCode    String    @unique
+  id             String    @id @default(cuid())
+  phone          String    @unique
+  pinHash        String
+  name           String?
+  businessName   String?
+  city           String?
+  locale         Locale    @default(FR)
+  role           Role      @default(USER)
+  mode           Mode      @default(ECOMMERCE)
+  proUntil       DateTime?
+  pendingProDays Int       @default(0)
+  referralCode   String    @unique
 
   // ─── Freemium ───
-  duplicationsThisMonth   Int      @default(0)
-  renumerationsThisMonth  Int      @default(0)
-  monthlyCountersResetAt  DateTime @default(now())
-  productPhotosCount      Int      @default(0)
+  duplicationsThisMonth  Int      @default(0)
+  renumerationsThisMonth Int      @default(0)
+  monthlyCountersResetAt DateTime @default(now())
+  productPhotosCount     Int      @default(0)
 
   // ─── Anti-fraude ───
   bannedAt         DateTime?
@@ -95,7 +95,7 @@ model User {
   banReason        String?
   suspendedUntil   DateTime?
   suspendReason    String?
-  flaggedForReview Boolean  @default(false)
+  flaggedForReview Boolean   @default(false)
   lastAdminLoginAt DateTime?
 
   // ─── Informations légales (panafricain) ───
@@ -123,71 +123,75 @@ model User {
   documents          Document[]
   documentSequences  DocumentSequence[]
   subscriptions      Subscription[]
-  referralsMade      Referral[]        @relation("ReferralParrain")
-  referralReceived   Referral?         @relation("ReferralFilleul")
-  fraudFlags         FraudFlag[]       @relation("FraudFlagUser")
-  fraudFlagsReviewed FraudFlag[]       @relation("FraudFlagReviewer")
+  referralsMade      Referral[]          @relation("ReferralParrain")
+  referralReceived   Referral?           @relation("ReferralFilleul")
+  fraudFlags         FraudFlag[]         @relation("FraudFlagUser")
+  fraudFlagsReviewed FraudFlag[]         @relation("FraudFlagReviewer")
   blacklistEntries   BlacklistEntry[]
   thresholdsUpdated  FraudThreshold[]
+  recurringSchedules RecurringSchedule[]
+  bulkJobs           BulkJob[]
 
   @@index([country])
   @@index([flaggedForReview])
 }
 
 model Device {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deviceId    String
-  userAgent   String?
-  lastIp      String?
-  lastSeenAt  DateTime  @default(now())
-  revokedAt   DateTime?
-  createdAt   DateTime  @default(now())
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId   String
+  userAgent  String?
+  lastIp     String?
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
 
   @@unique([userId, deviceId])
   @@index([userId, revokedAt])
 }
 
 model DeviceApproval {
-  id           String    @id @default(cuid())
-  userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  codeHash     String
-  expiresAt    DateTime
-  consumed     Boolean   @default(false)
-  newDeviceId  String
-  userAgent    String?
-  ip           String?
-  createdAt    DateTime  @default(now())
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash    String
+  expiresAt   DateTime
+  consumed    Boolean  @default(false)
+  newDeviceId String
+  userAgent   String?
+  ip          String?
+  createdAt   DateTime @default(now())
 
   @@index([userId, consumed, expiresAt])
 }
 
 model RecoveryCode {
-  id         String    @id @default(cuid())
-  userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  codeHash   String
-  usedAt     DateTime?
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([userId, usedAt])
 }
 
 model Client {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  phone     String?
-  email     String?
-  address   String?
-  note      String?
-  taxId     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  documents Document[]
+  id                 String              @id @default(cuid())
+  userId             String
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name               String
+  phone              String?
+  email              String?
+  address            String?
+  note               String?
+  taxId              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  documents          Document[]
+  recurringSchedules RecurringSchedule[]
+  bulkJobItems       BulkJobItem[]
 
   @@index([userId])
 }
@@ -213,8 +217,10 @@ model Document {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  verification    DocumentVerification?
-  fraudFlags      FraudFlag[]
+  verification  DocumentVerification?
+  fraudFlags    FraudFlag[]
+  recurringRuns RecurringRun[]
+  bulkJobItems  BulkJobItem[]
 
   @@index([userId, createdAt])
   @@index([userId, type])
@@ -222,12 +228,12 @@ model Document {
 }
 
 model DocumentSequence {
-  id         String  @id @default(cuid())
+  id         String @id @default(cuid())
   userId     String
-  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  prefix     String  // ex: "F", "DV", "BC"
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prefix     String // ex: "F", "DV", "BC"
   year       Int
-  lastNumber Int     @default(0)
+  lastNumber Int    @default(0)
 
   @@unique([userId, prefix, year])
   @@index([userId, prefix])
@@ -332,7 +338,7 @@ model FraudFlag {
 
 model BlacklistEntry {
   id          String   @id @default(cuid())
-  type        String   // "PHONE" | "TAX_ID" | "DOCUMENT_HASH"
+  type        String // "PHONE" | "TAX_ID" | "DOCUMENT_HASH"
   value       String
   reason      String
   createdById String
@@ -360,4 +366,102 @@ model AuditLog {
   @@index([actorId, createdAt])
   @@index([targetId, createdAt])
   @@index([action, createdAt])
+}
+
+model RecurringSchedule {
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label         String
+  docType       DocType
+  mode          Mode
+  locale        Locale
+  payload       Json
+  clientId      String?
+  client        Client?            @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  frequency     RecurringFrequency
+  nextRunAt     DateTime
+  lastRunAt     DateTime?
+  isPaused      Boolean            @default(false)
+  autoSendEmail Boolean            @default(false)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  runs          RecurringRun[]
+
+  @@index([userId, isPaused])
+  @@index([nextRunAt, isPaused])
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+model RecurringRun {
+  id         String            @id @default(cuid())
+  scheduleId String
+  schedule   RecurringSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  documentId String?
+  document   Document?         @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  status     RunStatus
+  error      String?
+  executedAt DateTime          @default(now())
+
+  @@index([scheduleId, executedAt])
+}
+
+model BulkJob {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label        String
+  docType      DocType
+  mode         Mode
+  locale       Locale
+  payload      Json
+  channel      BulkChannel
+  status       BulkStatus    @default(PENDING)
+  totalCount   Int
+  successCount Int           @default(0)
+  failCount    Int           @default(0)
+  createdAt    DateTime      @default(now())
+  completedAt  DateTime?
+  items        BulkJobItem[]
+
+  @@index([userId, status])
+}
+
+// EMAIL = auto via Resend
+// WHATSAPP_LINKS = retourne URLs wa.me (pas d'API)
+enum BulkChannel {
+  EMAIL
+  WHATSAPP_LINKS
+}
+
+enum BulkStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+}
+
+model BulkJobItem {
+  id         String    @id @default(cuid())
+  jobId      String
+  job        BulkJob   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  clientId   String
+  client     Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  documentId String?
+  document   Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  waUrl      String? // rempli si channel WHATSAPP_LINKS
+  status     RunStatus @default(SUCCESS)
+  error      String?
+  executedAt DateTime  @default(now())
+
+  @@index([jobId])
+}
+
+enum RunStatus {
+  SUCCESS
+  FAILED
 }

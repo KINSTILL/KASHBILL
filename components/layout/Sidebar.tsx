@@ -15,6 +15,7 @@ export function Sidebar() {
     { href: `/${locale}/documents/new`, label: t('new') },
     { href: `/${locale}/documents`, label: t('history') },
     { href: `/${locale}/clients`, label: t('clients') },
+    { href: `/${locale}/recurring`, label: t('recurring') },
     { href: `/${locale}/settings`, label: t('profile') },
   ];
 

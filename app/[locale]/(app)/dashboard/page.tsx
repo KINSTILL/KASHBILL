@@ -28,7 +28,7 @@ export default async function DashboardPage({
   const { user } = current;
   const t = await getTranslations();
 
-  const [recentDocs, documentsCount, clientsCount, activatedReferralsCount] = await Promise.all([
+  const [recentDocs, documentsCount, clientsCount, activatedReferralsCount, recurringCount] = await Promise.all([
     prisma.document.findMany({
       where: { userId: user.id },
       take: 5,
@@ -42,6 +42,9 @@ export default async function DashboardPage({
         parrainId: user.id,
         status: { in: ['ACTIVATED', 'REWARDED'] },
       },
+    }),
+    prisma.recurringSchedule.count({
+      where: { userId: user.id },
     }),
   ]);
 
@@ -86,7 +89,7 @@ export default async function DashboardPage({
 
       {!userIsPro && <UpgradeCTA reason="removeWatermark" />}
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard
           label={t('dashboard.stats.documents')}
           value={documentsCount}
@@ -101,6 +104,18 @@ export default async function DashboardPage({
           icon="👥"
           accent="brass"
         />
+        <Link
+          href={`/${locale}/recurring` as Route}
+          className="col-span-2 block transition sm:col-span-1 hover:opacity-90"
+        >
+          <StatCard
+            label={t('dashboard.stats.recurring')}
+            value={recurringCount}
+            hint={t('dashboard.stats.recurringHint')}
+            icon="⏱️"
+            accent="ink"
+          />
+        </Link>
       </div>
 
       <section>

@@ -15,6 +15,7 @@ const envSchema = z.object({
   NOTCHPAY_WEBHOOK_HASH: z.string().min(1),
   NOTCHPAY_BASE_URL: z.string().url().default('https://api.notchpay.co'),
   RESEND_API_KEY: z.string().min(1),
+  CRON_SECRET: z.string().min(16),
 });
 
 const parsed = envSchema.safeParse({
@@ -32,6 +33,7 @@ const parsed = envSchema.safeParse({
   NOTCHPAY_WEBHOOK_HASH: process.env.NOTCHPAY_WEBHOOK_HASH,
   NOTCHPAY_BASE_URL: process.env.NOTCHPAY_BASE_URL,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
+  CRON_SECRET: process.env.CRON_SECRET,
 });
 
 if (!parsed.success) {

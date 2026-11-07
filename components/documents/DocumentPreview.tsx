@@ -7,6 +7,8 @@ import { Spinner } from '@/components/ui/Spinner';
 import { renderPdfToBlob } from '@/lib/pdf/render';
 import type { PdfDocument, PdfFormat } from '@/lib/pdf/types';
 import { ShareSheet } from '@/components/share/ShareSheet';
+import { RecurringSheet } from './RecurringSheet';
+import { BulkSheet } from './BulkSheet';
 import { PdfViewer } from './PdfViewer';
 import { haptic } from '@/lib/device/haptics';
 
@@ -22,6 +24,8 @@ export function DocumentPreview({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [recurringOpen, setRecurringOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   const options = useMemo(
     () => ({
@@ -78,6 +82,28 @@ export function DocumentPreview({
         >
           {t('send')}
         </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant="outline"
+            fullWidth
+            onClick={() => {
+              haptic('medium');
+              setRecurringOpen(true);
+            }}
+          >
+            ⏱️ {t('schedule')}
+          </Button>
+          <Button
+            variant="outline"
+            fullWidth
+            onClick={() => {
+              haptic('medium');
+              setBulkOpen(true);
+            }}
+          >
+            👥 {t('sendBulk')}
+          </Button>
+        </div>
       </div>
       {blob && (
         <ShareSheet
@@ -92,6 +118,18 @@ export function DocumentPreview({
           onSent={() => {}}
         />
       )}
+      <RecurringSheet
+        open={recurringOpen}
+        onOpenChange={setRecurringOpen}
+        documentId={pdfDoc.id}
+        documentNumber={pdfDoc.number}
+      />
+      <BulkSheet
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        documentId={pdfDoc.id}
+        documentNumber={pdfDoc.number}
+      />
     </div>
   );
 }

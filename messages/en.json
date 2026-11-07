@@ -33,7 +33,8 @@
     "admin": "Admin",
     "logout": "Logout",
     "login": "Login",
-    "register": "Create account"
+    "register": "Create account",
+    "recurring": "Recurring"
   },
   "auth": {
     "metaTitle": "Authentication",
@@ -170,7 +171,9 @@
       "documents": "Documents",
       "documentsHint": "Total issued",
       "clients": "Clients",
-      "clientsHint": "Saved"
+      "clientsHint": "Saved",
+      "recurring": "Recurring",
+      "recurringHint": "Active schedules"
     }
   },
   "documents": {
@@ -336,7 +339,9 @@
       "iosPreviewHelp": "On iPhone, the integrated preview is not available. Open the PDF in a new tab.",
       "openPdf": "Open PDF",
       "openInNewTab": "Open in new tab",
-      "pdfError": "Failed to generate PDF. Please try again."
+      "pdfError": "Failed to generate PDF. Please try again.",
+      "schedule": "Schedule",
+      "sendBulk": "Send in bulk"
     },
     "email": {
       "title": "Send by email",
@@ -561,5 +566,60 @@
     "fraudulent": "Fraudulent document",
     "fraudulentHelp": "This document was flagged as fraudulent by MyCashBill. Do not use it.",
     "noCommercialData": "This verification does not reveal any commercial data."
+  },
+  "recurring": {
+    "title": "Recurring billing",
+    "subtitle": "Generate and automate your periodic documents",
+    "emptyTitle": "No recurring schedules",
+    "emptyHelp": "Open a document and click \"Schedule\" to set up automatic recurrence.",
+    "sheetTitle": "Schedule this document",
+    "sheetSubtitle": "A copy will be automatically generated based on the selected frequency.",
+    "label": "Schedule label",
+    "labelPlaceholder": "E.g. Monthly rent, Maintenance...",
+    "frequency": "Execution frequency",
+    "freqDaily": "Daily (every day)",
+    "freqWeekly": "Weekly (every week)",
+    "freqMonthly": "Monthly (every month)",
+    "autoSendEmail": "Send by email automatically (if client has an email)",
+    "save": "Save schedule",
+    "saving": "Saving...",
+    "success": "Schedule created successfully",
+    "error": "Failed to create schedule",
+    "active": "Active",
+    "paused": "Paused",
+    "pause": "Pause",
+    "resume": "Resume",
+    "delete": "Delete",
+    "deleteConfirm": "Permanently delete this recurring schedule?",
+    "deleted": "Schedule deleted",
+    "updated": "Schedule updated",
+    "lastRun": "Last execution",
+    "nextRun": "Next execution",
+    "never": "Never",
+    "runsCount": "{count, plural, =0 {No runs} =1 {1 run} other {# runs}}",
+    "emailAutoBadge": "Auto email"
+  },
+  "bulk": {
+    "sheetTitle": "Send in bulk",
+    "sheetSubtitle": "Issue this document for multiple clients simultaneously.",
+    "proOnly": "Bulk sending is reserved for Pro users.",
+    "upgrade": "Upgrade to Pro",
+    "selectClients": "Select clients ({count} selected)",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "noClients": "No clients registered yet.",
+    "noPhone": "No phone",
+    "noEmail": "No email",
+    "channel": "Sending channel",
+    "channelEmail": "Email (direct send from server)",
+    "channelWhatsApp": "WhatsApp (wa.me links to click)",
+    "send": "Start bulk send",
+    "sending": "Processing...",
+    "resultsTitle": "Bulk send results",
+    "resultsSummary": "{success} succeeded, {fail} failed",
+    "openWhatsApp": "Open WhatsApp",
+    "close": "Close",
+    "error": "Error during bulk send",
+    "minOneClient": "Please select at least one client."
   }
 }
