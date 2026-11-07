@@ -66,7 +66,7 @@ export function TicketDocument({
         </View>
         <Text style={styles.docTitle}>{isEn ? config.labelEn : config.label}</Text>
         <Text style={styles.docNumber}>
-          N° {doc.number} · {formatDateShort(doc.createdAt)}
+          N° {doc.number} · {formatDateShort(doc.createdAt, doc.locale)}
         </Text>
         {doc.client && (
           <ClientBlock

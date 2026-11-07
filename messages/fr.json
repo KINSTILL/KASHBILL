@@ -329,7 +329,16 @@
           "notesLabel": "Message bas de ticket",
           "notesPlaceholder": "Ex : Merci de votre visite ! Ni repris ni échangé après 48h."
         }
-      }
+      },
+      "documentLocale": "Langue du document",
+      "paymentOperator": "Opérateur Mobile Money",
+      "paymentOperatorFreeText": "Opérateur de paiement (texte libre)",
+      "paymentOperatorFreeTextPlaceholder": "Ex : Wave, M-Pesa, virement...",
+      "foreignClientWarning": "Client à l'étranger ({country}). Facture en devise de votre pays. Le taux de change fluctue — vérifiez-le avant d'envoyer.",
+      "exchangeRate": "Taux de change (optionnel)",
+      "equivalentAmount": "Montant équivalent en {currency} (optionnel)",
+      "exchangeRateNote": "Note sur le taux (optionnel)",
+      "exchangeRateNotePlaceholder": "Ex : taux du 07/11/2026"
     },
     "preview": {
       "title": "Aperçu",
@@ -398,7 +407,9 @@
     "scanNfc": "Scanner un tag NFC (Pro)",
     "deleteConfirm": "Supprimer ce client ? Les documents associés ne seront pas supprimés.",
     "taxId": "NIU / NIF du client (B2B)",
-    "taxIdPlaceholder": "Ex : P0987654321"
+    "taxIdPlaceholder": "Ex : P0987654321",
+    "country": "Pays du client",
+    "countryDefault": "Par défaut : {country}"
   },
   "settings": {
     "title": "Paramètres",

@@ -18,6 +18,8 @@ import { checkRequiredCompanyFields } from '@/lib/validators/documents';
 import { DocumentTypeSelector } from './DocumentTypeSelector';
 import { RequiredFieldsAlert } from './RequiredFieldsAlert';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
+import { getOperatorsForCountry, isPawaPayCountry } from '@/lib/countries/pawapay';
+import { getCurrencyForCountry } from '@/lib/countries/currency';
 import type { DocType } from '@prisma/client';
 import type { PdfFormat } from '@/lib/pdf/types';
 
@@ -40,14 +42,25 @@ type DraftState = {
   paymentReference: string | null;
   deliveryDate: string | null;
   deliveryAddress: string | null;
+  documentLocale: 'FR' | 'EN';
+  paymentOperator: string | null;
+  paymentOperatorFreeText: string | null;
+  equivalentCurrency: string | null;
+  equivalentAmount: number | null;
+  exchangeRate: number | null;
+  exchangeRateNote: string | null;
 };
 
 export function DocumentForm({
   clients,
   initialDraftId,
+  userCountry = 'CM',
+  userCurrency: _userCurrency = 'XAF',
 }: {
-  clients: { id: string; name: string }[];
+  clients: { id: string; name: string; country?: string | null }[];
   initialDraftId?: string;
+  userCountry?: string;
+  userCurrency?: string;
 }) {
   const t = useTranslations('documents.new');
   const locale = useLocale();
@@ -73,7 +86,21 @@ export function DocumentForm({
     paymentReference: null,
     deliveryDate: null,
     deliveryAddress: null,
+    documentLocale: (locale.toUpperCase() as 'FR' | 'EN'),
+    paymentOperator: null,
+    paymentOperatorFreeText: null,
+    equivalentCurrency: null,
+    equivalentAmount: null,
+    exchangeRate: null,
+    exchangeRateNote: null,
   });
+
+  const selectedClient = state.clientId ? clients.find((c) => c.id === state.clientId) : null;
+  const clientCountry = selectedClient?.country ?? userCountry;
+  const clientCurrency = getCurrencyForCountry(clientCountry);
+  const isForeignClient = clientCountry !== userCountry;
+  const operators = getOperatorsForCountry(clientCountry);
+  const isPawaPay = isPawaPayCountry(clientCountry);
 
   const currentConfig = DOC_TYPE_CONFIG[state.type];
   const [showPrices, setShowPrices] = useState<boolean>(currentConfig.showPricesByDefault);
@@ -199,7 +226,7 @@ export function DocumentForm({
         body: JSON.stringify({
           clientId: finalClientId,
           type: state.type,
-          locale: locale.toUpperCase(),
+          locale: state.documentLocale,
           payload: {
             lines: validLines,
             vatRate: state.vatRate ?? null,
@@ -210,7 +237,13 @@ export function DocumentForm({
             dueDate: state.dueDate ?? null,
             referenceNumber: state.referenceNumber ?? null,
             paymentMethod: state.paymentMethod ?? null,
-            paymentReference: state.paymentReference ?? null,
+            paymentReference: state.paymentReference,
+            paymentOperator: state.paymentOperator,
+            paymentOperatorFreeText: state.paymentOperatorFreeText,
+            equivalentCurrency: isForeignClient ? clientCurrency : null,
+            equivalentAmount: state.equivalentAmount,
+            exchangeRate: state.exchangeRate,
+            exchangeRateNote: state.exchangeRateNote,
             deliveryDate: state.deliveryDate ?? null,
             deliveryAddress: state.deliveryAddress ?? null,
           },
@@ -232,7 +265,8 @@ export function DocumentForm({
     }
   };
 
-  const presets = isEn ? currentConfig.quickPresets.en : currentConfig.quickPresets.fr;
+  const isDocEn = state.documentLocale === 'EN';
+  const presets = isDocEn ? currentConfig.quickPresets.en : currentConfig.quickPresets.fr;
   const isDeliveryNote = state.type === 'BORDEREAU';
   const isReceipt = state.type === 'RECU';
   const hideQtyInput = isReceipt && !showReceiptQty;
@@ -296,11 +330,34 @@ export function DocumentForm({
               referenceNumber: cfg.showReferenceNumber ? s.referenceNumber : null,
               paymentMethod: cfg.showPaymentInfo ? s.paymentMethod : null,
               paymentReference: cfg.showPaymentInfo ? s.paymentReference : null,
+              paymentOperator: cfg.showPaymentInfo ? s.paymentOperator : null,
+              paymentOperatorFreeText: cfg.showPaymentInfo ? s.paymentOperatorFreeText : null,
+              equivalentCurrency: cfg.showPaymentInfo ? s.equivalentCurrency : null,
+              equivalentAmount: cfg.showPaymentInfo ? s.equivalentAmount : null,
+              exchangeRate: cfg.showPaymentInfo ? s.exchangeRate : null,
+              exchangeRateNote: cfg.showPaymentInfo ? s.exchangeRateNote : null,
               deliveryDate: cfg.showShipmentDetails ? s.deliveryDate : null,
               deliveryAddress: cfg.showShipmentDetails ? s.deliveryAddress : null,
             }));
           }}
         />
+        <div className="mt-3">
+          <label className="mb-1.5 block text-[13px] font-medium text-ink-soft">
+            {t('documentLocale')}
+          </label>
+          <div className="inline-flex rounded-lg border border-slate-300 p-0.5 text-sm">
+            {(['FR', 'EN'] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setState((s) => ({ ...s, documentLocale: l }))}
+                className={`px-3 py-1 rounded ${state.documentLocale === l ? 'bg-sage-500 text-white' : ''}`}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
       </Card>
 
       {missingCompanyFields.length > 0 && (
@@ -571,6 +628,34 @@ export function DocumentForm({
                   <option value="CHECK">{t('paymentCheck')}</option>
                 </select>
               </div>
+              {isPawaPay ? (
+                <div>
+                  <label className="mb-1.5 block text-[13px] font-medium text-ink-soft">
+                    {t('paymentOperator')}
+                  </label>
+                  <select
+                    value={state.paymentOperator ?? ''}
+                    onChange={(e) => setState((s) => ({ ...s, paymentOperator: e.target.value || null }))}
+                    className="thumb-zone w-full rounded-btn border border-slate-200 bg-white px-3.5 text-[15px]"
+                  >
+                    <option value="">—</option>
+                    {operators.map((op) => (
+                      <option key={op.code} value={op.code}>
+                        {op.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <Input
+                  label={t('paymentOperatorFreeText')}
+                  placeholder={t('paymentOperatorFreeTextPlaceholder')}
+                  value={state.paymentOperatorFreeText ?? ''}
+                  onChange={(e) =>
+                    setState((s) => ({ ...s, paymentOperatorFreeText: e.target.value || null }))
+                  }
+                />
+              )}
               <Input
                 label={t('paymentReference')}
                 placeholder={t('paymentReferencePlaceholder')}
@@ -580,6 +665,46 @@ export function DocumentForm({
                 }
               />
             </>
+          )}
+          {isForeignClient && (
+            <div className="space-y-2 rounded-lg border border-orange-200 bg-orange-50 p-3">
+              <p className="text-[12px] font-medium text-orange-900">
+                ⚠️ {t('foreignClientWarning', { country: clientCountry, currency: clientCurrency })}
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  inputMode="numeric"
+                  label={t('exchangeRate')}
+                  placeholder="0.028"
+                  value={state.exchangeRate ?? ''}
+                  onChange={(e) =>
+                    setState((s) => ({
+                      ...s,
+                      exchangeRate: e.target.value ? Number(e.target.value) : null,
+                    }))
+                  }
+                />
+                <Input
+                  inputMode="numeric"
+                  label={t('equivalentAmount', { currency: clientCurrency })}
+                  value={state.equivalentAmount ?? ''}
+                  onChange={(e) =>
+                    setState((s) => ({
+                      ...s,
+                      equivalentAmount: e.target.value ? Number(e.target.value) : null,
+                    }))
+                  }
+                />
+              </div>
+              <Input
+                label={t('exchangeRateNote')}
+                placeholder={t('exchangeRateNotePlaceholder')}
+                value={state.exchangeRateNote ?? ''}
+                onChange={(e) =>
+                  setState((s) => ({ ...s, exchangeRateNote: e.target.value || null }))
+                }
+              />
+            </div>
           )}
           {DOC_TYPE_CONFIG[state.type].showShipmentDetails && (
             <>

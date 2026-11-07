@@ -32,6 +32,7 @@ export type ShareSheetProps = {
   pdfBlob: Blob;
   documentNumber: string;
   documentId?: string;
+  docLocale?: 'FR' | 'EN';
   onSent: () => void;
 };
 
@@ -44,12 +45,14 @@ export function ShareSheet({
   pdfBlob,
   documentNumber,
   documentId,
+  docLocale,
   onSent,
 }: ShareSheetProps) {
   const tRoot = useTranslations();
   const t = useTranslations('share');
   const toast = useToast();
   const locale = useLocale() as 'fr' | 'en';
+  const effectiveLocale = (docLocale ? docLocale.toLowerCase() : locale) as 'fr' | 'en';
   const group = getShareGroup(docType);
   const { user } = useCurrentUser();
   const userIsPro = user ? isPro({ proUntil: user.proUntil }) : false;
@@ -85,16 +88,16 @@ export function ShareSheet({
       setMessage(custom);
       setIsCustom(true);
     } else {
-      setMessage(resolveShareMessage(tRoot, group, loaded.lastTone, loaded.lastDistance, locale));
+      setMessage(resolveShareMessage(tRoot, group, loaded.lastTone, loaded.lastDistance, effectiveLocale));
       setIsCustom(false);
     }
-  }, [open, group, locale, tRoot]);
+  }, [open, group, effectiveLocale, tRoot]);
 
   const applyToneDistance = (tone: ShareTone, distance: ShareDistance) => {
     haptic('light');
     setPrefs({ ...prefs, lastTone: tone, lastDistance: distance });
     if (!isCustom) {
-      setMessage(resolveShareMessage(tRoot, group, tone, distance, locale));
+      setMessage(resolveShareMessage(tRoot, group, tone, distance, effectiveLocale));
     }
   };
 
@@ -106,7 +109,7 @@ export function ShareSheet({
   const handleReset = () => {
     clearCustomMessage(group);
     setIsCustom(false);
-    setMessage(resolveShareMessage(tRoot, group, prefs.lastTone, prefs.lastDistance, locale));
+    setMessage(resolveShareMessage(tRoot, group, prefs.lastTone, prefs.lastDistance, effectiveLocale));
   };
 
   const finalize = () => {

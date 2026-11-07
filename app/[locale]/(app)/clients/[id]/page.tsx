@@ -53,6 +53,8 @@ export default async function ClientDetailPage({
           phone: client.phone,
           address: client.address,
           note: client.note,
+          taxId: client.taxId,
+          country: client.country,
         }}
         locale={locale}
       />

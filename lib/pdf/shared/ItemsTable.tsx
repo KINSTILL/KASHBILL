@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { Locale } from '@prisma/client';
 import type { PdfLine } from '../types';
-import { formatXaf } from './format';
+import { formatCurrency } from './format';
 
 type Props = {
   lines: PdfLine[];
@@ -62,9 +62,9 @@ export function ItemsTable({
           <Text style={styles.colQty}>{line.quantity}</Text>
           {!hidePrices ? (
             <>
-              <Text style={styles.colPrice}>{formatXaf(line.unitPrice, currency)}</Text>
+              <Text style={styles.colPrice}>{formatCurrency(line.unitPrice, currency, locale)}</Text>
               {showVat ? <Text style={styles.colVat}>—</Text> : null}
-              <Text style={styles.colTotal}>{formatXaf(line.total, currency)}</Text>
+              <Text style={styles.colTotal}>{formatCurrency(line.total, currency, locale)}</Text>
             </>
           ) : null}
         </View>

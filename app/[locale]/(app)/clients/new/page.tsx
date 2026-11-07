@@ -4,24 +4,37 @@ import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { ContactPickerButton } from '@/components/clients/ContactPickerButton';
 import { NfcScannerButton } from '@/components/clients/NfcScannerButton';
+import countries from 'i18n-iso-countries';
+import frLocale from 'i18n-iso-countries/langs/fr.json';
+import enLocale from 'i18n-iso-countries/langs/en.json';
+import { useCurrentUser } from '@/components/providers/SessionProvider';
+
+countries.registerLocale(frLocale);
+countries.registerLocale(enLocale);
 
 export default function NewClientPage() {
   const t = useTranslations();
   const router = useRouter();
   const params = useParams();
-  const locale = (params?.locale as string) || 'fr';
+  const locale = (useLocale() || params?.locale || 'fr') as 'fr' | 'en';
+  const { user } = useCurrentUser();
+  const userCountry = user?.country ?? 'CM';
+  const allCountries = Object.entries(countries.getNames(locale))
+    .map(([code, name]) => ({ code, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [taxId, setTaxId] = useState('');
   const [note, setNote] = useState('');
+  const [country, setCountry] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +53,7 @@ export default function NewClientPage() {
           address: address.trim() || null,
           taxId: taxId.trim() || null,
           note: note.trim() || null,
+          country: country || null,
         }),
       });
 
@@ -179,6 +193,22 @@ export default function NewClientPage() {
               onChange={(e) => setNote(e.target.value)}
               className="mt-1"
             />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-[13px] font-medium text-ink-soft">
+              {t('clients.country')}
+            </label>
+            <select
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className="thumb-zone w-full rounded-btn border border-slate-200 bg-white px-3.5 text-[15px]"
+            >
+              <option value="">{t('clients.countryDefault', { country: userCountry })}</option>
+              {allCountries.map((c) => (
+                <option key={c.code} value={c.code}>{c.name}</option>
+              ))}
+            </select>
           </div>
 
           <div className="flex gap-3 pt-4">

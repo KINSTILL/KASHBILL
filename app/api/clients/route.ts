@@ -13,6 +13,7 @@ const createClientSchema = z.object({
   address: z.string().max(300).optional().nullable(),
   note: z.string().max(500).optional().nullable(),
   taxId: z.string().max(50).optional().nullable(),
+  country: z.string().max(2).optional().nullable(),
 });
 
 export async function GET(req: NextRequest): Promise<Response> {

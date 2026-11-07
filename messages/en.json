@@ -329,7 +329,16 @@
           "notesLabel": "Receipt footer note",
           "notesPlaceholder": "E.g. Thank you for your business! No refunds after 48h."
         }
-      }
+      },
+      "documentLocale": "Document language",
+      "paymentOperator": "Mobile Money operator",
+      "paymentOperatorFreeText": "Payment operator (free text)",
+      "paymentOperatorFreeTextPlaceholder": "Ex: Wave, M-Pesa, bank transfer...",
+      "foreignClientWarning": "Foreign client ({country}). Invoice in your home currency. Exchange rate fluctuates — verify before sending.",
+      "exchangeRate": "Exchange rate (optional)",
+      "equivalentAmount": "Equivalent amount in {currency} (optional)",
+      "exchangeRateNote": "Rate note (optional)",
+      "exchangeRateNotePlaceholder": "Ex: rate on 2026-11-07"
     },
     "preview": {
       "title": "Preview",
@@ -398,7 +407,9 @@
     "scanNfc": "Scan an NFC tag (Pro)",
     "deleteConfirm": "Delete this client? Related documents won't be deleted.",
     "taxId": "Client Tax ID (B2B)",
-    "taxIdPlaceholder": "Ex: P0987654321"
+    "taxIdPlaceholder": "Ex: P0987654321",
+    "country": "Client country",
+    "countryDefault": "Default: {country}"
   },
   "settings": {
     "title": "Settings",

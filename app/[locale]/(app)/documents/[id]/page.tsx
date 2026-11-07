@@ -6,6 +6,7 @@ import { generateQrCode } from '@/lib/documents/integrity';
 import { env } from '@/lib/env';
 import { DocumentPreview } from '@/components/documents/DocumentPreview';
 import type { PdfDocument, PdfFormat, PdfPayload } from '@/lib/pdf/types';
+import { getCurrencyForCountry } from '@/lib/countries/currency';
 
 export default async function DocumentDetailPage({
   params,
@@ -62,7 +63,7 @@ export default async function DocumentDetailPage({
       cgvText: doc.user.cgvText,
       legalForm: doc.user.legalForm,
       country: doc.user.country,
-      currency: 'FCFA',
+      currency: getCurrencyForCountry(doc.user.country),
     },
     client: doc.client
       ? {

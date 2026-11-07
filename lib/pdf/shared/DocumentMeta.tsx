@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { PdfDocument } from '../types';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
-import { formatDateShort } from './format';
+import { formatDateShort, formatCurrency } from './format';
 
 const PAYMENT_LABELS: Record<string, { fr: string; en: string }> = {
   CASH: { fr: 'Espèces', en: 'Cash' },
@@ -44,7 +44,7 @@ export function DocumentMeta({ doc, compact }: { doc: PdfDocument; compact: bool
         <View style={styles.row}>
           <Text style={styles.label}>{isFr ? 'Échéance :' : 'Due date:'}</Text>
           <Text style={styles.value}>
-            {formatDateShort(new Date(doc.payload.dueDate))}
+            {formatDateShort(new Date(doc.payload.dueDate), doc.locale)}
           </Text>
         </View>
       ) : null}
@@ -73,7 +73,7 @@ export function DocumentMeta({ doc, compact }: { doc: PdfDocument; compact: bool
           <Text style={styles.label}>{isFr ? 'Livraison :' : 'Delivery:'}</Text>
           <Text style={styles.value}>
             {doc.payload.deliveryDate
-              ? formatDateShort(new Date(doc.payload.deliveryDate))
+              ? formatDateShort(new Date(doc.payload.deliveryDate), doc.locale)
               : ''}
             {doc.payload.deliveryAddress ? ` — ${doc.payload.deliveryAddress}` : ''}
           </Text>
@@ -94,11 +94,7 @@ export function DocumentMeta({ doc, compact }: { doc: PdfDocument; compact: bool
             {isFr ? 'Équivalent :' : 'Equivalent:'}
           </Text>
           <Text style={styles.value}>
-            ≈ {new Intl.NumberFormat('fr-FR', {
-              style: 'currency',
-              currency: doc.payload.equivalentCurrency,
-              maximumFractionDigits: 0,
-            }).format(doc.payload.equivalentAmount)}
+            ≈ {formatCurrency(doc.payload.equivalentAmount, doc.payload.equivalentCurrency, doc.locale)}
             {doc.payload.exchangeRate
               ? ` (${isFr ? 'taux' : 'rate'} : ${doc.payload.exchangeRate})`
               : ''}

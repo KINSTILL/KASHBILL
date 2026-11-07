@@ -116,6 +116,7 @@ export function DocumentPreview({
           pdfBlob={blob}
           documentNumber={pdfDoc.number}
           documentId={pdfDoc.id}
+          docLocale={pdfDoc.locale}
           onSent={() => {}}
         />
       )}

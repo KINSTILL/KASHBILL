@@ -7,6 +7,13 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+import countries from 'i18n-iso-countries';
+import frLocale from 'i18n-iso-countries/langs/fr.json';
+import enLocale from 'i18n-iso-countries/langs/en.json';
+import { useCurrentUser } from '@/components/providers/SessionProvider';
+
+countries.registerLocale(frLocale);
+countries.registerLocale(enLocale);
 
 interface ClientData {
   id: string;
@@ -15,6 +22,7 @@ interface ClientData {
   address: string | null;
   note: string | null;
   taxId?: string | null;
+  country?: string | null;
 }
 
 export function ClientDetailClient({
@@ -32,6 +40,13 @@ export function ClientDetailClient({
   const [address, setAddress] = useState(client.address || '');
   const [taxId, setTaxId] = useState(client.taxId || '');
   const [note, setNote] = useState(client.note || '');
+  const [country, setCountry] = useState(client.country || '');
+  const { user } = useCurrentUser();
+  const userCountry = user?.country ?? 'CM';
+  const lang = (locale === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+  const allCountries = Object.entries(countries.getNames(lang))
+    .map(([code, name]) => ({ code, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<{ text: string; error?: boolean } | null>(null);
@@ -51,6 +66,7 @@ export function ClientDetailClient({
           address: address.trim() || null,
           taxId: taxId.trim() || null,
           note: note.trim() || null,
+          country: country || null,
         }),
       });
 
@@ -172,6 +188,22 @@ export function ClientDetailClient({
             onChange={(e) => setNote(e.target.value)}
             className="mt-1"
           />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-[13px] font-medium text-ink-soft">
+            {t('settings.country') || 'Pays'}
+          </label>
+          <select
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            className="thumb-zone w-full rounded-btn border border-slate-200 bg-white px-3.5 text-[15px]"
+          >
+            <option value="">{userCountry}</option>
+            {allCountries.map((c) => (
+              <option key={c.code} value={c.code}>{c.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="flex items-center justify-between pt-4">

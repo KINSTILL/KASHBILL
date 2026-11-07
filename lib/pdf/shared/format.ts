@@ -1,7 +1,12 @@
-export function formatCurrency(amount: number, currencyCode: string = 'XAF'): string {
+export function formatCurrency(
+  amount: number,
+  currencyCode: string = 'XAF',
+  locale: 'FR' | 'EN' | string = 'FR'
+): string {
   const rounded = Math.round(amount);
+  const loc = String(locale).toUpperCase() === 'EN' ? 'en-US' : 'fr-FR';
   try {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat(loc, {
       style: 'currency',
       currency: currencyCode,
       maximumFractionDigits: 0,
@@ -10,7 +15,7 @@ export function formatCurrency(amount: number, currencyCode: string = 'XAF'): st
       .format(rounded)
       .replace(/\u202F|\u00A0/g, '\u00A0');
   } catch {
-    const formatted = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 })
+    const formatted = new Intl.NumberFormat(loc, { maximumFractionDigits: 0 })
       .format(rounded)
       .replace(/\s/g, '\u00A0');
     return `${formatted}\u00A0${currencyCode}`;
@@ -24,8 +29,9 @@ export function formatXaf(amount: number, currencyOrCode = 'XAF'): string {
   return formatCurrency(amount, code);
 }
 
-export function formatDateShort(d: Date): string {
-  return new Intl.DateTimeFormat('fr-CM', {
+export function formatDateShort(d: Date, locale: 'FR' | 'EN' | string = 'FR'): string {
+  const loc = String(locale).toUpperCase() === 'EN' ? 'en-US' : 'fr-CM';
+  return new Intl.DateTimeFormat(loc, {
     timeZone: 'Africa/Douala',
     day: '2-digit',
     month: '2-digit',

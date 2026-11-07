@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { Locale } from '@prisma/client';
 import type { PdfPayload } from '../types';
-import { formatXaf } from './format';
+import { formatCurrency } from './format';
 
 export function Totals({
   payload,
@@ -48,31 +48,31 @@ export function Totals({
     <View style={styles.block}>
       <View style={styles.line}>
         <Text style={styles.label}>{isEn ? 'Subtotal' : 'Sous-total'}</Text>
-        <Text style={styles.value}>{formatXaf(payload.subtotal, currency)}</Text>
+        <Text style={styles.value}>{formatCurrency(payload.subtotal, currency, locale)}</Text>
       </View>
       {showVat && payload.vatAmount !== null && payload.vatRate !== null ? (
         <View style={styles.line}>
           <Text style={styles.label}>
             {isEn ? 'VAT' : 'TVA'} ({payload.vatRate}%)
           </Text>
-          <Text style={styles.value}>{formatXaf(payload.vatAmount, currency)}</Text>
+          <Text style={styles.value}>{formatCurrency(payload.vatAmount, currency, locale)}</Text>
         </View>
       ) : null}
       {payload.deliveryFee !== null && payload.deliveryFee > 0 && (
         <View style={styles.line}>
           <Text style={styles.label}>{isEn ? 'Delivery' : 'Livraison'}</Text>
-          <Text style={styles.value}>{formatXaf(payload.deliveryFee, currency)}</Text>
+          <Text style={styles.value}>{formatCurrency(payload.deliveryFee, currency, locale)}</Text>
         </View>
       )}
       {payload.depositAmount !== null && payload.depositAmount > 0 && (
         <View style={styles.line}>
           <Text style={styles.label}>{isEn ? 'Deposit' : 'Acompte'}</Text>
-          <Text style={styles.value}>−{formatXaf(payload.depositAmount, currency)}</Text>
+          <Text style={styles.value}>−{formatCurrency(payload.depositAmount, currency, locale)}</Text>
         </View>
       )}
       <View style={styles.totalRow}>
         <Text style={styles.totalLabel}>TOTAL</Text>
-        <Text style={styles.totalValue}>{formatXaf(payload.total, currency)}</Text>
+        <Text style={styles.totalValue}>{formatCurrency(payload.total, currency, locale)}</Text>
       </View>
     </View>
   );
