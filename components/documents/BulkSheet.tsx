@@ -139,7 +139,7 @@ export function BulkSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={t('sheetTitle')}>
+    <Sheet open={open} onOpenChange={onOpenChange} title={t('title')}>
       <div className="space-y-4">
         <p className="text-sm text-slate-600">{t('sheetSubtitle')}</p>
 
@@ -163,7 +163,7 @@ export function BulkSheet({
 
         {results !== null ? (
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-slate-900">{t('resultsTitle')}</h3>
+            <h3 className="text-sm font-bold text-slate-900">{t('results')}</h3>
             <div className="max-h-72 space-y-2 overflow-y-auto">
               {results.map((r) => (
                 <div
@@ -183,7 +183,7 @@ export function BulkSheet({
                       className="shrink-0"
                     >
                       <Button size="sm" variant="whatsapp">
-                        {t('openWhatsApp')}
+                        {t('openWhatsapp')}
                       </Button>
                     </a>
                   )}
@@ -207,9 +207,12 @@ export function BulkSheet({
                 onChange={(e) => setChannel(e.target.value as 'EMAIL' | 'WHATSAPP_LINKS')}
                 className="thumb-zone w-full rounded-btn border border-slate-200 bg-white px-3.5 text-[15px] text-ink focus:border-sage-500 focus:outline-none focus:ring-2 focus:ring-sage-100"
               >
-                <option value="WHATSAPP_LINKS">{t('channelWhatsApp')}</option>
+                <option value="WHATSAPP_LINKS">{t('channelWhatsappLinks')}</option>
                 <option value="EMAIL">{t('channelEmail')}</option>
               </select>
+              {channel === 'WHATSAPP_LINKS' && (
+                <p className="mt-1 text-xs text-slate-500">{t('channelWhatsappHelp')}</p>
+              )}
             </div>
 
             <div>
@@ -282,7 +285,7 @@ export function BulkSheet({
                 loading={submitting}
                 disabled={!pro || selectedIds.length === 0}
               >
-                {t('send')}
+                {t('sendButton')}
               </Button>
             </div>
           </>

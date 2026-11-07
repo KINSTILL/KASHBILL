@@ -67,6 +67,12 @@ sudo -u postgres pg_restore -d mycashbill -c /var/backups/mycashbill/mycashbill_
 - PM2 healthcheck : cron 5 min
 - Logs : `pm2 logs mycashbill`
 
+## Crontab
+```bash
+# Récurrent — toutes les 15 min
+*/15 * * * * /usr/bin/curl -fsS -X POST https://mycashbill.app/api/cron/recurring -H "X-Cron-Secret: $(grep CRON_SECRET /var/www/mycashbill/.env.production | cut -d= -f2 | tr -d '\"')" >> /var/log/mycashbill/cron.log 2>&1
+```
+
 ## Sécurité
 - SSH : clé uniquement, root désactivé
 - Firewall : 22, 80, 443 uniquement

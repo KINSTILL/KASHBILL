@@ -597,7 +597,16 @@
     "nextRun": "Prochaine exécution",
     "never": "Jamais",
     "runsCount": "{count, plural, =0 {Aucune exécution} =1 {1 exécution} other {# exécutions}}",
-    "emailAutoBadge": "Email auto"
+    "emailAutoBadge": "Email auto",
+    "schedule": "Programmer",
+    "list": "Plannings récurrents",
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "monthly": "Mensuel",
+    "autoEmail": "Envoi automatique par email",
+    "autoEmailHelp": "Envoyer par email automatiquement (si le client a un email)",
+    "empty": "Aucun planning récurrent",
+    "emailNotAvailable": "Email non disponible pour ce client"
   },
   "bulk": {
     "sheetTitle": "Envoyer en masse",
@@ -613,13 +622,21 @@
     "channel": "Canal d'envoi",
     "channelEmail": "Email (envoi direct depuis le serveur)",
     "channelWhatsApp": "WhatsApp (liens wa.me à cliquer)",
-    "send": "Lancer l'envoi en masse",
+    "send": "Envoyer en masse",
     "sending": "Traitement en cours...",
     "resultsTitle": "Résultats de l'envoi en masse",
     "resultsSummary": "{success} réussi(s), {fail} échec(s)",
     "openWhatsApp": "Ouvrir WhatsApp",
     "close": "Fermer",
     "error": "Erreur lors de l'envoi en masse",
-    "minOneClient": "Veuillez sélectionner au moins un client."
+    "minOneClient": "Veuillez sélectionner au moins un client.",
+    "title": "Envoi en masse",
+    "channelWhatsappLinks": "WhatsApp (liens wa.me à cliquer)",
+    "channelWhatsappHelp": "Génère des liens wa.me à cliquer manuellement (pas d’API WhatsApp)",
+    "sendButton": "Lancer l'envoi en masse",
+    "results": "Résultats",
+    "success": "Envoi en masse terminé avec succès",
+    "partial": "Envoi partiellement réussi",
+    "openWhatsapp": "Ouvrir WhatsApp"
   }
 }

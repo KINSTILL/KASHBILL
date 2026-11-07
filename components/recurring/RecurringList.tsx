@@ -101,11 +101,11 @@ export function RecurringList({
   const getFreqLabel = (freq: ScheduleItem['frequency']) => {
     switch (freq) {
       case 'DAILY':
-        return t('freqDaily');
+        return t('daily');
       case 'WEEKLY':
-        return t('freqWeekly');
+        return t('weekly');
       case 'MONTHLY':
-        return t('freqMonthly');
+        return t('monthly');
       default:
         return freq;
     }
@@ -114,7 +114,7 @@ export function RecurringList({
   if (schedules.length === 0) {
     return (
       <EmptyState
-        title={t('emptyTitle')}
+        title={t('empty')}
         description={t('emptyHelp')}
         action={
           <Link href={`/${locale}/documents` as Route}>

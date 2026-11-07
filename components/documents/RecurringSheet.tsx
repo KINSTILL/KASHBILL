@@ -64,7 +64,7 @@ export function RecurringSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={t('sheetTitle')}>
+    <Sheet open={open} onOpenChange={onOpenChange} title={t('schedule')}>
       <div className="space-y-4">
         <p className="text-sm text-slate-600">{t('sheetSubtitle')}</p>
 
@@ -90,9 +90,9 @@ export function RecurringSheet({
             onChange={(e) => setFrequency(e.target.value as 'DAILY' | 'WEEKLY' | 'MONTHLY')}
             className="thumb-zone w-full rounded-btn border border-slate-200 bg-white px-3.5 text-[15px] text-ink focus:border-sage-500 focus:outline-none focus:ring-2 focus:ring-sage-100"
           >
-            <option value="DAILY">{t('freqDaily')}</option>
-            <option value="WEEKLY">{t('freqWeekly')}</option>
-            <option value="MONTHLY">{t('freqMonthly')}</option>
+            <option value="DAILY">{t('daily')}</option>
+            <option value="WEEKLY">{t('weekly')}</option>
+            <option value="MONTHLY">{t('monthly')}</option>
           </select>
         </div>
 
@@ -103,7 +103,7 @@ export function RecurringSheet({
             onChange={(e) => setAutoSendEmail(e.target.checked)}
             className="mt-0.5 h-4 w-4 rounded border-slate-300 text-sage-600 focus:ring-sage-500"
           />
-          <span className="text-xs leading-relaxed text-slate-700">{t('autoSendEmail')}</span>
+          <span className="text-xs leading-relaxed text-slate-700">{t('autoEmailHelp')}</span>
         </label>
 
         <div className="pt-2">

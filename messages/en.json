@@ -597,7 +597,16 @@
     "nextRun": "Next execution",
     "never": "Never",
     "runsCount": "{count, plural, =0 {No runs} =1 {1 run} other {# runs}}",
-    "emailAutoBadge": "Auto email"
+    "emailAutoBadge": "Auto email",
+    "schedule": "Schedule",
+    "list": "Recurring schedules",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "autoEmail": "Automatic email delivery",
+    "autoEmailHelp": "Send by email automatically (if client has an email)",
+    "empty": "No recurring schedules",
+    "emailNotAvailable": "Email not available for this client"
   },
   "bulk": {
     "sheetTitle": "Send in bulk",
@@ -613,13 +622,21 @@
     "channel": "Sending channel",
     "channelEmail": "Email (direct send from server)",
     "channelWhatsApp": "WhatsApp (wa.me links to click)",
-    "send": "Start bulk send",
+    "send": "Send in bulk",
     "sending": "Processing...",
     "resultsTitle": "Bulk send results",
     "resultsSummary": "{success} succeeded, {fail} failed",
     "openWhatsApp": "Open WhatsApp",
     "close": "Close",
     "error": "Error during bulk send",
-    "minOneClient": "Please select at least one client."
+    "minOneClient": "Please select at least one client.",
+    "title": "Bulk sending",
+    "channelWhatsappLinks": "WhatsApp (wa.me links to click)",
+    "channelWhatsappHelp": "Generates wa.me links to click manually (no WhatsApp API)",
+    "sendButton": "Start bulk send",
+    "results": "Results",
+    "success": "Bulk sending completed successfully",
+    "partial": "Partially successful sending",
+    "openWhatsapp": "Open WhatsApp"
   }
 }
