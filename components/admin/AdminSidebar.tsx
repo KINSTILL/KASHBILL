@@ -6,15 +6,18 @@ import { usePathname } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
+import { canDo, type AdminAction } from '@/lib/admin/roles';
 
 export function AdminSidebar() {
   const locale = useLocale();
   const pathname = usePathname();
   const { user } = useCurrentUser();
 
-  const items = [
+  const items: Array<{ href: string; label: string; action: AdminAction }> = [
     { href: `/${locale}/admin`, label: '📊 Dashboard', action: 'view_stats' },
     { href: `/${locale}/admin/users`, label: '👥 Utilisateurs', action: 'view_users' },
+    { href: `/${locale}/admin/subscriptions`, label: '💎 Abonnements', action: 'manage_subscriptions' },
+    { href: `/${locale}/admin/invoices`, label: '🧾 Factures', action: 'view_invoices' },
     { href: `/${locale}/admin/fraud`, label: '🚨 Fraude', action: 'view_fraud_queue' },
     { href: `/${locale}/admin/blacklist`, label: '⛔ Blacklist', action: 'manage_blacklist' },
     { href: `/${locale}/admin/thresholds`, label: '⚙️ Seuils', action: 'manage_thresholds' },
@@ -24,6 +27,8 @@ export function AdminSidebar() {
   if (user?.role === 'ADMIN') {
     items.push({ href: `/${locale}/admin/supports`, label: '👤 SUPPORT', action: 'list_supports' });
   }
+
+  const visibleItems = items.filter((item) => canDo(user?.role ?? 'USER', item.action));
 
   return (
     <>
@@ -38,7 +43,7 @@ export function AdminSidebar() {
           </span>
         </div>
         <nav className="space-y-1 p-4">
-          {items.map((item) => {
+          {visibleItems.map((item) => {
             const active =
               pathname === item.href ||
               (item.href !== `/${locale}/admin` && pathname.startsWith(item.href + '/'));
@@ -71,7 +76,7 @@ export function AdminSidebar() {
           </span>
         </div>
         <nav className="flex gap-2 overflow-x-auto pb-1 text-xs">
-          {items.map((item) => {
+          {visibleItems.map((item) => {
             const active =
               pathname === item.href ||
               (item.href !== `/${locale}/admin` && pathname.startsWith(item.href + '/'));

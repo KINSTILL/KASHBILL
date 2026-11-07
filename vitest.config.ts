@@ -2,6 +2,11 @@ import { defineConfig } from 'vitest/config';
 import path from 'node:path';
 
 export default defineConfig({
+  oxc: {
+    jsx: {
+      runtime: 'automatic',
+    },
+  },
   test: {
     environment: 'node',
     globals: true,
@@ -14,8 +19,8 @@ export default defineConfig({
     maxWorkers: 1,
     pool: 'forks',
     // @ts-expect-error compatibilité descendante
-    poolOptions: {
-      forks: { singleFork: true },
+    forks: {
+      singleFork: true,
     },
     coverage: {
       provider: 'v8',

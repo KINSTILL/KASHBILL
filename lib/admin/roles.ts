@@ -24,7 +24,14 @@ export type AdminAction =
   | 'manage_countries'
   | 'create_support'
   | 'revoke_support'
-  | 'list_supports';
+  | 'list_supports'
+  | 'manage_subscriptions'
+  | 'grant_pro_bulk'
+  | 'extend_subscription'
+  | 'cancel_subscription'
+  | 'view_invoices'
+  | 'resend_invoice_email'
+  | 'regenerate_invoice_pdf';
 
 const SUPPORT_ACTIONS: AdminAction[] = [
   'view_users',
@@ -53,6 +60,13 @@ const ADMIN_ACTIONS: AdminAction[] = [
   'create_support',
   'revoke_support',
   'list_supports',
+  'manage_subscriptions',
+  'grant_pro_bulk',
+  'extend_subscription',
+  'cancel_subscription',
+  'view_invoices',
+  'resend_invoice_email',
+  'regenerate_invoice_pdf',
 ];
 
 export function canDo(role: Role, action: AdminAction): boolean {
@@ -79,6 +93,11 @@ export function requiresReauth(action: AdminAction): boolean {
     action === 'manage_thresholds' ||
     action === 'manage_countries' ||
     action === 'create_support' ||
+    action === 'grant_pro_bulk' ||
+    action === 'extend_subscription' ||
+    action === 'cancel_subscription' ||
+    action === 'resend_invoice_email' ||
+    action === 'regenerate_invoice_pdf' ||
     action === 'revoke_support'
   );
 }
