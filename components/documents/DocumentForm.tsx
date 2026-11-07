@@ -26,7 +26,7 @@ type DraftState = {
   type: DocType;
   clientId: string | null;
   clientMode: 'existing' | 'new';
-  newClient: { name: string; phone: string; address: string; taxId: string };
+  newClient: { name: string; phone: string; email: string; address: string; taxId: string };
   lines: Line[];
   vatRate: number | null;
   depositPercentage: number | null;
@@ -59,7 +59,7 @@ export function DocumentForm({
     type: 'DEVIS',
     clientId: null,
     clientMode: 'existing',
-    newClient: { name: '', phone: '', address: '', taxId: '' },
+    newClient: { name: '', phone: '', email: '', address: '', taxId: '' },
     lines: [{ description: '', quantity: 1, unitPrice: 0 }],
     vatRate: null,
     depositPercentage: null,
@@ -175,6 +175,7 @@ export function DocumentForm({
           body: JSON.stringify({
             name: state.newClient.name.trim(),
             phone: state.newClient.phone.trim() || null,
+            email: state.newClient.email.trim() || null,
             address: state.newClient.address.trim() || null,
             taxId: state.newClient.taxId.trim() || null,
           }),
@@ -353,6 +354,15 @@ export function DocumentForm({
               value={state.newClient.phone}
               onChange={(e) =>
                 setState((s) => ({ ...s, newClient: { ...s.newClient, phone: e.target.value } }))
+              }
+            />
+            <Input
+              type="email"
+              inputMode="email"
+              placeholder={t('newClientEmail')}
+              value={state.newClient.email}
+              onChange={(e) =>
+                setState((s) => ({ ...s, newClient: { ...s.newClient, email: e.target.value } }))
               }
             />
             <Input

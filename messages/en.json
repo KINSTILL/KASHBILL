@@ -188,6 +188,7 @@
       "clientModeNew": "New client",
       "newClientName": "Client name *",
       "newClientPhone": "Phone (optional)",
+      "newClientEmail": "Email (optional)",
       "newClientAddress": "Address (optional)",
       "newClientTaxId": "Tax ID / TIN (optional, B2B)",
       "clientLimitReached": "3-client limit reached. Select an existing client or upgrade to Pro.",
@@ -483,6 +484,8 @@
         "download": "Download PDF",
         "cancel": "Cancel"
       },
+      "clientEmail": "Client email (optional)",
+      "clientEmailPlaceholder": "client@example.com",
       "premiumOnly": "Pro feature. Upgrade to send by email, Bluetooth or AirDrop.",
       "shareNotSupported": "Native sharing is not available on this device.",
       "userCancelled": "Sharing cancelled",

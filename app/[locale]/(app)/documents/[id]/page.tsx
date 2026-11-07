@@ -68,6 +68,7 @@ export default async function DocumentDetailPage({
       ? {
           name: doc.client.name,
           phone: doc.client.phone,
+          email: doc.client.email ?? null,
           address: doc.client.address,
           taxId: doc.client.taxId ?? null,
         }

@@ -19,7 +19,6 @@ import { resolveShareMessage } from '@/lib/share/messages';
 import { buildWhatsAppUrl, shareNative } from '@/lib/share/whatsapp';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { isPro } from '@/lib/auth/plan';
-import { EmailSendSheet } from '@/components/documents/EmailSendSheet';
 import { ProBadge } from '@/components/ui/ProBadge';
 import type { DocType } from '@prisma/client';
 
@@ -29,6 +28,7 @@ export type ShareSheetProps = {
   docType: DocType;
   clientName: string;
   clientPhone: string | null;
+  clientEmail?: string | null;
   pdfBlob: Blob;
   documentNumber: string;
   documentId?: string;
@@ -40,6 +40,7 @@ export function ShareSheet({
   onOpenChange,
   docType,
   clientPhone,
+  clientEmail,
   pdfBlob,
   documentNumber,
   documentId,
@@ -53,11 +54,17 @@ export function ShareSheet({
   const { user } = useCurrentUser();
   const userIsPro = user ? isPro({ proUntil: user.proUntil }) : false;
 
-  const [emailOpen, setEmailOpen] = useState(false);
   const [prefs, setPrefs] = useState(loadSharePrefs());
   const [message, setMessage] = useState('');
+  const [email, setEmail] = useState(clientEmail ?? '');
   const [isCustom, setIsCustom] = useState(false);
   const [canShare, setCanShare] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setEmail(clientEmail ?? '');
+    }
+  }, [open, clientEmail]);
 
   useEffect(() => {
     if (typeof navigator !== 'undefined' && typeof navigator.canShare === 'function') {
@@ -126,6 +133,17 @@ export function ShareSheet({
     finalize();
     const url = buildWhatsAppUrl(clientPhone, message);
     window.open(url, '_blank');
+    await markDocumentSent();
+    onSent();
+    onOpenChange(false);
+  };
+
+  const handleEmail = async () => {
+    finalize();
+    const subject = `${docType} ${documentNumber}`;
+    const cleanEmail = email.trim();
+    const mailtoUrl = `mailto:${encodeURIComponent(cleanEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+    window.location.href = mailtoUrl;
     await markDocumentSent();
     onSent();
     onOpenChange(false);
@@ -228,26 +246,28 @@ export function ShareSheet({
           <p className="mt-1 text-xs text-slate-500">{t('modal.message.hint')}</p>
         </div>
 
+        {/* Email du client */}
+        <div>
+          <label className="mb-1 block text-sm font-medium text-slate-700">
+            {t('modal.clientEmail')}
+          </label>
+          <input
+            type="email"
+            inputMode="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t('modal.clientEmailPlaceholder')}
+            className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm"
+          />
+        </div>
+
         {/* Actions */}
         <div className="space-y-2 pt-2">
           <Button fullWidth variant="whatsapp" size="lg" onClick={handleWhatsApp} disabled={!clientPhone}>
             {t('modal.actions.whatsapp')}
           </Button>
-          <Button
-            fullWidth
-            variant="secondary"
-            className="relative"
-            disabled={!userIsPro || !documentId}
-            onClick={() => {
-              if (!userIsPro) {
-                toast.show(t('modal.premiumOnly'), 'info');
-                return;
-              }
-              setEmailOpen(true);
-            }}
-          >
+          <Button fullWidth variant="secondary" onClick={handleEmail}>
             {t('modal.actions.email')}
-            {!userIsPro && <ProBadge />}
           </Button>
           {canShare && (
             <Button
@@ -272,15 +292,6 @@ export function ShareSheet({
           </Button>
         </div>
       </div>
-      {emailOpen && userIsPro && documentId && (
-        <EmailSendSheet
-          open={emailOpen}
-          onOpenChange={setEmailOpen}
-          documentId={documentId}
-          defaultEmail={null}
-          defaultLocale={locale}
-        />
-      )}
     </Sheet>
   );
 }

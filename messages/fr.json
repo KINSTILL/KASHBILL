@@ -188,6 +188,7 @@
       "clientModeNew": "Nouveau client",
       "newClientName": "Nom du client *",
       "newClientPhone": "Téléphone (facultatif)",
+      "newClientEmail": "Email (facultatif)",
       "newClientAddress": "Adresse (facultatif)",
       "newClientTaxId": "NIU / NIF (facultatif, B2B)",
       "clientLimitReached": "Limite de 3 clients atteinte. Sélectionnez un client existant ou passez Pro.",
@@ -488,6 +489,8 @@
         "download": "Télécharger le PDF",
         "cancel": "Annuler"
       },
+      "clientEmail": "Email du client (facultatif)",
+      "clientEmailPlaceholder": "client@exemple.com",
       "premiumOnly": "Fonctionnalité Pro. Passez Pro pour envoyer par email, Bluetooth ou AirDrop.",
       "shareNotSupported": "Le partage natif n'est pas disponible sur cet appareil.",
       "userCancelled": "Partage annulé"

@@ -112,6 +112,7 @@ export function DocumentPreview({
           docType={pdfDoc.type}
           clientName={pdfDoc.client?.name ?? ''}
           clientPhone={pdfDoc.client?.phone ?? null}
+          clientEmail={pdfDoc.client?.email ?? null}
           pdfBlob={blob}
           documentNumber={pdfDoc.number}
           documentId={pdfDoc.id}

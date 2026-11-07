@@ -50,6 +50,7 @@ export type PdfCompany = {
 export type PdfClient = {
   name: string;
   phone: string | null;
+  email?: string | null;
   address: string | null;
   taxId?: string | null;
 };
