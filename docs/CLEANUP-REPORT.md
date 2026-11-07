@@ -5,20 +5,38 @@ Statut : **Validé — Nettoyage appliqué (sans régression)**
 
 ---
 
-## 🚨 RÉGRESSIONS DÉTECTÉES (À CÂBLER)
+## 🚨 RÉGRESSIONS DÉTECTÉES (CÂBLÉES ET VALIDÉES)
 
-Lors de l'analyse des composants et modules orphelins, 4 composants critiques se sont avérés être des **régressions fonctionnelles silencieuses** (code implémenté avec précision mais déconnecté lors d'une refonte antérieure). Ils doivent impérativement être câblés :
+Lors de l'analyse des composants et modules orphelins, 4 composants critiques se sont avérés être des **régressions fonctionnelles silencieuses**. Ils ont tous été **câblés, testés et validés en production** :
 
-| Fichier orphelin | Fichier cible d'intégration | Raison & Impact métier |
-|---|---|---|
-| **`lib/device/camera.ts`** (`compressImage`) | `app/[locale]/(app)/settings/business/page.tsx` & composants d'upload (logo, signature, cachet) | **Exigence data mobile** : Compresse les images côté client (maxWidth × maxHeight, JPEG/PNG qualité 0.85) avant envoi multipart. Évite d'uploader des fichiers bruts de 2+ Mo sur des réseaux 3G/4G lents. |
-| **`lib/device/wakelock.ts`** (`useWakeLock`) | `components/documents/DocumentForm.tsx` (ou `app/[locale]/(app)/documents/new/page.tsx`) | **Expérience utilisateur saisie longue** : Empêche l'extinction automatique de l'écran du smartphone pendant la saisie d'une facture détaillée ou d'un long devis (via la Screen Wake Lock API). |
-| **`components/documents/EmailSendSheet.tsx`** | `components/share/ShareSheet.tsx` | **Fonctionnalité Pro d'envoi d'email** : Permet aux abonnés Pro d'envoyer leurs factures/devis par email directement via `/api/documents/[id]/send-email`. Actuellement déconnecté de `ShareSheet`. |
-| **`components/ui/ProExpiryBanner.tsx`** | `app/[locale]/(app)/dashboard/page.tsx` (ou layout d'application) | **Mécanisme de conversion freemium critique** : Affiche un bandeau d'alerte à rebours avant expiration du Pro (`J-2`, `J-1`, `J-0 / aujourd'hui`). Sans cette bannière, les utilisateurs en fin d'essai churnent silencieusement sans être incités à souscrire. |
+| Fichier | Fichier cible d'intégration | Statut | Raison & Impact métier |
+|---|---|---|---|
+| **`lib/device/camera.ts`** (`compressImage`) | `components/documents/ImagePicker.tsx` | ✅ **Câblé** | **Exigence data mobile** : Compresse les images côté client (maxWidth × maxHeight, JPEG/PNG qualité 0.85) avant envoi multipart. Évite d'uploader des fichiers bruts de 2+ Mo sur des réseaux 3G/4G lents. |
+| **`lib/device/wakelock.ts`** (`useWakeLock`) | `components/documents/DocumentForm.tsx` | ✅ **Câblé** | **Expérience utilisateur saisie longue** : Empêche l'extinction automatique de l'écran du smartphone pendant la saisie d'une facture détaillée ou d'un long devis (via la Screen Wake Lock API). |
+| **`components/documents/EmailSendSheet.tsx`** | `components/share/ShareSheet.tsx` | ✅ **Câblé** | **Fonctionnalité Pro d'envoi d'email** : Permet aux abonnés Pro (et aux comptes gratuits dans la limite de leur quota) d'envoyer leurs factures/devis par email directement via `/api/documents/[id]/send-email`. |
+| **`components/ui/ProExpiryBanner.tsx`** | `app/[locale]/(app)/dashboard/page.tsx` | ✅ **Câblé** | **Mécanisme de conversion freemium critique** : Affiche un bandeau d'alerte à rebours avant expiration du Pro (`J-2`, `J-1`, `J-0 / aujourd'hui`). Sans cette bannière, les utilisateurs en fin d'essai churnent silencieusement sans être incités à souscrire. |
 
 ### Note Roadmap :
 * **`components/documents/SignaturePad.tsx`** : **GARDÉ — Roadmap signature électronique**  
   Composant canvas prêt pour la signature électronique manuscrite (client/prestataire) conférant une valeur probante aux devis et reçus.
+
+---
+
+## ⚡ LIMITES FREEMIUM, QUOTAS & CONVERSION PRO (DÉPLOYÉS)
+
+1. **Quotas mensuels gratuits ([`lib/constants.ts`](file:///c:/Users/Famille%20Mouelnjock/Documents/KASHBILL/lib/constants.ts) & [`lib/quota/check.ts`](file:///c:/Users/Famille%20Mouelnjock/Documents/KASHBILL/lib/quota/check.ts)) :**
+   - Documents : 10 / mois
+   - Envois WhatsApp : 5 / mois
+   - Emails envoyés : 1 / mois
+   - Clients enregistrés : 2
+   - Période d'essai Pro à l'inscription : 5 jours
+2. **Contrôle d'accès & API :**
+   - Vérification stricte des quotas sur `POST /api/documents`, `POST /api/clients`, `POST /api/documents/[id]/mark-sent`, `POST /api/documents/[id]/send-email`.
+   - Route `/api/me/quota` pour interroger l'état en temps réel.
+3. **UI de conversion :**
+   - [`QuotaBadge.tsx`](file:///c:/Users/Famille%20Mouelnjock/Documents/KASHBILL/components/layout/QuotaBadge.tsx) dans le header pour les comptes gratuits avec jauge et modal de mise à niveau.
+   - Filigrane renforcé (bandeau orange + filigrane diagonal massif + footer) sur [`TicketTemplate.tsx`](file:///c:/Users/Famille%20Mouelnjock/Documents/KASHBILL/lib/pdf/templates/TicketTemplate.tsx) et [`A4Template.tsx`](file:///c:/Users/Famille%20Mouelnjock/Documents/KASHBILL/lib/pdf/templates/A4Template.tsx).
+   - Bouton « 💎 Voir cette facture en version Pro » avec modal explicatif et aperçu dynamique sans filigrane ([`ProPreviewToggle.tsx`](file:///c:/Users/Famille%20Mouelnjock/Documents/KASHBILL/components/documents/ProPreviewToggle.tsx)).
 
 ---
 
