@@ -20,6 +20,7 @@ import { buildWhatsAppUrl, shareNative } from '@/lib/share/whatsapp';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { isPro } from '@/lib/auth/plan';
 import { ProBadge } from '@/components/ui/ProBadge';
+import { EmailSendSheet } from '@/components/documents/EmailSendSheet';
 import type { DocType } from '@prisma/client';
 
 export type ShareSheetProps = {
@@ -58,6 +59,7 @@ export function ShareSheet({
   const userIsPro = user ? isPro({ proUntil: user.proUntil }) : false;
 
   const [prefs, setPrefs] = useState(loadSharePrefs());
+  const [emailSheetOpen, setEmailSheetOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState(clientEmail ?? '');
   const [isCustom, setIsCustom] = useState(false);
@@ -143,6 +145,10 @@ export function ShareSheet({
 
   const handleEmail = async () => {
     finalize();
+    if (documentId && userIsPro) {
+      setEmailSheetOpen(true);
+      return;
+    }
     const subject = `${docType} ${documentNumber}`;
     const cleanEmail = email.trim();
     const mailtoUrl = `mailto:${encodeURIComponent(cleanEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
@@ -180,7 +186,8 @@ export function ShareSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-slate-900">{t('modal.title')}</h2>
 
@@ -296,6 +303,23 @@ export function ShareSheet({
         </div>
       </div>
     </Sheet>
+
+    {documentId && (
+      <EmailSendSheet
+        open={emailSheetOpen}
+        onOpenChange={(v) => {
+          setEmailSheetOpen(v);
+          if (!v) {
+            markDocumentSent().then(() => onSent()).catch(() => {});
+            onOpenChange(false);
+          }
+        }}
+        documentId={documentId}
+        defaultEmail={email || clientEmail || null}
+        defaultLocale={effectiveLocale}
+      />
+    )}
+  </>
   );
 }
 

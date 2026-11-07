@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { UpgradeCTA } from '@/components/ui/UpgradeCTA';
 import { ProBadge } from '@/components/ui/ProBadge';
+import { ProExpiryBanner } from '@/components/ui/ProExpiryBanner';
 import { HeroCard } from '@/components/ui/HeroCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { DocumentCard } from '@/components/documents/DocumentCard';
@@ -55,8 +56,16 @@ export default async function DashboardPage({
   if (userInTrial && user.proUntil) {
     trialDaysLeft = Math.max(
       0,
-      Math.ceil((user.proUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      Math.ceil((new Date(user.proUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     );
+  }
+
+  let proDaysLeft: number | null = null;
+  if (user.proUntil) {
+    const diff = Math.ceil((new Date(user.proUntil).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (diff >= 0 && diff <= 3) {
+      proDaysLeft = diff;
+    }
   }
 
   const displayName = user.businessName || user.name || user.phone;
@@ -69,6 +78,7 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-4">
+      {proDaysLeft !== null && <ProExpiryBanner daysLeft={proDaysLeft} />}
       <HeroCard
         eyebrow={t('dashboard.welcomeBack')}
         title={

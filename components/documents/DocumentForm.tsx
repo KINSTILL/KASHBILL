@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { formatFCFA } from '@/lib/utils';
 import { haptic } from '@/lib/device/haptics';
+import { useWakeLock } from '@/lib/device/wakelock';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import { getDraft, deleteDraft } from '@/lib/storage/drafts';
 import { useToast } from '@/components/ui/Toast';
@@ -107,6 +108,7 @@ export function DocumentForm({
   const [showReceiptQty, setShowReceiptQty] = useState<boolean>(false);
 
   const [submitting, setSubmitting] = useState(false);
+  useWakeLock(!submitting);
   const toast = useToast();
   const [existingDraft, setExistingDraft] = useState<DraftState | null>(null);
   const draftId = useMemo(() => initialDraftId ?? 'default-document-draft', [initialDraftId]);

@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
+import { compressImage } from '@/lib/device/camera';
 import type { ImageKind } from '@/lib/validators/image';
 
 interface ImagePickerProps {
@@ -32,8 +33,9 @@ export function ImagePicker({
     setUploading(true);
 
     try {
+      const uploadBlob = await compressImage(file, 800, 0.85).catch(() => file);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', uploadBlob, file.name);
       formData.append('kind', kind);
 
       const res = await fetch('/api/uploads', {
