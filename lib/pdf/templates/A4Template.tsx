@@ -33,16 +33,41 @@ const styles = StyleSheet.create({
     borderColor: '#0F172A',
     width: 200,
   },
-  watermark: {
+  watermarkBanner: {
     position: 'absolute',
-    top: '50%',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#F59E0B',
+    paddingVertical: 6,
+    textAlign: 'center',
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    letterSpacing: 1,
+  },
+  watermarkDiagonal: {
+    position: 'absolute',
+    top: '40%',
     left: 0,
     right: 0,
     textAlign: 'center',
-    fontSize: 40,
+    fontSize: 48,
+    fontWeight: 'bold',
     color: '#94A3B8',
-    opacity: 0.15,
+    opacity: 0.3,
     transform: 'rotate(-30deg)',
+    letterSpacing: 4,
+  },
+  watermarkFooter: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    fontSize: 9,
+    color: '#F59E0B',
+    fontWeight: 'bold',
   },
 });
 
@@ -120,10 +145,19 @@ export function A4Document({
         )}
         <Footer doc={doc} compact={false} />
         {options.showWatermark && (
-          <Text style={styles.watermark} fixed>
-            {isEn ? 'Created with MyCashBill' : 'Créé avec MyCashBill'}
-            {doc.referralCode ? `\n\nmycashbill.app/r/${doc.referralCode}` : ''}
-          </Text>
+          <>
+            <Text style={styles.watermarkBanner} fixed>
+              MYCASHBILL — {doc.locale === 'FR' ? 'VERSION GRATUITE' : 'FREE VERSION'}
+            </Text>
+            <Text style={styles.watermarkDiagonal} fixed>
+              {doc.locale === 'FR' ? 'GRATUIT' : 'FREE'}
+            </Text>
+            <Text style={styles.watermarkFooter} fixed>
+              {doc.locale === 'FR'
+                ? 'Doc généré en version gratuite · Passez Pro : mycashbill.app'
+                : 'Generated with free version · Upgrade: mycashbill.app'}
+            </Text>
+          </>
         )}
       </Page>
     </Document>

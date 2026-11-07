@@ -672,5 +672,25 @@
     "success": "Bulk sending completed successfully",
     "partial": "Partially successful sending",
     "openWhatsapp": "Open WhatsApp"
+  },
+  "quota": {
+    "title": "Your free quota",
+    "subtitle": "Resets on the 1st of each month.",
+    "docs": "Documents created",
+    "whatsapp": "WhatsApp sends",
+    "emails": "Emails sent",
+    "clients": "Clients saved",
+    "upgrade": "Upgrade to Pro — 2,000 FCFA/30 days"
+  },
+  "proPreview": {
+    "viewPro": "💎 See this invoice in Pro",
+    "backToFree": "Back to free view",
+    "sheetTitle": "This is what your clients see in Pro",
+    "sheetSubtitle": "No watermark. Your logo. Ready to send.",
+    "benefit1": "✅ No watermark",
+    "benefit2": "✅ Your logo in the header",
+    "benefit3": "✅ Unlimited WhatsApp + email",
+    "showPreview": "See my invoice in Pro",
+    "upgradeNow": "Upgrade to Pro — 2,000 FCFA"
   }
 }

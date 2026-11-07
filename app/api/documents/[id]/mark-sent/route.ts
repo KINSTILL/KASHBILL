@@ -13,6 +13,17 @@ export async function POST(
       const doc = await prisma.document.findFirst({ where: { id, userId: user.id } });
       if (!doc) return jsonError('NOT_FOUND', 'Document introuvable', 404);
 
+      const { checkWhatsAppQuota } = await import('@/lib/quota/check');
+      const quota = await checkWhatsAppQuota(user);
+      if (quota.reached) {
+        return jsonError(
+          'PLAN_LIMIT_REACHED',
+          `Limite gratuite atteinte (${quota.limit} envois WhatsApp/mois). Passez Pro pour un envoi illimité.`,
+          403,
+          { used: quota.used, limit: quota.limit }
+        );
+      }
+
       if (doc.sentViaWhatsAppAt) {
         return jsonOk({ ok: true, alreadyMarked: true });
       }

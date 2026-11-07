@@ -21,16 +21,41 @@ const styles = StyleSheet.create({
   header: { borderBottomWidth: 1, borderColor: '#0F172A', paddingBottom: 4, marginBottom: 6 },
   docTitle: { fontSize: 13, fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
   docNumber: { fontSize: 8, textAlign: 'center', color: '#64748B', marginBottom: 4 },
-  watermark: {
+  watermarkBanner: {
     position: 'absolute',
-    top: '45%',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#F59E0B',
+    paddingVertical: 3,
+    textAlign: 'center',
+    fontSize: 7,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  watermarkDiagonal: {
+    position: 'absolute',
+    top: '40%',
     left: 0,
     right: 0,
     textAlign: 'center',
-    fontSize: 14,
+    fontSize: 22,
+    fontWeight: 'bold',
     color: '#94A3B8',
-    opacity: 0.15,
+    opacity: 0.3,
     transform: 'rotate(-30deg)',
+    letterSpacing: 2,
+  },
+  watermarkFooter: {
+    position: 'absolute',
+    bottom: 8,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    fontSize: 6,
+    color: '#F59E0B',
+    fontWeight: 'bold',
   },
 });
 
@@ -95,10 +120,19 @@ export function TicketDocument({
         />
         <Footer doc={doc} compact />
         {options.showWatermark && (
-          <Text style={styles.watermark} fixed>
-            {isEn ? 'Created with MyCashBill' : 'Créé avec MyCashBill'}
-            {doc.referralCode ? ` — mycashbill.app/r/${doc.referralCode}` : ''}
-          </Text>
+          <>
+            <Text style={styles.watermarkBanner} fixed>
+              MYCASHBILL — {doc.locale === 'FR' ? 'VERSION GRATUITE' : 'FREE VERSION'}
+            </Text>
+            <Text style={styles.watermarkDiagonal} fixed>
+              {doc.locale === 'FR' ? 'VERSION GRATUITE' : 'FREE VERSION'}
+            </Text>
+            <Text style={styles.watermarkFooter} fixed>
+              {doc.locale === 'FR'
+                ? 'Doc généré en version gratuite · Passez Pro : mycashbill.app'
+                : 'Generated with free version · Upgrade: mycashbill.app'}
+            </Text>
+          </>
         )}
       </Page>
     </Document>

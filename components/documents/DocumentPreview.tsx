@@ -10,6 +10,7 @@ import { ShareSheet } from '@/components/share/ShareSheet';
 import { RecurringSheet } from './RecurringSheet';
 import { BulkSheet } from './BulkSheet';
 import { PdfViewer } from './PdfViewer';
+import { ProPreviewToggle } from './ProPreviewToggle';
 import { haptic } from '@/lib/device/haptics';
 
 export function DocumentPreview({
@@ -26,6 +27,7 @@ export function DocumentPreview({
   const [shareOpen, setShareOpen] = useState(false);
   const [recurringOpen, setRecurringOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [previewPro, setPreviewPro] = useState(false);
 
   const options = useMemo(
     () => ({
@@ -34,9 +36,9 @@ export function DocumentPreview({
       showSignature: true,
       showStamp: true,
       showCgv: true,
-      showWatermark: pdfDoc.watermarked,
+      showWatermark: previewPro ? false : pdfDoc.watermarked,
     }),
-    [initialFormat, pdfDoc.watermarked]
+    [initialFormat, pdfDoc.watermarked, previewPro]
   );
 
   useEffect(() => {
@@ -82,6 +84,11 @@ export function DocumentPreview({
         >
           {t('send')}
         </Button>
+        <ProPreviewToggle
+          enabled={previewPro}
+          onToggle={setPreviewPro}
+          isPro={!pdfDoc.watermarked}
+        />
         <div className="grid grid-cols-2 gap-2">
           <Button
             variant="outline"

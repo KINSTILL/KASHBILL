@@ -45,6 +45,17 @@ export async function POST(req: NextRequest): Promise<Response> {
       const body = await req2.json();
       const data = createDocumentSchema.parse(body);
 
+      const { checkDocQuota } = await import('@/lib/quota/check');
+      const quota = await checkDocQuota(user);
+      if (quota.reached) {
+        return jsonError(
+          'PLAN_LIMIT_REACHED',
+          `Limite gratuite atteinte (${quota.limit} documents/mois). Passez Pro pour des documents illimités.`,
+          403,
+          { used: quota.used, limit: quota.limit }
+        );
+      }
+
       const result = await createDocument({
         user,
         clientId: data.clientId ?? null,

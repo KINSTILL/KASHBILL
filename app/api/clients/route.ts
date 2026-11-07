@@ -3,8 +3,6 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth } from '@/lib/api/server';
-import { isPro } from '@/lib/auth/plan';
-import { FREE_CLIENTS_LIMIT } from '@/lib/constants';
 
 const createClientSchema = z.object({
   name: z.string().min(1).max(120),
@@ -36,15 +34,15 @@ export async function POST(req: NextRequest): Promise<Response> {
       const body = await req2.json();
       const data = createClientSchema.parse(body);
 
-      if (!isPro(user)) {
-        const count = await prisma.client.count({ where: { userId: user.id } });
-        if (count >= FREE_CLIENTS_LIMIT) {
-          return jsonError(
-            'PLAN_LIMIT_REACHED',
-            `Limite gratuite atteinte (${FREE_CLIENTS_LIMIT} clients). Passez Pro pour des clients illimités.`,
-            403
-          );
-        }
+      const { checkClientQuota } = await import('@/lib/quota/check');
+      const quota = await checkClientQuota(user);
+      if (quota.reached) {
+        return jsonError(
+          'PLAN_LIMIT_REACHED',
+          `Limite gratuite atteinte (${quota.limit} clients). Passez Pro pour des clients illimités.`,
+          403,
+          { used: quota.used, limit: quota.limit }
+        );
       }
 
       const client = await prisma.client.create({

@@ -4,6 +4,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { QuotaBadge } from './QuotaBadge';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { Button } from '@/components/ui/Button';
 
@@ -23,6 +24,7 @@ export function Header() {
           <span className="h-1.5 w-1.5 rounded-full bg-sage-500 transition-smooth group-hover:bg-terracotta" />
         </Link>
         <div className="flex items-center gap-2">
+          <QuotaBadge />
           <LocaleSwitcher />
           {!user && (
             <Link href={`/${locale}/login` as Route}>

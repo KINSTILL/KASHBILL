@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
-import { isPro } from '@/lib/auth/plan';
 import { getResendClient, EMAIL_FROM } from '@/lib/email/client';
 import { buildDocumentEmail } from '@/lib/email/templates/document-email';
 import { env } from '@/lib/env';
@@ -22,8 +21,15 @@ const schema = z.object({
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     return await requireAuth(req, async (req2, { user, ip, userAgent }) => {
-      if (!isPro(user)) {
-        return jsonError('PLAN_FEATURE_LOCKED', "Envoi email réservé aux utilisateurs Pro.", 403);
+      const { checkEmailQuota } = await import('@/lib/quota/check');
+      const quota = await checkEmailQuota(user);
+      if (quota.reached) {
+        return jsonError(
+          'PLAN_LIMIT_REACHED',
+          `Limite gratuite atteinte (${quota.limit} email/mois). Passez Pro pour un envoi illimité.`,
+          403,
+          { used: quota.used, limit: quota.limit }
+        );
       }
 
       const rl = rateLimit(`email:${user.id}`, 10, 60 * 60 * 1000);
@@ -84,6 +90,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         });
         return jsonError('INTERNAL', "Erreur lors de l'envoi.", 500);
       }
+
+      await prisma.document.update({
+        where: { id: doc.id },
+        data: { sentViaEmailAt: new Date() },
+      });
 
       await writeAudit({
         actorId: user.id,

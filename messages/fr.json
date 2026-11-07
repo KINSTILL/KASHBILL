@@ -672,5 +672,25 @@
     "success": "Envoi en masse terminé avec succès",
     "partial": "Envoi partiellement réussi",
     "openWhatsapp": "Ouvrir WhatsApp"
+  },
+  "quota": {
+    "title": "Votre quota gratuit",
+    "subtitle": "Reset le 1er de chaque mois.",
+    "docs": "Documents créés",
+    "whatsapp": "Envois WhatsApp",
+    "emails": "Emails envoyés",
+    "clients": "Clients enregistrés",
+    "upgrade": "Passer Pro — 2 000 FCFA/30 jours"
+  },
+  "proPreview": {
+    "viewPro": "💎 Voir cette facture en version Pro",
+    "backToFree": "Voir en version gratuite",
+    "sheetTitle": "Voici ce que verront vos clients en Pro",
+    "sheetSubtitle": "Sans filigrane. Avec votre logo. Prêt à envoyer.",
+    "benefit1": "✅ Sans filigrane",
+    "benefit2": "✅ Votre logo en en-tête",
+    "benefit3": "✅ Envoi illimité WhatsApp + email",
+    "showPreview": "Voir ma facture en Pro",
+    "upgradeNow": "Passer Pro — 2 000 FCFA"
   }
 }

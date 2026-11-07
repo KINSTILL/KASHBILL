@@ -213,6 +213,7 @@ model Document {
   pdfPath           String?
   watermarked       Boolean   @default(true)
   sentViaWhatsAppAt DateTime?
+  sentViaEmailAt    DateTime?
   contentHash       String?
   qrCodeUrl         String?
   editCount         Int       @default(0)
