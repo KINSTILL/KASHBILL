@@ -87,6 +87,29 @@ export function DocumentMeta({ doc, compact }: { doc: PdfDocument; compact: bool
             : 'Document without accounting or fiscal value — Proforma Invoice'}
         </Text>
       ) : null}
+
+      {doc.payload.equivalentAmount && doc.payload.equivalentCurrency ? (
+        <View style={styles.row}>
+          <Text style={styles.label}>
+            {isFr ? 'Équivalent :' : 'Equivalent:'}
+          </Text>
+          <Text style={styles.value}>
+            ≈ {new Intl.NumberFormat('fr-FR', {
+              style: 'currency',
+              currency: doc.payload.equivalentCurrency,
+              maximumFractionDigits: 0,
+            }).format(doc.payload.equivalentAmount)}
+            {doc.payload.exchangeRate
+              ? ` (${isFr ? 'taux' : 'rate'} : ${doc.payload.exchangeRate})`
+              : ''}
+          </Text>
+        </View>
+      ) : null}
+      {doc.payload.exchangeRateNote ? (
+        <Text style={[styles.label, { marginTop: 2, fontSize: compact ? 6 : 8, fontStyle: 'italic' }]}>
+          {doc.payload.exchangeRateNote}
+        </Text>
+      ) : null}
     </View>
   );
 }

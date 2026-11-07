@@ -73,62 +73,45 @@ async function seedAdmin() {
 // Seed pays
 // ─────────────────────────────────────────────
 const COUNTRIES = [
-  {
-    countryCode: 'CM', countryNameFr: 'Cameroun', countryNameEn: 'Cameroon',
-    currency: 'XAF', taxIdLabel: 'NIU', rccmLabel: 'RCCM', vatRate: 19.25,
-    requiredFields: ['taxId', 'rccm', 'legalAddress'],
-    legalMentionsTemplate: 'NIU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%',
-  },
-  {
-    countryCode: 'SN', countryNameFr: 'Sénégal', countryNameEn: 'Senegal',
-    currency: 'XOF', taxIdLabel: 'NINEA', rccmLabel: 'RCCM', vatRate: 18.00,
-    requiredFields: ['taxId', 'rccm', 'legalAddress'],
-    legalMentionsTemplate: 'NINEA : {taxId} — RCCM : {rccm} — TVA : {vatRate}%',
-  },
-  {
-    countryCode: 'CI', countryNameFr: "Côte d'Ivoire", countryNameEn: 'Ivory Coast',
-    currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00,
-    requiredFields: ['taxId', 'rccm', 'legalAddress'],
-    legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%',
-  },
-  {
-    countryCode: 'BJ', countryNameFr: 'Bénin', countryNameEn: 'Benin',
-    currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00,
-    requiredFields: ['taxId', 'rccm', 'legalAddress'],
-    legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%',
-  },
-  {
-    countryCode: 'TG', countryNameFr: 'Togo', countryNameEn: 'Togo',
-    currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00,
-    requiredFields: ['taxId', 'rccm', 'legalAddress'],
-    legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%',
-  },
-  {
-    countryCode: 'BF', countryNameFr: 'Burkina Faso', countryNameEn: 'Burkina Faso',
-    currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00,
-    requiredFields: ['taxId', 'rccm', 'legalAddress'],
-    legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%',
-  },
-  {
-    countryCode: 'ML', countryNameFr: 'Mali', countryNameEn: 'Mali',
-    currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00,
-    requiredFields: ['taxId', 'rccm', 'legalAddress'],
-    legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%',
-  },
-  {
-    countryCode: 'NE', countryNameFr: 'Niger', countryNameEn: 'Niger',
-    currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 19.00,
-    requiredFields: ['taxId', 'rccm', 'legalAddress'],
-    legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%',
-  },
+  // 19 pays pawaPay
+  { countryCode: 'BJ', countryNameFr: 'Bénin', countryNameEn: 'Benin', currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00, requiredFields: ['taxId','rccm','legalAddress'], legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MTN_BJ', name: 'MTN MoMo' }, { code: 'MOOV_BJ', name: 'Moov Africa' }] },
+  { countryCode: 'BF', countryNameFr: 'Burkina Faso', countryNameEn: 'Burkina Faso', currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00, requiredFields: ['taxId','rccm','legalAddress'], legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'ORANGE_BF', name: 'Orange Money' }, { code: 'MOOV_BF', name: 'Moov Africa' }] },
+  { countryCode: 'CI', countryNameFr: "Côte d'Ivoire", countryNameEn: 'Ivory Coast', currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00, requiredFields: ['taxId','rccm','legalAddress'], legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'ORANGE_CI', name: 'Orange Money' }, { code: 'MTN_CI', name: 'MTN MoMo' }, { code: 'MOOV_CI', name: 'Moov Africa' }, { code: 'WAVE_CI', name: 'Wave' }] },
+  { countryCode: 'GH', countryNameFr: 'Ghana', countryNameEn: 'Ghana', currency: 'GHS', taxIdLabel: 'TIN', rccmLabel: 'Reg. No.', vatRate: 15.00, requiredFields: ['taxId'], legalMentionsTemplate: 'TIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MTN_GH', name: 'MTN MoMo' }, { code: 'VODAFONE_GH', name: 'Telecel Cash' }, { code: 'AIRTELTIGO_GH', name: 'AT Money' }] },
+  { countryCode: 'NG', countryNameFr: 'Nigéria', countryNameEn: 'Nigeria', currency: 'NGN', taxIdLabel: 'TIN', rccmLabel: 'RC No.', vatRate: 7.50, requiredFields: ['taxId'], legalMentionsTemplate: 'TIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MTN_NG', name: 'MTN MoMo PSB' }, { code: 'AIRTEL_NG', name: 'Airtel SmartCash' }, { code: 'NIBSS_NG', name: 'NIBSS Transfer' }] },
+  { countryCode: 'SN', countryNameFr: 'Sénégal', countryNameEn: 'Senegal', currency: 'XOF', taxIdLabel: 'NINEA', rccmLabel: 'RCCM', vatRate: 18.00, requiredFields: ['taxId','rccm','legalAddress'], legalMentionsTemplate: 'NINEA : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'ORANGE_SN', name: 'Orange Money' }, { code: 'WAVE_SN', name: 'Wave' }, { code: 'FREE_SN', name: 'Free Money' }] },
+  { countryCode: 'SL', countryNameFr: 'Sierra Leone', countryNameEn: 'Sierra Leone', currency: 'SLE', taxIdLabel: 'TIN', rccmLabel: 'Reg. No.', vatRate: 15.00, requiredFields: ['taxId'], legalMentionsTemplate: 'TIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'ORANGE_SL', name: 'Orange Money' }, { code: 'AFRICELL_SL', name: 'Africell Money' }] },
+  { countryCode: 'CM', countryNameFr: 'Cameroun', countryNameEn: 'Cameroon', currency: 'XAF', taxIdLabel: 'NIU', rccmLabel: 'RCCM', vatRate: 19.25, requiredFields: ['taxId','rccm','legalAddress'], legalMentionsTemplate: 'NIU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MTN_CM', name: 'MTN MoMo' }, { code: 'ORANGE_CM', name: 'Orange Money' }] },
+  { countryCode: 'CG', countryNameFr: 'Congo', countryNameEn: 'Congo', currency: 'XAF', taxIdLabel: 'NIU', rccmLabel: 'RCCM', vatRate: 18.00, requiredFields: ['taxId','rccm'], legalMentionsTemplate: 'NIU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MTN_CG', name: 'MTN MoMo' }, { code: 'AIRTEL_CG', name: 'Airtel Money' }] },
+  { countryCode: 'GA', countryNameFr: 'Gabon', countryNameEn: 'Gabon', currency: 'XAF', taxIdLabel: 'NIU', rccmLabel: 'RCCM', vatRate: 18.00, requiredFields: ['taxId','rccm'], legalMentionsTemplate: 'NIU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'AIRTEL_GA', name: 'Airtel Money' }, { code: 'MOOV_GA', name: 'Moov Africa' }] },
+  { countryCode: 'CD', countryNameFr: 'RDC', countryNameEn: 'DRC', currency: 'CDF', taxIdLabel: 'ID Nat.', rccmLabel: 'RCCM', vatRate: 16.00, requiredFields: ['taxId'], legalMentionsTemplate: 'ID Nat. : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MPESA_CD', name: 'Vodacom M-Pesa' }, { code: 'ORANGE_CD', name: 'Orange Money' }, { code: 'AIRTEL_CD', name: 'Airtel Money' }] },
+  { countryCode: 'KE', countryNameFr: 'Kenya', countryNameEn: 'Kenya', currency: 'KES', taxIdLabel: 'KRA PIN', rccmLabel: 'Reg. No.', vatRate: 16.00, requiredFields: ['taxId'], legalMentionsTemplate: 'KRA PIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MPESA_KE', name: 'Safaricom M-Pesa' }, { code: 'AIRTEL_KE', name: 'Airtel Money' }] },
+  { countryCode: 'UG', countryNameFr: 'Ouganda', countryNameEn: 'Uganda', currency: 'UGX', taxIdLabel: 'TIN', rccmLabel: 'Reg. No.', vatRate: 18.00, requiredFields: ['taxId'], legalMentionsTemplate: 'TIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MTN_UG', name: 'MTN Mobile Money' }, { code: 'AIRTEL_UG', name: 'Airtel Money' }] },
+  { countryCode: 'TZ', countryNameFr: 'Tanzanie', countryNameEn: 'Tanzania', currency: 'TZS', taxIdLabel: 'TIN', rccmLabel: 'Reg. No.', vatRate: 18.00, requiredFields: ['taxId'], legalMentionsTemplate: 'TIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MPESA_TZ', name: 'Vodacom M-Pesa' }, { code: 'TIGO_TZ', name: 'Tigo Pesa' }, { code: 'AIRTEL_TZ', name: 'Airtel Money' }, { code: 'HALOPESA_TZ', name: 'Halopesa' }] },
+  { countryCode: 'RW', countryNameFr: 'Rwanda', countryNameEn: 'Rwanda', currency: 'RWF', taxIdLabel: 'TIN', rccmLabel: 'Reg. No.', vatRate: 18.00, requiredFields: ['taxId'], legalMentionsTemplate: 'TIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MTN_RW', name: 'MTN MoMo' }, { code: 'AIRTEL_RW', name: 'Airtel Money' }] },
+  { countryCode: 'ZM', countryNameFr: 'Zambie', countryNameEn: 'Zambia', currency: 'ZMW', taxIdLabel: 'TPIN', rccmLabel: 'Reg. No.', vatRate: 16.00, requiredFields: ['taxId'], legalMentionsTemplate: 'TPIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MTN_ZM', name: 'MTN MoMo' }, { code: 'AIRTEL_ZM', name: 'Airtel Money' }, { code: 'ZAMTEL_ZM', name: 'Zamtel' }] },
+  { countryCode: 'MW', countryNameFr: 'Malawi', countryNameEn: 'Malawi', currency: 'MWK', taxIdLabel: 'TPIN', rccmLabel: 'Reg. No.', vatRate: 16.50, requiredFields: ['taxId'], legalMentionsTemplate: 'TPIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'AIRTEL_MW', name: 'Airtel Money' }, { code: 'TNM_MW', name: 'TNM Mpamba' }] },
+  { countryCode: 'MZ', countryNameFr: 'Mozambique', countryNameEn: 'Mozambique', currency: 'MZN', taxIdLabel: 'NUIT', rccmLabel: 'Reg. No.', vatRate: 16.00, requiredFields: ['taxId'], legalMentionsTemplate: 'NUIT : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MPESA_MZ', name: 'Vodacom M-Pesa' }, { code: 'MOVITEL_MZ', name: 'Movitel e-Mola' }] },
+  { countryCode: 'LS', countryNameFr: 'Lesotho', countryNameEn: 'Lesotho', currency: 'LSL', taxIdLabel: 'TIN', rccmLabel: 'Reg. No.', vatRate: 15.00, requiredFields: ['taxId'], legalMentionsTemplate: 'TIN : {taxId} — TVA : {vatRate}%', isPawaPayEnabled: true, paymentOperators: [{ code: 'MPESA_LS', name: 'Vodacom M-Pesa' }, { code: 'ECONET_LS', name: 'Econet EcoCash' }] },
+  // Non-pawaPay (backward compat)
+  { countryCode: 'TG', countryNameFr: 'Togo', countryNameEn: 'Togo', currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00, requiredFields: ['taxId','rccm','legalAddress'], legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: false, paymentOperators: null },
+  { countryCode: 'ML', countryNameFr: 'Mali', countryNameEn: 'Mali', currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00, requiredFields: ['taxId','rccm','legalAddress'], legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: false, paymentOperators: null },
+  { countryCode: 'NE', countryNameFr: 'Niger', countryNameEn: 'Niger', currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 19.00, requiredFields: ['taxId','rccm','legalAddress'], legalMentionsTemplate: 'IFU : {taxId} — RCCM : {rccm} — TVA : {vatRate}%', isPawaPayEnabled: false, paymentOperators: null },
 ];
 
 async function seedCountries() {
   for (const country of COUNTRIES) {
+    const data = {
+      ...country,
+      vatRate: country.vatRate,
+      requiredFields: country.requiredFields as string[],
+      isPawaPayEnabled: country.isPawaPayEnabled,
+      paymentOperators: country.paymentOperators ?? undefined,
+    };
     await prisma.countryTaxConfig.upsert({
       where: { countryCode: country.countryCode },
-      update: country,
-      create: country,
+      update: data,
+      create: data,
     });
   }
   console.log(`✅ ${COUNTRIES.length} pays seedés`);

@@ -187,6 +187,7 @@ model Client {
   address            String?
   note               String?
   taxId              String?
+  country            String?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   documents          Document[]
@@ -297,6 +298,8 @@ model CountryTaxConfig {
   requiredFields        Json
   legalMentionsTemplate String
   isActive              Boolean  @default(true)
+  isPawaPayEnabled      Boolean  @default(false)
+  paymentOperators      Json?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }

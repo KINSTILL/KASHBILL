@@ -18,6 +18,12 @@ export const documentPayloadSchema = z.object({
   referenceNumber: z.string().max(50).nullable().default(null),
   paymentMethod: z.enum(['CASH', 'MOBILE_MONEY', 'BANK_TRANSFER', 'CHECK']).nullable().default(null),
   paymentReference: z.string().max(100).nullable().default(null),
+  paymentOperator: z.string().max(50).nullable().default(null),
+  paymentOperatorFreeText: z.string().max(100).nullable().default(null),
+  equivalentCurrency: z.string().length(3).nullable().default(null),
+  equivalentAmount: z.number().nonnegative().nullable().default(null),
+  exchangeRate: z.number().positive().nullable().default(null),
+  exchangeRateNote: z.string().max(100).nullable().default(null),
   deliveryDate: z.string().datetime().nullable().default(null),
   deliveryAddress: z.string().max(300).nullable().default(null),
 });
@@ -38,6 +44,12 @@ export type ComputedPayload = {
   referenceNumber: string | null;
   paymentMethod: 'CASH' | 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CHECK' | null;
   paymentReference: string | null;
+  paymentOperator: string | null;
+  paymentOperatorFreeText: string | null;
+  equivalentCurrency: string | null;
+  equivalentAmount: number | null;
+  exchangeRate: number | null;
+  exchangeRateNote: string | null;
   deliveryDate: string | null;
   deliveryAddress: string | null;
 };
@@ -81,6 +93,12 @@ export function computePayload(input: DocumentPayloadInput): ComputedPayload {
     referenceNumber: input.referenceNumber,
     paymentMethod: input.paymentMethod,
     paymentReference: input.paymentReference,
+    paymentOperator: input.paymentOperator,
+    paymentOperatorFreeText: input.paymentOperatorFreeText,
+    equivalentCurrency: input.equivalentCurrency,
+    equivalentAmount: input.equivalentAmount,
+    exchangeRate: input.exchangeRate,
+    exchangeRateNote: input.exchangeRateNote,
     deliveryDate: input.deliveryDate,
     deliveryAddress: input.deliveryAddress,
   };

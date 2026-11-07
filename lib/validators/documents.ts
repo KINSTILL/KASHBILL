@@ -20,6 +20,12 @@ export const documentPayloadSchema = z.object({
   referenceNumber: z.string().max(50).nullable().default(null),
   paymentMethod: z.enum(['CASH', 'MOBILE_MONEY', 'BANK_TRANSFER', 'CHECK']).nullable().default(null),
   paymentReference: z.string().max(100).nullable().default(null),
+  paymentOperator: z.string().max(50).nullable().default(null),
+  paymentOperatorFreeText: z.string().max(100).nullable().default(null),
+  equivalentCurrency: z.string().length(3).nullable().default(null),
+  equivalentAmount: z.number().nonnegative().nullable().default(null),
+  exchangeRate: z.number().positive().nullable().default(null),
+  exchangeRateNote: z.string().max(100).nullable().default(null),
   deliveryDate: z.string().datetime().nullable().default(null),
   deliveryAddress: z.string().max(300).nullable().default(null),
 });

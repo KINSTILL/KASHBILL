@@ -17,7 +17,13 @@ export function Footer({ doc, compact }: { doc: PdfDocument; compact: boolean })
     <View style={styles.block}>
       <View style={styles.payment}>
         <Text style={styles.label}>{doc.locale === 'EN' ? 'Accepted payment:' : 'Paiement accepté :'}</Text>
-        <PaymentBadges compact={compact} />
+        <PaymentBadges
+          compact={compact}
+          method={(doc.payload.paymentMethod ?? null) as 'CASH' | 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CHECK' | null}
+          operatorName={doc.payload.paymentOperator ?? null}
+          operatorFreeText={doc.payload.paymentOperatorFreeText ?? null}
+          locale={doc.locale}
+        />
       </View>
       {doc.qrCodeDataUrl && (
         <>

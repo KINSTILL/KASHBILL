@@ -24,6 +24,12 @@ export type PdfPayload = {
   referenceNumber?: string | null;
   paymentMethod?: 'CASH' | 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CHECK' | null;
   paymentReference?: string | null;
+  paymentOperator?: string | null;
+  paymentOperatorFreeText?: string | null;
+  equivalentCurrency?: string | null;
+  equivalentAmount?: number | null;
+  exchangeRate?: number | null;
+  exchangeRateNote?: string | null;
   deliveryDate?: string | null;
   deliveryAddress?: string | null;
 };
