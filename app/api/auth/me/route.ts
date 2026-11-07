@@ -2,9 +2,7 @@ import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
-import { verifyPin } from '@/lib/auth/pin';
 import { clearSessionCookie } from '@/lib/auth/session';
-import { rateLimit } from '@/lib/rate-limit';
 import { prisma } from '@/lib/db';
 
 const updateProfileSchema = z.object({
@@ -63,54 +61,49 @@ export async function GET(req: NextRequest): Promise<Response> {
   }
 }
 
-const deleteAccountSchema = z.object({
-  pin: z.string().regex(/^\d{6}$/),
-});
-
-/**
- * Suppression définitive du compte par l'utilisateur lui-même.
- * Exige le PIN. Les données liées (documents, clients, appareils, etc.)
- * sont supprimées en cascade par la base.
- */
 export async function DELETE(req: NextRequest): Promise<Response> {
   try {
-    return await requireAuth(req, async (_req, { user, ip, userAgent }) => {
-      if (user.role !== 'USER') {
-        return jsonError(
-          'FORBIDDEN',
-          'Les comptes administrateurs ne peuvent pas être supprimés ici',
-          403
-        );
+    return await requireAuth(req, async (req2, { user, ip, userAgent }) => {
+      if (user.role === 'ADMIN') {
+        const activeAdmins = await prisma.user.count({ where: { role: 'ADMIN', bannedAt: null } });
+        if (activeAdmins <= 1) return jsonError('FORBIDDEN', 'Impossible de supprimer le dernier administrateur actif.', 403);
       }
 
-      const body = await req.json().catch(() => null);
-      const parsed = deleteAccountSchema.safeParse(body);
-      if (!parsed.success) {
-        return jsonError('BAD_REQUEST', 'PIN invalide', 400);
-      }
+      const body = await req2.json().catch(() => ({}));
+      if (body?.confirm !== true) return jsonError('VALIDATION_ERROR', 'Confirmation requise. Envoyez { "confirm": true }.', 400);
 
-      const rl = rateLimit(`delete-account:${user.id}`, 5, 15 * 60 * 1000);
-      if (!rl.allowed) {
-        return jsonError('RATE_LIMITED', 'Trop de tentatives, réessayez plus tard', 429);
-      }
+      const anonSuffix = user.id.slice(-8);
+      const now = new Date();
 
-      const ok = await verifyPin(user.pinHash, parsed.data.pin);
-      if (!ok) {
-        return jsonError('INVALID_CREDENTIALS', 'PIN incorrect', 401);
-      }
+      await prisma.$transaction(async (tx) => {
+        await tx.device.updateMany({ where: { userId: user.id, revokedAt: null }, data: { revokedAt: now } });
+        await tx.recoveryCode.deleteMany({ where: { userId: user.id } });
+        await tx.deviceApproval.deleteMany({ where: { userId: user.id } });
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            phone: `deleted_${anonSuffix}@deleted.local`,
+            referralCode: `deleted_${anonSuffix}`,
+            name: 'Compte supprimé',
+            businessName: null, legalName: null, legalAddress: null, city: null,
+            taxId: null, rccm: null, logoUrl: null, signatureUrl: null, stampUrl: null,
+            headerText: null, footerText: null, cgvText: null, legalForm: null,
+            bannedAt: now, banReason: "Compte supprimé par l'utilisateur",
+          },
+        });
+      });
 
-      await prisma.user.delete({ where: { id: user.id } });
-
+      await clearSessionCookie();
       await writeAudit({
-        action: 'account_deleted',
-        meta: { userId: user.id },
+        actorId: null,
+        targetId: user.id,
+        action: 'account_deleted_by_user',
+        meta: { anonymized: true },
         ip,
         userAgent,
       });
 
-      const response = jsonOk({ ok: true });
-      await clearSessionCookie(response);
-      return response;
+      return jsonOk({ ok: true, message: 'Compte supprimé. Données archivées.' });
     });
   } catch (err) {
     return handleApiError(err);

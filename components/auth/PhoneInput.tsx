@@ -10,8 +10,23 @@ import {
   type DialCountry,
 } from '@/lib/countries/dial-codes';
 
-export function formatPhoneNumber(value: string, maxDigits: number = 10): string {
-  const cleaned = value.replace(/\D/g, '').slice(0, maxDigits);
+export function formatPhoneNumber(
+  value: string,
+  maxDigits: number = 10,
+  dialCode?: string
+): string {
+  let digitsOnly = value.replace(/\D/g, '');
+  if (dialCode) {
+    const dialDigits = dialCode.replace(/\D/g, '');
+    if (
+      dialDigits &&
+      digitsOnly.startsWith(dialDigits) &&
+      digitsOnly.length > maxDigits
+    ) {
+      digitsOnly = digitsOnly.slice(dialDigits.length);
+    }
+  }
+  const cleaned = digitsOnly.slice(0, maxDigits);
   const parts: string[] = [];
   if (cleaned.length <= 9) {
     if (cleaned.length > 0) parts.push(cleaned.slice(0, 3));
@@ -166,7 +181,13 @@ export function PhoneInput({
             placeholder={placeholder}
             value={value}
             onChange={(e) =>
-              onChange(formatPhoneNumber(e.target.value, currentCountry.maxDigits))
+              onChange(
+                formatPhoneNumber(
+                  e.target.value,
+                  currentCountry.maxDigits,
+                  currentCountry.dialCode
+                )
+              )
             }
             disabled={disabled}
             required={required}

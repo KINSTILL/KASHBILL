@@ -54,7 +54,7 @@ export function DeleteAccountSection() {
       const res = await fetch('/api/auth/me', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ pin: pin.join('') }),
+        body: JSON.stringify({ confirm: true, pin: pin.join('') }),
       });
       if (!res.ok) {
         const data: { code?: string; error?: { code?: string } } = await res

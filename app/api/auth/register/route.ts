@@ -108,11 +108,20 @@ export async function POST(req: NextRequest): Promise<Response> {
       });
 
       if (referrerId) {
+        // Récupérer l'IP + device du parrain (dernier device actif)
+        const parrainDevice = await tx.device.findFirst({
+          where: { userId: referrerId, revokedAt: null },
+          orderBy: { lastSeenAt: 'desc' },
+          select: { deviceId: true, lastIp: true },
+        });
+
         await tx.referral.create({
           data: {
             parrainId: referrerId,
             filleulId: user.id,
             status: 'PENDING',
+            parrainIp: parrainDevice?.lastIp ?? ip,
+            parrainDeviceId: parrainDevice?.deviceId ?? null,
             filleulRewardedAt: now,
           },
         });

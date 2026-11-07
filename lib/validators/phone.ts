@@ -30,14 +30,14 @@ export function normalizePhone(input: string): string | null {
   const cleaned = input.replace(/[\s\-().]/g, '');
   if (!cleaned) return null;
 
+  // Compatibilité prioritaire numéro camerounais (699..., 0699..., 237699..., +2370699...)
+  const cm = normalizeCameroonPhone(cleaned);
+  if (cm) return cm;
+
   // Format international E.164 (+ suivi d'un indicatif et de 6 à 14 chiffres)
   if (/^\+[1-9]\d{6,14}$/.test(cleaned)) {
     return cleaned;
   }
-
-  // Compatibilité historique numéro camerounais (699..., 0699..., 237699...)
-  const cm = normalizeCameroonPhone(cleaned);
-  if (cm) return cm;
 
   // Si indicatif sans '+' mais avec 8 à 15 chiffres
   if (/^[1-9]\d{7,14}$/.test(cleaned)) {

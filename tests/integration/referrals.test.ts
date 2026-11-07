@@ -113,4 +113,184 @@ describe('Parrainage complet', () => {
     expect(meData.stats.activated).toBe(1);
     expect(meData.stats.proDaysEarned).toBe(7);
   });
+
+  it('rejette le parrainage si même IP détectée (SAME_IP)', async () => {
+    const sharedIp = '198.51.100.55';
+
+    // Parrain
+    const parrainRes = await registerRoute(
+      new NextRequest('http://localhost/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-requested-with': 'fetch',
+          'x-forwarded-for': sharedIp,
+        },
+        body: JSON.stringify({
+          phone: '+237699333333',
+          pin: '123456',
+          deviceId: 'device-parrain-ip-1',
+          locale: 'FR',
+        }),
+      })
+    );
+    const parrain = await parrainRes.json();
+    const code = parrain.user.referralCode;
+
+    // Filleul
+    const filleulRes = await registerRoute(
+      new NextRequest('http://localhost/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-requested-with': 'fetch',
+        },
+        body: JSON.stringify({
+          phone: '+237699444444',
+          pin: '123456',
+          deviceId: 'device-filleul-ip-2',
+          locale: 'FR',
+          referredByCode: code,
+        }),
+      })
+    );
+    const filleul = await filleulRes.json();
+    const cookie =
+      filleulRes.headers.get('set-cookie')?.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
+
+    // Filleul crée document
+    const docRes = await createDocRoute(
+      new NextRequest('http://localhost/api/documents', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-requested-with': 'fetch',
+          cookie: `mycashbill_session=${cookie}`,
+        },
+        body: JSON.stringify({
+          type: 'DEVIS',
+          locale: 'FR',
+          payload: {
+            lines: [{ description: 'Test', quantity: 1, unitPrice: 2000 }],
+            vatRate: null,
+            depositPercentage: null,
+            deliveryFee: null,
+            notes: null,
+            validityDays: 30,
+          },
+        }),
+      })
+    );
+    expect(docRes.status).toBe(201);
+    const { documentId } = await docRes.json();
+
+    // Mark sent avec la même IP que le parrain
+    const markRes = await markSentRoute(
+      new NextRequest(`http://localhost/api/documents/${documentId}/mark-sent`, {
+        method: 'POST',
+        headers: {
+          'x-requested-with': 'fetch',
+          'x-forwarded-for': sharedIp,
+          cookie: `mycashbill_session=${cookie}`,
+        },
+      }),
+      { params: Promise.resolve({ id: documentId }) }
+    );
+    expect(markRes.status).toBe(200);
+
+    const referral = await prisma.referral.findUnique({
+      where: { filleulId: filleul.user.id },
+    });
+    expect(referral?.status).toBe('REJECTED');
+    expect((referral?.fraudFlags as Record<string, unknown>)?.reason).toBe('SAME_IP');
+  });
+
+  it('rejette le parrainage si même appareil détecté (SAME_DEVICE)', async () => {
+    const sharedDevice = 'device-shared-hardware-99';
+
+    // Parrain
+    const parrainRes = await registerRoute(
+      new NextRequest('http://localhost/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-requested-with': 'fetch',
+        },
+        body: JSON.stringify({
+          phone: '+237699555555',
+          pin: '123456',
+          deviceId: sharedDevice,
+          locale: 'FR',
+        }),
+      })
+    );
+    const parrain = await parrainRes.json();
+    const code = parrain.user.referralCode;
+
+    // Filleul sur le même device
+    const filleulRes = await registerRoute(
+      new NextRequest('http://localhost/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-requested-with': 'fetch',
+        },
+        body: JSON.stringify({
+          phone: '+237699666666',
+          pin: '123456',
+          deviceId: sharedDevice,
+          locale: 'FR',
+          referredByCode: code,
+        }),
+      })
+    );
+    const filleul = await filleulRes.json();
+    const cookie =
+      filleulRes.headers.get('set-cookie')?.match(/mycashbill_session=([^;]+)/)?.[1] ?? '';
+
+    // Filleul crée document
+    const docRes = await createDocRoute(
+      new NextRequest('http://localhost/api/documents', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-requested-with': 'fetch',
+          cookie: `mycashbill_session=${cookie}`,
+        },
+        body: JSON.stringify({
+          type: 'DEVIS',
+          locale: 'FR',
+          payload: {
+            lines: [{ description: 'Test', quantity: 1, unitPrice: 2000 }],
+            vatRate: null,
+            depositPercentage: null,
+            deliveryFee: null,
+            notes: null,
+            validityDays: 30,
+          },
+        }),
+      })
+    );
+    expect(docRes.status).toBe(201);
+    const { documentId } = await docRes.json();
+
+    // Mark sent
+    const markRes = await markSentRoute(
+      new NextRequest(`http://localhost/api/documents/${documentId}/mark-sent`, {
+        method: 'POST',
+        headers: {
+          'x-requested-with': 'fetch',
+          cookie: `mycashbill_session=${cookie}`,
+        },
+      }),
+      { params: Promise.resolve({ id: documentId }) }
+    );
+    expect(markRes.status).toBe(200);
+
+    const referral = await prisma.referral.findUnique({
+      where: { filleulId: filleul.user.id },
+    });
+    expect(referral?.status).toBe('REJECTED');
+    expect((referral?.fraudFlags as Record<string, unknown>)?.reason).toBe('SAME_DEVICE');
+  });
 });

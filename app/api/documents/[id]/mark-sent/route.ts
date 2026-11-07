@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   try {
-    return await requireAuth(req, async (_req, { user, ip, userAgent }) => {
+    return await requireAuth(req, async (_req, { user, deviceId, ip, userAgent }) => {
       const { id } = await params;
       const doc = await prisma.document.findFirst({ where: { id, userId: user.id } });
       if (!doc) return jsonError('NOT_FOUND', 'Document introuvable', 404);
@@ -25,7 +25,7 @@ export async function POST(
       // Hook parrainage : appelé à l'étape 8
       try {
         const { tryActivateReferral } = await import('@/lib/referral/activate');
-        await tryActivateReferral(user.id);
+        await tryActivateReferral(user.id, ip, deviceId);
       } catch {}
 
       await writeAudit({

@@ -1,24 +1,57 @@
 import { prisma } from '@/lib/db';
 import { REFERRAL_REWARD_DAYS, REFERRAL_MAX_ACCUMULATED_DAYS } from '@/lib/constants';
 
-/**
- * Active le parrainage du user (s'il est filleul) si les conditions sont remplies.
- * Appelé après le 1er document envoyé via WhatsApp.
- */
-export async function tryActivateReferral(filleulId: string): Promise<void> {
+export type ActivationResult =
+  | { ok: true }
+  | { ok: false; reason: 'NOT_FOUND' | 'NOT_PENDING' | 'EXPIRED' | 'SAME_IP' | 'SAME_DEVICE' };
+
+export async function tryActivateReferral(
+  filleulId: string,
+  filleulIp: string | null,
+  filleulDeviceId: string | null
+): Promise<ActivationResult> {
   const referral = await prisma.referral.findUnique({ where: { filleulId } });
-  if (!referral || referral.status !== 'PENDING') return;
+  if (!referral) return { ok: false, reason: 'NOT_FOUND' };
+  if (referral.status !== 'PENDING') return { ok: false, reason: 'NOT_PENDING' };
 
   const now = new Date();
-  const windowEnd = new Date(referral.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  // Anti-fraude 1 : fenêtre 7 jours
+  const windowEnd = new Date(referral.createdAt.getTime() + 7 * 86_400 * 1000);
   if (now > windowEnd) {
     await prisma.referral.update({
       where: { id: referral.id },
-      data: { status: 'REJECTED' },
+      data: { status: 'REJECTED', fraudFlags: { reason: 'EXPIRED' } },
     });
-    return;
+    return { ok: false, reason: 'EXPIRED' };
   }
 
+  // Anti-fraude 2 : même IP
+  if (referral.parrainIp && filleulIp && referral.parrainIp === filleulIp) {
+    await prisma.referral.update({
+      where: { id: referral.id },
+      data: { status: 'REJECTED', fraudFlags: { reason: 'SAME_IP', ip: filleulIp } },
+    });
+    return { ok: false, reason: 'SAME_IP' };
+  }
+
+  // Anti-fraude 3 : même device
+  if (
+    referral.parrainDeviceId &&
+    filleulDeviceId &&
+    referral.parrainDeviceId === filleulDeviceId
+  ) {
+    await prisma.referral.update({
+      where: { id: referral.id },
+      data: {
+        status: 'REJECTED',
+        fraudFlags: { reason: 'SAME_DEVICE', deviceId: filleulDeviceId },
+      },
+    });
+    return { ok: false, reason: 'SAME_DEVICE' };
+  }
+
+  // Attribution (logique existante)
   await prisma.$transaction(async (tx) => {
     await tx.referral.update({
       where: { id: referral.id },
@@ -29,20 +62,17 @@ export async function tryActivateReferral(filleulId: string): Promise<void> {
     if (!parrain) return;
 
     const currentPro = parrain.proUntil && parrain.proUntil > now ? parrain.proUntil : now;
-    const newPro = new Date(currentPro.getTime() + REFERRAL_REWARD_DAYS * 24 * 60 * 60 * 1000);
-    const maxPro = new Date(now.getTime() + REFERRAL_MAX_ACCUMULATED_DAYS * 24 * 60 * 60 * 1000);
+    const newPro = new Date(currentPro.getTime() + REFERRAL_REWARD_DAYS * 86_400 * 1000);
+    const maxPro = new Date(now.getTime() + REFERRAL_MAX_ACCUMULATED_DAYS * 86_400 * 1000);
 
     if (newPro > maxPro) {
-      const pending = Math.ceil((newPro.getTime() - maxPro.getTime()) / (24 * 60 * 60 * 1000));
+      const pending = Math.ceil((newPro.getTime() - maxPro.getTime()) / 86_400_000);
       await tx.user.update({
         where: { id: parrain.id },
         data: { proUntil: maxPro, pendingProDays: parrain.pendingProDays + pending },
       });
     } else {
-      await tx.user.update({
-        where: { id: parrain.id },
-        data: { proUntil: newPro },
-      });
+      await tx.user.update({ where: { id: parrain.id }, data: { proUntil: newPro } });
     }
 
     await tx.subscription.create({
@@ -54,5 +84,6 @@ export async function tryActivateReferral(filleulId: string): Promise<void> {
       },
     });
   });
-}
 
+  return { ok: true };
+}
