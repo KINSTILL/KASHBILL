@@ -437,6 +437,8 @@
     "proRequiredHelp": "Passez Pro pour afficher ce champ sur vos documents.",
     "save": "Enregistrer",
     "saved": "Enregistré",
+    "subscriptionsLink": "Mes factures d'abonnement",
+    "subscriptionsLinkHelp": "Télécharger les factures MyCashBill Pro",
     "deleteAccount": {
       "title": "Supprimer mon compte",
       "description": "Supprime définitivement votre compte et toutes vos données (documents, clients, appareils). Cette action est irréversible.",
@@ -448,6 +450,13 @@
       "confirmButton": "Supprimer définitivement",
       "wrongPin": "Code PIN incorrect."
     }
+  },
+  "subscriptions": {
+    "title": "Mes factures d'abonnement",
+    "subtitle": "Téléchargez les factures de vos paiements MyCashBill Pro.",
+    "empty": "Aucune facture pour le moment",
+    "emptyHelp": "Vos factures d'abonnement apparaîtront ici après votre premier paiement.",
+    "period": "Période :"
   },
   "upgrade": {
     "title": "Passer Pro",

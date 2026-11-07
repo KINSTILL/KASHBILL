@@ -437,6 +437,8 @@
     "proRequiredHelp": "Go Pro to display this field on your documents.",
     "save": "Save",
     "saved": "Saved",
+    "subscriptionsLink": "My subscription invoices",
+    "subscriptionsLinkHelp": "Download MyCashBill Pro invoices",
     "deleteAccount": {
       "title": "Delete my account",
       "description": "Permanently deletes your account and all your data (documents, clients, devices). This action cannot be undone.",
@@ -448,6 +450,13 @@
       "confirmButton": "Delete permanently",
       "wrongPin": "Incorrect PIN."
     }
+  },
+  "subscriptions": {
+    "title": "My subscription invoices",
+    "subtitle": "Download invoices for your MyCashBill Pro payments.",
+    "empty": "No invoices yet",
+    "emptyHelp": "Your subscription invoices will appear here after your first payment.",
+    "period": "Period:"
   },
   "upgrade": {
     "title": "Go Pro",

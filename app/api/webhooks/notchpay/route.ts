@@ -102,6 +102,39 @@ export async function POST(req: NextRequest): Promise<Response> {
         userAgent: getUserAgent(req),
       });
 
+      // Facture d'abonnement — non bloquant si erreur
+      try {
+        const { generateSubscriptionInvoice } = await import('@/lib/subscriptions/generate-invoice');
+        const invoiceResult = await generateSubscriptionInvoice(subscription.id);
+        if (invoiceResult.ok) {
+          const { sendSubscriptionInvoiceEmail } = await import('@/lib/subscriptions/send-invoice-email');
+          const emailResult = await sendSubscriptionInvoiceEmail(invoiceResult.invoiceId);
+          await writeAudit({
+            actorId: subscription.userId,
+            targetId: subscription.userId,
+            action: 'subscription_invoice_generated',
+            meta: {
+              invoiceId: invoiceResult.invoiceId,
+              number: invoiceResult.number,
+              email: emailResult.ok ? 'sent' : emailResult.reason,
+            },
+            ip: getClientIp(req),
+            userAgent: getUserAgent(req),
+          });
+        } else {
+          await writeAudit({
+            actorId: subscription.userId,
+            targetId: subscription.userId,
+            action: 'subscription_invoice_failed',
+            meta: { reason: invoiceResult.reason },
+            ip: getClientIp(req),
+            userAgent: getUserAgent(req),
+          });
+        }
+      } catch {
+        // Ne jamais bloquer le webhook
+      }
+
       return jsonOk({ received: true });
     }
 

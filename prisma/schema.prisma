@@ -110,6 +110,7 @@ model User {
   headerText   String?
   footerText   String?
   cgvText      String?
+  email        String?
   legalForm    String?
 
   createdAt DateTime @default(now())
@@ -122,7 +123,8 @@ model User {
   clients            Client[]
   documents          Document[]
   documentSequences  DocumentSequence[]
-  subscriptions      Subscription[]
+  subscriptions        Subscription[]
+  subscriptionInvoices SubscriptionInvoice[]
   referralsMade      Referral[]          @relation("ReferralParrain")
   referralReceived   Referral?           @relation("ReferralFilleul")
   fraudFlags         FraudFlag[]         @relation("FraudFlagUser")
@@ -263,6 +265,7 @@ model Subscription {
   providerRef String?
   amountXaf   Int?
   createdAt   DateTime  @default(now())
+  invoice     SubscriptionInvoice?
 
   @@index([userId, endsAt])
 }
@@ -467,4 +470,35 @@ model BulkJobItem {
 enum RunStatus {
   SUCCESS
   FAILED
+}
+
+model PlatformInvoiceSequence {
+  id         String @id @default(cuid())
+  year       Int    @unique
+  lastNumber Int    @default(0)
+}
+
+model SubscriptionInvoice {
+  id             String       @id @default(cuid())
+  subscriptionId String       @unique
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  number         String       @unique
+  locale         Locale
+  amountXaf      Int
+  vatRate        Decimal?     @db.Decimal(5, 2)
+  vatAmountXaf   Int?
+  totalXaf       Int
+  paymentRef     String?
+  paymentMethod  String
+  paidAt         DateTime
+  periodStart    DateTime
+  periodEnd      DateTime
+  pdfPath        String?
+  sentByEmailAt  DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([userId, createdAt])
+  @@index([paidAt])
 }

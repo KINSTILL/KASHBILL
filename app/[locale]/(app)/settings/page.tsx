@@ -141,6 +141,21 @@ export default function SettingsPage() {
         </Link>
 
         <Link
+          href={`/${locale}/subscriptions` as Route}
+          className="flex items-center justify-between p-4 hover:bg-slate-50 transition"
+        >
+          <div>
+            <div className="font-semibold text-sm text-slate-900">
+              {t('settings.subscriptionsLink')}
+            </div>
+            <div className="text-xs text-slate-500">
+              {t('settings.subscriptionsLinkHelp')}
+            </div>
+          </div>
+          <span className="text-slate-400 text-sm">&rarr;</span>
+        </Link>
+
+        <Link
           href={`/${locale}/devices` as Route}
           className="flex items-center justify-between p-4 hover:bg-slate-50 transition"
         >
