@@ -369,6 +369,17 @@
       "cancelDelete": "Annuler",
       "deleted": "Document supprimé",
       "deleteError": "Erreur lors de la suppression"
+    },
+    "export": {
+      "title": "Télécharger l'historique",
+      "today": "Aujourd'hui",
+      "week": "7 derniers jours",
+      "month": "30 derniers jours",
+      "year": "12 derniers mois",
+      "custom": "Personnalisé",
+      "exportZip": "Tout exporter (ZIP)",
+      "exportSuccess": "Export ZIP téléchargé",
+      "exportError": "Erreur lors de l'export"
     }
   },
   "clients": {

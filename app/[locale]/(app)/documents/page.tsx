@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { DocumentCard } from '@/components/documents/DocumentCard';
+import { ExportPeriodSelector } from '@/components/documents/ExportPeriodSelector';
 
 export default async function DocumentsPage({
   params,
@@ -56,6 +57,8 @@ export default async function DocumentsPage({
           </Button>
         </Link>
       </div>
+
+      <ExportPeriodSelector />
 
       {!pro && (
         <Card className="border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">

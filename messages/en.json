@@ -369,6 +369,17 @@
       "cancelDelete": "Cancel",
       "deleted": "Document deleted",
       "deleteError": "Failed to delete the document"
+    },
+    "export": {
+      "title": "Download history",
+      "today": "Today",
+      "week": "Last 7 days",
+      "month": "Last 30 days",
+      "year": "Last 12 months",
+      "custom": "Custom",
+      "exportZip": "Export all (ZIP)",
+      "exportSuccess": "ZIP export downloaded",
+      "exportError": "Export failed"
     }
   },
   "clients": {
