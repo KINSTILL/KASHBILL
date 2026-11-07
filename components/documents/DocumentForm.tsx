@@ -25,6 +25,8 @@ type Line = { description: string; quantity: number; unitPrice: number };
 type DraftState = {
   type: DocType;
   clientId: string | null;
+  clientMode: 'existing' | 'new';
+  newClient: { name: string; phone: string; address: string; taxId: string };
   lines: Line[];
   vatRate: number | null;
   depositPercentage: number | null;
@@ -56,6 +58,8 @@ export function DocumentForm({
   const [state, setState] = useState<DraftState>({
     type: 'DEVIS',
     clientId: null,
+    clientMode: 'existing',
+    newClient: { name: '', phone: '', address: '', taxId: '' },
     lines: [{ description: '', quantity: 1, unitPrice: 0 }],
     vatRate: null,
     depositPercentage: null,
@@ -162,26 +166,52 @@ export function DocumentForm({
             : l.description.length > 0 && l.unitPrice > 0
         );
 
+      let finalClientId = state.clientId;
+
+      if (state.clientMode === 'new' && state.newClient.name.trim()) {
+        const clientRes = await fetch('/api/clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
+          body: JSON.stringify({
+            name: state.newClient.name.trim(),
+            phone: state.newClient.phone.trim() || null,
+            address: state.newClient.address.trim() || null,
+            taxId: state.newClient.taxId.trim() || null,
+          }),
+        });
+
+        if (!clientRes.ok) {
+          const err = await clientRes.json().catch(() => ({}));
+          alert(err?.error?.code === 'PLAN_LIMIT_REACHED' ? t('clientLimitReached') : (err?.error?.message ?? t('clientCreateError')));
+          setState((s) => ({ ...s, clientMode: 'existing' }));
+          setSubmitting(false);
+          return;
+        }
+
+        const { client } = await clientRes.json();
+        finalClientId = client.id;
+      }
+
       const res = await fetch('/api/documents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
         body: JSON.stringify({
-          clientId: state.clientId,
+          clientId: finalClientId,
           type: state.type,
           locale: locale.toUpperCase(),
           payload: {
             lines: validLines,
-            vatRate: state.vatRate,
-            depositPercentage: state.depositPercentage,
-            deliveryFee: state.deliveryFee,
-            notes: state.notes,
-            validityDays: state.validityDays,
-            dueDate: state.dueDate,
-            referenceNumber: state.referenceNumber,
-            paymentMethod: state.paymentMethod,
-            paymentReference: state.paymentReference,
-            deliveryDate: state.deliveryDate,
-            deliveryAddress: state.deliveryAddress,
+            vatRate: state.vatRate ?? null,
+            depositPercentage: state.depositPercentage ?? null,
+            deliveryFee: state.deliveryFee ?? null,
+            notes: state.notes ?? null,
+            validityDays: state.validityDays ?? null,
+            dueDate: state.dueDate ?? null,
+            referenceNumber: state.referenceNumber ?? null,
+            paymentMethod: state.paymentMethod ?? null,
+            paymentReference: state.paymentReference ?? null,
+            deliveryDate: state.deliveryDate ?? null,
+            deliveryAddress: state.deliveryAddress ?? null,
           },
         }),
       });
@@ -280,24 +310,67 @@ export function DocumentForm({
       )}
 
       <Card>
-        <label htmlFor="clientId" className="mb-1 block text-sm font-medium">
-          {t(`typeContext.${state.type}.clientLabel`)}
-        </label>
-        <select
-          id="clientId"
-          name="clientId"
-          aria-label={t('client')}
-          value={state.clientId ?? ''}
-          onChange={(e) => setState((s) => ({ ...s, clientId: e.target.value || null }))}
-          className="thumb-zone w-full rounded-lg border bg-slate-50 p-2"
-        >
-          <option value="">{t('noClient')}</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
+        <label className="mb-2 block text-sm font-medium">{t('client')}</label>
+        <div className="mb-3 inline-flex rounded-lg border border-slate-300 p-0.5 text-sm">
+          {(['existing', 'new'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setState((s) => ({ ...s, clientMode: m }))}
+              className={`px-3 py-1 rounded ${state.clientMode === m ? 'bg-sage-500 text-white' : ''}`}
+            >
+              {m === 'existing' ? t('clientModeExisting') : t('clientModeNew')}
+            </button>
           ))}
-        </select>
+        </div>
+
+        {state.clientMode === 'existing' ? (
+          <select
+            value={state.clientId ?? ''}
+            onChange={(e) => setState((s) => ({ ...s, clientId: e.target.value || null }))}
+            className="thumb-zone w-full rounded-lg border bg-white p-2"
+          >
+            <option value="">{t('noClient')}</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <div className="space-y-2">
+            <Input
+              placeholder={t('newClientName')}
+              value={state.newClient.name}
+              onChange={(e) =>
+                setState((s) => ({ ...s, newClient: { ...s.newClient, name: e.target.value } }))
+              }
+            />
+            <Input
+              type="tel"
+              inputMode="tel"
+              placeholder={t('newClientPhone')}
+              value={state.newClient.phone}
+              onChange={(e) =>
+                setState((s) => ({ ...s, newClient: { ...s.newClient, phone: e.target.value } }))
+              }
+            />
+            <Input
+              placeholder={t('newClientAddress')}
+              value={state.newClient.address}
+              onChange={(e) =>
+                setState((s) => ({ ...s, newClient: { ...s.newClient, address: e.target.value } }))
+              }
+            />
+            <Input
+              placeholder={t('newClientTaxId')}
+              value={state.newClient.taxId}
+              onChange={(e) =>
+                setState((s) => ({ ...s, newClient: { ...s.newClient, taxId: e.target.value } }))
+              }
+            />
+          </div>
+        )}
       </Card>
 
       <Card>
@@ -570,7 +643,16 @@ export function DocumentForm({
         </p>
       )}
 
-      <Button fullWidth size="lg" onClick={handleSubmit} isLoading={submitting}>
+      <Button
+        type="button"
+        fullWidth
+        size="lg"
+        onClick={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+        isLoading={submitting}
+      >
         {t('generate')}
       </Button>
     </div>
