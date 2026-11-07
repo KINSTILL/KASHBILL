@@ -9,8 +9,27 @@ import { env } from '@/lib/env';
 import { isPro } from '@/lib/auth/plan';
 
 const schema = z.object({
-  channel: z.enum(['cm.orange', 'cm.mtn']).optional(),
+  method: z.enum(['mobile_money', 'card']),
+  operatorCode: z.string().nullable().default(null),
 });
+
+function resolveNotchChannels(
+  method: 'mobile_money' | 'card',
+  operatorCode: string | null
+): string[] {
+  if (method === 'card') return ['card'];
+  const MAP: Record<string, string> = {
+    MTN_CM: 'cm.mtn', ORANGE_CM: 'cm.orange',
+    MTN_CI: 'ci.mtn', ORANGE_CI: 'ci.orange', WAVE_CI: 'ci.wave',
+    WAVE_SN: 'sn.wave', ORANGE_SN: 'sn.orange', FREE_SN: 'sn.free',
+    AIRTEL_GA: 'ga.airtel', MOOV_GA: 'ga.moov',
+    MTN_GH: 'gh.mtn', TELECEL_GH: 'gh.vodafone', AIRTELTIGO_GH: 'gh.airteltigo',
+    MPESA_KE: 'ke.mpesa', AIRTEL_KE: 'ke.airtel',
+    MTN_UG: 'ug.mtn', AIRTEL_UG: 'ug.airtel',
+  };
+  if (!operatorCode) return ['cm.orange', 'cm.mtn'];
+  return [MAP[operatorCode] ?? 'cm.orange'];
+}
 
 export async function POST(req: NextRequest): Promise<Response> {
   try {
@@ -26,7 +45,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       }
 
       const body = await req2.json().catch(() => ({}));
-      schema.parse(body);
+      const data = schema.parse(body);
 
       // Créer la Subscription en PENDING (id utilisé comme référence Notch Pay)
       const subscription = await prisma.subscription.create({
@@ -50,6 +69,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         customerPhone: user.phone,
         customerName: user.name ?? user.businessName ?? 'Utilisateur',
         callbackUrl: `${env.APP_URL}/fr/upgrade?ref=${reference}`,
+        channels: resolveNotchChannels(data.method, data.operatorCode),
       });
 
       if (!result.ok) {

@@ -7,14 +7,21 @@ import type { Route } from 'next';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useToast } from '@/components/ui/Toast';
+import { useCurrentUser } from '@/components/providers/SessionProvider';
+import { isSupportedPaymentCountry, getOperatorsForCountry } from '@/lib/countries/mobile-money';
 
 export default function UpgradePage() {
   const t = useTranslations('upgrade');
   const toast = useToast();
   const search = useSearchParams();
-  const [loading, setLoading] = useState<'orange' | 'mtn' | null>(null);
+  const { user } = useCurrentUser();
+  const [loading, setLoading] = useState<string | null>(null);
   const [status, setStatus] = useState<{ proUntil: string | null; role: string } | null>(null);
   const [pollCount, setPollCount] = useState(0);
+
+  const userCountry = user?.country;
+  const canPayMobileMoney = isSupportedPaymentCountry(userCountry ?? 'CM');
+  const operators = canPayMobileMoney ? getOperatorsForCountry(userCountry ?? 'CM') : [];
 
   const ref = search.get('ref');
 
@@ -56,13 +63,13 @@ export default function UpgradePage() {
     };
   }, [ref, pollCount]);
 
-  const startPayment = async (channel: 'cm.orange' | 'cm.mtn') => {
-    setLoading(channel === 'cm.orange' ? 'orange' : 'mtn');
+  const startPayment = async (method: 'mobile_money' | 'card', operatorCode: string | null) => {
+    setLoading(method === 'card' ? 'card' : (operatorCode ?? 'mobile_money'));
     try {
       const res = await fetch('/api/payments/initialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ channel }),
+        body: JSON.stringify({ method, operatorCode }),
       });
       if (!res.ok) {
         toast.show("Erreur lors de l'initialisation du paiement", 'error');
@@ -105,14 +112,36 @@ export default function UpgradePage() {
         </ul>
       </Card>
 
-      <div className="space-y-2">
-        <Button fullWidth size="lg" onClick={() => startPayment('cm.orange')} isLoading={loading === 'orange'}>
-          💳 Orange Money — 2 000 FCFA
-        </Button>
-        <Button fullWidth size="lg" onClick={() => startPayment('cm.mtn')} isLoading={loading === 'mtn'}>
-          💳 MTN MoMo — 2 000 FCFA
-        </Button>
-      </div>
+      {canPayMobileMoney ? (
+        <div className="space-y-2">
+          {operators.map((op) => (
+            <Button
+              key={op.code}
+              fullWidth
+              size="lg"
+              onClick={() => startPayment('mobile_money', op.code)}
+              isLoading={loading === op.code}
+            >
+              💳 {op.name} — 2 000 FCFA
+            </Button>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <p className="text-sm text-amber-900">⚠️ {t('mobileMoneyNotAvailable')}</p>
+            <p className="mt-1 text-xs text-amber-800">{t('cardPaymentAvailable')}</p>
+          </div>
+          <Button
+            fullWidth
+            size="lg"
+            onClick={() => startPayment('card', null)}
+            isLoading={loading === 'card'}
+          >
+            💳 {t('payByCard')} — 2 000 FCFA
+          </Button>
+        </div>
+      )}
 
       {ref && (
         <Card className="p-4">

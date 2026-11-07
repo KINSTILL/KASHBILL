@@ -15,6 +15,7 @@ export type NotchPayInitInput = {
   customerPhone: string;       // +237XXXXXXXX
   customerName: string;
   callbackUrl: string;         // URL de retour côté app
+  channels?: string[];
 };
 
 /**
@@ -32,8 +33,7 @@ export async function initNotchPayPayment(input: NotchPayInitInput): Promise<Not
       phone: input.customerPhone,
     },
     callback: input.callbackUrl,
-    // Canaux acceptés : Orange Money CM + MTN MoMo CM
-    channels: ['cm.orange', 'cm.mtn'],
+    channels: input.channels ?? ['cm.orange', 'cm.mtn'],
   };
 
   try {

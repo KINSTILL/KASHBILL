@@ -334,6 +334,7 @@
       "paymentOperator": "Mobile Money operator",
       "paymentOperatorFreeText": "Payment operator (free text)",
       "paymentOperatorFreeTextPlaceholder": "Ex: Wave, M-Pesa, bank transfer...",
+      "mobileMoneyNotAvailableInCountry": "Mobile Money payment links are not yet available in your country. Use the free-text field to indicate your payment details.",
       "foreignClientWarning": "Foreign client ({country}). Invoice in your home currency. Exchange rate fluctuates — verify before sending.",
       "exchangeRate": "Exchange rate (optional)",
       "equivalentAmount": "Equivalent amount in {currency} (optional)",
@@ -470,6 +471,9 @@
     "featureNfc": "NFC + Contacts Picker",
     "featureUsbPrint": "USB printing",
     "pay": "Pay with Mobile Money",
+    "mobileMoneyNotAvailable": "Mobile Money is not yet available in your country.",
+    "cardPaymentAvailable": "You can pay your subscription by credit card (Visa, Mastercard).",
+    "payByCard": "Pay by card",
     "or": "or",
     "refer": "Refer a friend — +7 free days",
     "currentStatus": "Current status",
@@ -692,5 +696,9 @@
     "benefit3": "✅ Unlimited WhatsApp + email",
     "showPreview": "See my invoice in Pro",
     "upgradeNow": "Upgrade to Pro — 2,000 FCFA"
+  },
+  "unsupportedCountry": {
+    "title": "Welcome to MyCashBill",
+    "message": "Mobile Money payment links are not yet available in your country. You can still use MyCashBill and pay for your Pro subscription by credit card."
   }
 }

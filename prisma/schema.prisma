@@ -302,7 +302,7 @@ model CountryTaxConfig {
   requiredFields        Json
   legalMentionsTemplate String
   isActive              Boolean  @default(true)
-  isPawaPayEnabled      Boolean  @default(false)
+  mobileMoneyEnabled    Boolean  @default(false)
   paymentOperators      Json?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt

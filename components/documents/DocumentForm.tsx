@@ -19,7 +19,7 @@ import { checkRequiredCompanyFields } from '@/lib/validators/documents';
 import { DocumentTypeSelector } from './DocumentTypeSelector';
 import { RequiredFieldsAlert } from './RequiredFieldsAlert';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
-import { getOperatorsForCountry, isPawaPayCountry } from '@/lib/countries/pawapay';
+import { getOperatorsForCountry, isSupportedPaymentCountry } from '@/lib/countries/mobile-money';
 import { getCurrencyForCountry } from '@/lib/countries/currency';
 import type { DocType } from '@prisma/client';
 import type { PdfFormat } from '@/lib/pdf/types';
@@ -96,12 +96,15 @@ export function DocumentForm({
     exchangeRateNote: null,
   });
 
+  const userCountrySupported = isSupportedPaymentCountry(userCountry);
+
   const selectedClient = state.clientId ? clients.find((c) => c.id === state.clientId) : null;
   const clientCountry = selectedClient?.country ?? userCountry;
   const clientCurrency = getCurrencyForCountry(clientCountry);
   const isForeignClient = clientCountry !== userCountry;
-  const operators = getOperatorsForCountry(clientCountry);
-  const isPawaPay = isPawaPayCountry(clientCountry);
+  const canOfferMobileMoney = userCountrySupported && isSupportedPaymentCountry(clientCountry);
+  const operators = canOfferMobileMoney ? getOperatorsForCountry(clientCountry) : [];
+  const useFreeText = !canOfferMobileMoney;
 
   const currentConfig = DOC_TYPE_CONFIG[state.type];
   const [showPrices, setShowPrices] = useState<boolean>(currentConfig.showPricesByDefault);
@@ -630,7 +633,7 @@ export function DocumentForm({
                   <option value="CHECK">{t('paymentCheck')}</option>
                 </select>
               </div>
-              {isPawaPay ? (
+              {!useFreeText ? (
                 <div>
                   <label className="mb-1.5 block text-[13px] font-medium text-ink-soft">
                     {t('paymentOperator')}
@@ -649,14 +652,21 @@ export function DocumentForm({
                   </select>
                 </div>
               ) : (
-                <Input
-                  label={t('paymentOperatorFreeText')}
-                  placeholder={t('paymentOperatorFreeTextPlaceholder')}
-                  value={state.paymentOperatorFreeText ?? ''}
-                  onChange={(e) =>
-                    setState((s) => ({ ...s, paymentOperatorFreeText: e.target.value || null }))
-                  }
-                />
+                <>
+                  <Input
+                    label={t('paymentOperatorFreeText')}
+                    placeholder={t('paymentOperatorFreeTextPlaceholder')}
+                    value={state.paymentOperatorFreeText ?? ''}
+                    onChange={(e) =>
+                      setState((s) => ({ ...s, paymentOperatorFreeText: e.target.value || null }))
+                    }
+                  />
+                  {!userCountrySupported && (
+                    <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
+                      ⚠️ {t('mobileMoneyNotAvailableInCountry')}
+                    </p>
+                  )}
+                </>
               )}
               <Input
                 label={t('paymentReference')}

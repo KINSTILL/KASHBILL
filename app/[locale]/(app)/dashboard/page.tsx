@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { UpgradeCTA } from '@/components/ui/UpgradeCTA';
 import { ProBadge } from '@/components/ui/ProBadge';
 import { ProExpiryBanner } from '@/components/ui/ProExpiryBanner';
+import { UnsupportedCountryBanner } from '@/components/layout/UnsupportedCountryBanner';
 import { HeroCard } from '@/components/ui/HeroCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { DocumentCard } from '@/components/documents/DocumentCard';
@@ -78,6 +79,7 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-4">
+      <UnsupportedCountryBanner />
       {proDaysLeft !== null && <ProExpiryBanner daysLeft={proDaysLeft} />}
       <HeroCard
         eyebrow={t('dashboard.welcomeBack')}

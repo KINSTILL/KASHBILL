@@ -334,6 +334,7 @@
       "paymentOperator": "Opérateur Mobile Money",
       "paymentOperatorFreeText": "Opérateur de paiement (texte libre)",
       "paymentOperatorFreeTextPlaceholder": "Ex : Wave, M-Pesa, virement...",
+      "mobileMoneyNotAvailableInCountry": "Les liens de paiement Mobile Money ne sont pas encore disponibles dans votre pays. Utilisez le champ libre pour indiquer vos coordonnées de paiement.",
       "foreignClientWarning": "Client à l'étranger ({country}). Facture en devise de votre pays. Le taux de change fluctue — vérifiez-le avant d'envoyer.",
       "exchangeRate": "Taux de change (optionnel)",
       "equivalentAmount": "Montant équivalent en {currency} (optionnel)",
@@ -470,6 +471,9 @@
     "featureNfc": "NFC + Contacts Picker",
     "featureUsbPrint": "Impression USB",
     "pay": "Payer avec Mobile Money",
+    "mobileMoneyNotAvailable": "Mobile Money n'est pas encore disponible dans votre pays.",
+    "cardPaymentAvailable": "Vous pouvez payer votre abonnement par carte bancaire (Visa, Mastercard).",
+    "payByCard": "Payer par carte",
     "or": "ou",
     "refer": "Parrainer un ami — +7 jours gratuits",
     "currentStatus": "Statut actuel",
@@ -692,5 +696,9 @@
     "benefit3": "✅ Envoi illimité WhatsApp + email",
     "showPreview": "Voir ma facture en Pro",
     "upgradeNow": "Passer Pro — 2 000 FCFA"
+  },
+  "unsupportedCountry": {
+    "title": "Bienvenue sur MyCashBill",
+    "message": "Les liens de paiement Mobile Money ne sont pas encore disponibles dans votre pays. Vous pouvez utiliser MyCashBill et payer votre abonnement Pro par carte bancaire."
   }
 }
