@@ -11,13 +11,13 @@ const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours de répit doux
 
 export function InstallPrompt() {
   const t = useTranslations('pwa');
-  const { canInstall, isIOS, isDesktop, isStandalone, promptInstall } = usePWAInstall();
+  const { canInstall, isIOS, isDesktop, isInstalled, promptInstall } = usePWAInstall();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     try {
-      // 1. Si déjà installé en standalone, ne rien afficher
-      if (isStandalone) {
+      // 1. Si déjà installé (détecté via OS, standalone ou installation précédente), ne rien afficher
+      if (isInstalled) {
         setVisible(false);
         return;
       }
@@ -45,9 +45,9 @@ export function InstallPrompt() {
     } catch {
       setVisible(false);
     }
-  }, [isStandalone]);
+  }, [isInstalled]);
 
-  if (!visible) return null;
+  if (!visible || isInstalled) return null;
   if (!canInstall && !isIOS) return null;
 
   const dismiss = () => {

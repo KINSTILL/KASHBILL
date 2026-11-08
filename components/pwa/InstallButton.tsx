@@ -10,9 +10,9 @@ export function InstallButton({
   variant?: 'header' | 'sidebar';
 }) {
   const t = useTranslations('pwa');
-  const { canInstall, isDesktop, isStandalone, promptInstall } = usePWAInstall();
+  const { canInstall, isDesktop, isInstalled, promptInstall } = usePWAInstall();
 
-  if (!canInstall || isStandalone) return null;
+  if (!canInstall || isInstalled) return null;
 
   if (variant === 'sidebar') {
     return (

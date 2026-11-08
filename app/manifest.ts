@@ -5,6 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'MyCashBill',
     short_name: 'MyCashBill',
     description: 'Facturation et devis pour le Cameroun',
+    id: '/fr',
     start_url: '/fr',
     scope: '/',
     display: 'standalone',
