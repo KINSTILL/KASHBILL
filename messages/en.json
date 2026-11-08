@@ -756,5 +756,82 @@
     "share": "Share on WhatsApp",
     "related": "Related articles",
     "empty": "No articles published yet"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "demo": "Demo",
+      "login": "Log in",
+      "try": "Start for free"
+    },
+    "problem": {
+      "title": "Invoicing should not be a headache",
+      "subtitle": "You are losing precious time with outdated tools",
+      "word_title": "Broken Word templates",
+      "word_desc": "Messy formatting, misaligned tables, and unprofessional looks.",
+      "excel_title": "Complex Excel formulas",
+      "excel_desc": "VAT calculation mistakes, lost spreadsheets, and manual re-entry.",
+      "paper_title": "Paper receipt booklets",
+      "paper_desc": "No backup, lost records, and impossible to send over WhatsApp.",
+      "transition": "There is a better way ↓"
+    },
+    "how": {
+      "title": "How it works",
+      "subtitle": "Create and send your invoice in under 60 seconds",
+      "step1_title": "1. Enter invoice details",
+      "step1_desc": "Client name, service, amount, and automatic tax calculations.",
+      "step2_title": "2. Instant generation",
+      "step2_desc": "Polished, OHADA-compliant invoice generated immediately.",
+      "step3_title": "3. Share on WhatsApp",
+      "step3_desc": "Send the PDF or secure link directly to your customer."
+    },
+    "features": {
+      "title": "Built for your everyday workflow",
+      "subtitle": "All the essential tools to manage invoices and quotes",
+      "f1_title": "OHADA & Local Compliance",
+      "f1_desc": "Required legal notices, local currencies (FCFA, GHS, KES, USD), and taxes.",
+      "f2_title": "Mobile Money & Card",
+      "f2_desc": "Collect smoothly with Orange, MTN, Wave, Moov, or credit cards.",
+      "f3_title": "Direct WhatsApp Sharing",
+      "f3_desc": "Send invoices in one click right where your clients already are.",
+      "f4_title": "Payment Tracking",
+      "f4_desc": "See who has paid in real time and follow up with a single tap.",
+      "f5_title": "Lightning-fast on mobile",
+      "f5_desc": "Mobile-first design that loads quickly even on slower connections.",
+      "f6_title": "Secure cloud backups",
+      "f6_desc": "Your client data and documents are encrypted and always safe."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know before getting started",
+      "view_all": "View full FAQ →",
+      "q1": "Are my invoices compliant with OHADA regulations?",
+      "a1": "Yes, fully. Mandatory legal mentions, sequential numbering, tax breakdowns, and local currencies strictly comply with OHADA standards.",
+      "q2": "How do my clients pay me via Mobile Money?",
+      "a2": "Your clients can pay directly with Orange Money, MTN MoMo, Wave, Moov, or Airtel depending on your country. Funds go directly to you.",
+      "q3": "Does the application work on mobile?",
+      "a3": "Yes! MyCashBill is a lightweight Progressive Web App designed mobile-first. You can add it directly to your home screen.",
+      "q4": "What happens after the 30-day Pro trial?",
+      "a4": "No credit card is required. At the end of your trial, you can upgrade to Pro or keep using the Free tier forever.",
+      "q5": "Can I send invoices directly via WhatsApp?",
+      "a5": "Absolutely. A single tap drafts a professional WhatsApp message with your invoice link and PDF attachment ready to send."
+    },
+    "finalCta": {
+      "title": "Ready to invoice like a pro?",
+      "subtitle": "Join thousands of African entrepreneurs and freelancers saving time every day.",
+      "btn_primary": "Create my first invoice",
+      "btn_secondary": "Try demo without signing up",
+      "guarantee": "✓ 30-day Pro trial · No card required · Ready in 60 seconds"
+    },
+    "footer": {
+      "tagline": "🌍 Made in Africa, for Africa",
+      "desc": "Fast, OHADA-compliant, multi-currency invoicing platform designed for entrepreneurs.",
+      "col_product": "Product",
+      "col_legal": "Legal",
+      "col_resources": "Resources",
+      "col_countries": "Tier 1 Countries",
+      "rights": "All rights reserved."
+    }
   }
 }

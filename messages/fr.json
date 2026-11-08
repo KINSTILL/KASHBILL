@@ -756,5 +756,82 @@
     "share": "Partager sur WhatsApp",
     "related": "Articles liés",
     "empty": "Aucun article pour le moment"
+  },
+  "landing": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "demo": "Démo",
+      "login": "Connexion",
+      "try": "Essayer gratuitement"
+    },
+    "problem": {
+      "title": "Facturer ne devrait pas être un casse-tête",
+      "subtitle": "Vous perdez du temps précieux sur des outils inadaptés",
+      "word_title": "Modèles Word cassés",
+      "word_desc": "Mise en page qui saute, alignement approximatif et rendu peu soigné.",
+      "excel_title": "Formules Excel complexes",
+      "excel_desc": "Erreurs de calcul de TVA, perte de fichiers et ressaisies manuelles.",
+      "paper_title": "Cahiers et reçus papier",
+      "paper_desc": "Aucune sauvegarde, perte de traces et impossible à envoyer par WhatsApp.",
+      "transition": "Il y a une meilleure façon ↓"
+    },
+    "how": {
+      "title": "Comment ça marche",
+      "subtitle": "Créez et envoyez votre facture en moins de 60 secondes",
+      "step1_title": "1. Renseignez les détails",
+      "step1_desc": "Client, prestation, montant et taxes calculées automatiquement.",
+      "step2_title": "2. Générez la facture",
+      "step2_desc": "Document élégant et conforme OHADA prêt instantanément.",
+      "step3_title": "3. Partagez sur WhatsApp",
+      "step3_desc": "Envoyez le PDF ou le lien directement à votre client."
+    },
+    "features": {
+      "title": "Conçu pour votre quotidien",
+      "subtitle": "Tous les outils essentiels pour vos devis et factures",
+      "f1_title": "Conformité OHADA & locale",
+      "f1_desc": "Mentions obligatoires, devises locales (FCFA, GHS, KES, USD) et TVA adaptées.",
+      "f2_title": "Mobile Money & Carte",
+      "f2_desc": "Encaissez facilement par Orange, MTN, Wave, Moov ou carte bancaire.",
+      "f3_title": "Envoi direct WhatsApp",
+      "f3_desc": "Envoyez vos factures en un clic là où se trouvent vos clients.",
+      "f4_title": "Suivi des paiements",
+      "f4_desc": "Sachez en temps réel qui a payé et relancez en un clic.",
+      "f5_title": "Ultra-rapide sur mobile",
+      "f5_desc": "Optimisé pour smartphone, fonctionne parfaitement même à faible débit.",
+      "f6_title": "Sauvegarde & sécurité",
+      "f6_desc": "Vos documents sont chiffrés et toujours accessibles dans le cloud."
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "subtitle": "Tout ce que vous devez savoir avant de commencer",
+      "view_all": "Voir toute la FAQ →",
+      "q1": "Mes factures sont-elles conformes à la législation OHADA ?",
+      "a1": "Oui, parfaitement. Les mentions obligatoires, numérotations séquentielles, ventilations HT/TVA/TTC et monnaies locales respectent le droit commercial OHADA.",
+      "q2": "Comment mes clients me paient-ils par Mobile Money ?",
+      "a2": "Vos clients peuvent régler en un clic via Orange Money, MTN MoMo, Wave, Moov ou Airtel selon votre pays. Les fonds vous sont transférés directement.",
+      "q3": "L'application fonctionne-t-elle sur smartphone ?",
+      "a3": "Oui ! MyCashBill est une PWA ultra-légère conçue pour mobile. Vous pouvez l'ajouter à votre écran d'accueil sans passer par le Play Store ou l'App Store.",
+      "q4": "Que se passe-t-il après les 30 jours d'essai Pro ?",
+      "a4": "Aucune carte bancaire n'est demandée. À la fin de l'essai, vous pouvez choisir de passer à l'abonnement Pro ou conserver le compte Gratuit à vie.",
+      "q5": "Puis-je envoyer mes factures sur WhatsApp ?",
+      "a5": "Absolument. Un bouton direct prépare un message professionnel et génère le lien de la facture avec PDF téléchargeable à envoyer en un clic."
+    },
+    "finalCta": {
+      "title": "Prêt à facturer comme un pro ?",
+      "subtitle": "Rejoignez des milliers d'entrepreneurs et indépendants africains qui gagnent du temps chaque jour.",
+      "btn_primary": "Créer ma première facture",
+      "btn_secondary": "Tester la démo sans inscription",
+      "guarantee": "✓ 30 jours Pro offerts · Sans carte bancaire · Opérationnel en 60 secondes"
+    },
+    "footer": {
+      "tagline": "🌍 Fait en Afrique, pour l'Afrique",
+      "desc": "La solution de facturation rapide, conforme OHADA et multidevise pensée pour les entrepreneurs.",
+      "col_product": "Produit",
+      "col_legal": "Légal",
+      "col_resources": "Ressources",
+      "col_countries": "Pays Tier 1",
+      "rights": "Tous droits réservés."
+    }
   }
 }
