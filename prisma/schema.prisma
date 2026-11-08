@@ -553,3 +553,23 @@ model UserConsent {
   @@index([documentSlug, version])
 }
 
+// ─── FAQ ───
+
+model FAQEntry {
+  id          String   @id @default(cuid())
+  category    String
+  order       Int      @default(0)
+  locale      Locale
+  question    String
+  answer      String   @db.Text
+  isPublished Boolean  @default(true)
+  helpful     Int      @default(0)
+  notHelpful  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category, locale, order])
+  @@index([isPublished])
+}
+
+

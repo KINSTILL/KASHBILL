@@ -726,5 +726,18 @@
     "acceptAll": "Tout accepter",
     "essentialOnly": "Essentiels uniquement",
     "learnMore": "En savoir plus sur les cookies"
+  },
+  "faq": {
+    "subtitle": "Trouvez rapidement des réponses à vos questions.",
+    "search": "Rechercher une question...",
+    "all": "Toutes",
+    "helpful": "Cette réponse vous a aidé ?",
+    "cat": {
+      "account": "Compte",
+      "documents": "Documents",
+      "billing": "Abonnement",
+      "technical": "Technique",
+      "legal": "Légal"
+    }
   }
 }

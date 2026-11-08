@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useToast } from '@/components/ui/Toast';
+import { MiniFAQ } from '@/components/faq/MiniFAQ';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { isSupportedPaymentCountry, getOperatorsForCountry } from '@/lib/countries/mobile-money';
 
@@ -157,6 +158,26 @@ export default function UpgradePage() {
           {t('refer')}
         </Link>
       </div>
+
+      <MiniFAQWrapper />
     </div>
   );
+}
+
+function MiniFAQWrapper() {
+  const [entries, setEntries] = useState<Array<{ id: string; question: string; answer: string }>>([]);
+  const locale = useLocale();
+
+  useEffect(() => {
+    fetch(`/api/faq?category=billing&locale=${locale}&limit=4`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.entries?.length) {
+          setEntries(d.entries);
+        }
+      })
+      .catch(() => {});
+  }, [locale]);
+
+  return <MiniFAQ entries={entries} title="Questions fréquentes" />;
 }
