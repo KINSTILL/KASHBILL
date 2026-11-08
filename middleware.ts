@@ -70,8 +70,29 @@ export function middleware(req: NextRequest) {
   }
 
   if (isAuthPage && hasSession) {
+    let target = `/${locale}/dashboard`;
+    try {
+      const token = req.cookies.get(SESSION_COOKIE)?.value;
+      if (token) {
+        const parts = token.split('.');
+        const payloadPart = parts[1];
+        if (parts.length === 3 && payloadPart) {
+          const raw = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+          const json =
+            typeof atob === 'function'
+              ? atob(raw)
+              : Buffer.from(raw, 'base64').toString('utf8');
+          const payload = JSON.parse(json);
+          if (payload?.role === 'ADMIN' || payload?.role === 'SUPPORT') {
+            target = `/${locale}/admin`;
+          }
+        }
+      }
+    } catch {
+      // Repli sûr sur /dashboard
+    }
     const url = req.nextUrl.clone();
-    url.pathname = `/${locale}/dashboard`;
+    url.pathname = target;
     return NextResponse.redirect(url);
   }
 

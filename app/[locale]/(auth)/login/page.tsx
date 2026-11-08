@@ -83,6 +83,7 @@ export default function LoginPage() {
         const data: {
           code?: string;
           message?: string;
+          user?: { role?: string };
           details?: { activeDevices?: ActiveDevice[] };
           error?: {
             code?: string;
@@ -114,7 +115,9 @@ export default function LoginPage() {
         }
 
         await refresh();
-        router.push(`/${locale}/dashboard` as Route);
+        const isAdminUser = data.user?.role === 'ADMIN' || data.user?.role === 'SUPPORT';
+        const targetRoute = isAdminUser ? `/${locale}/admin` : `/${locale}/dashboard`;
+        router.push(targetRoute as Route);
         router.refresh();
       } catch {
         setErrorMessage(t('login.error_default'));

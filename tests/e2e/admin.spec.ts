@@ -9,9 +9,8 @@ test.describe('Admin', () => {
     await page.fill('input[name="phone"]', adminPhone);
     await page.fill('input[name="pin"]', process.env.ADMIN_PIN!);
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard');
+    await page.waitForURL('**/admin');
 
-    await page.goto('/fr/admin');
     await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible();
     await expect(page.getByText('Utilisateurs', { exact: true })).toBeVisible();
     await expect(page.getByText('Documents', { exact: true })).toBeVisible();
@@ -28,7 +27,7 @@ test.describe('Admin', () => {
     await page.fill('input[name="phone"]', adminPhone);
     await page.fill('input[name="pin"]', process.env.ADMIN_PIN!);
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard');
+    await page.waitForURL('**/admin');
 
     // 2. Créer un USER cible dans un autre contexte
     const ctx2 = await browser.newContext();
@@ -65,7 +64,7 @@ test.describe('Admin', () => {
     await page.fill('input[name="phone"]', adminPhone);
     await page.fill('input[name="pin"]', process.env.ADMIN_PIN!);
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard');
+    await page.waitForURL('**/admin');
 
     const res = await page.request.patch('/api/admin/thresholds/MAX_DOCS_PER_24H', {
       headers: { 'X-Requested-With': 'fetch' },

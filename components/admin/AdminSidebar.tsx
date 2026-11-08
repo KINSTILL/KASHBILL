@@ -33,36 +33,48 @@ export function AdminSidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden w-64 shrink-0 border-r bg-white md:block">
-        <div className="border-b p-4 flex items-center justify-between">
-          <Link href={`/${locale}/admin` as Route} className="text-lg font-bold text-sage-900">
-            MyCashBill Admin
-          </Link>
-          <span className="text-xs px-2 py-0.5 rounded bg-sage-100 text-sage-800 font-semibold">
-            {user?.role}
-          </span>
+      <aside className="hidden w-64 shrink-0 border-r bg-white md:flex md:flex-col justify-between min-h-screen">
+        <div>
+          <div className="border-b p-4 flex items-center justify-between">
+            <Link href={`/${locale}/admin` as Route} className="text-lg font-bold text-sage-900">
+              MyCashBill Admin
+            </Link>
+            <span className="text-xs px-2 py-0.5 rounded bg-sage-100 text-sage-800 font-semibold">
+              {user?.role}
+            </span>
+          </div>
+          <nav className="space-y-1 p-4">
+            {visibleItems.map((item) => {
+              const active =
+                pathname === item.href ||
+                (item.href !== `/${locale}/admin` && pathname.startsWith(item.href + '/'));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href as Route}
+                  className={cn(
+                    'block rounded-lg px-3 py-2 text-sm transition-colors',
+                    active
+                      ? 'bg-sage-100 font-medium text-sage-900'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
-        <nav className="space-y-1 p-4">
-          {visibleItems.map((item) => {
-            const active =
-              pathname === item.href ||
-              (item.href !== `/${locale}/admin` && pathname.startsWith(item.href + '/'));
-            return (
-              <Link
-                key={item.href}
-                href={item.href as Route}
-                className={cn(
-                  'block rounded-lg px-3 py-2 text-sm transition-colors',
-                  active
-                    ? 'bg-sage-100 font-medium text-sage-900'
-                    : 'text-slate-700 hover:bg-slate-50'
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+
+        <div className="border-t p-4 bg-slate-50">
+          <Link
+            href={`/${locale}/dashboard` as Route}
+            className="flex items-center justify-between rounded-lg border border-sage-200 bg-white px-3 py-2 text-xs font-semibold text-sage-900 shadow-xs hover:bg-sage-100 transition-colors"
+          >
+            <span>📱 Espace Client (Mode Test)</span>
+            <span>→</span>
+          </Link>
+        </div>
       </aside>
 
       {/* Mobile Top Navigation */}
@@ -71,9 +83,17 @@ export function AdminSidebar() {
           <Link href={`/${locale}/admin` as Route} className="font-bold text-sage-900">
             MyCashBill Admin
           </Link>
-          <span className="text-xs px-2 py-0.5 rounded bg-sage-100 text-sage-800 font-semibold">
-            {user?.role}
-          </span>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/${locale}/dashboard` as Route}
+              className="text-xs px-2.5 py-1 rounded bg-sage-50 text-sage-800 hover:bg-sage-100 font-semibold border border-sage-200"
+            >
+              📱 App Client
+            </Link>
+            <span className="text-xs px-2 py-0.5 rounded bg-sage-100 text-sage-800 font-semibold">
+              {user?.role}
+            </span>
+          </div>
         </div>
         <nav className="flex gap-2 overflow-x-auto pb-1 text-xs">
           {visibleItems.map((item) => {

@@ -24,6 +24,18 @@ export function Header() {
           <span className="h-1.5 w-1.5 rounded-full bg-sage-500 transition-smooth group-hover:bg-terracotta" />
         </Link>
         <div className="flex items-center gap-2">
+          {(user?.role === 'ADMIN' || user?.role === 'SUPPORT') && (
+            <Link href={`/${locale}/admin` as Route}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 gap-1.5 border-sage-300 bg-sage-50 text-xs font-semibold text-sage-900 shadow-xs hover:bg-sage-100"
+              >
+                <span>🛡️</span>
+                <span className="hidden sm:inline">Console Admin</span>
+              </Button>
+            </Link>
+          )}
           <QuotaBadge />
           <LocaleSwitcher />
           {!user && (
