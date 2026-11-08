@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
+import { InstallButton } from '@/components/pwa/InstallButton';
 
 export function Sidebar() {
   const t = useTranslations('nav');
@@ -47,7 +48,7 @@ export function Sidebar() {
             <Link href={`/${locale}/admin` as Route} className="block">
               <button
                 type="button"
-                className="w-full text-left rounded-lg px-3 py-2 text-xs font-semibold bg-sage-50 text-sage-900 border border-sage-200 hover:bg-sage-100 flex items-center justify-between"
+                className="w-full text-left rounded-lg px-3 py-2 text-xs font-semibold bg-sage-50 text-sage-900 border border-sage-200 hover:bg-sage-100 flex items-center justify-between cursor-pointer"
               >
                 <span>🛡️ Console Admin</span>
                 <span>→</span>
@@ -55,6 +56,10 @@ export function Sidebar() {
             </Link>
           </div>
         )}
+
+        <div className="pt-3 mt-3 border-t border-slate-200">
+          <InstallButton variant="sidebar" />
+        </div>
       </nav>
     </aside>
   );

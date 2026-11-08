@@ -48,7 +48,12 @@ export function DocumentPreview({
     setBlob(null);
     renderPdfToBlob(pdfDoc, initialFormat, options)
       .then((b) => {
-        if (mounted) setBlob(b);
+        if (mounted) {
+          setBlob(b);
+          try {
+            localStorage.setItem('kashbill:has_created_doc', '1');
+          } catch {}
+        }
       })
       .catch((e) => {
         if (mounted) setError(e instanceof Error ? e.message : 'PDF generation failed');

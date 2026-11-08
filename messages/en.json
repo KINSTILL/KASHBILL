@@ -591,8 +591,14 @@
   },
   "pwa": {
     "install": "Install MyCashBill",
-    "installHelp": "Add MyCashBill to your home screen for quick access.",
-    "iosInstallHelp": "On iPhone: tap Share then “Add to Home Screen”.",
+    "installDesktop": "Install on your PC / Mac",
+    "installHelp": "Install the app for instant access and to create invoices even without an internet connection.",
+    "installHelpDesktop": "Install the app on your desktop for quick direct access and smooth offline work.",
+    "iosInstallHelp": "On iPhone: tap Share ⎋ then “Add to Home Screen”.",
+    "buttonInstall": "Install",
+    "buttonLater": "Not now",
+    "installSidebarDesktop": "💻 Install PC App",
+    "installHeader": "Install app",
     "offline": "Offline — drafts saved locally",
     "online": "Connection restored",
     "updateAvailable": "Update available. Reload to get the latest."

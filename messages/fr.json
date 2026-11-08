@@ -591,8 +591,14 @@
   },
   "pwa": {
     "install": "Installer MyCashBill",
-    "installHelp": "Ajoutez MyCashBill à votre écran d'accueil pour un accès rapide.",
-    "iosInstallHelp": "Sur iPhone : appuyez sur Partager puis « Sur l'écran d'accueil ».",
+    "installDesktop": "Installer sur votre PC / Mac",
+    "installHelp": "Installez l'application pour un accès direct et pour créer vos factures même sans connexion internet.",
+    "installHelpDesktop": "Installez l'application sur votre bureau pour un accès direct et fluide, avec fonctionnement hors-ligne.",
+    "iosInstallHelp": "Sur iPhone : appuyez sur Partager ⎋ puis « Sur l'écran d'accueil ».",
+    "buttonInstall": "Installer",
+    "buttonLater": "Plus tard",
+    "installSidebarDesktop": "💻 Installer l'app sur PC",
+    "installHeader": "Installer l'app",
     "offline": "Hors ligne — vos brouillons sont sauvegardés localement",
     "online": "Connexion rétablie",
     "updateAvailable": "Mise à jour disponible. Rechargez pour profiter des nouveautés."

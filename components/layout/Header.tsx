@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { QuotaBadge } from './QuotaBadge';
+import { InstallButton } from '@/components/pwa/InstallButton';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { Button } from '@/components/ui/Button';
 
@@ -36,6 +37,7 @@ export function Header() {
               </Button>
             </Link>
           )}
+          <InstallButton variant="header" />
           <QuotaBadge />
           <LocaleSwitcher />
           {!user && (
