@@ -39,6 +39,12 @@ export function Header() {
           )}
           <InstallButton variant="header" />
           <QuotaBadge />
+          <Link
+            href={`/${locale}/blog` as Route}
+            className="text-xs font-semibold text-slate-600 hover:text-sage-700 px-2 py-1 rounded hover:bg-slate-50 transition"
+          >
+            Blog
+          </Link>
           <LocaleSwitcher />
           {!user && (
             <Link href={`/${locale}/login` as Route}>

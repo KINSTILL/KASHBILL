@@ -1,9 +1,32 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
 import { getPublishedLegal } from '@/lib/legal/queries';
 import { LEGAL_SLUG_LIST, type LegalSlug } from '@/lib/legal/constants';
+import { hreflangAlternates } from '@/lib/seo/hreflang';
+import { env } from '@/lib/env';
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, slug } = await params;
+  if (!LEGAL_SLUG_LIST.includes(slug as LegalSlug) || (locale !== 'fr' && locale !== 'en')) {
+    return { title: 'Document légal — MyCashBill' };
+  }
+
+  const doc = await getPublishedLegal(slug as LegalSlug, locale === 'fr' ? 'FR' : 'EN');
+  const base = env.APP_URL || process.env.APP_URL || 'https://mycashbill.app';
+
+  return {
+    title: doc?.title ? `${doc.title} — MyCashBill` : 'Document légal — MyCashBill',
+    description: `Consultez les ${doc?.title ?? 'documents légaux'} officiels de la plateforme MyCashBill.`,
+    alternates: {
+      canonical: `${base}/${locale}/legal/${slug}`,
+      languages: hreflangAlternates(`/legal/${slug}`),
+    },
+  };
+}
 
 export default async function LegalPage({ params }: Props) {
   const { locale, slug } = await params;
@@ -16,7 +39,8 @@ export default async function LegalPage({ params }: Props) {
   );
   if (!doc) notFound();
 
-  const html = await marked(doc.content);
+  const rawHtml = await marked(doc.content);
+  const html = DOMPurify.sanitize(rawHtml);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">

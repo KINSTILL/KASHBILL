@@ -71,18 +71,6 @@ export async function POST(req: NextRequest): Promise<Response> {
         data: { providerRef: result.providerRef },
       });
 
-      // Créer le UserAddOn en attente (activé par webhook)
-      await prisma.userAddOn.create({
-        data: {
-          userId: user.id,
-          type: data.type,
-          startsAt: now,
-          endsAt,
-          amountXaf: price,
-          subscriptionId: subscription.id,
-        },
-      });
-
       await writeAudit({
         actorId: user.id,
         targetId: user.id,

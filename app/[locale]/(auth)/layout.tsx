@@ -52,7 +52,16 @@ export default async function AuthLayout({
       <main className="flex flex-1 items-center justify-center p-4">
         <div className="w-full max-w-md">{children}</div>
       </main>
-      <footer className="w-full py-4 text-center">
+      <footer className="w-full py-4 text-center space-y-2">
+        <div className="flex items-center justify-center gap-3 text-xs text-slate-500">
+          <Link href={`/${locale}/blog` as Route} className="hover:text-sage-700 hover:underline">
+            Blog
+          </Link>
+          <span>·</span>
+          <Link href={`/${locale}/faq` as Route} className="hover:text-sage-700 hover:underline">
+            FAQ
+          </Link>
+        </div>
         <p className="text-xs font-medium tracking-wide text-slate-400">
           {t('footer')}
         </p>

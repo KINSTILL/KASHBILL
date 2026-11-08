@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
 
 type Entry = { id: string; category: string; question: string; answer: string; helpful: number; notHelpful: number };
 
@@ -51,7 +52,7 @@ export function FAQClient({ entries, locale: _locale }: { entries: Entry[]; loca
                   </button>
                   {openId === e.id && (
                     <div className="border-t border-slate-100 px-4 py-3">
-                      <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: marked(e.answer) as string }} />
+                      <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked(e.answer) as string) }} />
                       <div className="mt-3 flex items-center gap-3 text-xs text-slate-500">
                         <span>{t('helpful')}</span>
                         <button onClick={() => fetch(`/api/faq/${e.id}/feedback`, { method: 'POST', headers: { 'X-Requested-With': 'fetch', 'Content-Type': 'application/json' }, body: JSON.stringify({ helpful: true }) })} className="rounded bg-slate-100 px-2 py-1 hover:bg-green-100">👍 {e.helpful}</button>

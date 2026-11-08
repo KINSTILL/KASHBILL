@@ -100,6 +100,23 @@ export async function POST(req: NextRequest): Promise<Response> {
         });
       }
 
+      if (subscription && [500, 3000].includes(subscription.amountXaf ?? 0)) {
+        const type = subscription.amountXaf === 3000 ? 'WHITE_LABEL' : 'EXTRA_DEVICE';
+        const startsAt = new Date();
+        const endsAt = new Date(startsAt.getTime() + 30 * 86_400_000);
+
+        await prisma.userAddOn.create({
+          data: {
+            userId: subscription.userId,
+            type,
+            startsAt,
+            endsAt,
+            amountXaf: subscription.amountXaf!,
+            subscriptionId: subscription.id,
+          },
+        });
+      }
+
       await writeAudit({
         actorId: subscription.userId,
         targetId: subscription.userId,

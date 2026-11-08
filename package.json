@@ -39,6 +39,7 @@
     "clsx": "^2.1.1",
     "i18n-iso-countries": "^7.14.0",
     "idb": "^8.0.4",
+    "isomorphic-dompurify": "^4.7.0",
     "jose": "^6.2.15",
     "jszip": "^3.10.2",
     "marked": "^18.1.3",

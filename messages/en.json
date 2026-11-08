@@ -747,5 +747,14 @@
     "whiteLabel": "White label",
     "whiteLabelDesc": "Removes all MyCashBill mentions from your PDFs",
     "activate": "Activate +{price} FCFA/month"
+  },
+  "blog": {
+    "title": "MyCashBill Blog",
+    "subtitle": "Tips, guides, and news for African entrepreneurs",
+    "readMore": "Read article",
+    "minRead": "{min} min read",
+    "share": "Share on WhatsApp",
+    "related": "Related articles",
+    "empty": "No articles published yet"
   }
 }

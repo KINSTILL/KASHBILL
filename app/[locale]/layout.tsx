@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -7,6 +8,16 @@ import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ToastProvider } from '@/components/ui/Toast';
 import { getCurrentUser } from '@/lib/auth/session';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.APP_URL ?? 'https://mycashbill.app'),
+  title: { default: "MyCashBill — Facturation pro pour l'Afrique", template: '%s · MyCashBill' },
+  description:
+    'Générez devis, factures, reçus en 60 secondes depuis WhatsApp. Outil conforme au Cameroun et en Afrique.',
+  openGraph: { type: 'website', siteName: 'MyCashBill', locale: 'fr_FR' },
+  twitter: { card: 'summary_large_image' },
+  robots: { index: true, follow: true },
+};
 
 const locales = ['fr', 'en'] as const;
 
@@ -59,6 +70,23 @@ export default async function LocaleLayout({
           <CookieBanner />
           <InstallPrompt />
           {children}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: 'MyCashBill',
+                url: process.env.APP_URL ?? 'https://mycashbill.app',
+                logo: `${process.env.APP_URL ?? 'https://mycashbill.app'}/icons/logo-platform.png`,
+                contactPoint: {
+                  '@type': 'ContactPoint',
+                  email: 'support@mycashbill.app',
+                  contactType: 'Customer Support',
+                },
+              }),
+            }}
+          />
         </ToastProvider>
       </SessionProvider>
     </NextIntlClientProvider>

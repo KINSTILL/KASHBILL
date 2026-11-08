@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient, Role, Locale, ArticleStatus } from '@prisma/client';
 import { hash } from '@node-rs/argon2';
 import { randomInt } from 'node:crypto';
 
@@ -1150,12 +1150,458 @@ async function seedFAQ() {
 // ─────────────────────────────────────────────
 // Main
 // ─────────────────────────────────────────────
+
+// ─────────────────────────────────────────────
+// Seed Blog Articles
+// ─────────────────────────────────────────────
+async function seedArticles() {
+  const articles: Array<{
+    slug: string;
+    locale: Locale;
+    title: string;
+    excerpt: string;
+    authorName: string;
+    tags: string[];
+    status: ArticleStatus;
+    seoTitle: string;
+    seoDescription: string;
+    readingTime: number;
+    content: string;
+  }> = [
+    {
+      slug: 'mentions-obligatoires-facture-cameroun',
+      locale: 'FR',
+      title: 'Les mentions obligatoires sur une facture au Cameroun',
+      excerpt: 'Découvrez toutes les mentions obligatoires à faire figurer sur une facture conforme selon le Code Général des Impôts au Cameroun et le droit commercial OHADA.',
+      authorName: 'Équipe Fiscale MyCashBill',
+      tags: ['facturation', 'fiscalite', 'cameroun', 'entreprise'],
+      status: 'DRAFT',
+      seoTitle: 'Mentions obligatoires d\'une facture au Cameroun : Guide CGI 2026',
+      seoDescription: 'Guide complet des mentions obligatoires sur une facture conforme au Cameroun selon le Code Général des Impôts (NIU, RCCM, TVA, régimes).',
+      readingTime: 6,
+      content: `## Pourquoi la conformité de vos factures est cruciale au Cameroun
+
+Dans le contexte économique camerounais et l'espace OHADA, émettre une facture ne se résume pas à inscrire un montant sur une feuille volante ou dans un message informel. La facture constitue à la fois un **acte juridique probant**, un **justificatif comptable obligatoire** et le support fondamental de l'assujettissement fiscal devant la Direction Générale des Impôts (DGI).
+
+Une facture non conforme expose votre entreprise à des sanctions sévères : rejet de déductibilité des charges pour vos clients, application d'amendes fiscales prévues par le Code Général des Impôts (CGI), voire litiges commerciaux irrécupérables en cas de procédure de recouvrement judiciaire.
+
+---
+
+## Les 7 mentions obligatoires selon le Code Général des Impôts
+
+Pour être juridiquement et fiscalement inattaquable au Cameroun, chaque facture commerciale doit impérativement comporter les éléments suivants :
+
+### 1. Identification complète de l'émetteur
+Votre entreprise doit être identifiée sans ambiguïté :
+- **Raison sociale ou Nom commercial** complet.
+- **Forme juridique** (ETS, SARL, SAS, SA) et capital social le cas échéant.
+- **Numéro d'Identifiant Unique (NIU)** attribué par la DGI (14 caractères alphanumériques).
+- **Numéro du Registre du Commerce et du Crédit Mobilier (RCCM)**.
+- **Adresse géographique et siège social** (ville, quartier, boîte postale).
+- **Numéro de téléphone et adresse électronique**.
+
+### 2. Informations obligatoires relatives au client
+Le client professionnel doit faire l'objet d'une identification précise :
+- Nom commercial ou nom et prénom.
+- NIU du client (obligatoire pour les transactions B2B afin d'autoriser la déductibilité fiscale de la charge).
+- Adresse physique ou localisation commerciale.
+
+### 3. Numéro de facture chronologique et séquentiel
+Chaque document doit porter un numéro unique fondé sur une série chronologique continue et sans rupture (par exemple : *MCB-2026-000124*). La numérotation rétroactive ou l'effacement de factures émises est formellement prohibé.
+
+### 4. Date d'émission et date d'exigibilité
+La date à laquelle la prestation a été achevée ou les marchandises livrées, ainsi que la date limite de paiement convenue entre les parties.
+
+### 5. Description détaillée des biens et services
+Pour chaque ligne d'article ou de service :
+- Libellé explicite de la marchandise ou de la prestation fournie.
+- Quantité vendue.
+- Prix unitaire Hors Taxe (HT).
+- Réductions de prix éventuelles (rabais, remises, ristournes).
+
+### 6. Ventilation fiscale : Montant HT, TVA et TTC
+Si vous êtes assujetti à la TVA :
+- Montant total Hors Taxes (HT).
+- Taux de TVA applicable (taux légal de 19,25% au Cameroun, incluant les Centimes Additionnels Communaux).
+- Montant total de la TVA collectée.
+- Montant global Toutes Taxes Comprises (TTC) libellé en FCFA (XAF).
+- Si votre structure relève du Régime de l'Impôt Libératoire ou du Régime Simplifié non collecteur de TVA, la mention explicite : *« TVA non applicable — Régime Simplifié »* doit figurer sur la facture.
+
+### 7. Modalités de règlement et coordonnées de paiement
+Indiquez clairement comment régler : RIB bancaire, compte Mobile Money professionnel (Orange Money ou MTN Mobile Money), et délai accordé (comptant, 15 jours, 30 jours fin de mois).
+
+---
+
+## Exemple concret d'une facture conforme
+
+Imaginons une prestation de conseil facturée 500 000 FCFA HT à Douala par une SARL assujettie au Réel :
+- **Montant brut HT** : 500 000 FCFA
+- **Taux TVA** : 19,25%
+- **Montant TVA** : 96 250 FCFA
+- **Net à payer TTC** : 596 250 FCFA
+
+Le document doit en outre préciser la mention de dispense ou de précompte éventuel (acompte d'impôt sur le revenu retenu à la source par les grandes entreprises et organismes publics).
+
+---
+
+## Les sanctions en cas de facture irrégulière
+
+Selon le Livre des Procédures Fiscales du CGI camerounais :
+- **Amende de 100 000 FCFA à 5 000 000 FCFA** pour absence de mentions légales ou facturation non conforme.
+- **Rejet de la déduction de TVA** pour votre acheteur professionnel.
+- **Sanctions pour fausse facturation** pouvant entraîner la suspension du compte fiscal en ligne de la DGI.
+
+---
+
+## Comment MyCashBill garantit votre conformité
+
+En utilisant notre solution de facturation professionnelle, l'ensemble de ces règles est automatisé :
+1. Calcul automatique et exact de la TVA à 19,25%.
+2. Numérotation atomique continue et inviolable.
+3. QR Code de vérification d'intégrité numérique apposé sur chaque document.
+4. Génération instantanée au format PDF normalisé A4 ou Ticket thermique.
+
+Pour plus de précisions sur les règles contractuelles et juridiques applicables à nos services, consultez nos [Conditions Générales d'Utilisation](/fr/legal/cgu) ainsi que nos [Mentions Légales](/fr/legal/mentions-legales).`
+    },
+    {
+      slug: 'tva-19-25-cameroun-calcul-guide',
+      locale: 'FR',
+      title: 'TVA 19,25% : qui est concerné et comment la calculer',
+      excerpt: 'Comprendre le taux de TVA à 19,25% au Cameroun (17,5% + CAC 10%), les régimes fiscaux assujettis, et les formules de calcul HT et TTC avec exemples.',
+      authorName: 'Équipe Fiscale MyCashBill',
+      tags: ['tva', 'fiscalite', 'cameroun', 'comptabilite'],
+      status: 'DRAFT',
+      seoTitle: 'TVA à 19,25% au Cameroun : Calcul, Régimes et Guide Fiscal 2026',
+      seoDescription: 'Guide complet du calcul de la TVA à 19,25% au Cameroun. Formules HT/TTC, régimes réel et simplifié, Centimes Additionnels Communaux.',
+      readingTime: 5,
+      content: `## Les fondamentaux de la Taxe sur la Valeur Ajoutée au Cameroun
+
+La Taxe sur la Valeur Ajoutée (TVA) est un impôt indirect sur la consommation pesant sur l'utilisateur final. Au Cameroun, elle est régie par les articles 125 et suivants du Code Général des Impôts (CGI).
+
+---
+
+## Pourquoi 19,25% et non 17,5% ? La règle des CAC
+
+Beaucoup d'entrepreneurs s'interrogent sur l'origine du taux effectif de **19,25%**. 
+
+La décomposition légale est la suivante :
+1. **Taux de base de la TVA** : 17,5%
+2. **Centimes Additionnels Communaux (CAC)** : 10% calculés sur le montant principal de la TVA (soit 10% de 17,5% = 1,75%).
+3. **Taux global effectif** : 17,5% + 1,75% = **19,25%**.
+
+Lorsque vous appliquez la TVA sur vos produits ou prestations de services, vous devez toujours appliquer ce coefficient global de 19,25%.
+
+---
+
+## Qui doit collecter et reverser la TVA ?
+
+Tous les commerçants ou prestataires ne sont pas habilités à facturer la TVA :
+
+### 1. Le Régime du Réel (Chiffre d'affaires > 50 millions FCFA)
+Les entreprises relevant du régime du Réel sont **obligatoirement collectrices de TVA**. Elles doivent :
+- Facturer la TVA à 19,25% sur toutes leurs ventes imposables.
+- Déduire la TVA payée sur leurs achats professionnels légitimes.
+- Déclarer et reverser la différence (TVA collectée – TVA déductible) mensuellement avant le 15 de chaque mois auprès de leur Centre des Impôts de rattachement.
+
+### 2. Le Régime Simplifié (Chiffre d'affaires entre 10 et 50 millions FCFA)
+Sauf option volontaire pour le régime du réel validée par la DGI, les structures du Régime Simplifié ne facturent pas la TVA et ne peuvent pas la récupérer sur leurs achats.
+
+### 3. Les opérations exonérées par la loi
+Certains biens et services de première nécessité sont exonérés de TVA au Cameroun :
+- Produits alimentaires de base non transformés (riz, farine, pain, lait).
+- Médicaments et produits pharmaceutiques essentiels.
+- Prestations d'enseignement et de formation professionnelle agréées.
+- Opérations d'assurance vie et certains crédits bancaires.
+
+---
+
+## Formules mathématiques et exemples de calcul
+
+### 1. Calculer le montant TTC à partir du montant HT
+Pour obtenir le montant Toutes Taxes Comprises :
+$\\text{TVA} = \\text{Montant HT} \\times 0{,}1925$
+$\\text{Montant TTC} = \\text{Montant HT} \\times 1{,}1925$
+
+**Exemple :**
+Vente de matériel informatique d'une valeur de 400 000 FCFA HT :
+- TVA = 400 000 × 0,1925 = **77 000 FCFA**
+- TTC = 400 000 + 77 000 = **477 000 FCFA**
+
+### 2. Extraire le montant HT à partir d'un prix TTC
+Si vous convenez d'un prix forfaitaire TTC avec votre client, appliquez le diviseur 1,1925 :
+$\\text{Montant HT} = \\frac{\\text{Montant TTC}}{1{,}1925}$
+$\\text{TVA} = \\text{Montant TTC} - \\text{Montant HT}$
+
+**Exemple :**
+Prestation facturée 1 000 000 FCFA TTC :
+- Montant HT = 1 000 000 / 1,1925 = **838 574,42 FCFA**
+- TVA collectée = 1 000 000 – 838 574,42 = **161 425,58 FCFA**
+
+---
+
+## Facturation de la TVA sur MyCashBill
+
+Sur MyCashBill, les calculs de TVA s'opèrent avec une précision au centime près, éliminant tout risque d'erreur d'arrondi fiscal. Lors de la création de vos factures et devis, l'outil ventile automatiquement les bases HT, les lignes de TVA et le total TTC.
+
+Pour en savoir plus sur les responsabilités fiscales de l'utilisateur, référez-vous à nos [Conditions Générales d'Utilisation](/fr/legal/cgu).`
+    },
+    {
+      slug: '10-astuces-vendre-sur-whatsapp',
+      locale: 'FR',
+      title: '10 astuces pour vendre efficacement sur WhatsApp',
+      excerpt: 'Guide complet pour transformer vos discussions WhatsApp en commandes fermes : catalogue, relances professionnelles, factures PDF et paiement mobile.',
+      authorName: 'Équipe Commerciale MyCashBill',
+      tags: ['whatsapp', 'vente', 'ecommerce', 'mobile-money'],
+      status: 'DRAFT',
+      seoTitle: '10 astuces pour vendre sur WhatsApp en Afrique (Guide 2026)',
+      seoDescription: 'Comment vendre plus sur WhatsApp Business : profil, catalogue, relances non intrusives, factures professionnelles et paiement Mobile Money.',
+      readingTime: 6,
+      content: `## Le commerce conversationnel : le canal n°1 en Afrique
+
+En Afrique francophone, WhatsApp n'est plus une simple application de messagerie : c'est le principal canal de vente, de prospection et de relation client pour des millions de PME, créateurs de mode, grossistes et prestataires de services.
+
+Néanmoins, vendre sur WhatsApp requiert une rigueur professionnelle pour convertir un simple prospect curieux en acheteur fidèle. Voici 10 stratégies concrètes pour maximiser vos encaissements.
+
+---
+
+## Les 10 astuces incontournables
+
+### 1. Migrer impérativement vers WhatsApp Business
+Téléchargez WhatsApp Business pour bénéficier d'outils clés : horaires d'ouverture, adresse physique, description de votre activité et lien vers votre catalogue.
+
+### 2. Soigner votre catalogue de produits
+Présentez vos articles avec des photos de haute qualité sous lumière naturelle, en mentionnant explicitement le prix en FCFA et les délais de livraison. L'opacité sur les tarifs fait fuir 60% des prospects.
+
+### 3. Exploiter les étiquettes pour segmenter vos contacts
+Attribuez des étiquettes de couleur à chaque conversation :
+- *Nouveau prospect*
+- *Devis envoyé*
+- *En attente de paiement*
+- *Commande livrée*
+
+### 4. Répondre en moins de 15 minutes
+Sur WhatsApp, l'attention d'un prospect s'évapore rapidement. Configurer des messages de réponse rapide (ex: */prix*, */livraison*) pour répondre instantanément aux interrogations récurrentes.
+
+### 5. Utiliser les statuts WhatsApp comme vitrine quotidienne
+Publiez régulièrement en évitant le spam (3 à 5 statuts par jour maximum) :
+- Arrivage de nouveautés
+- Preuves sociales (captures de retours clients satisfaits)
+- Coulisses de fabrication ou de préparation de colis
+
+### 6. Remplacer les simples messages textes par des devis formels
+Lorsqu'un prospect demande un devis, ne vous contentez pas de taper les chiffres dans le fil de discussion. Émettez un **devis PDF propre**, avec votre logo et vos conditions de validité. Le taux de conversion d'un devis formel est trois fois supérieur.
+
+### 7. Simplifier le paiement Mobile Money
+Ne demandez pas à vos clients de recopier un numéro personnel avec risque d'erreur. Utilisez des liens de paiement ou mentionnez clairement les références du compte marchand (*Orange Money Marchand* ou *MTN MoMo Business*).
+
+### 8. Sécuriser les transactions par une facture dès réception des fonds
+Dès que le paiement Mobile Money est confirmé, envoyez immédiatement une facture acquittée avec mention du solde nul. Cela renforce la confiance et supprime toute contestation future.
+
+### 9. Pratiquer la relance de courtoisie sans harceler
+Si un prospect ne donne plus de nouvelles après envoi d'une proposition :
+- **À J+1** : *« Bonjour [Prénom], avez-vous pu consulter notre devis pour [Produit] ? Je reste disponible si vous avez une question sur les spécifications. »*
+- **À J+4** : *« Bonjour [Prénom], nos stocks sur cette référence sont limités cette semaine. Souhaitez-vous que nous vous réservions votre commande ? »*
+
+### 10. Fidéliser avec des listes de diffusion consenties
+Créez des listes de diffusion pour informer vos clients de remises exclusives, en respectant leur vie privée conformément à notre [Politique de Confidentialité](/fr/legal/politique-confidentialite).
+
+---
+
+## Pourquoi MyCashBill est le compagnon idéal de WhatsApp
+
+Avec MyCashBill :
+- Générez un devis ou une facture en 30 secondes sur votre smartphone.
+- Partagez le PDF directement dans la conversation WhatsApp en un clic.
+- Ajoutez des boutons de règlement rapides Mobile Money sur vos devis.
+
+Pour découvrir l'ensemble de nos fonctionnalités et nos engagements de service, consultez nos [Conditions Générales d'Utilisation](/fr/legal/cgu).`
+    },
+    {
+      slug: 'devis-facture-proforma-differences',
+      locale: 'FR',
+      title: 'Devis, facture, proforma : quelle différence ?',
+      excerpt: 'Ne confondez plus devis, facture proforma et facture définitive : découvrez leurs valeurs juridiques respectives, obligations comptables et cas d\'usage.',
+      authorName: 'Équipe Fiscale MyCashBill',
+      tags: ['devis', 'proforma', 'facturation', 'droit-des-affaires'],
+      status: 'DRAFT',
+      seoTitle: 'Devis, Facture, Proforma : Quelles différences juridiques et comptables ?',
+      seoDescription: 'Guide pratique pour distinguer devis, facture proforma et facture commerciale définitive en droit OHADA et fiscalité africaine.',
+      readingTime: 5,
+      content: `## Clarification des trois documents commerciaux fondamentaux
+
+Dans la gestion quotidienne d'une entreprise, les termes **devis**, **facture proforma** et **facture définitive** sont fréquemment employés de manière interchangeable. Pourtant, au regard du droit commercial OHADA et du droit fiscal, chacun de ces documents répond à une finalité spécifique et n'engage pas les parties de la même façon.
+
+---
+
+## 1. Le Devis : L'offre contractuelle préalable
+
+### Qu'est-ce qu'un devis ?
+Le devis est une **proposition commerciale écrite** par laquelle un prestataire ou un vendeur détaille la nature de sa prestation, ses tarifs et ses conditions d'exécution, avant tout engagement du client.
+
+### Valeur juridique
+Tant que le client n'a pas manifesté son accord, le devis n'engage que son émetteur (qui est tenu de respecter les prix indiqués pendant la durée de validité mentionnée). Une fois revêtu de la mention *« Bon pour accord »*, daté et signé par le client, le devis devient un **contrat commercial synallagmatique** engageant fermement les deux parties.
+
+### Impact comptable
+Le devis n'a **aucune valeur comptable ni fiscale**. Il n'est jamais enregistré dans le journal des ventes et ne donne lieu à aucune exigibilité de TVA.
+
+---
+
+## 2. La Facture Proforma : Une facture pour la forme
+
+### Qu'est-ce qu'une proforma ?
+L'expression latine *pro forma* signifie « pour la forme ». Il s'agit d'un document qui reprend la présentation rigoureuse d'une facture définitive mais qui n'en a pas le statut légal.
+
+### Cas d'usage fréquents
+- **Demande de financement bancaire** : l'acheteur remet la proforma à sa banque pour solliciter un prêt ou un déblocage de fonds.
+- **Procédures douanières et import/export** : déclaration de la valeur prévisionnelle en douane.
+- **Obtention d'autorisations administratives** ou de subventions publiques.
+- **Bons de commande institutionnels** dans les grandes entreprises ou ONG.
+
+### Valeur juridique et comptable
+La facture proforma n'a **pas de valeur probante de créance**. Elle ne permet pas d'exiger un paiement devant les tribunaux et ne peut pas être déduite fiscalement. Elle ne donne lieu à aucun enregistrement dans les livres de comptes.
+
+---
+
+## 3. La Facture Définitive : Le titre exécutoire de la vente
+
+### Qu'est-ce qu'une facture ?
+La facture définitive est le document obligatoire émis lors de la livraison du bien ou de l'achèvement de la prestation de service.
+
+### Caractéristiques majeures
+1. **Obligation légale** : Tout acte commercial B2B ou toute vente au consommateur qui en fait la demande doit faire l'objet d'une facture.
+2. **Caractère irrévocable** : Une facture émise ne peut jamais être purement et simplement effacée ; toute correction doit faire l'objet d'une note d'avoir (*avoir fiscal*).
+3. **Exigibilité fiscale** : Elle déclenche l'obligation de déclarer et reverser la TVA ainsi que le chiffre d'affaires imposable.
+4. **Titre de créance** : Elle autorise les procédures de mise en demeure et d'injonction de payer en cas de défaut de règlement.
+
+---
+
+## Tableau comparatif récapitulatif
+
+| Critère | Devis | Facture Proforma | Facture Définitive |
+| :--- | :--- | :--- | :--- |
+| **Moment d'émission** | Avant la commande | Phase de négociation / démarche | Après accord ou réalisation |
+| **Obligation comptable** | Aucune | Aucune | Obligatoire |
+| **Valeur juridique** | Contrat si signé | Information indicative | Titre de créance légale |
+| **Exigibilité de la TVA** | Non | Non | Oui |
+| **Possibilité d'annuler** | Simple annulation | Caducité automatique | Note d'avoir obligatoire |
+
+---
+
+## La chaîne documentaire simplifiée sur MyCashBill
+
+Avec MyCashBill, passez d'un devis ou d'une proforma à une facture définitive en un seul clic, sans risque de ressaisie ou d'erreur de numéro séquentiel.
+
+Pour plus d'informations sur l'archivage et l'intégrité de vos pièces commerciales, consultez nos [Mentions Légales](/fr/legal/mentions-legales) et nos [Conditions Générales d'Utilisation](/fr/legal/cgu).`
+    },
+    {
+      slug: 'relance-client-gestion-impayes',
+      locale: 'FR',
+      title: 'Relance client et gestion des impayés : sécuriser sa trésorerie',
+      excerpt: 'Stratégies éprouvées pour anticiper les retards de paiement, structurer un calendrier de relance amiable et préserver sa trésorerie sans froisser la relation client.',
+      authorName: 'Équipe Financière MyCashBill',
+      tags: ['tresorerie', 'relance-client', 'gestion', 'impayes'],
+      status: 'DRAFT',
+      seoTitle: 'Gestion des Impayés et Relance Client en Afrique : Méthodes et Scripts',
+      seoDescription: 'Comment réduire les délais de paiement et gérer les retards clients sans dégrader la relation commerciale. Guide et calendrier de relance.',
+      readingTime: 6,
+      content: `## L'impact critique des retards de paiement sur les TPE et PME
+
+En Afrique subsaharienne, plus de 70% des défaillances d'entreprises ne sont pas causées par un déficit de rentabilité, mais par une crise aiguë de trésorerie provoquée par des retards de paiement chroniques.
+
+Vendre est une chose, être payé en est une autre. Sans un processus systématique de suivi et de recouvrement amiable, les créances clients s'accumulent et menacent la pérennité de votre activité.
+
+---
+
+## Les réflexes préventifs : anticiper avant l'échéance
+
+Le moyen le plus efficace de gérer les impayés est d'éviter qu'ils ne se produisent :
+
+### 1. Fixer des conditions de paiement claires dès le départ
+Indiquez explicitement sur vos devis et factures :
+- Le délai de règlement accordé (ex: *Paiement comptant*, *30 jours net*).
+- Les pénalités applicables en cas de retard de paiement.
+- L'exigence systématique d'un **acompte de 30% à 50%** à la commande pour les prestations de services ou fabrications sur-mesure.
+
+### 2. Émettre la facture immédiatement
+Ne laissez jamais s'écouler plusieurs jours entre la livraison et l'envoi de la facture. Plus le document tarde à parvenir au client, plus son règlement sera reporté.
+
+---
+
+## Le calendrier progressif de relance amiable
+
+Une relance efficace repose sur une gradation mesurée du ton :
+
+### Étape 1 : Le rappel préventif (J-3 avant échéance)
+Un simple message courtois par email ou WhatsApp pour s'assurer que la facture a bien été intégrée dans le calendrier de décaissement du client :
+> *« Bonjour [Nom du contact], nous espérons que vous êtes satisfait de [Produit/Service]. Pour faciliter votre gestion, nous vous rappelons que la facture n° [Numéro] arrive à échéance le [Date]. Nous restons à votre disposition. »*
+
+### Étape 2 : La relance de courtoisie (J+3 après échéance)
+À ce stade, l'oubli involontaire est l'hypothèse la plus probable :
+> *« Bonjour [Nom], sauf erreur de notre part, nous n'avons pas encore reçu le règlement de la facture n° [Numéro] de [Montant] FCFA échue le [Date]. Vous trouverez notre RIB et coordonnées Mobile Money ci-joint. Merci de nous tenir informés. »*
+
+### Étape 3 : La relance ferme par appel direct (J+10 après échéance)
+Privilégiez le contact vocal direct avec le décideur ou le responsable financier. Demandez un engagement ferme sur une date de virement ou de transfert Mobile Money.
+
+### Étape 4 : La mise en demeure formelle (J+25 après échéance)
+En cas de silence persistant ou de promesses non tenues, adressez une lettre recommandée avec accusé de réception ou un exploit d'huissier valant mise en demeure formelle de payer sous huit jours, préalable indispensable à toute action en justice devant le tribunal de commerce compétent.
+
+---
+
+## Comment MyCashBill protège vos encaissements
+
+Grâce aux tableaux de bord et indicateurs de suivi de MyCashBill :
+- Visualisez immédiatement vos factures en retard de paiement.
+- Partagez des relances directes avec lien de facture sécurisé sur WhatsApp.
+- Gardez une traçabilité totale des échanges et des paiements partiels enregistrés.
+
+Pour toute question relative aux règles de preuve et à la conservation des documents, veuillez consulter nos [Conditions Générales d'Utilisation](/fr/legal/cgu).`
+    }
+  ];
+
+  for (const a of articles) {
+    await prisma.article.upsert({
+      where: {
+        slug_locale: {
+          slug: a.slug,
+          locale: a.locale,
+        },
+      },
+      update: {
+        title: a.title,
+        excerpt: a.excerpt,
+        content: a.content,
+        authorName: a.authorName,
+        tags: a.tags,
+        status: a.status,
+        seoTitle: a.seoTitle,
+        seoDescription: a.seoDescription,
+        readingTime: a.readingTime,
+      },
+      create: {
+        slug: a.slug,
+        locale: a.locale,
+        title: a.title,
+        excerpt: a.excerpt,
+        content: a.content,
+        authorName: a.authorName,
+        tags: a.tags,
+        status: a.status,
+        seoTitle: a.seoTitle,
+        seoDescription: a.seoDescription,
+        readingTime: a.readingTime,
+      },
+    });
+  }
+  console.log('✅ Blog articles seeded (5 pillar articles in DRAFT)');
+}
+
 async function main() {
   await seedAdmin();
   await seedCountries();
   await seedThresholds();
   await seedLegal();
   await seedFAQ();
+  await seedArticles();
 }
 
 main()
