@@ -133,6 +133,8 @@ model User {
   thresholdsUpdated  FraudThreshold[]
   recurringSchedules RecurringSchedule[]
   bulkJobs           BulkJob[]
+  legalDocumentsAuthored LegalDocument[] @relation("LegalDocumentAuthor")
+  consents               UserConsent[]
 
   @@index([country])
   @@index([flaggedForReview])
@@ -503,3 +505,51 @@ model SubscriptionInvoice {
   @@index([userId, createdAt])
   @@index([paidAt])
 }
+
+// ─── Documents Légaux & Consentements ───
+
+enum LegalStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model LegalDocument {
+  id          String      @id @default(cuid())
+  slug        String
+  version     String
+  locale      Locale
+  title       String
+  content     String      @db.Text
+  status      LegalStatus @default(DRAFT)
+  effectiveAt DateTime?
+  publishedAt DateTime?
+  createdById String?
+  createdBy   User?       @relation("LegalDocumentAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  consents    UserConsent[]
+
+  @@unique([slug, version, locale])
+  @@index([slug, status, locale])
+  @@index([effectiveAt])
+}
+
+model UserConsent {
+  id              String         @id @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentSlug    String
+  version         String
+  legalDocumentId String?
+  legalDocument   LegalDocument? @relation(fields: [legalDocumentId], references: [id], onDelete: SetNull)
+  acceptedAt      DateTime       @default(now())
+  ip              String?
+  userAgent       String?
+
+  @@unique([userId, documentSlug, version])
+  @@index([userId])
+  @@index([documentSlug, version])
+}
+

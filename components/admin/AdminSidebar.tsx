@@ -22,6 +22,10 @@ export function AdminSidebar() {
     { href: `/${locale}/admin/blacklist`, label: '⛔ Blacklist', action: 'manage_blacklist' },
     { href: `/${locale}/admin/thresholds`, label: '⚙️ Seuils', action: 'manage_thresholds' },
     { href: `/${locale}/admin/countries`, label: '🌍 Pays', action: 'manage_countries' },
+    { href: `/${locale}/admin/legal`, label: '📜 Pages légales', action: 'manage_legal' },
+    { href: `/${locale}/admin/faq`, label: '❓ FAQ', action: 'manage_faq' },
+    { href: `/${locale}/admin/articles`, label: '📰 Articles', action: 'manage_articles' },
+    { href: `/${locale}/admin/addons`, label: '🛒 Add-ons', action: 'manage_addons' },
     { href: `/${locale}/admin/audit`, label: '📜 Audit', action: 'view_audit' },
   ];
   if (user?.role === 'ADMIN') {

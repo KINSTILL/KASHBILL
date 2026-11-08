@@ -720,5 +720,11 @@
   "unsupportedCountry": {
     "title": "Welcome to MyCashBill",
     "message": "Mobile Money payment links are not yet available in your country. You can still use MyCashBill and pay for your Pro subscription by credit card."
+  },
+  "cookies": {
+    "message": "We use essential cookies to ensure the platform functions properly, and analytics cookies to measure audience with your consent.",
+    "acceptAll": "Accept all",
+    "essentialOnly": "Essential only",
+    "learnMore": "Learn more about cookies"
   }
 }

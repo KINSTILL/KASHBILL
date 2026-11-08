@@ -720,5 +720,11 @@
   "unsupportedCountry": {
     "title": "Bienvenue sur MyCashBill",
     "message": "Les liens de paiement Mobile Money ne sont pas encore disponibles dans votre pays. Vous pouvez utiliser MyCashBill et payer votre abonnement Pro par carte bancaire."
+  },
+  "cookies": {
+    "message": "Nous utilisons des cookies essentiels pour assurer le bon fonctionnement de la plateforme, et des cookies analytiques pour mesurer l'audience avec votre consentement.",
+    "acceptAll": "Tout accepter",
+    "essentialOnly": "Essentiels uniquement",
+    "learnMore": "En savoir plus sur les cookies"
   }
 }

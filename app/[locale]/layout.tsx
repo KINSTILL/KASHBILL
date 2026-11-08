@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { CookieBanner } from '@/components/legal/CookieBanner';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ToastProvider } from '@/components/ui/Toast';
@@ -55,6 +56,7 @@ export default async function LocaleLayout({
       <SessionProvider initialUser={initialUser}>
         <ToastProvider>
           <OfflineBanner />
+          <CookieBanner />
           <InstallPrompt />
           {children}
         </ToastProvider>

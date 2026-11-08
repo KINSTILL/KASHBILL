@@ -172,6 +172,13 @@ export async function POST(req: NextRequest): Promise<Response> {
       userAgent,
     });
 
+    const { getCurrentConsentVersions, recordConsent } = await import('@/lib/legal/queries');
+    type LegalSlugType = Parameters<typeof recordConsent>[1];
+    const versions = await getCurrentConsentVersions('FR');
+    for (const [slug, version] of Object.entries(versions)) {
+      await recordConsent(created.id, slug as LegalSlugType, version, ip, userAgent);
+    }
+
     return response;
   } catch (err) {
     return handleApiError(err);

@@ -392,7 +392,12 @@ function RegisterForm() {
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-sage-600 focus:ring-sage-500"
             />
             <label htmlFor="terms" className="text-xs leading-relaxed text-slate-600">
-              {t('register.acceptTerms')}
+              <span>
+                J&apos;ai lu et j&apos;accepte les{' '}
+                <a href="/fr/legal/cgu" target="_blank" className="text-sage-600 underline">CGU</a>
+                {' '}et la{' '}
+                <a href="/fr/legal/privacy" target="_blank" className="text-sage-600 underline">Politique de confidentialité</a>.
+              </span>
             </label>
           </div>
 

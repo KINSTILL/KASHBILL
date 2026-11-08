@@ -25,6 +25,10 @@ export type AdminAction =
   | 'create_support'
   | 'revoke_support'
   | 'list_supports'
+  | 'manage_legal'
+  | 'manage_faq'
+  | 'manage_articles'
+  | 'manage_addons'
   | 'manage_subscriptions'
   | 'grant_pro_bulk'
   | 'extend_subscription'
@@ -60,6 +64,10 @@ const ADMIN_ACTIONS: AdminAction[] = [
   'create_support',
   'revoke_support',
   'list_supports',
+  'manage_legal',
+  'manage_faq',
+  'manage_articles',
+  'manage_addons',
   'manage_subscriptions',
   'grant_pro_bulk',
   'extend_subscription',
