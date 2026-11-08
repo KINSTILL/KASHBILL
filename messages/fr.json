@@ -166,6 +166,20 @@
     "trialBanner": "Essai Pro : {days} jours restants",
     "upgradeBanner": "Passez Pro pour retirer le filigrane et ajouter votre logo.",
     "referralCount": "{count} filleul(s) activé(s)",
+    "proGiftedBadge": "PRO OFFERT 🎁",
+    "proGiftedHero": "🎁 Accès Pro offert par l'équipe MyCashBill jusqu'au {date}",
+    "proGift": {
+      "tag": "CADEAU DE BIENVENUE & FIDÉLITÉ",
+      "title": "Félicitations ! Votre abonnement Pro vous est offert 🎁",
+      "message": "Pour vous remercier de votre confiance et accompagner le développement de votre activité, l'équipe MyCashBill a le plaisir de vous offrir l'accès complet à la version Pro jusqu'au {date}.",
+      "benefit1": "Zéro filigrane sur tous vos devis & factures",
+      "benefit2": "Logo officiel & cachet commercial personnalisés",
+      "benefit3": "Nombre de clients et documents illimités",
+      "benefit4": "Partage direct et illimité par WhatsApp & email",
+      "cta": "Créer un document Pro",
+      "dismiss": "Masquer",
+      "compactNotice": "🎁 Votre compte bénéficie d'un abonnement Pro offert jusqu'au {date} !"
+    },
     "seeAll": "Tout voir",
     "stats": {
       "documents": "Documents",

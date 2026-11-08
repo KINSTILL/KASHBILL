@@ -10,10 +10,12 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { UpgradeCTA } from '@/components/ui/UpgradeCTA';
 import { ProBadge } from '@/components/ui/ProBadge';
 import { ProExpiryBanner } from '@/components/ui/ProExpiryBanner';
+import { ProGiftBanner } from '@/components/ui/ProGiftBanner';
 import { UnsupportedCountryBanner } from '@/components/layout/UnsupportedCountryBanner';
 import { HeroCard } from '@/components/ui/HeroCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { DocumentCard } from '@/components/documents/DocumentCard';
+import { formatDate } from '@/lib/utils';
 
 export default async function DashboardPage({
   params,
@@ -30,7 +32,14 @@ export default async function DashboardPage({
   const { user } = current;
   const t = await getTranslations();
 
-  const [recentDocs, documentsCount, clientsCount, activatedReferralsCount, recurringCount] = await Promise.all([
+  const [
+    recentDocs,
+    documentsCount,
+    clientsCount,
+    activatedReferralsCount,
+    recurringCount,
+    latestGiftSub,
+  ] = await Promise.all([
     prisma.document.findMany({
       where: { userId: user.id },
       take: 5,
@@ -48,10 +57,22 @@ export default async function DashboardPage({
     prisma.recurringSchedule.count({
       where: { userId: user.id },
     }),
+    prisma.subscription.findFirst({
+      where: {
+        userId: user.id,
+        source: 'ADMIN_GIFT',
+        endsAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
   ]);
 
   const userIsPro = isPro(user);
   const userInTrial = isInTrial(user);
+  const isGiftedPro = Boolean(latestGiftSub && userIsPro);
+  const formattedGiftDate = latestGiftSub
+    ? formatDate(new Date(latestGiftSub.endsAt), locale as 'fr' | 'en')
+    : '';
 
   let trialDaysLeft = 0;
   if (userInTrial && user.proUntil) {
@@ -71,22 +92,34 @@ export default async function DashboardPage({
 
   const displayName = user.businessName || user.name || user.phone;
 
-  const heroSubtitle = userInTrial
-    ? t('dashboard.trialBanner', { days: trialDaysLeft })
-    : !userIsPro
-      ? t('dashboard.upgradeBanner')
-      : t('dashboard.referralCount', { count: activatedReferralsCount });
+  const heroSubtitle = isGiftedPro
+    ? t('dashboard.proGiftedHero', { date: formattedGiftDate })
+    : userInTrial
+      ? t('dashboard.trialBanner', { days: trialDaysLeft })
+      : !userIsPro
+        ? t('dashboard.upgradeBanner')
+        : t('dashboard.referralCount', { count: activatedReferralsCount });
 
   return (
     <div className="space-y-4">
       <UnsupportedCountryBanner />
-      {proDaysLeft !== null && <ProExpiryBanner daysLeft={proDaysLeft} />}
+      {isGiftedPro && latestGiftSub && (
+        <ProGiftBanner
+          endsAtFormatted={formattedGiftDate}
+          subId={latestGiftSub.id}
+        />
+      )}
+      {!isGiftedPro && proDaysLeft !== null && <ProExpiryBanner daysLeft={proDaysLeft} />}
       <HeroCard
         eyebrow={t('dashboard.welcomeBack')}
         title={
           <span className="flex items-center gap-2">
             {displayName}
-            {userIsPro && <ProBadge />}
+            {userIsPro && (
+              <ProBadge
+                label={isGiftedPro ? t('dashboard.proGiftedBadge') : undefined}
+              />
+            )}
           </span>
         }
         subtitle={heroSubtitle}

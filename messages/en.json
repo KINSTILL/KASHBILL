@@ -166,6 +166,20 @@
     "trialBanner": "Pro trial: {days} days left",
     "upgradeBanner": "Go Pro to remove the watermark and add your logo.",
     "referralCount": "{count} activated referral(s)",
+    "proGiftedBadge": "GIFTED PRO 🎁",
+    "proGiftedHero": "🎁 Gifted Pro access from the MyCashBill team active until {date}",
+    "proGift": {
+      "tag": "WELCOME & LOYALTY GIFT",
+      "title": "Congratulations! Your Pro subscription is gifted 🎁",
+      "message": "To thank you for your trust and empower the growth of your business, the MyCashBill team is pleased to offer you full access to the Pro version until {date}.",
+      "benefit1": "Zero watermark on all your quotes & invoices",
+      "benefit2": "Add your official business logo & stamp",
+      "benefit3": "Unlimited clients and documents",
+      "benefit4": "Direct & unlimited sharing via WhatsApp & email",
+      "cta": "Create a Pro document",
+      "dismiss": "Dismiss",
+      "compactNotice": "🎁 Your account has gifted Pro access active until {date}!"
+    },
     "seeAll": "See all",
     "stats": {
       "documents": "Documents",
