@@ -1,16 +1,15 @@
 import { prisma } from '@/lib/db';
-import {
-  MAX_ACTIVE_DEVICES_FREE,
-  MAX_ACTIVE_DEVICES_PRO,
-} from '@/lib/constants';
 import type { Device, User } from '@prisma/client';
 
-export function getDeviceLimit(user: { proUntil?: Date | null; role?: string }): number {
+export async function getDeviceLimit(user: { id?: string; proUntil?: Date | null; role?: string }): Promise<number> {
   if (user.role === 'ADMIN' || user.role === 'SUPPORT') {
     return 100;
   }
-  const isPro = user.proUntil !== null && user.proUntil !== undefined && user.proUntil > new Date();
-  return isPro ? MAX_ACTIVE_DEVICES_PRO : MAX_ACTIVE_DEVICES_FREE;
+  const { getDeviceLimitForUser } = await import('@/lib/addons/queries');
+  return getDeviceLimitForUser({
+    id: user.id ?? '',
+    proUntil: user.proUntil ?? null,
+  });
 }
 
 export async function countActiveDevices(userId: string): Promise<number> {
@@ -46,7 +45,7 @@ export async function registerDevice(
     return { ok: true, device };
   }
 
-  const limit = getDeviceLimit(user);
+  const limit = await getDeviceLimit(user);
   const count = await countActiveDevices(user.id);
 
   if (count >= limit) {

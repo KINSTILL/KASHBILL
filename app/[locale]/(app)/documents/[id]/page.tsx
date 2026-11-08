@@ -7,6 +7,7 @@ import { env } from '@/lib/env';
 import { DocumentPreview } from '@/components/documents/DocumentPreview';
 import type { PdfDocument, PdfFormat, PdfPayload } from '@/lib/pdf/types';
 import { getCurrencyForCountry } from '@/lib/countries/currency';
+import { isWhiteLabelActive } from '@/lib/addons/queries';
 
 export default async function DocumentDetailPage({
   params,
@@ -39,6 +40,7 @@ export default async function DocumentDetailPage({
   const publicToken = doc.verification?.publicToken ?? null;
   const qrCodeDataUrl =
     doc.qrCodeUrl || (publicToken ? await generateQrCode(publicToken, env.APP_URL) : null);
+  const whiteLabel = await isWhiteLabelActive(doc.userId);
 
   const pdfDoc: PdfDocument = {
     id: doc.id,
@@ -79,6 +81,7 @@ export default async function DocumentDetailPage({
     watermarked: doc.watermarked,
     referralCode: doc.user.referralCode,
     cgvText: doc.user.cgvText,
+    whiteLabel,
   };
 
   const initialFormat: PdfFormat =

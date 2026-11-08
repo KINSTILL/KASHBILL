@@ -32,11 +32,13 @@ export function Footer({ doc, compact }: { doc: PdfDocument; compact: boolean })
         </>
       )}
       {(doc.cgvText ?? doc.company.cgvText) && <Text style={styles.cgv}>{doc.cgvText ?? doc.company.cgvText}</Text>}
-      <Text style={styles.small}>
-        {doc.locale === 'EN'
-          ? 'Issued via MyCashBill — Document generated electronically. MyCashBill is a technical tool and cannot be held liable for commercial or tax disputes.'
-          : 'Émis via MyCashBill — Document généré électroniquement. MyCashBill est un outil technique et ne saurait être tenu responsable des litiges commerciaux ou fiscaux.'}
-      </Text>
+      {!doc.whiteLabel && (
+        <Text style={styles.small}>
+          {doc.locale === 'EN'
+            ? 'Issued via MyCashBill — Document generated electronically. MyCashBill is a technical tool and cannot be held liable for commercial or tax disputes.'
+            : 'Émis via MyCashBill — Document généré électroniquement. MyCashBill est un outil technique et ne saurait être tenu responsable des litiges commerciaux ou fiscaux.'}
+        </Text>
+      )}
     </View>
   );
 }

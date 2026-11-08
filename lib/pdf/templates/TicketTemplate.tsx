@@ -119,7 +119,7 @@ export function TicketDocument({
           locale={doc.locale}
         />
         <Footer doc={doc} compact />
-        {options.showWatermark && (
+        {options.showWatermark && !doc.whiteLabel && (
           <>
             <Text style={styles.watermarkBanner} fixed>
               MYCASHBILL — {doc.locale === 'FR' ? 'VERSION GRATUITE' : 'FREE VERSION'}

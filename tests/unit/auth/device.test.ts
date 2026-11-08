@@ -15,18 +15,18 @@ beforeEach(async () => {
 });
 
 describe('getDeviceLimit', () => {
-  it('retourne 1 pour un utilisateur gratuit', () => {
-    expect(getDeviceLimit({ proUntil: null })).toBe(1);
+  it('retourne 1 pour un utilisateur gratuit', async () => {
+    expect(await getDeviceLimit({ proUntil: null })).toBe(1);
   });
 
-  it('retourne 2 pour un utilisateur Pro', () => {
+  it('retourne 2 pour un utilisateur Pro', async () => {
     const future = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    expect(getDeviceLimit({ proUntil: future })).toBe(2);
+    expect(await getDeviceLimit({ proUntil: future })).toBe(2);
   });
 
-  it('retourne 1 si proUntil est dans le passé', () => {
+  it('retourne 1 si proUntil est dans le passé', async () => {
     const past = new Date(Date.now() - 1000);
-    expect(getDeviceLimit({ proUntil: past })).toBe(1);
+    expect(await getDeviceLimit({ proUntil: past })).toBe(1);
   });
 });
 

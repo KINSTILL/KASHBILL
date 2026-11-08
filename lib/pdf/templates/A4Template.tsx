@@ -144,7 +144,7 @@ export function A4Document({
           </View>
         )}
         <Footer doc={doc} compact={false} />
-        {options.showWatermark && (
+        {options.showWatermark && !doc.whiteLabel && (
           <>
             <Text style={styles.watermarkBanner} fixed>
               MYCASHBILL — {doc.locale === 'FR' ? 'VERSION GRATUITE' : 'FREE VERSION'}

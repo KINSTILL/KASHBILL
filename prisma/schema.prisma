@@ -39,6 +39,11 @@ enum SubSource {
   TRIAL
 }
 
+enum AddOnType {
+  EXTRA_DEVICE
+  WHITE_LABEL
+}
+
 enum Locale {
   FR
   EN
@@ -135,6 +140,7 @@ model User {
   bulkJobs           BulkJob[]
   legalDocumentsAuthored LegalDocument[] @relation("LegalDocumentAuthor")
   consents               UserConsent[]
+  addOns                 UserAddOn[]
 
   @@index([country])
   @@index([flaggedForReview])
@@ -269,6 +275,7 @@ model Subscription {
   amountXaf   Int?
   createdAt   DateTime  @default(now())
   invoice     SubscriptionInvoice?
+  addOns      UserAddOn[]
 
   @@index([userId, endsAt])
 }
@@ -504,6 +511,21 @@ model SubscriptionInvoice {
 
   @@index([userId, createdAt])
   @@index([paidAt])
+}
+
+model UserAddOn {
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           AddOnType
+  startsAt       DateTime      @default(now())
+  endsAt         DateTime
+  amountXaf      Int
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now())
+
+  @@index([userId, type, endsAt])
 }
 
 // ─── Documents Légaux & Consentements ───

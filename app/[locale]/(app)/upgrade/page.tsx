@@ -13,6 +13,7 @@ import { isSupportedPaymentCountry, getOperatorsForCountry } from '@/lib/countri
 
 export default function UpgradePage() {
   const t = useTranslations('upgrade');
+  const tAddons = useTranslations('addons');
   const toast = useToast();
   const search = useSearchParams();
   const { user } = useCurrentUser();
@@ -144,6 +145,28 @@ export default function UpgradePage() {
         </div>
       )}
 
+      {user?.proUntil && new Date(user.proUntil) > new Date() && (
+        <div className="space-y-3 pt-4 border-t">
+          <h2 className="text-lg font-bold">{tAddons('title')}</h2>
+          <AddOnCard
+            type="EXTRA_DEVICE"
+            price={500}
+            title={tAddons('extraDevice')}
+            desc={tAddons('extraDeviceDesc')}
+            canPayMobileMoney={canPayMobileMoney}
+            operators={operators}
+          />
+          <AddOnCard
+            type="WHITE_LABEL"
+            price={3000}
+            title={tAddons('whiteLabel')}
+            desc={tAddons('whiteLabelDesc')}
+            canPayMobileMoney={canPayMobileMoney}
+            operators={operators}
+          />
+        </div>
+      )}
+
       {ref && (
         <Card className="p-4">
           <p className="text-sm text-slate-600">
@@ -180,4 +203,84 @@ function MiniFAQWrapper() {
   }, [locale]);
 
   return <MiniFAQ entries={entries} title="Questions fréquentes" />;
+}
+
+function AddOnCard({
+  type,
+  price,
+  title,
+  desc,
+  canPayMobileMoney,
+  operators,
+}: {
+  type: 'EXTRA_DEVICE' | 'WHITE_LABEL';
+  price: number;
+  title: string;
+  desc: string;
+  canPayMobileMoney: boolean;
+  operators: Array<{ code: string; name: string }>;
+}) {
+  const toast = useToast();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const startAddonPayment = async (method: 'mobile_money' | 'card', operatorCode: string | null) => {
+    setLoading(method === 'card' ? 'card' : (operatorCode ?? 'mobile_money'));
+    try {
+      const res = await fetch('/api/addons/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
+        body: JSON.stringify({ type, method, operatorCode }),
+      });
+      if (!res.ok) {
+        toast.show("Erreur lors de l'initialisation de l'extension", 'error');
+        return;
+      }
+      const { authorizationUrl } = await res.json();
+      window.location.href = authorizationUrl;
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  return (
+    <Card className="p-4 space-y-3">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h3 className="text-base font-semibold text-ink">{title}</h3>
+          <p className="text-xs text-slate-500">{desc}</p>
+        </div>
+        <span className="shrink-0 rounded bg-sage-50 px-2 py-1 text-xs font-bold text-sage-800">
+          +{price.toLocaleString('fr-FR')} FCFA/mois
+        </span>
+      </div>
+
+      <div className="space-y-1.5 pt-1">
+        {canPayMobileMoney ? (
+          <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            {operators.map((op) => (
+              <Button
+                key={op.code}
+                size="sm"
+                variant="outline"
+                onClick={() => startAddonPayment('mobile_money', op.code)}
+                isLoading={loading === op.code}
+              >
+                Activer via {op.name}
+              </Button>
+            ))}
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            fullWidth
+            onClick={() => startAddonPayment('card', null)}
+            isLoading={loading === 'card'}
+          >
+            Activer par carte
+          </Button>
+        )}
+      </div>
+    </Card>
+  );
 }

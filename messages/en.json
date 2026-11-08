@@ -739,5 +739,13 @@
       "technical": "Technical",
       "legal": "Legal"
     }
+  },
+  "addons": {
+    "title": "Add-ons",
+    "extraDevice": "Extra device",
+    "extraDeviceDesc": "+1 active device on your account",
+    "whiteLabel": "White label",
+    "whiteLabelDesc": "Removes all MyCashBill mentions from your PDFs",
+    "activate": "Activate +{price} FCFA/month"
   }
 }

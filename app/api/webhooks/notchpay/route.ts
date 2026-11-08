@@ -76,28 +76,40 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     if (eventType === 'payment.complete' && status === 'complete') {
       const now = new Date();
-      const currentPro =
-        subscription.user.proUntil && subscription.user.proUntil > now
-          ? subscription.user.proUntil
-          : now;
-      const newPro = new Date(currentPro.getTime() + PRO_DURATION_DAYS * 24 * 60 * 60 * 1000);
+      const isAddon = Boolean(
+        subscription && subscription.amountXaf && [500, 3000].includes(subscription.amountXaf)
+      );
 
-      await prisma.$transaction(async (tx) => {
-        await tx.subscription.update({
-          where: { id: subscription.id },
-          data: { startsAt: now, endsAt: newPro },
+      let newPro: Date | null = null;
+      if (!isAddon) {
+        const currentPro =
+          subscription.user.proUntil && subscription.user.proUntil > now
+            ? subscription.user.proUntil
+            : now;
+        newPro = new Date(currentPro.getTime() + PRO_DURATION_DAYS * 24 * 60 * 60 * 1000);
+
+        await prisma.$transaction(async (tx) => {
+          await tx.subscription.update({
+            where: { id: subscription.id },
+            data: { startsAt: now, endsAt: newPro! },
+          });
+          await tx.user.update({
+            where: { id: subscription.userId },
+            data: { proUntil: newPro! },
+          });
         });
-        await tx.user.update({
-          where: { id: subscription.userId },
-          data: { proUntil: newPro },
-        });
-      });
+      }
 
       await writeAudit({
         actorId: subscription.userId,
         targetId: subscription.userId,
         action: 'payment_completed',
-        meta: { providerRef, amountXaf: amount, newProUntil: newPro.toISOString() },
+        meta: {
+          providerRef,
+          amountXaf: amount,
+          isAddon,
+          ...(newPro ? { newProUntil: newPro.toISOString() } : {}),
+        },
         ip: getClientIp(req),
         userAgent: getUserAgent(req),
       });

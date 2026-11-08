@@ -37,8 +37,9 @@ export function DocumentPreview({
       showStamp: true,
       showCgv: true,
       showWatermark: previewPro ? false : pdfDoc.watermarked,
+      whiteLabel: pdfDoc.whiteLabel ?? false,
     }),
-    [initialFormat, pdfDoc.watermarked, previewPro]
+    [initialFormat, pdfDoc.watermarked, pdfDoc.whiteLabel, previewPro]
   );
 
   useEffect(() => {

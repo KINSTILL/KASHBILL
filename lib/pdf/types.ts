@@ -75,6 +75,7 @@ export type PdfDocument = {
   watermarked: boolean;
   referralCode: string | null;
   cgvText?: string | null;
+  whiteLabel?: boolean;
 };
 
 export type PdfRenderOptions = {
@@ -84,4 +85,5 @@ export type PdfRenderOptions = {
   showStamp: boolean;
   showCgv: boolean;
   showWatermark: boolean;
+  whiteLabel?: boolean;
 };
