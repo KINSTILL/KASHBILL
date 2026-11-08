@@ -32,12 +32,18 @@ async function generateUniqueReferralCode(): Promise<string> {
 // Seed admin
 // ─────────────────────────────────────────────
 async function seedAdmin() {
-  const adminPhone = process.env.ADMIN_PHONE;
+  const adminPhonesRaw = process.env.ADMIN_PHONES || process.env.ADMIN_PHONE;
   const adminPin = process.env.ADMIN_PIN;
 
-  if (!adminPhone || !adminPin) {
+  if (!adminPhonesRaw || !adminPin) {
     throw new Error('ADMIN_PHONE et ADMIN_PIN doivent être définis dans .env.local');
   }
+
+  const adminPhones = adminPhonesRaw
+    .split(/[,;]/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => (p.startsWith('+') ? p : `+237${p}`));
 
   const pinHash = await hash(adminPin, {
     memoryCost: 19456,
@@ -46,26 +52,28 @@ async function seedAdmin() {
     algorithm: 2,
   });
 
-  const existing = await prisma.user.findUnique({ where: { phone: adminPhone } });
+  for (const phone of adminPhones) {
+    const existing = await prisma.user.findUnique({ where: { phone } });
 
   if (existing) {
     await prisma.user.update({
-      where: { phone: adminPhone },
+      where: { phone },
       data: { pinHash, role: Role.ADMIN },
     });
-    console.log(`✅ Admin mis à jour : ${adminPhone}`);
+    console.log(`✅ Admin mis à jour : ${phone}`);
   } else {
     const referralCode = await generateUniqueReferralCode();
     await prisma.user.create({
       data: {
-        phone: adminPhone,
+        phone,
         pinHash,
         role: Role.ADMIN,
         name: 'Admin',
         referralCode,
       },
     });
-    console.log(`✅ Admin créé : ${adminPhone} (referralCode: ${referralCode})`);
+      console.log(`✅ Admin créé : ${phone} (referralCode: ${referralCode})`);
+    }
   }
 }
 

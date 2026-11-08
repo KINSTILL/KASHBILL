@@ -23,7 +23,11 @@ export type RateLimitResult = {
 export function rateLimit(key: string, limit: number, windowMs: number): RateLimitResult {
   ensureCleanup();
   const isTest = process.env.DATABASE_URL?.includes('test');
-  const isAdminTest = Boolean(isTest && process.env.ADMIN_PHONE && key.includes(process.env.ADMIN_PHONE));
+  const isAdminTest = Boolean(
+    isTest &&
+      process.env.ADMIN_PHONE &&
+      process.env.ADMIN_PHONE.split(/[,;]/).some((p) => p.trim() && key.includes(p.trim()))
+  );
   const effectiveLimit = isTest && (key.startsWith('reg:') || key.startsWith('login:ip:') || isAdminTest) ? 10000 : limit;
   const now = Date.now();
   const entry = store.get(key);

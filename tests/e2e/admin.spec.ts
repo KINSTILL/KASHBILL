@@ -2,9 +2,11 @@ import { test, expect } from '@playwright/test';
 import { registerUser } from './fixtures';
 
 test.describe('Admin', () => {
+  const adminPhone = (process.env.ADMIN_PHONE?.split(/[,;]/)[0] || '').trim();
+
   test('login admin + stats', async ({ page }) => {
     await page.goto('/fr/login');
-    await page.fill('input[name="phone"]', process.env.ADMIN_PHONE!);
+    await page.fill('input[name="phone"]', adminPhone);
     await page.fill('input[name="pin"]', process.env.ADMIN_PIN!);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard');
@@ -23,7 +25,7 @@ test.describe('Admin', () => {
   test('création SUPPORT + bannissement USER par ADMIN', async ({ page, browser }) => {
     // 1. Login ADMIN
     await page.goto('/fr/login');
-    await page.fill('input[name="phone"]', process.env.ADMIN_PHONE!);
+    await page.fill('input[name="phone"]', adminPhone);
     await page.fill('input[name="pin"]', process.env.ADMIN_PIN!);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard');
@@ -60,7 +62,7 @@ test.describe('Admin', () => {
 
   test('seuils bornés côté API', async ({ page }) => {
     await page.goto('/fr/login');
-    await page.fill('input[name="phone"]', process.env.ADMIN_PHONE!);
+    await page.fill('input[name="phone"]', adminPhone);
     await page.fill('input[name="pin"]', process.env.ADMIN_PIN!);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/dashboard');

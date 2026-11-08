@@ -4,7 +4,12 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url().or(z.string().startsWith('postgresql://')),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET doit faire au moins 32 caractères'),
   JWT_EXPIRES_DAYS: z.coerce.number().int().positive().default(7),
-  ADMIN_PHONE: z.string().regex(/^\+2376\d{8}$/, 'ADMIN_PHONE doit être au format +2376XXXXXXXX'),
+  ADMIN_PHONE: z
+    .string()
+    .regex(
+      /^\+2376\d{8}(?:[,\s;]+\+2376\d{8})*$/,
+      'ADMIN_PHONE doit être au format +2376XXXXXXXX (ou séparés par des virgules)'
+    ),
   ADMIN_PIN: z.string().regex(/^\d{6}$/, 'ADMIN_PIN doit être 6 chiffres'),
   APP_URL: z.string().url(),
   APP_NAME: z.string().default('MyCashBill'),
