@@ -42,7 +42,7 @@ export default function AdminFAQPage() {
       .then((r) => r.json())
       .then((d) => setEntries(d.entries ?? []))
       .catch(() => toast.show('Erreur de chargement', 'error'));
-  }, [refresh]);
+  }, [refresh, toast]);
 
   const save = async () => {
     try {
@@ -199,7 +199,7 @@ export default function AdminFAQPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-600">Ordre d'affichage</label>
+                <label className="text-xs font-medium text-slate-600">{"Ordre d'affichage"}</label>
                 <input
                   type="number"
                   value={form.order}
