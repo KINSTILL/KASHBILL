@@ -188,8 +188,52 @@ export default function UpgradePage() {
 }
 
 function MiniFAQWrapper() {
-  const [entries, setEntries] = useState<Array<{ id: string; question: string; answer: string }>>([]);
   const locale = useLocale();
+  const isFr = locale === 'fr';
+
+  const defaultBillingEntries = isFr
+    ? [
+        {
+          id: 'faq-momo',
+          question: 'Comment payer par Mobile Money ?',
+          answer:
+            'Sélectionnez votre opérateur (MTN MoMo, Orange Money ou Wave). Vous saisissez votre numéro de téléphone et validez le paiement directement avec votre code secret sur votre téléphone via le prompt USSD sécurisé Notch Pay.',
+        },
+        {
+          id: 'faq-renewal',
+          question: 'Puis-je annuler ? Y a-t-il un prélèvement automatique forcé ?',
+          answer:
+            'Non, aucun prélèvement automatique forcé. Vous payez 2 000 FCFA pour 30 jours d’accès Pro sans engagement. À la fin de la période, vous décidez vous-même si vous souhaitez renouveler.',
+        },
+        {
+          id: 'faq-data',
+          question: 'Que deviennent mes données si mon abonnement Pro expire ?',
+          answer:
+            'Toutes vos données (clients enregistrés, devis, factures) restent intactes et accessibles à tout moment. Vous repassez simplement sur le plan gratuit avec filigrane, sans aucune perte de vos historiques.',
+        },
+      ]
+    : [
+        {
+          id: 'faq-momo',
+          question: 'How to pay with Mobile Money?',
+          answer:
+            'Select your operator (MTN MoMo, Orange Money, or Wave). Enter your phone number and confirm the payment on your phone with your secret PIN via the secure Notch Pay USSD prompt.',
+        },
+        {
+          id: 'faq-renewal',
+          question: 'Can I cancel? Is there forced automatic renewal?',
+          answer:
+            'No forced automatic recurring billing. You pay 2,000 FCFA for 30 days of Pro access with zero commitment. You decide when and if you wish to renew.',
+        },
+        {
+          id: 'faq-data',
+          question: 'What happens to my data if my Pro plan expires?',
+          answer:
+            'All your documents, clients, and history remain completely safe and accessible. You simply transition to the free tier without losing any past invoices.',
+        },
+      ];
+
+  const [entries, setEntries] = useState<Array<{ id: string; question: string; answer: string }>>(defaultBillingEntries);
 
   useEffect(() => {
     fetch(`/api/faq?category=billing&locale=${locale}&limit=4`)
@@ -202,7 +246,7 @@ function MiniFAQWrapper() {
       .catch(() => {});
   }, [locale]);
 
-  return <MiniFAQ entries={entries} title="Questions fréquentes" />;
+  return <MiniFAQ entries={entries} title={isFr ? 'Questions fréquentes sur le paiement' : 'Billing FAQ'} />;
 }
 
 function AddOnCard({

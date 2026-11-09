@@ -53,8 +53,8 @@ export function Hero({
 
           <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600 md:text-lg">
             {isFr
-              ? `Générez une facture conforme en 47 secondes. Depuis WhatsApp, sur votre ${deviceLabel}.`
-              : `Generate a compliant invoice in 47 seconds. From WhatsApp, on your ${deviceLabel}.`}
+              ? `Générez une facture conforme en 47 secondes sur votre ${deviceLabel}, prête à envoyer par WhatsApp.`
+              : `Generate a compliant invoice in 47 seconds on your ${deviceLabel}, ready to send via WhatsApp.`}
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">

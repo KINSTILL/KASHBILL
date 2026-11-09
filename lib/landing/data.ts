@@ -162,12 +162,12 @@ export const TIER1_CONFIG: Record<
   },
 };
 
-// Tier 2 : prix en USD (paiement carte uniquement)
+// Tier 2 : prix par défaut en FCFA
 export const TIER2_PRICING: LandingPricing = {
-  proPriceLocal: 0,
-  proPriceLocalLabel: '',
+  proPriceLocal: 2000,
+  proPriceLocalLabel: '2 000 FCFA',
   proPriceFallbackUsd: 3.5,
-  proPriceFallbackLabel: '3,50 USD',
+  proPriceFallbackLabel: '2 000 FCFA',
 };
 
 // Pays anglophones d'Afrique (pour suggestion de langue)

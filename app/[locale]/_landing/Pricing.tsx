@@ -13,8 +13,8 @@ export function Pricing({
   const isFr = locale === 'fr';
   const { tier, pricing, operators, country } = personalization;
 
-  const proPrice = tier === 'tier1' ? pricing.proPriceLocalLabel : pricing.proPriceFallbackLabel;
-  const freeCurrency = country?.currencySymbol || 'FCFA';
+  const proPrice = (tier === 'tier1' && pricing.proPriceLocalLabel) ? pricing.proPriceLocalLabel : '2 000 FCFA';
+  const freeCurrency = 'FCFA';
 
   const paymentLine =
     tier === 'tier1'
@@ -45,37 +45,42 @@ export function Pricing({
               <span className="text-sm text-slate-500">{freeCurrency}</span>
             </p>
             <ul className="mt-4 space-y-1.5 text-sm text-slate-600">
-              <li>✓ {isFr ? '10 documents/mois' : '10 documents/month'}</li>
-              <li>✓ {isFr ? '5 envois WhatsApp/mois' : '5 WhatsApp sends/month'}</li>
-              <li>✓ {isFr ? '2 clients' : '2 clients'}</li>
-              <li>✓ {isFr ? 'Filigrane visible' : 'Visible watermark'}</li>
+              <li>✓ {isFr ? '10 documents / mois' : '10 documents / month'}</li>
+              <li>✓ {isFr ? '5 envois WhatsApp & 1 email / mois' : '5 WhatsApp sends & 1 email / month'}</li>
+              <li>✓ {isFr ? '2 clients enregistrés' : '2 saved clients'}</li>
+              <li>✓ {isFr ? '1 seul appareil' : '1 device only'}</li>
+              <li className="text-amber-800 font-medium">⚠️ {isFr ? 'Filigrane « Créé avec MyCashBill »' : 'Watermark « Created with MyCashBill »'}</li>
             </ul>
             <Link href={`/${locale}/register` as Route} className="mt-6 block">
               <Button fullWidth variant="secondary">
-                {isFr ? 'Commencer' : 'Start'}
+                {isFr ? 'Commencer gratuitement' : 'Start free'}
               </Button>
             </Link>
           </div>
 
           <div className="surface border-2 border-sage-500 p-6 shadow-lg">
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-sage-700">
-              ⭐ {isFr ? 'Populaire' : 'Popular'}
+              ⭐ {isFr ? 'Populaire — Statut Pro' : 'Popular — Pro Status'}
             </p>
             <h3 className="text-lg font-bold text-ink">Pro</h3>
             <p className="mt-1">
               <span className="text-3xl font-extrabold text-ink">{proPrice}</span>{' '}
               <span className="text-sm text-slate-500">{isFr ? '/ 30 jours' : '/ 30 days'}</span>
             </p>
+            <p className="text-xs font-semibold text-sage-700 mt-1">
+              {isFr ? 'Soit environ 66 FCFA / jour · Sans engagement' : 'About 66 FCFA / day · No commitment'}
+            </p>
             <ul className="mt-4 space-y-1.5 text-sm text-slate-600">
               <li>✓ {isFr ? 'Documents illimités' : 'Unlimited documents'}</li>
-              <li>✓ {isFr ? 'Envois illimités' : 'Unlimited sends'}</li>
+              <li>✓ {isFr ? 'Envois WhatsApp & emails illimités' : 'Unlimited WhatsApp & emails'}</li>
               <li>✓ {isFr ? 'Clients illimités' : 'Unlimited clients'}</li>
-              <li>✓ {isFr ? 'Sans filigrane' : 'No watermark'}</li>
-              <li>✓ {isFr ? 'Logo + signature' : 'Logo + signature'}</li>
-              <li>✓ {isFr ? '2 appareils' : '2 devices'}</li>
+              <li className="text-emerald-700 font-medium">✓ {isFr ? 'Suppression du filigrane' : 'No watermark'}</li>
+              <li>✓ {isFr ? 'Votre propre logo + signature' : 'Your custom logo + signature'}</li>
+              <li>✓ {isFr ? '2 appareils inclus (Mobile + PC)' : '2 devices included (Mobile + PC)'}</li>
+              <li>✓ {isFr ? 'Zéro prélèvement forcé (contrôle total)' : 'No forced renewal (full control)'}</li>
             </ul>
             <Link href={`/${locale}/register` as Route} className="mt-6 block">
-              <Button fullWidth>{isFr ? 'Passer Pro' : 'Go Pro'}</Button>
+              <Button fullWidth>{isFr ? 'Débloquer Pro (2 000 FCFA)' : 'Unlock Pro (2,000 FCFA)'}</Button>
             </Link>
           </div>
         </div>

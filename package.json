@@ -6,7 +6,8 @@
     "seed": "dotenv -e .env.local -- tsx prisma/seed.ts"
   },
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
+    "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
