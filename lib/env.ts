@@ -76,11 +76,61 @@ const parsed = envSchema.safeParse({
   PLATFORM_VAT_RATE: process.env.PLATFORM_VAT_RATE,
 });
 
-if (!parsed.success) {
+const isBuildPhase =
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.npm_lifecycle_event === 'build' ||
+  process.env.SKIP_ENV_VALIDATION === '1';
+
+let envData: z.infer<typeof envSchema>;
+
+if (parsed.success) {
+  envData = parsed.data;
+} else if (isBuildPhase) {
+  console.warn(
+    '⚠️ Build phase: Variables d’environnement manquantes ou partielles. Utilisation de valeurs de substitution temporaires pour compiler le build.'
+  );
+  const fallbackValues = {
+    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://build:build@localhost:5432/build',
+    JWT_SECRET: process.env.JWT_SECRET || 'build-secret-at-least-32-chars-long-placeholder',
+    JWT_EXPIRES_DAYS: process.env.JWT_EXPIRES_DAYS || 7,
+    ADMIN_PHONE: process.env.ADMIN_PHONE || '+237699000000',
+    ADMIN_PIN: process.env.ADMIN_PIN || '000000',
+    APP_URL: process.env.APP_URL || 'https://mycashbill.app',
+    APP_NAME: process.env.APP_NAME || 'MyCashBill',
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://mycashbill.app',
+    NODE_ENV: process.env.NODE_ENV || 'production',
+    NOTCHPAY_PUBLIC_KEY: process.env.NOTCHPAY_PUBLIC_KEY || 'pk_build_placeholder',
+    NOTCHPAY_HASH_KEY: process.env.NOTCHPAY_HASH_KEY || 'sk_build_placeholder',
+    NOTCHPAY_WEBHOOK_HASH: process.env.NOTCHPAY_WEBHOOK_HASH || 'whsec_build_placeholder',
+    NOTCHPAY_BASE_URL: process.env.NOTCHPAY_BASE_URL || 'https://api.notchpay.co',
+    CRON_SECRET: process.env.CRON_SECRET || 'build-cron-secret-16-chars',
+    RESEND_ENABLED: process.env.RESEND_ENABLED || 'false',
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    UPLOAD_ENCRYPTION_KEY:
+      process.env.UPLOAD_ENCRYPTION_KEY ||
+      '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || 'support@mycashbill.app',
+    RESEND_FROM_NAME: process.env.RESEND_FROM_NAME || 'MyCashBill',
+    RESEND_REPLY_TO: process.env.RESEND_REPLY_TO,
+    PLATFORM_LEGAL_NAME: process.env.PLATFORM_LEGAL_NAME || 'MyCashBill',
+    PLATFORM_TAX_ID: process.env.PLATFORM_TAX_ID || 'À_COMPLÉTER',
+    PLATFORM_RCCM: process.env.PLATFORM_RCCM || 'À_COMPLÉTER',
+    PLATFORM_ADDRESS: process.env.PLATFORM_ADDRESS || 'À_COMPLÉTER',
+    PLATFORM_CITY: process.env.PLATFORM_CITY || 'Douala',
+    PLATFORM_COUNTRY: process.env.PLATFORM_COUNTRY || 'CM',
+    PLATFORM_PHONE: process.env.PLATFORM_PHONE || '+237600000000',
+    PLATFORM_EMAIL: process.env.PLATFORM_EMAIL || 'support@mycashbill.app',
+    PLATFORM_WEB: process.env.PLATFORM_WEB || 'https://mycashbill.app',
+    PLATFORM_LOGO_URL: process.env.PLATFORM_LOGO_URL || '/icons/logo-platform.png',
+    PLATFORM_VAT_REGISTERED: process.env.PLATFORM_VAT_REGISTERED || 'false',
+    PLATFORM_VAT_RATE: process.env.PLATFORM_VAT_RATE || 0,
+  };
+  envData = envSchema.parse(fallbackValues);
+} else {
   console.error('❌ Variables d’environnement invalides :');
   console.error(parsed.error.flatten().fieldErrors);
   throw new Error('ENV_VALIDATION_FAILED');
 }
 
-export const env = parsed.data;
+export const env = envData;
 
