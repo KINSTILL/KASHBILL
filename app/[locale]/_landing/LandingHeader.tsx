@@ -5,6 +5,7 @@ import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
+import { Logo } from '@/components/layout/Logo';
 import type { LandingPersonalization } from '@/lib/landing/types';
 
 export function LandingHeader({
@@ -20,9 +21,7 @@ export function LandingHeader({
     <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-2.5">
-          <Link href={`/${locale}` as Route} className="font-display text-lg font-extrabold tracking-tight text-ink">
-            mycashbill<span className="text-sage-500">.</span>
-          </Link>
+          <Logo href={`/${locale}`} />
         </div>
         <nav className="hidden items-center gap-6 text-sm text-slate-600 md:flex">
           <a href="#features" className="hover:text-ink">{t('features')}</a>
@@ -33,11 +32,9 @@ export function LandingHeader({
         </nav>
         <div className="flex items-center gap-2">
           <LocaleSwitcher />
-          {personalization.isReturning && (
-            <Link href={`/${locale}/login` as Route} className="hidden text-sm text-slate-600 hover:text-ink md:block">
-              {t('login')}
-            </Link>
-          )}
+          <Link href={`/${locale}/login` as Route} className="text-sm font-medium text-slate-600 hover:text-ink">
+            {t('login')}
+          </Link>
           <Link href={`/${locale}/register` as Route}>
             <Button size="sm">{t('try')}</Button>
           </Link>

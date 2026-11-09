@@ -1,7 +1,8 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, View, Text, Image, Svg, Path, StyleSheet } from '@react-pdf/renderer';
 import type { SubscriptionInvoicePdfInput } from './types';
 
+const SAGE = '#3D8159'; // sage-600 : couleur de marque MyCashBill (identique à l'app et à la landing)
 const BRASS = '#B8935A';
 const BRASS_LIGHT = '#D4B584';
 const INK = '#0B1220';
@@ -10,7 +11,8 @@ const BORDER = '#E2E8F0';
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 10, fontFamily: 'Helvetica', color: INK, backgroundColor: '#FFFFFF' },
-  headerBar: { height: 4, backgroundColor: BRASS, marginBottom: 20 },
+  headerBar: { height: 4, backgroundColor: SAGE, marginBottom: 20 },
+  markBox: { width: 40, height: 40, borderRadius: 10, backgroundColor: SAGE, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   headerRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 24 },
   logo: { width: 80, height: 40, objectFit: 'contain', marginRight: 16 },
   brandBlock: { flex: 1 },
@@ -131,8 +133,14 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
 
         <View style={styles.headerRow}>
           {company.logoUrl ? <Image src={company.logoUrl} style={styles.logo} /> : null}
+          <View style={styles.markBox}>
+            <Svg viewBox="0 0 24 24" style={{ width: 22, height: 22 }}>
+              <Path d="M12 3 4 6.5v5c0 4.6 3.2 8 8 9.5 4.8-1.5 8-4.9 8-9.5v-5L12 3Z" stroke="#FFFFFF" strokeWidth={2} fill="none" />
+              <Path d="m9 12 2 2 4-4" stroke="#FFFFFF" strokeWidth={2} fill="none" />
+            </Svg>
+          </View>
           <View style={styles.brandBlock}>
-            <Text style={styles.brandName}>MyCashBill</Text>
+            <Text style={styles.brandName}>My<Text style={{ color: SAGE }}>CashBill</Text></Text>
             <Text style={styles.brandTagline}>
               {isFr ? "Facturation professionnelle pour l'Afrique" : 'Professional invoicing for Africa'}
             </Text>

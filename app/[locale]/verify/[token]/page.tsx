@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db';
+import { Logo } from '@/components/layout/Logo';
 
 type Props = { params: Promise<{ locale: string; token: string }> };
 
@@ -27,7 +28,7 @@ export default async function VerifyPage({ params }: Props) {
             <div className="mb-4 text-6xl">✅</div>
             <h1 className="mb-2 text-xl font-bold text-green-700">Facture d’abonnement authentique</h1>
             <p className="mb-4 text-sm text-slate-600">Émise par</p>
-            <p className="mb-2 font-bold text-slate-900">MyCashBill</p>
+            <div className="mb-2"><Logo size="sm" /></div>
             <p className="text-sm text-slate-600">
               Facture N° {subscriptionInvoice.number}
               <br />

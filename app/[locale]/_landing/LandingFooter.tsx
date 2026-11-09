@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Logo } from '@/components/layout/Logo';
 import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
 import type { LandingPersonalization } from '@/lib/landing/types';
@@ -22,12 +23,7 @@ export function LandingFooter({
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
           {/* Col 1: Brand & Tagline */}
           <div className="space-y-3">
-            <Link
-              href={`/${locale}` as Route}
-              className="font-display text-xl font-extrabold tracking-tight text-ink"
-            >
-              mycashbill<span className="text-sage-500">.</span>
-            </Link>
+            <Logo href={`/${locale}`} />
             <p className="text-sm font-semibold text-emerald-800">
               {t('tagline')}
             </p>

@@ -5,6 +5,7 @@ import type { Route } from 'next';
 import { usePathname } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/layout/Logo';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { canDo, type AdminAction } from '@/lib/admin/roles';
 
@@ -40,9 +41,7 @@ export function AdminSidebar() {
       <aside className="hidden w-64 shrink-0 border-r bg-white md:flex md:flex-col justify-between min-h-screen">
         <div>
           <div className="border-b p-4 flex items-center justify-between">
-            <Link href={`/${locale}/admin` as Route} className="text-lg font-bold text-sage-900">
-              MyCashBill Admin
-            </Link>
+            <Logo href={`/${locale}/admin`} size="sm" />
             <span className="text-xs px-2 py-0.5 rounded bg-sage-100 text-sage-800 font-semibold">
               {user?.role}
             </span>
@@ -84,9 +83,7 @@ export function AdminSidebar() {
       {/* Mobile Top Navigation */}
       <div className="border-b bg-white p-3 md:hidden sticky top-0 z-20">
         <div className="flex items-center justify-between mb-2">
-          <Link href={`/${locale}/admin` as Route} className="font-bold text-sage-900">
-            MyCashBill Admin
-          </Link>
+          <Logo href={`/${locale}/admin`} size="sm" />
           <div className="flex items-center gap-2">
             <Link
               href={`/${locale}/dashboard` as Route}
