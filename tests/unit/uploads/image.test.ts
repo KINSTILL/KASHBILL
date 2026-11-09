@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { writeFile, unlink, mkdir, rm } from 'node:fs/promises';
+import { describe, it, expect } from 'vitest';
+import { writeFile, unlink, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { saveImage, readImageFile, deleteImageByUrl } from '@/lib/uploads/image';
 
