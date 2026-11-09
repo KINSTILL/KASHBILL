@@ -613,6 +613,8 @@ model Article {
   authorName     String
   tags           String[]
   status         ArticleStatus @default(DRAFT)
+  category       String        @default("BLOG")
+  published      Boolean       @default(false)
   publishedAt    DateTime?
   seoTitle       String?
   seoDescription String?
@@ -622,8 +624,31 @@ model Article {
   updatedAt      DateTime      @updatedAt
 
   @@unique([slug, locale])
+  @@index([category, locale, published])
   @@index([locale, status, publishedAt])
 }
+
+model UnifiedArticle {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String   @db.Text
+  content     String   @db.Text
+  category    String   // "BLOG" ou "FAQ"
+  locale      String   // "fr" ou "en"
+  tags        String[]
+  published   Boolean  @default(false)
+  views       Int      @default(0)
+  readingTime Int      @default(0)
+  authorName  String   @default("MyCashBill")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category, locale, published])
+  @@index([locale, published, createdAt])
+  @@map("articles_unified")
+}
+
 
 
 

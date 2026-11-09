@@ -23,9 +23,23 @@ export async function renderSubscriptionInvoicePdf(input: SubscriptionInvoicePdf
       resolvedCompany.logoUrl = '';
     }
   }
+  const publicToken = input.publicToken || input.invoiceId || input.number;
+  let qrCode = input.qrCode;
+  if (!qrCode) {
+    try {
+      const { generateQrCode } = await import('@/lib/documents/integrity');
+      const { env } = await import('@/lib/env');
+      qrCode = await generateQrCode(publicToken, env.APP_URL);
+    } catch (e) {
+      console.warn('[subscription-invoice] qr code generation failed', e);
+    }
+  }
+
   const resolvedInput: SubscriptionInvoicePdfInput = {
     ...input,
     company: resolvedCompany,
+    publicToken,
+    qrCode,
   };
 
   const blob = await pdf(SubscriptionInvoiceDocument({ input: resolvedInput }) as unknown as Parameters<typeof pdf>[0]).toBlob();

@@ -54,13 +54,42 @@ const styles = StyleSheet.create({
   },
   grandTotalLabel: { fontSize: 13, fontWeight: 'bold', marginRight: 12, color: INK },
   grandTotalValue: { fontSize: 16, fontWeight: 'bold', color: BRASS, textAlign: 'right', minWidth: 120 },
+  paidRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginTop: 16,
+  },
   paidStamp: {
-    marginTop: 20, alignSelf: 'flex-start',
+    alignSelf: 'flex-start',
     borderWidth: 2, borderColor: BRASS,
     paddingHorizontal: 16, paddingVertical: 6, borderRadius: 4,
     transform: 'rotate(-3deg)',
   },
   paidText: { fontSize: 14, fontWeight: 'bold', color: BRASS, letterSpacing: 2 },
+  qrContainer: {
+    alignItems: 'center',
+    padding: 6,
+    backgroundColor: '#FAFBFC',
+    borderRadius: 4,
+    borderWidth: 0.5,
+    borderColor: BORDER,
+  },
+  qrCode: {
+    width: 60,
+    height: 60,
+  },
+  qrLabel: {
+    fontSize: 7,
+    color: SLATE,
+    marginTop: 4,
+    fontWeight: 'bold',
+  },
+  qrSub: {
+    fontSize: 6,
+    color: SLATE,
+    marginTop: 1,
+  },
   vatNote: { fontSize: 8, color: SLATE, marginTop: 8, fontStyle: 'italic' },
   footer: { marginTop: 30, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: BORDER },
   footerText: { fontSize: 7, color: SLATE, textAlign: 'center', marginBottom: 3 },
@@ -68,7 +97,19 @@ const styles = StyleSheet.create({
 });
 
 export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvoicePdfInput }) {
-  const { user, company, amount, vatRate, vatAmount, total, paidAt, number, subscription } = input;
+  const {
+    user,
+    company,
+    amount,
+    vatRate,
+    vatAmount,
+    total,
+    paidAt,
+    number,
+    subscription,
+    publicToken,
+    qrCode,
+  } = input;
   const isFr = user.locale === 'FR';
 
   const fmt = (n: number) =>
@@ -183,15 +224,29 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
           <Text style={styles.vatNote}>{vatMention}</Text>
         </View>
 
-        <View style={styles.paidStamp}>
-          <Text style={styles.paidText}>{isFr ? 'PAYÉ' : 'PAID'}</Text>
+        <View style={styles.paidRow}>
+          <View>
+            <View style={styles.paidStamp}>
+              <Text style={styles.paidText}>{isFr ? 'PAYÉ' : 'PAID'}</Text>
+            </View>
+            {subscription.providerRef && (
+              <Text style={{ fontSize: 8, color: SLATE, marginTop: 10 }}>
+                {isFr ? 'Référence de paiement' : 'Payment reference'} : {subscription.providerRef}
+              </Text>
+            )}
+          </View>
+          {qrCode && (
+            <View style={styles.qrContainer}>
+              <Image src={qrCode} style={styles.qrCode} />
+              <Text style={styles.qrLabel}>
+                {isFr ? 'Vérifier l’authenticité' : 'Verify authenticity'}
+              </Text>
+              <Text style={styles.qrSub}>
+                /verify/{publicToken ?? number}
+              </Text>
+            </View>
+          )}
         </View>
-
-        {subscription.providerRef && (
-          <Text style={{ fontSize: 8, color: SLATE, marginTop: 12 }}>
-            {isFr ? 'Référence de paiement' : 'Payment reference'} : {subscription.providerRef}
-          </Text>
-        )}
 
         <View style={styles.footer}>
           <Text style={styles.footerStrong}>{company.legalName}</Text>

@@ -40,16 +40,16 @@ export default async function BlogPage({ params, searchParams }: Props) {
   const selectedTag = typeof sp.tag === 'string' && sp.tag.trim() ? sp.tag.trim() : undefined;
 
   const where = {
+    category: 'BLOG',
     locale: isFr ? ('FR' as const) : ('EN' as const),
-    status: 'PUBLISHED' as const,
-    publishedAt: { lte: new Date() },
+    published: true,
     ...(selectedTag ? { tags: { has: selectedTag } } : {}),
   };
 
   const [articles, totalCount, allTagsRaw] = await Promise.all([
     prisma.article.findMany({
       where,
-      orderBy: { publishedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       skip: (pageNum - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       select: {
@@ -67,9 +67,9 @@ export default async function BlogPage({ params, searchParams }: Props) {
     prisma.article.count({ where }),
     prisma.article.findMany({
       where: {
-        locale: isFr ? 'FR' : 'EN',
-        status: 'PUBLISHED',
-        publishedAt: { lte: new Date() },
+        category: 'BLOG',
+        locale: isFr ? ('FR' as const) : ('EN' as const),
+        published: true,
       },
       select: { tags: true },
       take: 100,

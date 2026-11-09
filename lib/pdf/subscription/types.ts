@@ -12,5 +12,6 @@ export type SubscriptionInvoicePdfInput = {
   vatAmount: number | null;
   total: number;
   paidAt: Date;
+  publicToken?: string;
+  qrCode?: string;
 };
-

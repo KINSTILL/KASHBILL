@@ -2,16 +2,14 @@ import type { MetadataRoute } from 'next';
 import { env } from '@/lib/env';
 
 export default function robots(): MetadataRoute.Robots {
-  const base = env.APP_URL || process.env.APP_URL || 'https://mycashbill.app';
-
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
         disallow: [
-          '/api',
           '/admin',
+          '/api',
           '/dashboard',
           '/documents',
           '/clients',
@@ -30,7 +28,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${base}/sitemap.xml`,
-    host: base,
+    sitemap: `${env.APP_URL}/sitemap.xml`,
+    host: env.APP_URL,
   };
 }

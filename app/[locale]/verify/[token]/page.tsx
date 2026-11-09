@@ -15,6 +15,34 @@ export default async function VerifyPage({ params }: Props) {
   });
 
   if (!verification) {
+    const subscriptionInvoice = await prisma.subscriptionInvoice.findFirst({
+      where: { OR: [{ id: token }, { number: token }] },
+      include: { user: true },
+    });
+
+    if (subscriptionInvoice) {
+      return (
+        <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+          <div className="max-w-md rounded-lg bg-white p-6 text-center shadow">
+            <div className="mb-4 text-6xl">✅</div>
+            <h1 className="mb-2 text-xl font-bold text-green-700">Facture d’abonnement authentique</h1>
+            <p className="mb-4 text-sm text-slate-600">Émise par</p>
+            <p className="mb-2 font-bold text-slate-900">MyCashBill</p>
+            <p className="text-sm text-slate-600">
+              Facture N° {subscriptionInvoice.number}
+              <br />
+              Type : Abonnement MyCashBill Pro
+              <br />
+              Émise le {new Intl.DateTimeFormat('fr-CM', { dateStyle: 'long' }).format(subscriptionInvoice.paidAt)}
+            </p>
+            <p className="mt-6 text-xs text-slate-400">
+              Cette vérification atteste de la validité de l’abonnement MyCashBill Pro.
+            </p>
+          </div>
+        </main>
+      );
+    }
+
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <div className="max-w-md rounded-lg bg-white p-6 text-center shadow">

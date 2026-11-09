@@ -79,6 +79,28 @@ export function Pricing({
             </Link>
           </div>
         </div>
+
+        <div className="mt-8 surface p-6">
+          <h3 className="text-base font-bold text-ink">{isFr ? 'Extensions (Pro uniquement)' : 'Add-ons (Pro only)'}</h3>
+          <p className="mt-1 text-xs text-slate-500">{isFr ? 'Ajoutez à votre abonnement Pro' : 'Add to your Pro subscription'}</p>
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+              <div>
+                <p className="text-sm font-semibold text-ink">{isFr ? 'Appareil supplémentaire' : 'Extra device'}</p>
+                <p className="text-xs text-slate-500">+500 FCFA/{isFr ? 'mois' : 'month'}</p>
+              </div>
+              <span className="text-xs font-medium text-slate-400">{isFr ? 'Sur /upgrade' : 'On /upgrade'}</span>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+              <div>
+                <p className="text-sm font-semibold text-ink">White-label</p>
+                <p className="text-xs text-slate-500">+3 000 FCFA/{isFr ? 'mois' : 'month'}</p>
+                <p className="text-[11px] text-slate-400">{isFr ? 'Retire le branding MyCashBill de vos PDF' : 'Removes MyCashBill branding from PDFs'}</p>
+              </div>
+              <span className="text-xs font-medium text-slate-400">{isFr ? 'Sur /upgrade' : 'On /upgrade'}</span>
+            </div>
+          </div>
+        </div>
         <p className="mt-6 text-center text-xs text-slate-500">{paymentLine}</p>
         {tier === 'tier2' && (
           <p className="mt-2 text-center text-[11px] text-slate-400">
