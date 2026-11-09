@@ -19,11 +19,11 @@ export function Pricing({
   const paymentLine =
     tier === 'tier1'
       ? isFr
-        ? `💳 Paiement sécurisé par Mobile Money (${operators.join(' · ')}) via Notch Pay`
-        : `💳 Secure payment via Mobile Money (${operators.join(' · ')}) via Notch Pay`
+        ? `💳 Règlement sécurisé de votre abonnement Pro par Mobile Money (${operators.join(' · ')}) via Notch Pay`
+        : `💳 Secure payment of your Pro subscription via Mobile Money (${operators.join(' · ')}) via Notch Pay`
       : isFr
-        ? '💳 Paiement sécurisé par Carte bancaire (Visa · Mastercard) via Notch Pay'
-        : '💳 Secure payment via Credit Card (Visa · Mastercard) via Notch Pay';
+        ? '💳 Règlement sécurisé de votre abonnement Pro par Carte bancaire (Visa · Mastercard) via Notch Pay'
+        : '💳 Secure payment of your Pro subscription via Credit Card (Visa · Mastercard) via Notch Pay';
 
   return (
     <section id="pricing" className="bg-slate-50 px-4 py-16">

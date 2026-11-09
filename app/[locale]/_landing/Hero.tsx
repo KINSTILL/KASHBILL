@@ -10,7 +10,7 @@ export function Hero({
   personalization: LandingPersonalization;
   locale: string;
 }) {
-  const { tier, country, operators, device, fromWhatsApp } = personalization;
+  const { tier, country, device, fromWhatsApp } = personalization;
   const isFr = locale === 'fr';
   const deviceLabel =
     device === 'android' ? 'Android' : device === 'ios' ? 'iPhone' : isFr ? 'ordinateur' : 'computer';
@@ -18,20 +18,12 @@ export function Hero({
   const badge =
     tier === 'tier1'
       ? isFr
-        ? `${country.flag} Conçu pour ${country.name} · Encaissez par ${operators.slice(0, 2).join(' & ')}`
-        : `${country.flag} Built for ${country.name} · Collect via ${operators.slice(0, 2).join(' & ')}`
+        ? `${country.flag} Conçu pour ${country.name} · Devis & Factures professionnels`
+        : `${country.flag} Built for ${country.name} · Professional Quotes & Invoices`
       : isFr
         ? '🌍 Panafricain · Facturation conforme OHADA & multidevise'
         : '🌍 Pan-African · OHADA-compliant invoicing & multi-currency';
 
-  const paymentLine =
-    tier === 'tier1'
-      ? isFr
-        ? `💳 Paiement sécurisé : ${operators.join(' · ')}`
-        : `💳 Secure payment: ${operators.join(' · ')}`
-      : isFr
-        ? '💳 Carte bancaire (Visa · Mastercard via Notch Pay)'
-        : '💳 Credit card (Visa · Mastercard via Notch Pay)';
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-sage-50 to-white px-4 pt-16 pb-20">
@@ -71,8 +63,9 @@ export function Hero({
           </div>
 
           <p className="mt-4 text-xs text-slate-500">
-            {isFr ? '✓ Plan gratuit immédiat  ✓ Sans carte bancaire  ' : '✓ Immediate free plan  ✓ No card required  '}
-            {paymentLine}
+            {isFr
+              ? '✓ Plan gratuit immédiat  ·  ✓ Sans carte bancaire  ·  ✓ Vos clients vous règlent en direct'
+              : '✓ Immediate free plan  ·  ✓ No credit card required  ·  ✓ Your clients pay you directly'}
           </p>
         </div>
 

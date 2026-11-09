@@ -209,7 +209,7 @@ export function DemoSection({
               {/* Mentions de paiement et légalité */}
               <div className="mt-6 rounded border-t border-slate-100 pt-4 text-xs text-slate-500">
                 <p className="font-medium text-slate-700">
-                  {isFr ? 'Règlement accepté :' : 'Accepted payment:'} MTN MoMo · Orange Money · Wave · Espèces
+                  {isFr ? 'Instructions de règlement vendeur :' : 'Seller payment instructions:'} MTN MoMo · Orange Money · Wave · Espèces
                 </p>
                 <p className="mt-2 text-[10px] text-slate-400 italic">
                   {isFr
