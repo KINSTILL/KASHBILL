@@ -39,7 +39,7 @@ pnpm-debug.log*
 next-env.d.ts
 
 # Uploads
-uploads/
+/uploads/
 
 # PWA service worker build artifacts
 public/sw.js
