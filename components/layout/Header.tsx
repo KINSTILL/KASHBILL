@@ -15,8 +15,8 @@ export function Header() {
   const { user } = useCurrentUser();
 
   return (
-    <header className="header-blur transition-smooth sticky top-0 z-30 border-b border-slate-100">
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+    <header className="bg-white/80 backdrop-blur-md transition-smooth sticky top-0 z-30 border-b border-slate-100">
+      <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-4">
         <Link
           href={`/${locale}` as Route}
           className="group flex items-baseline gap-0.5 font-display text-[18px] font-extrabold tracking-[-0.03em] text-ink"

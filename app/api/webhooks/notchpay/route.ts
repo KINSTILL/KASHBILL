@@ -17,7 +17,9 @@ import { PRO_DURATION_DAYS } from '@/lib/constants';
 export async function POST(req: NextRequest): Promise<Response> {
   try {
     const rawBody = await req.text();
-    const signature = req.headers.get('x-notchpay-signature');
+    const signature =
+      req.headers.get('x-notch-signature') ??
+      req.headers.get('x-notchpay-signature');
 
     if (!verifyNotchPaySignature(rawBody, signature)) {
       await writeAudit({
@@ -30,11 +32,24 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     const event = JSON.parse(rawBody) as {
       event?: string;
-      data?: { reference?: string; status?: string; amount?: number; currency?: string };
+      type?: string;
+      data?: {
+        id?: string;
+        reference?: string;
+        merchant_reference?: string;
+        trxref?: string;
+        status?: string;
+        amount?: number;
+        currency?: string;
+      };
     };
 
-    const eventType = event.event;
-    const providerRef = event.data?.reference;
+    const eventType = event.event ?? event.type;
+    const providerRef =
+      event.data?.reference ??
+      event.data?.id ??
+      event.data?.merchant_reference ??
+      event.data?.trxref;
     const status = event.data?.status;
     const amount = event.data?.amount;
 
@@ -42,9 +57,26 @@ export async function POST(req: NextRequest): Promise<Response> {
       return jsonError('VALIDATION_ERROR', 'reference manquante', 400);
     }
 
-    // Retrouver la subscription
+    const possibleRefs = [
+      event.data?.reference,
+      event.data?.id,
+      event.data?.merchant_reference,
+      event.data?.trxref,
+    ].filter((r): r is string => typeof r === 'string' && r.length > 0);
+
+    // Retrouver la subscription soit par providerRef direct, soit par merchant reference
     const subscription = await prisma.subscription.findFirst({
-      where: { providerRef },
+      where: {
+        OR: [
+          { providerRef: { in: possibleRefs } },
+          ...possibleRefs
+            .filter((r) => r.startsWith('MCB-') || r.startsWith('CB-ADD-'))
+            .map((r) => {
+              const suffix = r.replace(/^(MCB-|CB-ADD-)/, '').toLowerCase();
+              return { id: { endsWith: suffix } };
+            }),
+        ],
+      },
       include: { user: true },
     });
 

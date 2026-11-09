@@ -45,7 +45,7 @@ export function Button({
         'disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:active:scale-100',
         'active:scale-[0.98]',
         {
-          'bg-gradient-to-b from-sage-500 to-sage-600 text-white shadow-sm hover:from-sage-600 hover:to-sage-700 hover:shadow-md':
+          'bg-sage-600 text-white hover:bg-sage-700 active:bg-sage-800 shadow-sm':
             variant === 'primary',
           'bg-white text-ink border border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm':
             variant === 'secondary',
@@ -58,8 +58,8 @@ export function Button({
         },
         {
           'h-9 px-3 text-sm': size === 'sm',
-          'thumb-zone h-12 px-4 text-[15px]': size === 'md',
-          'thumb-zone-lg h-[54px] px-6 text-base': size === 'lg',
+          'thumb-zone h-10 px-4 text-sm rounded-lg font-medium': size === 'md',
+          'thumb-zone-lg h-11 px-5 text-sm rounded-xl font-semibold': size === 'lg',
         },
         fullWidth && 'w-full',
         className

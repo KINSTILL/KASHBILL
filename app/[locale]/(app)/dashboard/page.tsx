@@ -14,8 +14,8 @@ import { ProGiftBanner } from '@/components/ui/ProGiftBanner';
 import { UnsupportedCountryBanner } from '@/components/layout/UnsupportedCountryBanner';
 import { HeroCard } from '@/components/ui/HeroCard';
 import { StatCard } from '@/components/ui/StatCard';
-import { DocumentCard } from '@/components/documents/DocumentCard';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatFCFA } from '@/lib/utils';
+import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 
 export default async function DashboardPage({
   params,
@@ -102,6 +102,15 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-4">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">Tableau de bord</h1>
+          <p className="mt-1 text-sm text-slate-500">Vue d&apos;ensemble de votre activité</p>
+        </div>
+        <Link href={`/${locale}/documents/new` as Route}>
+          <Button size="md" variant="primary">+ Nouveau document</Button>
+        </Link>
+      </div>
       <UnsupportedCountryBanner />
       {isGiftedPro && latestGiftSub && (
         <ProGiftBanner
@@ -189,20 +198,45 @@ export default async function DashboardPage({
             }
           />
         ) : (
-          <div className="space-y-2">
-            {recentDocs.map((doc) => (
-              <DocumentCard
-                key={doc.id}
-                id={doc.id}
-                number={doc.number}
-                type={doc.type}
-                clientName={doc.client?.name ?? null}
-                total={(doc.payload as { total?: number } | null)?.total ?? 0}
-                createdAt={doc.createdAt}
-                sentViaWhatsAppAt={doc.sentViaWhatsAppAt}
-                watermarked={doc.watermarked}
-              />
-            ))}
+          <div className="rounded-xl border border-slate-100 bg-white">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Numéro</th>
+                  <th>Type</th>
+                  <th>Client</th>
+                  <th className="text-right">Total</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentDocs.slice(0, 5).map((doc) => {
+                  const total = (doc.payload as { total?: number } | null)?.total ?? 0;
+                  return (
+                    <tr key={doc.id}>
+                      <td className="font-mono text-xs text-slate-500">
+                        <Link
+                          href={`/${locale}/documents/${doc.id}` as Route}
+                          className="hover:text-sage-700"
+                        >
+                          {doc.number}
+                        </Link>
+                      </td>
+                      <td>{DOC_TYPE_CONFIG[doc.type]?.label}</td>
+                      <td className="text-slate-600">{doc.client?.name ?? '—'}</td>
+                      <td className="text-right font-medium">{formatFCFA(total)}</td>
+                      <td>
+                        <span
+                          className={`status-badge ${doc.sentViaWhatsAppAt ? 'status-success' : 'status-neutral'}`}
+                        >
+                          {doc.sentViaWhatsAppAt ? 'Envoyé' : 'Brouillon'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

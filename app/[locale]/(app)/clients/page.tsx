@@ -9,7 +9,6 @@ import { FREE_CLIENTS_LIMIT } from '@/lib/constants';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { UpgradeCTA } from '@/components/ui/UpgradeCTA';
-import { ClientCard } from '@/components/clients/ClientCard';
 
 export default async function ClientsPage({
   params,
@@ -37,20 +36,14 @@ export default async function ClientsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            {t('nav.clients')}
-          </h1>
-          <p className="text-xs text-slate-500">
-            {clients.length} {pro ? 'clients (illimités)' : `/ ${FREE_CLIENTS_LIMIT} clients (gratuit)`}
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">Clients</h1>
+          <p className="mt-1 text-sm text-slate-500">{clients.length} clients</p>
         </div>
         {!limitReached && (
           <Link href={`/${locale}/clients/new` as Route}>
-            <Button variant="primary" className="thumb-zone">
-              + {t('common.add')}
-            </Button>
+            <Button size="md" variant="primary">+ Nouveau</Button>
           </Link>
         )}
       </div>
@@ -70,17 +63,34 @@ export default async function ClientsPage({
           }
         />
       ) : (
-        <div className="space-y-2">
-          {clients.map((client) => (
-            <ClientCard
-              key={client.id}
-              id={client.id}
-              name={client.name}
-              phone={client.phone ?? null}
-              note={client.note ?? null}
-              documentsCount={client._count.documents}
-            />
-          ))}
+        <div className="rounded-xl border border-slate-100 bg-white">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Téléphone</th>
+                <th className="text-center">Documents</th>
+                <th className="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clients.map((client) => (
+                <tr key={client.id}>
+                  <td className="font-medium text-ink">{client.name}</td>
+                  <td className="text-slate-600">{client.phone ?? '—'}</td>
+                  <td className="text-center text-slate-500">{client._count.documents}</td>
+                  <td className="text-right">
+                    <Link
+                      href={`/${locale}/clients/${client.id}` as Route}
+                      className="text-xs text-sage-600 hover:underline"
+                    >
+                      Voir
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

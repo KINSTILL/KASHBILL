@@ -19,7 +19,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="bottomnav-floating transition-smooth fixed inset-x-0 bottom-0 z-40 mx-3 mb-3 pb-safe md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-3 mb-3 rounded-2xl border border-slate-100 bg-white/95 pb-safe shadow-lg backdrop-blur-md md:hidden">
       <div className="grid grid-cols-4">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + '/');

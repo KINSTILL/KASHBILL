@@ -8,8 +8,9 @@ import { isPro, getHistoryWindowDays } from '@/lib/auth/plan';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { DocumentCard } from '@/components/documents/DocumentCard';
 import { ExportPeriodSelector } from '@/components/documents/ExportPeriodSelector';
+import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
+import { formatFCFA } from '@/lib/utils';
 
 export default async function DocumentsPage({
   params,
@@ -42,19 +43,13 @@ export default async function DocumentsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            {t('nav.history')}
-          </h1>
-          <p className="text-xs text-slate-500">
-            {documents.length} document{documents.length > 1 ? 's' : ''}
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">Documents</h1>
+          <p className="mt-1 text-sm text-slate-500">{documents.length} documents</p>
         </div>
         <Link href={`/${locale}/documents/new` as Route}>
-          <Button variant="primary" className="thumb-zone">
-            + {t('nav.new')}
-          </Button>
+          <Button size="md" variant="primary">+ Nouveau</Button>
         </Link>
       </div>
 
@@ -87,20 +82,49 @@ export default async function DocumentsPage({
           }
         />
       ) : (
-        <div className="space-y-2">
-          {documents.map((doc) => (
-            <DocumentCard
-              key={doc.id}
-              id={doc.id}
-              number={doc.number}
-              type={doc.type}
-              clientName={doc.client?.name ?? null}
-              total={(doc.payload as { total?: number } | null)?.total ?? 0}
-              createdAt={doc.createdAt}
-              sentViaWhatsAppAt={doc.sentViaWhatsAppAt}
-              watermarked={doc.watermarked}
-            />
-          ))}
+        <div className="rounded-xl border border-slate-100 bg-white">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Numéro</th>
+                <th>Type</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th className="text-right">Total</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documents.map((doc) => {
+                const total = (doc.payload as { total?: number } | null)?.total ?? 0;
+                return (
+                  <tr key={doc.id}>
+                    <td className="font-mono text-xs text-slate-500">
+                      <Link
+                        href={`/${locale}/documents/${doc.id}` as Route}
+                        className="hover:text-sage-700"
+                      >
+                        {doc.number}
+                      </Link>
+                    </td>
+                    <td>{DOC_TYPE_CONFIG[doc.type]?.label}</td>
+                    <td className="text-slate-600">{doc.client?.name ?? '—'}</td>
+                    <td className="text-xs text-slate-500">
+                      {new Date(doc.createdAt).toLocaleDateString('fr-FR')}
+                    </td>
+                    <td className="text-right font-medium">{formatFCFA(total)}</td>
+                    <td>
+                      <span
+                        className={`status-badge ${doc.sentViaWhatsAppAt ? 'status-success' : 'status-neutral'}`}
+                      >
+                        {doc.sentViaWhatsAppAt ? 'Envoyé' : 'Brouillon'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

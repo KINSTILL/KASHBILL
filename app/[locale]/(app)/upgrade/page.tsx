@@ -90,9 +90,11 @@ export default function UpgradePage() {
   const isActive = proUntil && new Date(proUntil) > new Date();
 
   return (
-    <div className="space-y-4 max-w-lg mx-auto">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
-      <p className="text-slate-600">{t('subtitle')}</p>
+    <div className="mx-auto max-w-2xl">
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">Passer Pro</h1>
+        <p className="mt-1 text-sm text-slate-500">2 000 FCFA / 30 jours</p>
+      </div>
 
       {isActive && (
         <Card className="p-4">
