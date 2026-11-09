@@ -49,10 +49,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedAt: true,
       authorName: true,
       status: true,
+      published: true,
     },
   });
 
-  if (!article || article.status !== 'PUBLISHED') {
+  if (!article || (article.status !== 'PUBLISHED' && !article.published)) {
     return { title: isFr ? 'Article non trouvé — MyCashBill' : 'Article Not Found — MyCashBill' };
   }
 
@@ -98,14 +99,16 @@ export default async function BlogPostPage({ params }: Props) {
     },
   });
 
-  if (
-    !article ||
-    article.status !== 'PUBLISHED' ||
-    !article.publishedAt ||
-    article.publishedAt > new Date()
-  ) {
+  const isPublished =
+    article &&
+    (article.status === 'PUBLISHED' || article.published === true) &&
+    (!article.publishedAt || article.publishedAt <= new Date());
+
+  if (!isPublished || !article) {
     notFound();
   }
+
+  const publishedDate = article.publishedAt ?? article.createdAt;
 
   // Increment views count silently
   prisma.article
@@ -139,12 +142,11 @@ export default async function BlogPostPage({ params }: Props) {
           where: {
             id: { not: article.id },
             locale: article.locale,
-            status: 'PUBLISHED',
-            publishedAt: { lte: new Date() },
+            OR: [{ status: 'PUBLISHED' }, { published: true }],
             tags: { hasSome: article.tags },
           },
           take: 3,
-          orderBy: { publishedAt: 'desc' },
+          orderBy: { createdAt: 'desc' },
           select: {
             id: true,
             slug: true,
@@ -167,7 +169,7 @@ export default async function BlogPostPage({ params }: Props) {
     headline: article.seoTitle || article.title,
     description: article.seoDescription || article.excerpt,
     image: article.coverUrl ? [article.coverUrl] : undefined,
-    datePublished: article.publishedAt.toISOString(),
+    datePublished: publishedDate.toISOString(),
     dateModified: article.updatedAt.toISOString(),
     author: [{ '@type': 'Person', 'name': article.authorName }],
     publisher: {
@@ -213,8 +215,8 @@ export default async function BlogPostPage({ params }: Props) {
             <div className="flex items-center gap-3">
               <span className="font-medium text-slate-700">{article.authorName}</span>
               <span>·</span>
-              <time dateTime={article.publishedAt.toISOString()}>
-                {new Date(article.publishedAt).toLocaleDateString(isFr ? 'fr-FR' : 'en-GB', {
+              <time dateTime={publishedDate.toISOString()}>
+                {publishedDate.toLocaleDateString(isFr ? 'fr-FR' : 'en-GB', {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',

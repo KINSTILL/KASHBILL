@@ -1175,7 +1175,7 @@ async function seedArticles() {
       excerpt: 'Découvrez toutes les mentions obligatoires à faire figurer sur une facture conforme selon le Code Général des Impôts au Cameroun et le droit commercial OHADA.',
       authorName: 'Équipe Fiscale MyCashBill',
       tags: ['facturation', 'fiscalite', 'cameroun', 'entreprise'],
-      status: 'DRAFT',
+      status: 'PUBLISHED',
       seoTitle: 'Mentions obligatoires d\'une facture au Cameroun : Guide CGI 2026',
       seoDescription: 'Guide complet des mentions obligatoires sur une facture conforme au Cameroun selon le Code Général des Impôts (NIU, RCCM, TVA, régimes).',
       readingTime: 6,
@@ -1270,7 +1270,7 @@ Pour plus de précisions sur les règles contractuelles et juridiques applicable
       excerpt: 'Comprendre le taux de TVA à 19,25% au Cameroun (17,5% + CAC 10%), les régimes fiscaux assujettis, et les formules de calcul HT et TTC avec exemples.',
       authorName: 'Équipe Fiscale MyCashBill',
       tags: ['tva', 'fiscalite', 'cameroun', 'comptabilite'],
-      status: 'DRAFT',
+      status: 'PUBLISHED',
       seoTitle: 'TVA à 19,25% au Cameroun : Calcul, Régimes et Guide Fiscal 2026',
       seoDescription: 'Guide complet du calcul de la TVA à 19,25% au Cameroun. Formules HT/TTC, régimes réel et simplifié, Centimes Additionnels Communaux.',
       readingTime: 5,
@@ -1352,7 +1352,7 @@ Pour en savoir plus sur les responsabilités fiscales de l'utilisateur, référe
       excerpt: 'Guide complet pour transformer vos discussions WhatsApp en commandes fermes : catalogue, relances professionnelles, factures PDF et paiement mobile.',
       authorName: 'Équipe Commerciale MyCashBill',
       tags: ['whatsapp', 'vente', 'ecommerce', 'mobile-money'],
-      status: 'DRAFT',
+      status: 'PUBLISHED',
       seoTitle: '10 astuces pour vendre sur WhatsApp en Afrique (Guide 2026)',
       seoDescription: 'Comment vendre plus sur WhatsApp Business : profil, catalogue, relances non intrusives, factures professionnelles et paiement Mobile Money.',
       readingTime: 6,
@@ -1423,7 +1423,7 @@ Pour découvrir l'ensemble de nos fonctionnalités et nos engagements de service
       excerpt: 'Ne confondez plus devis, facture proforma et facture définitive : découvrez leurs valeurs juridiques respectives, obligations comptables et cas d\'usage.',
       authorName: 'Équipe Fiscale MyCashBill',
       tags: ['devis', 'proforma', 'facturation', 'droit-des-affaires'],
-      status: 'DRAFT',
+      status: 'PUBLISHED',
       seoTitle: 'Devis, Facture, Proforma : Quelles différences juridiques et comptables ?',
       seoDescription: 'Guide pratique pour distinguer devis, facture proforma et facture commerciale définitive en droit OHADA et fiscalité africaine.',
       readingTime: 5,
@@ -1500,7 +1500,7 @@ Pour plus d'informations sur l'archivage et l'intégrité de vos pièces commerc
       excerpt: 'Stratégies éprouvées pour anticiper les retards de paiement, structurer un calendrier de relance amiable et préserver sa trésorerie sans froisser la relation client.',
       authorName: 'Équipe Financière MyCashBill',
       tags: ['tresorerie', 'relance-client', 'gestion', 'impayes'],
-      status: 'DRAFT',
+      status: 'PUBLISHED',
       seoTitle: 'Gestion des Impayés et Relance Client en Afrique : Méthodes et Scripts',
       seoDescription: 'Comment réduire les délais de paiement et gérer les retards clients sans dégrader la relation commerciale. Guide et calendrier de relance.',
       readingTime: 6,
@@ -1573,6 +1573,8 @@ Pour toute question relative aux règles de preuve et à la conservation des doc
         authorName: a.authorName,
         tags: a.tags,
         status: a.status,
+        published: true,
+        publishedAt: new Date('2026-01-15T08:00:00.000Z'),
         seoTitle: a.seoTitle,
         seoDescription: a.seoDescription,
         readingTime: a.readingTime,
@@ -1586,13 +1588,15 @@ Pour toute question relative aux règles de preuve et à la conservation des doc
         authorName: a.authorName,
         tags: a.tags,
         status: a.status,
+        published: true,
+        publishedAt: new Date('2026-01-15T08:00:00.000Z'),
         seoTitle: a.seoTitle,
         seoDescription: a.seoDescription,
         readingTime: a.readingTime,
       },
     });
   }
-  console.log('✅ Blog articles seeded (5 pillar articles in DRAFT)');
+  console.log('✅ Blog articles seeded (5 pillar articles PUBLISHED)');
 }
 
 async function main() {

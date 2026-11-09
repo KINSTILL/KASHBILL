@@ -813,7 +813,7 @@
       "q3": "Does the application work on mobile?",
       "a3": "Yes! MyCashBill is a lightweight Progressive Web App designed mobile-first. You can add it directly to your home screen.",
       "q4": "How does the free plan work and when should I go Pro?",
-      "a4": "The free plan requires no credit card and allows you to create up to 10 invoices per month. As your business grows, you can unlock Pro (2,000 FCFA for 30 days via Mobile Money) to remove watermarks and get unlimited volume.",
+      "a4": "The free plan requires no credit card and allows you to create up to 10 invoices per month. As your business grows, you can unlock Pro (2,000 FCFA for 30 days via the secure Notch Pay gateway, by Mobile Money or credit card) to remove watermarks and get unlimited volume.",
       "q5": "Can I send invoices directly via WhatsApp?",
       "a5": "Absolutely. A single tap drafts a professional WhatsApp message with your invoice link and PDF attachment ready to send."
     },

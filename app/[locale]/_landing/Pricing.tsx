@@ -11,19 +11,10 @@ export function Pricing({
   locale: string;
 }) {
   const isFr = locale === 'fr';
-  const { tier, pricing, operators } = personalization;
+  const { tier, pricing } = personalization;
 
   const proPrice = (tier === 'tier1' && pricing.proPriceLocalLabel) ? pricing.proPriceLocalLabel : '2 000 FCFA';
   const freeCurrency = 'FCFA';
-
-  const paymentLine =
-    tier === 'tier1'
-      ? isFr
-        ? `💳 Règlement sécurisé de votre abonnement Pro par Mobile Money (${operators.join(' · ')}) via Notch Pay`
-        : `💳 Secure payment of your Pro subscription via Mobile Money (${operators.join(' · ')}) via Notch Pay`
-      : isFr
-        ? '💳 Règlement sécurisé de votre abonnement Pro par Carte bancaire (Visa · Mastercard) via Notch Pay'
-        : '💳 Secure payment of your Pro subscription via Credit Card (Visa · Mastercard) via Notch Pay';
 
   return (
     <section id="pricing" className="bg-slate-50 px-4 py-16">
@@ -106,7 +97,26 @@ export function Pricing({
             </div>
           </div>
         </div>
-        <p className="mt-6 text-center text-xs text-slate-500">{paymentLine}</p>
+        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">💳</span>
+            <div className="space-y-1.5 text-xs text-slate-600">
+              <p className="font-bold text-ink text-sm">
+                {isFr ? 'Règlement sécurisé de votre abonnement Pro via Notch Pay' : 'Secure payment of your Pro subscription via Notch Pay'}
+              </p>
+              <p>
+                {isFr
+                  ? "Les paiements d'abonnement s'effectuent exclusivement via la passerelle agréée Notch Pay : par Mobile Money (Orange Money, MTN MoMo, Wave, Moov...) selon votre pays, ou par carte bancaire (Visa, Mastercard) pour les autres pays. Aucun paiement ne se fait directement vers un compte ou portefeuille mobile personnel."
+                  : "Subscription payments are processed exclusively via the certified Notch Pay gateway: via Mobile Money (Orange Money, MTN MoMo, Wave, Moov...) according to your country, or by credit card (Visa, Mastercard) for other countries. No payment is made directly to any personal mobile wallet account."}
+              </p>
+              <p className="text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                🔒 {isFr
+                  ? "Transactions chiffrées Notch Pay · Zéro prélèvement automatique forcé · Vous renouvelez uniquement selon votre choix."
+                  : "Encrypted Notch Pay transactions · No forced automatic renewal · You renew only when you decide."}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

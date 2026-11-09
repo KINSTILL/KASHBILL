@@ -146,6 +146,11 @@ export default function UpgradePage() {
           >
             {t('payByCard')} (Visa, Mastercard) — 2 000 FCFA
           </button>
+          <p className="text-center text-[11px] text-slate-400 pt-1">
+            🔒 {locale === 'fr'
+              ? 'Paiement traité et sécurisé par Notch Pay (aucun transfert direct vers un portefeuille personnel)'
+              : 'Payment processed and secured by Notch Pay (no direct transfer to personal wallets)'}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -161,6 +166,11 @@ export default function UpgradePage() {
           >
             💳 {t('payByCard')} — 2 000 FCFA
           </Button>
+          <p className="text-center text-[11px] text-slate-400 pt-1">
+            🔒 {locale === 'fr'
+              ? 'Paiement traité et sécurisé par Notch Pay (aucun transfert direct vers un portefeuille personnel)'
+              : 'Payment processed and secured by Notch Pay (no direct transfer to personal wallets)'}
+          </p>
         </div>
       )}
 

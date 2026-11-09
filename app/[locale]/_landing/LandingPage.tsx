@@ -8,6 +8,7 @@ import { SocialProofStrip } from './SocialProofStrip';
 import { ProblemSection } from './ProblemSection';
 import { HowItWorks } from './HowItWorks';
 import { Features } from './Features';
+import { CaseStudies } from './CaseStudies';
 import { DemoSection } from './DemoSection';
 import { Pricing } from './Pricing';
 import { MiniFAQ } from './MiniFAQ';
@@ -36,10 +37,11 @@ export function LandingPage({
       <LandingHeader personalization={personalization} locale={locale} />
       <main>
         <Hero personalization={personalization} locale={locale} />
-        <SocialProofStrip />
+        <SocialProofStrip locale={locale} />
         <ProblemSection />
         <HowItWorks />
         <Features />
+        <CaseStudies locale={locale} />
         <DemoSection personalization={personalization} locale={locale} />
         <Pricing personalization={personalization} locale={locale} />
         <MiniFAQ locale={locale} />

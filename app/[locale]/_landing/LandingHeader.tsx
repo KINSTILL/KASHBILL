@@ -23,12 +23,6 @@ export function LandingHeader({
           <Link href={`/${locale}` as Route} className="font-display text-lg font-extrabold tracking-tight text-ink">
             mycashbill<span className="text-sage-500">.</span>
           </Link>
-          {personalization.country && (
-            <span className="hidden items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 sm:inline-flex">
-              <span>{personalization.country.flag}</span>
-              <span>{personalization.country.currency}</span>
-            </span>
-          )}
         </div>
         <nav className="hidden items-center gap-6 text-sm text-slate-600 md:flex">
           <a href="#features" className="hover:text-ink">{t('features')}</a>
