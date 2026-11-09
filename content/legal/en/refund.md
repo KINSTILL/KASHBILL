@@ -27,4 +27,4 @@ Refunds for paid subscriptions may be granted in the following cases:
 
 ## 4. Refund Process
 
-To request a refund, contact us at billing@mycashbill.app with your transaction reference. Approved refunds are returned via the original payment method (Mobile Money or credit card) within 5 business days.
+To request a refund, contact us at support@mycashbill.app with your transaction reference. Approved refunds are returned via the original payment method (Mobile Money or credit card) within 5 business days.

@@ -243,8 +243,8 @@ export function DemoSection({
               </div>
               <p className="text-[11px] text-slate-500">
                 {isFr
-                  ? '✓ 10 factures/mois offertes · ✓ Sans engagement · ✓ Sans carte bancaire'
-                  : '✓ 10 invoices/month free · ✓ No commitment · ✓ No card required'}
+                  ? '✓ Plan gratuit à 10 factures/mois · ✓ Sans carte bancaire · ✓ Activez Pro en 1 clic'
+                  : '✓ Free plan with 10 invoices/month · ✓ No card required · ✓ Activate Pro in 1 click'}
               </p>
             </div>
           </div>

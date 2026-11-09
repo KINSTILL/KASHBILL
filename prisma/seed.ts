@@ -317,7 +317,7 @@ Conformément à la **loi camerounaise n°2024/017 du 23 décembre 2024** relati
 
 ## 1. Responsable du traitement
 
-MyCashBill SARL, [adresse à compléter], Douala, Cameroun. Contact : privacy@mycashbill.app
+MyCashBill SARL, [adresse à compléter], Douala, Cameroun. Contact : support@mycashbill.app
 
 ## 2. Données collectées
 
@@ -374,7 +374,7 @@ Conformément à la loi n°2024/017, l'Utilisateur dispose des droits suivants :
 - **Opposition** au traitement
 - **Portabilité** des données
 
-Pour exercer ces droits : privacy@mycashbill.app. Réponse sous 30 jours.
+Pour exercer ces droits : support@mycashbill.app. Réponse sous 30 jours.
 
 ## 9. Sécurité
 
@@ -432,7 +432,7 @@ Vous pouvez modifier votre choix à tout moment depuis les paramètres de votre 
 
 ## 4. Contact
 
-Pour toute question : privacy@mycashbill.app
+Pour toute question : support@mycashbill.app
 
 ---
 
@@ -452,7 +452,7 @@ Pour toute question : privacy@mycashbill.app
 - NIU : [à compléter]
 - RCCM : [à compléter]
 - Téléphone : +237 6XX XXX XXX
-- Email : contact@mycashbill.app
+- Email : support@mycashbill.app
 
 ## Directeur de publication
 

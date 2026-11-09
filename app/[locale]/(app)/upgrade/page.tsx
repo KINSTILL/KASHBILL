@@ -124,9 +124,16 @@ export default function UpgradePage() {
               onClick={() => startPayment('mobile_money', op.code)}
               isLoading={loading === op.code}
             >
-              💳 {op.name} — 2 000 FCFA
+              📱 {op.name} — 2 000 FCFA
             </Button>
           ))}
+          <button
+            type="button"
+            onClick={() => startPayment('card', null)}
+            className="w-full text-center text-xs text-slate-500 hover:text-slate-800 underline pt-1"
+          >
+            {t('payByCard')} (Visa, Mastercard) — 2 000 FCFA
+          </button>
         </div>
       ) : (
         <div className="space-y-3">

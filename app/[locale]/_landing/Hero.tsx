@@ -27,11 +27,11 @@ export function Hero({
   const paymentLine =
     tier === 'tier1'
       ? isFr
-        ? `💳 ${operators.join(' · ')} · Carte bancaire`
-        : `💳 ${operators.join(' · ')} · Credit card`
+        ? `💳 Paiement sécurisé : ${operators.join(' · ')}`
+        : `💳 Secure payment: ${operators.join(' · ')}`
       : isFr
-        ? '💳 Carte bancaire (Visa, Mastercard) · Mobile Money bientôt'
-        : '💳 Credit card (Visa, Mastercard) · Mobile Money soon';
+        ? '💳 Carte bancaire (Visa · Mastercard via Notch Pay)'
+        : '💳 Credit card (Visa · Mastercard via Notch Pay)';
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-sage-50 to-white px-4 pt-16 pb-20">
@@ -71,7 +71,7 @@ export function Hero({
           </div>
 
           <p className="mt-4 text-xs text-slate-500">
-            {isFr ? '✓ 30 jours Pro offerts  ✓ Sans carte bancaire  ' : '✓ 30-day Pro trial  ✓ No card required  '}
+            {isFr ? '✓ Plan gratuit immédiat  ✓ Sans carte bancaire  ' : '✓ Immediate free plan  ✓ No card required  '}
             {paymentLine}
           </p>
         </div>

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { prisma } from '@/lib/db';
 import { clearDatabase } from '../../helpers/db';
@@ -46,7 +47,7 @@ describe('createRecoveryCodes', () => {
     const stored = await prisma.recoveryCode.findMany({ where: { userId: user.id } });
     for (const s of stored) {
       expect(codes).not.toContain(s.codeHash);
-      expect(s.codeHash).toMatch(/^[0-9a-f]{64}$/);
+      expect(s.codeHash).toMatch(/^\$argon2id\$/);
     }
   });
 });
@@ -86,6 +87,29 @@ describe('verifyAndConsumeRecoveryCode', () => {
     const user2 = await createTestUser();
     const codes1 = await createRecoveryCodes(user1.id);
     expect(await verifyAndConsumeRecoveryCode(user2.id, codes1[0]!)).toBe(false);
+  });
+
+  it('accepte et migre un code legacy SHA-256 vers argon2id', async () => {
+    const user = await createTestUser();
+    const rawCode = 'ABCD-EFGH';
+    const normalized = 'ABCDEFGH';
+    const legacyHash = createHash('sha256').update(normalized).digest('hex');
+
+    const created = await prisma.recoveryCode.create({
+      data: {
+        userId: user.id,
+        codeHash: legacyHash,
+      },
+    });
+
+    const result = await verifyAndConsumeRecoveryCode(user.id, rawCode);
+    expect(result).toBe(true);
+
+    const updated = await prisma.recoveryCode.findUnique({
+      where: { id: created.id },
+    });
+    expect(updated?.usedAt).not.toBeNull();
+    expect(updated?.codeHash).toMatch(/^\$argon2id\$/);
   });
 });
 

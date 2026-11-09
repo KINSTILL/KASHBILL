@@ -812,8 +812,8 @@
       "a2": "Vos clients peuvent régler en un clic via Orange Money, MTN MoMo, Wave, Moov ou Airtel selon votre pays. Les fonds vous sont transférés directement.",
       "q3": "L'application fonctionne-t-elle sur smartphone ?",
       "a3": "Oui ! MyCashBill est une PWA ultra-légère conçue pour mobile. Vous pouvez l'ajouter à votre écran d'accueil sans passer par le Play Store ou l'App Store.",
-      "q4": "Que se passe-t-il après les 30 jours d'essai Pro ?",
-      "a4": "Aucune carte bancaire n'est demandée. À la fin de l'essai, vous pouvez choisir de passer à l'abonnement Pro ou conserver le compte Gratuit à vie.",
+      "q4": "Comment fonctionne le plan gratuit et quand passer à Pro ?",
+      "a4": "Le plan gratuit sans carte bancaire vous permet de créer jusqu'à 10 documents par mois. Dès que votre activité grandit, vous pouvez débloquer le statut Pro (2 000 FCFA pour 30 jours via Mobile Money) pour retirer le filigrane et profiter de volumes illimités.",
       "q5": "Puis-je envoyer mes factures sur WhatsApp ?",
       "a5": "Absolument. Un bouton direct prépare un message professionnel et génère le lien de la facture avec PDF téléchargeable à envoyer en un clic."
     },
@@ -822,7 +822,7 @@
       "subtitle": "Rejoignez des milliers d'entrepreneurs et indépendants africains qui gagnent du temps chaque jour.",
       "btn_primary": "Créer ma première facture",
       "btn_secondary": "Tester la démo sans inscription",
-      "guarantee": "✓ 30 jours Pro offerts · Sans carte bancaire · Opérationnel en 60 secondes"
+      "guarantee": "✓ Plan gratuit sans carte bancaire · Opérationnel en 60 secondes · Passez Pro à 2 000 FCFA/mois"
     },
     "footer": {
       "tagline": "🌍 Fait en Afrique, pour l'Afrique",

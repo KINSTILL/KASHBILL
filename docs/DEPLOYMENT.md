@@ -47,7 +47,25 @@ pnpm cli:create-admin "+237XXXXXXXXX" "123456" "Nom"
 pnpm cli:export-user "+237XXXXXXXXX" "réquisition judiciaire"
 pnpm cli:modify-threshold "MAX_DOCS_PER_24H" 500 "test"
 pnpm cli:remove-blacklist "PHONE" "+237XXXXXXXXX" "faux positif"
+pnpm cli:migrate-uploads
 ```
+
+### Migration chiffrement des uploads au repos (AES-256-GCM)
+Procédure à exécuter lors du déploiement :
+1. **Backup** `/var/www/mycashbill/uploads/` :
+   ```bash
+   cp -r /var/www/mycashbill/uploads /var/backups/mycashbill/uploads_pre_encryption_$(date +%Y%m%d_%H%M%S)
+   ```
+2. **Vérifier** la présence de `UPLOAD_ENCRYPTION_KEY` (64 caractères hex) dans `/var/www/mycashbill/.env.production`.
+3. **Exécuter la migration** :
+   ```bash
+   pnpm cli:migrate-uploads
+   ```
+4. **Redémarrer le service PM2** :
+   ```bash
+   pm2 restart mycashbill --update-env
+   ```
+5. **Vérifier** que les logos et signatures s'affichent toujours correctement.
 
 ## Logs
 - App : `/var/log/mycashbill/{out,error}.log`
@@ -71,6 +89,9 @@ sudo -u postgres pg_restore -d mycashbill -c /var/backups/mycashbill/mycashbill_
 ```bash
 # Récurrent — toutes les 15 min
 */15 * * * * /usr/bin/curl -fsS -X POST https://mycashbill.app/api/cron/recurring -H "X-Cron-Secret: $(grep CRON_SECRET /var/www/mycashbill/.env.production | cut -d= -f2 | tr -d '\"')" >> /var/log/mycashbill/cron.log 2>&1
+
+# Purge automatique — tous les jours à 4h du matin (heure Douala)
+0 4 * * * /usr/bin/curl -fsS -X POST https://mycashbill.app/api/cron/cleanup -H "X-Cron-Secret: $(grep CRON_SECRET /var/www/mycashbill/.env.production | cut -d= -f2 | tr -d '\"')" >> /var/log/mycashbill/cleanup.log 2>&1
 ```
 
 ## Sécurité

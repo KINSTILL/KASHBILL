@@ -34,7 +34,7 @@ Vous pouvez modifier votre choix à tout moment depuis les paramètres de votre 
 
 ## 4. Contact
 
-Pour toute question : privacy@mycashbill.app
+Pour toute question : support@mycashbill.app
 
 ---
 

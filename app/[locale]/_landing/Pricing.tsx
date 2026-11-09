@@ -11,7 +11,7 @@ export function Pricing({
   locale: string;
 }) {
   const isFr = locale === 'fr';
-  const { tier, pricing, operators, country } = personalization;
+  const { tier, pricing, operators } = personalization;
 
   const proPrice = (tier === 'tier1' && pricing.proPriceLocalLabel) ? pricing.proPriceLocalLabel : '2 000 FCFA';
   const freeCurrency = 'FCFA';
@@ -19,11 +19,11 @@ export function Pricing({
   const paymentLine =
     tier === 'tier1'
       ? isFr
-        ? `💳 ${operators.join(' · ')} · Carte bancaire`
-        : `💳 ${operators.join(' · ')} · Credit card`
+        ? `💳 Paiement sécurisé par Mobile Money (${operators.join(' · ')}) via Notch Pay`
+        : `💳 Secure payment via Mobile Money (${operators.join(' · ')}) via Notch Pay`
       : isFr
-        ? '💳 Carte bancaire (Visa, Mastercard) · Mobile Money bientôt disponible'
-        : '💳 Credit card (Visa, Mastercard) · Mobile Money coming soon';
+        ? '💳 Paiement sécurisé par Carte bancaire (Visa · Mastercard) via Notch Pay'
+        : '💳 Secure payment via Credit Card (Visa · Mastercard) via Notch Pay';
 
   return (
     <section id="pricing" className="bg-slate-50 px-4 py-16">
@@ -33,8 +33,8 @@ export function Pricing({
         </h2>
         <p className="mt-2 text-center text-slate-600">
           {isFr
-            ? "30 jours Pro offerts à l'inscription. Aucune carte requise."
-            : '30-day Pro trial at signup. No card required.'}
+            ? 'Démarrez gratuitement sans carte bancaire. Passez Pro quand votre activité grandit.'
+            : 'Start free with no credit card required. Upgrade to Pro as your business grows.'}
         </p>
 
         <div className="mt-10 grid gap-4 md:grid-cols-2">
@@ -107,13 +107,6 @@ export function Pricing({
           </div>
         </div>
         <p className="mt-6 text-center text-xs text-slate-500">{paymentLine}</p>
-        {tier === 'tier2' && (
-          <p className="mt-2 text-center text-[11px] text-slate-400">
-            {isFr
-              ? 'Les liens de paiement Mobile Money seront disponibles prochainement dans votre zone. Votre abonnement Pro reste payable par carte bancaire.'
-              : 'Mobile Money payment links will soon be available in your region. Your Pro subscription remains payable by credit card.'}
-          </p>
-        )}
       </div>
     </section>
   );

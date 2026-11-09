@@ -34,4 +34,4 @@ We strive to ensure 99.9% uptime. Scheduled maintenance will be announced in adv
 
 ## Contact
 
-For billing inquiries: billing@mycashbill.app
+For billing inquiries: support@mycashbill.app

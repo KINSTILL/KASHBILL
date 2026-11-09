@@ -32,6 +32,7 @@
     "cli:export-user": "dotenv -e .env.production -- tsx scripts/cli/export-user.ts",
     "cli:modify-threshold": "dotenv -e .env.production -- tsx scripts/cli/modify-threshold.ts",
     "cli:remove-blacklist": "dotenv -e .env.production -- tsx scripts/cli/remove-blacklist.ts",
+    "cli:migrate-uploads": "dotenv -e .env.production -- tsx scripts/cli/migrate-uploads-encryption.ts",
     "domain:set": "bash scripts/set-domain.sh"
   },
   "dependencies": {

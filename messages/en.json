@@ -812,8 +812,8 @@
       "a2": "Your clients can pay directly with Orange Money, MTN MoMo, Wave, Moov, or Airtel depending on your country. Funds go directly to you.",
       "q3": "Does the application work on mobile?",
       "a3": "Yes! MyCashBill is a lightweight Progressive Web App designed mobile-first. You can add it directly to your home screen.",
-      "q4": "What happens after the 30-day Pro trial?",
-      "a4": "No credit card is required. At the end of your trial, you can upgrade to Pro or keep using the Free tier forever.",
+      "q4": "How does the free plan work and when should I go Pro?",
+      "a4": "The free plan requires no credit card and allows you to create up to 10 invoices per month. As your business grows, you can unlock Pro (2,000 FCFA for 30 days via Mobile Money) to remove watermarks and get unlimited volume.",
       "q5": "Can I send invoices directly via WhatsApp?",
       "a5": "Absolutely. A single tap drafts a professional WhatsApp message with your invoice link and PDF attachment ready to send."
     },
@@ -822,7 +822,7 @@
       "subtitle": "Join thousands of African entrepreneurs and freelancers saving time every day.",
       "btn_primary": "Create my first invoice",
       "btn_secondary": "Try demo without signing up",
-      "guarantee": "✓ 30-day Pro trial · No card required · Ready in 60 seconds"
+      "guarantee": "✓ Free plan with no card required · Ready in 60 seconds · Unlock Pro for 2,000 FCFA/mo"
     },
     "footer": {
       "tagline": "🌍 Made in Africa, for Africa",
