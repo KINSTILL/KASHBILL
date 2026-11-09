@@ -46,15 +46,15 @@ body {
 }
 
 .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-.data-table th { text-align: left; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748B; padding: 0.5rem 0.75rem; border-bottom: 1px solid #E2E8F0; }
-.data-table td { font-size: 0.8125rem; padding: 0.625rem 0.75rem; border-bottom: 1px solid #F1F5F9; vertical-align: middle; }
+.data-table th { text-align: left; font-size: 0.6875rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; padding: 0.625rem 1rem; border-bottom: 1px solid #e5e7eb; background: #fafafa; }
+.data-table td { font-size: 0.8125rem; padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; vertical-align: middle; color: #111827; }
 .data-table tr:hover td { background-color: #F8FAFC; }
 .data-table tr:last-child td { border-bottom: none; }
-.status-badge { display: inline-flex; align-items: center; gap: 0.25rem; border-radius: 9999px; padding: 0.125rem 0.5rem; font-size: 0.6875rem; font-weight: 600; }
-.status-success { background: #DCFCE7; color: #166534; }
-.status-warning { background: #FEF3C7; color: #92400E; }
-.status-error { background: #FEE2E2; color: #991B1B; }
-.status-neutral { background: #F1F5F9; color: #475569; }
+.status-badge { display: inline-flex; align-items: center; gap: 0.25rem; border-radius: 6px; padding: 0.125rem 0.5rem; font-size: 0.6875rem; font-weight: 500; }
+.status-success { background: #ecfdf5; color: #047857; }
+.status-warning { background: #fffbeb; color: #b45309; }
+.status-error { background: #fef2f2; color: #b91c1c; }
+.status-neutral { background: #f3f4f6; color: #4b5563; }
 
 /* Montants signature — JetBrains Mono tabular */
 .money {
@@ -74,8 +74,9 @@ body {
 /* Surface de carte moderne */
 .surface {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition:
     border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -83,8 +84,8 @@ body {
 }
 
 .surface:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(11, 18, 32, 0.06);
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
 /* Chat pills pour filtres FAQ / UI */

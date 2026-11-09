@@ -87,9 +87,9 @@ export default async function DocumentsPage({
             <thead>
               <tr>
                 <th>Numéro</th>
-                <th>Type</th>
+                <th className="hidden sm:table-cell">Type</th>
                 <th>Client</th>
-                <th>Date</th>
+                <th className="hidden sm:table-cell">Date</th>
                 <th className="text-right">Total</th>
                 <th>Statut</th>
               </tr>
@@ -107,9 +107,9 @@ export default async function DocumentsPage({
                         {doc.number}
                       </Link>
                     </td>
-                    <td>{DOC_TYPE_CONFIG[doc.type]?.label}</td>
+                    <td className="hidden sm:table-cell">{DOC_TYPE_CONFIG[doc.type]?.label}</td>
                     <td className="text-slate-600">{doc.client?.name ?? '—'}</td>
-                    <td className="text-xs text-slate-500">
+                    <td className="hidden text-xs text-slate-500 sm:table-cell">
                       {new Date(doc.createdAt).toLocaleDateString('fr-FR')}
                     </td>
                     <td className="text-right font-medium">{formatFCFA(total)}</td>

@@ -203,7 +203,7 @@ export default async function DashboardPage({
               <thead>
                 <tr>
                   <th>Numéro</th>
-                  <th>Type</th>
+                  <th className="hidden sm:table-cell">Type</th>
                   <th>Client</th>
                   <th className="text-right">Total</th>
                   <th>Statut</th>
@@ -222,7 +222,7 @@ export default async function DashboardPage({
                           {doc.number}
                         </Link>
                       </td>
-                      <td>{DOC_TYPE_CONFIG[doc.type]?.label}</td>
+                      <td className="hidden sm:table-cell">{DOC_TYPE_CONFIG[doc.type]?.label}</td>
                       <td className="text-slate-600">{doc.client?.name ?? '—'}</td>
                       <td className="text-right font-medium">{formatFCFA(total)}</td>
                       <td>
