@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useToast } from '@/components/ui/Toast';
 import { MiniFAQ } from '@/components/faq/MiniFAQ';
+import { PaymentBadges } from '@/components/ui/PaymentBadges';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { isSupportedPaymentCountry, getOperatorsForCountry } from '@/lib/countries/mobile-money';
 
@@ -127,6 +128,11 @@ export default function UpgradePage() {
           </p>
         </div>
       )}
+
+      <div className="mb-4">
+        <p className="mb-2 text-xs font-medium text-slate-500">Moyens de paiement acceptés</p>
+        <PaymentBadges countryCode={user?.country ?? 'CM'} showCards={!canPayMobileMoney} />
+      </div>
 
       {canPayMobileMoney ? (
         <div className="space-y-2">

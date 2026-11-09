@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { Button } from '@/components/ui/Button';
+import { PaymentBadges } from '@/components/ui/PaymentBadges';
 import type { LandingPersonalization } from '@/lib/landing/types';
 
 export function Pricing({
@@ -74,6 +75,11 @@ export function Pricing({
               <Button fullWidth>{isFr ? 'Débloquer Pro (2 000 FCFA)' : 'Unlock Pro (2,000 FCFA)'}</Button>
             </Link>
           </div>
+        </div>
+
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <p className="text-xs text-slate-500">{isFr ? 'Payez avec' : 'Pay with'}</p>
+          <PaymentBadges countryCode="CM" />
         </div>
 
         <div className="mt-8 surface p-6">
