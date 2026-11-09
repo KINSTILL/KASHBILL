@@ -27,6 +27,8 @@ const validBody = {
   pin: '123456',
   deviceId: 'device-uuid-1',
   locale: 'FR',
+  accountType: 'PROFESSIONAL' as const,
+  acceptTerms: true,
 };
 
 describe('POST /api/auth/register', () => {
@@ -92,6 +94,37 @@ describe('POST /api/auth/register', () => {
       buildReq({ ...validBody, referredByCode: 'ZZZZZZZZ' })
     );
     expect(res.status).toBe(201);
+  });
+
+  it('enregistre un particulier avec renonciation tracée', async () => {
+    const res = await registerRoute(
+      buildReq({
+        ...validBody,
+        phone: '699333333',
+        deviceId: 'device-consumer-1',
+        accountType: 'CONSUMER',
+        acceptTerms: true,
+      })
+    );
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.user.accountType).toBe('CONSUMER');
+
+    const dbUser = await prisma.user.findUnique({ where: { id: json.user.id } });
+    expect(dbUser?.accountType).toBe('CONSUMER');
+    expect(dbUser?.consumerWaiverAcceptedAt).not.toBeNull();
+  });
+
+  it('rejette l\'inscription si acceptTerms est false', async () => {
+    const res = await registerRoute(
+      buildReq({
+        ...validBody,
+        phone: '699444444',
+        deviceId: 'device-reject-1',
+        acceptTerms: false,
+      })
+    );
+    expect(res.status).toBe(422);
   });
 });
 

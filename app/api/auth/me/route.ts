@@ -31,6 +31,7 @@ export async function GET(req: NextRequest): Promise<Response> {
         user: {
           id: user.id,
           phone: user.phone,
+          accountType: user.accountType,
           name: user.name,
           businessName: user.businessName,
           city: user.city,

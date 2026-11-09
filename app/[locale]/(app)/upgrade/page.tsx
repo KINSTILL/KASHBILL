@@ -12,6 +12,7 @@ import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { isSupportedPaymentCountry, getOperatorsForCountry } from '@/lib/countries/mobile-money';
 
 export default function UpgradePage() {
+  const locale = useLocale();
   const t = useTranslations('upgrade');
   const tAddons = useTranslations('addons');
   const toast = useToast();
@@ -21,6 +22,7 @@ export default function UpgradePage() {
   const [status, setStatus] = useState<{ proUntil: string | null; role: string } | null>(null);
   const [pollCount, setPollCount] = useState(0);
 
+  const isConsumer = user?.accountType === 'CONSUMER';
   const userCountry = user?.country;
   const canPayMobileMoney = isSupportedPaymentCountry(userCountry ?? 'CM');
   const operators = canPayMobileMoney ? getOperatorsForCountry(userCountry ?? 'CM') : [];
@@ -113,6 +115,16 @@ export default function UpgradePage() {
           <li>✓ {t('featureUsbPrint')}</li>
         </ul>
       </Card>
+
+      {isConsumer && (
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs text-slate-600">
+            {locale === 'fr'
+              ? 'Compte particulier. En souscrivant, vous confirmez la renonciation à votre droit de rétractation acceptée lors de votre inscription. Aucun remboursement après paiement.'
+              : 'Individual account. By subscribing, you confirm the withdrawal waiver accepted at registration. No refund after payment.'}
+          </p>
+        </div>
+      )}
 
       {canPayMobileMoney ? (
         <div className="space-y-2">

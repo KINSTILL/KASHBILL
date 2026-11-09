@@ -24,6 +24,7 @@ export type SessionUser = {
   name: string | null;
   businessName: string | null;
   role: 'USER' | 'SUPPORT' | 'ADMIN';
+  accountType?: 'PROFESSIONAL' | 'CONSUMER';
   proUntil: string | null;
   referralCode: string;
   country: string;

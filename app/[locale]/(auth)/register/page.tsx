@@ -37,6 +37,7 @@ function RegisterForm() {
   const [city, setCity] = useState('');
   const [mode, setMode] = useState<'ECOMMERCE' | 'PRESTATION'>('ECOMMERCE');
   const [referredByCode, setReferredByCode] = useState(refParam);
+  const [accountType, setAccountType] = useState<'PROFESSIONAL' | 'CONSUMER'>('PROFESSIONAL');
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -90,6 +91,8 @@ function RegisterForm() {
         body: JSON.stringify({
           phone: `${country.dialCode}${cleanPhone}`,
           pin: pinString,
+          accountType,
+          acceptTerms,
           name: name.trim() || undefined,
           businessName: businessName.trim() || undefined,
           city: city.trim() || undefined,
@@ -377,29 +380,85 @@ function RegisterForm() {
             <p className="text-xs text-slate-500">{t('register.ref_code_hint')}</p>
           </section>
 
-          {/* CGU */}
-          <div className="flex items-start gap-2.5 border-t border-slate-100 pt-5">
+          {/* Type de compte & CGU */}
+          <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-sm font-semibold text-ink">
+              {locale === 'fr' ? 'Type de compte' : 'Account type'}
+            </p>
+            <label className="flex items-start gap-2 text-sm cursor-pointer">
+              <input
+                type="radio"
+                name="accountType"
+                value="PROFESSIONAL"
+                checked={accountType === 'PROFESSIONAL'}
+                onChange={() => setAccountType('PROFESSIONAL')}
+                className="mt-1"
+              />
+              <span>
+                <strong>{locale === 'fr' ? 'Professionnel' : 'Professional'}</strong>
+                <br />
+                <span className="text-xs text-slate-600">
+                  {locale === 'fr'
+                    ? "J'utilise MyCashBill pour mon activité commerciale (artisan, e-commerçant, prestataire)."
+                    : 'I use MyCashBill for my business activity (craftsman, e-merchant, service provider).'}
+                </span>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm cursor-pointer">
+              <input
+                type="radio"
+                name="accountType"
+                value="CONSUMER"
+                checked={accountType === 'CONSUMER'}
+                onChange={() => setAccountType('CONSUMER')}
+                className="mt-1"
+              />
+              <span>
+                <strong>{locale === 'fr' ? 'Particulier' : 'Individual'}</strong>
+                <br />
+                <span className="text-xs text-slate-600">
+                  {locale === 'fr'
+                    ? "J'utilise MyCashBill à titre personnel, sans but professionnel."
+                    : 'I use MyCashBill for personal use, without business purpose.'}
+                </span>
+              </span>
+            </label>
+          </div>
+
+          {accountType === 'CONSUMER' && (
+            <p className="mb-1 text-xs text-slate-600">
+              {locale === 'fr'
+                ? "Vous disposez d'un droit de rétractation de 14 jours sur les abonnements payants."
+                : 'You have a 14-day right of withdrawal on paid subscriptions.'}
+            </p>
+          )}
+
+          <label className="flex items-start gap-2 text-sm cursor-pointer border-t border-slate-100 pt-3">
             <input
-              id="terms"
-              name="acceptTerms"
               type="checkbox"
-              required
               checked={acceptTerms}
               onChange={(e) => {
                 setAcceptTerms(e.target.checked);
                 if (error) setError(null);
               }}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-sage-600 focus:ring-sage-500"
+              className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-sage-600 focus:ring-sage-500"
             />
-            <label htmlFor="terms" className="text-xs leading-relaxed text-slate-600">
-              <span>
-                J&apos;ai lu et j&apos;accepte les{' '}
-                <a href="/fr/legal/cgu" target="_blank" className="text-sage-600 underline">CGU</a>
-                {' '}et la{' '}
-                <a href="/fr/legal/privacy" target="_blank" className="text-sage-600 underline">Politique de confidentialité</a>.
-              </span>
-            </label>
-          </div>
+            <span className="text-xs leading-relaxed text-slate-600">
+              {accountType === 'PROFESSIONAL' ? (
+                locale === 'fr' ? (
+                  <>J&apos;accepte les <a href="/fr/legal/cgu" target="_blank" className="text-sage-600 underline">CGU</a>, les <a href="/fr/legal/cgv" target="_blank" className="text-sage-600 underline">CGV professionnelles</a> et la <a href="/fr/legal/privacy" target="_blank" className="text-sage-600 underline">Politique de Confidentialité</a>. Je reconnais agir en tant que professionnel et ne pas bénéficier du droit de rétractation.</>
+                ) : (
+                  <>I accept the <a href="/en/legal/cgu" target="_blank" className="text-sage-600 underline">ToS</a>, professional <a href="/en/legal/cgv" target="_blank" className="text-sage-600 underline">Terms of Sale</a> and <a href="/en/legal/privacy" target="_blank" className="text-sage-600 underline">Privacy Policy</a>. I acknowledge acting as a professional and not benefiting from the right of withdrawal.</>
+                )
+              ) : (
+                locale === 'fr' ? (
+                  <>J&apos;accepte les <a href="/fr/legal/cgu" target="_blank" className="text-sage-600 underline">CGU</a> et la <a href="/fr/legal/privacy" target="_blank" className="text-sage-600 underline">Politique de Confidentialité</a>. <strong>Je demande l&apos;exécution immédiate des abonnements payants et renonce expressément à mon droit de rétractation de 14 jours. Je reconnais que cette renonciation est définitive une fois le paiement effectué.</strong></>
+                ) : (
+                  <>I accept the <a href="/en/legal/cgu" target="_blank" className="text-sage-600 underline">ToS</a> and <a href="/en/legal/privacy" target="_blank" className="text-sage-600 underline">Privacy Policy</a>. <strong>I request immediate performance of paid subscriptions and expressly waive my 14-day right of withdrawal. I acknowledge this waiver is final once payment is made.</strong></>
+                )
+              )}
+            </span>
+          </label>
 
           <Button
             type="submit"

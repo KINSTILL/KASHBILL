@@ -6,64 +6,99 @@ effectiveDate: "2026-11-09"
 
 # Clause de Non-Responsabilité
 
-## Nature du service
-
-MyCashBill est un **outil technique de génération de documents**. Il ne fournit AUCUN conseil juridique, fiscal, comptable ou financier. Il n'est PAS un logiciel de comptabilité, un service d'archivage électronique (SAE), un certificateur de conformité fiscale, ni un cabinet d'expertise comptable.
-
-## Responsabilité de l'Utilisateur
-
-L'Utilisateur est **seul responsable** de :
-
-- L'exactitude des informations saisies dans les documents
-- La conformité fiscale des documents émis (mentions obligatoires, NIU, RCCM, TVA, numérotation séquentielle)
-- La conservation légale de ses documents (10 ans selon la réglementation)
-- L'usage fait des documents
-- La vérification des taux de change affichés (les taux fluctuent)
-- L'obtention des autorisations nécessaires auprès des autorités fiscales
-
-## Limitation de responsabilité
-
-**La responsabilité de MyCashBill est strictement limitée au plus faible des deux montants suivants : (a) le montant total payé par l'Utilisateur au cours des 3 derniers mois ; (b) 10 000 FCFA.**
-
-Pour l'offre gratuite, ce plafond est de **0 FCFA**.
-
-## Exclusions expresses
-
-MyCashBill exclut toute responsabilité pour :
-
-- Les dommages indirects (perte de chiffre d'affaires, perte de clientèle, perte de chance, perte de données, atteinte à l'image)
-- Les erreurs de saisie de l'Utilisateur
-- La non-conformité fiscale ou juridique des documents émis
-- La perte ou la non-conservation des documents non téléchargés
-- Les litiges commerciaux entre l'Utilisateur et ses clients
-- Les interruptions temporaires du service
-- Les erreurs de taux de change saisis par l'Utilisateur
-- Le non-respect par l'Utilisateur de ses obligations légales et fiscales
-
-## Cas non excluables
-
-Conformément à la loi, cette limitation ne s'applique pas en cas de :
-- Faute lourde ou dolosive de MyCashBill
-- Fraude
-- Atteinte à la vie privée
-- Violation d'une disposition légale impérative
-
-Dans ces cas, la responsabilité de MyCashBill est engagée selon le droit commun.
-
-## Recommandations à l'Utilisateur
-
-MyCashBill recommande expressément :
-
-1. **Télécharger chaque document immédiatement** après sa génération
-2. **Conserver une copie** dans un système de sauvegarde personnel (cloud, disque externe)
-3. **Vérifier la conformité fiscale** de chaque document avant envoi
-4. **Consulter un expert-comptable** pour les questions fiscales complexes
-5. **Vérifier les taux de change** avant tout envoi à un client à l'étranger
-
-## Droit applicable
-
-Droit camerounais. Juridiction compétente : tribunaux de Douala.
+**Dernière mise à jour :** 9 novembre 2026 · **Version 1.0**
 
 ---
 
-*Document de démonstration — à réviser par un avocat.*
+## PRÉAMBULE
+
+La présente Clause précise les limites de la responsabilité de Dany Mouelnjock, éditeur de MyCashBill (entrepreneur individuel, Douala, NIU P118816334425R). Elle complète les CGU et les CGV.
+
+**En utilisant MyCashBill, vous reconnaissez avoir lu, compris et accepté l'intégralité de la présente Clause.**
+
+---
+
+## ARTICLE 1 — NATURE DU SERVICE : UN OUTIL TECHNIQUE
+
+**MyCashBill est un OUTIL LOGICIEL de génération de documents commerciaux.** Il n'est **en aucun cas** : service de conseil juridique, fiscal, comptable, commercial ou financier ; logiciel de comptabilité ; service d'archivage électronique à valeur probante (SAE) ; cabinet d'expertise comptable ; certificateur de conformité fiscale ; intermédiaire financier ou séquestre.
+
+---
+
+## ARTICLE 2 — ABSENCE DE CONSEIL JURIDIQUE, FISCAL OU COMPTABLE
+
+**MyCashBill ne fournit AUCUN conseil** juridique, fiscal, comptable, commercial ou financier.
+
+L'Utilisateur reconnaît que MyCashBill **ne vérifie ni la légalité, ni la conformité fiscale, ni l'exactitude** des informations saisies, et qu'il est **seul responsable** de la conformité de ses documents et de son activité. MyCashBill **ne se substitue pas** à un professionnel réglementé.
+
+---
+
+## ARTICLE 3 — ABSENCE D'INTERMÉDIATION FINANCIÈRE
+
+**MyCashBill n'intervient pas dans les flux financiers entre l'Utilisateur et ses Clients finaux.** Il **ne détient, ne séquestre et ne fait transiter aucun fonds**. Il **ne prélève aucune commission**.
+
+Les coordonnées de paiement affichées sur les documents sont de simples **instructions textuelles** fournies par l'Utilisateur à ses clients.
+
+---
+
+## ARTICLE 4 — RESPONSABILITÉ DE L'UTILISATEUR
+
+L'Utilisateur est **seul et unique responsable** : de l'exactitude des informations saisies ; de la conformité fiscale des documents émis ; de la conservation légale de ses documents (10 ans) ; du respect des droits de tiers ; de la légalité de son activité ; de l'usage fait des documents ; de la vérification des taux de change ; de l'obtention des autorisations nécessaires.
+
+**L'Utilisateur reconnaît que MyCashBill n'est pas responsable des conséquences de son activité commerciale, fiscale ou juridique.**
+
+---
+
+## ARTICLE 5 — LIMITATION DE RESPONSABILITÉ
+
+### 5.1 — Plafond de responsabilité
+
+La **responsabilité totale et cumulée** de Dany Mouelnjock envers un Utilisateur est **strictement limitée au plus faible des deux montants suivants** :
+
+- **(a)** le montant total effectivement payé par l'Utilisateur au cours des **douze (12) derniers mois** ;
+- **(b)** un plafond absolu de **dix mille (10 000) francs CFA**.
+
+Pour l'Utilisateur de l'offre gratuite, ce plafond est de **zéro (0) franc CFA**.
+
+### 5.2 — Exclusion des dommages indirects
+
+L'Éditeur **exclut expressément toute responsabilité** pour les dommages indirects (perte de chiffre d'affaires, perte de clientèle, atteinte à l'image, perte de données, interruption du service, erreur de saisie, litige avec un client final, sanctions fiscales, amendes).
+
+### 5.3 — Service fourni « en l'état »
+
+**L'Utilisateur reconnaît utiliser MyCashBill à ses propres risques.**
+
+### 5.4 — Force majeure
+
+L'Éditeur ne saurait être tenu responsable en cas de force majeure.
+
+### 5.5 — Faute lourde et dol
+
+Les limitations **ne s'appliquent pas** en cas de faute lourde ou dolosive, de fraude, ou de violation d'une disposition légale impérative.
+
+### 5.6 — Délai de prescription
+
+Toute réclamation doit être adressée par écrit dans un délai maximum de **six (6) mois**. Passé ce délai, la réclamation sera **irrecevable**.
+
+---
+
+## ARTICLE 6 — RECOMMANDATIONS À L'UTILISATEUR
+
+MyCashBill recommande à l'Utilisateur : (1) télécharger chaque document immédiatement ; (2) conserver une copie dans un système de sauvegarde personnel ; (3) vérifier la conformité fiscale ; (4) consulter un expert-comptable pour les questions complexes ; (5) vérifier les taux de change ; (6) ne pas utiliser MyCashBill comme unique moyen de conservation légale.
+
+---
+
+## ARTICLE 7 — INDEMNISATION
+
+L'Utilisateur s'engage à **indemniser, défendre et dégager de toute responsabilité** Dany Mouelnjock contre **toute réclamation, plainte, action en justice, sanction, amende, perte financière, frais de justice ou honoraires d'avocat** résultant directement ou indirectement de son usage. Cette clause **survit à la résiliation**.
+
+---
+
+## ARTICLE 8 — DROIT APPLICABLE ET JURIDICTION
+
+La présente Clause est régie par le **droit camerounais**. En cas de litige, solution amiable recherchée dans un délai de **trente (30) jours**. À défaut, le litige sera porté **exclusivement** devant les **tribunaux compétents de Douala, Cameroun**. L'Utilisateur reconnaît la compétence exclusive de ces juridictions et **renonce à tout autre for**.
+
+---
+
+## ARTICLE 9 — RECONNAISSANCE PAR L'UTILISATEUR
+
+L'Utilisateur reconnaît avoir lu et compris l'intégralité de la présente Clause, avoir été informé que MyCashBill est un **outil technique** et non un conseiller juridique, fiscal ou comptable, être **seul responsable** de la conformité de ses documents, **indemniser** Dany Mouelnjock, et accepter que la responsabilité soit **strictement plafonnée à 10 000 FCFA** et la juridiction **exclusivement** celle de Douala.

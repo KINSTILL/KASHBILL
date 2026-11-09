@@ -28,6 +28,13 @@ export const registerSchema = z.object({
   deviceId: deviceIdSchema,
   deviceName: deviceNameSchema,
   referredByCode: z.string().length(8).optional(),
+  accountType: z.enum(['PROFESSIONAL', 'CONSUMER']).default('PROFESSIONAL'),
+  acceptTerms: z
+    .boolean()
+    .default(true)
+    .refine((v) => v === true, {
+      message: 'Vous devez accepter les conditions',
+    }),
 });
 
 export const loginSchema = z.object({

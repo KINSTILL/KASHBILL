@@ -12,7 +12,7 @@ effectiveDate: "2026-11-09"
 
 ## PRÉAMBULE
 
-Les présentes Conditions Générales d'Utilisation (ci-après « **CGU** ») ont pour objet de définir les conditions dans lesquelles **Dany Mouelnjock**, entrepreneur individuel, exerçant sous le nom commercial **MyCashBill**, NIU P118816334425R, domicilié à Douala, Cameroun (ci-après « **l'Éditeur** »), met à disposition des utilisateurs (ci-après « **l'Utilisateur** ») l'application **MyCashBill** accessible à l'adresse https://mycashbill.app (ci-après « **le Service** »).
+Les présentes Conditions Générales d'Utilisation (ci-après « **CGU** ») ont pour objet de définir les conditions dans lesquelles **Dany Mouelnjock**, entrepreneur individuel, exerçant sous le nom commercial **MyCashBill**, NIU P118816334425R, domicilié à Douala, Cameroun (ci-après « **l'Éditeur** »), met à disposition des utilisateurs (ci-après « **l'Utilisateur** ») l'application **MyCashBill** accessible à https://mycashbill.app (ci-après « **le Service** »).
 
 **L'Utilisateur reconnaît que l'acceptation des présentes CGU est une condition sine qua non de son accès au Service.** En cochant la case d'acceptation lors de son inscription, ou en utilisant le Service de quelque manière que ce soit, l'Utilisateur reconnaît avoir lu, compris et accepté sans réserve l'intégralité des présentes CGU.
 
@@ -20,13 +20,11 @@ Les présentes Conditions Générales d'Utilisation (ci-après « **CGU** ») on
 
 ## ARTICLE 1 — DÉFINITIONS
 
-Au sens des présentes CGU, les termes suivants ont la signification ci-après :
-
 - **« Service »** : l'application SaaS MyCashBill, accessible via le web (PWA), permettant à l'Utilisateur de générer, stocker et partager des documents commerciaux (devis, factures, reçus, bons de commande, bordereaux de livraison).
 - **« Éditeur »** : Dany Mouelnjock, personne physique éditrice du Service.
 - **« Utilisateur »** : toute personne physique ou morale ayant créé un compte et accédant au Service.
-- **« Contenu Utilisateur »** : toute information saisie par l'Utilisateur dans le Service (données clients, descriptions, montants, mentions légales, logos, etc.).
-- **« Document »** : tout fichier (PDF ou autre) généré par le Service à la demande de l'Utilisateur.
+- **« Contenu Utilisateur »** : toute information saisie par l'Utilisateur dans le Service.
+- **« Document »** : tout fichier généré par le Service à la demande de l'Utilisateur.
 - **« Client final »** : la personne destinataire des Documents générés par l'Utilisateur.
 
 ---
@@ -35,18 +33,18 @@ Au sens des présentes CGU, les termes suivants ont la signification ci-après :
 
 ### 2.1 — Un outil technique, pas un service
 
-**MyCashBill est un OUTIL LOGICIEL de génération de documents commerciaux.** Il ne s'agit **en aucun cas** :
+**MyCashBill est un OUTIL LOGICIEL de génération de documents commerciaux.** Il n'est **en aucun cas** :
 
-- d'un service de conseil juridique, fiscal, comptable, commercial ou financier ;
-- d'un logiciel de comptabilité ;
-- d'un service d'archivage électronique à valeur probante (SAE) ;
-- d'un cabinet d'expertise comptable ou de commissariat aux comptes ;
-- d'un certificateur de conformité fiscale ;
-- d'un intermédiaire financier, d'un établissement de paiement ou d'un séquestre.
+- un service de conseil juridique, fiscal, comptable, commercial ou financier ;
+- un logiciel de comptabilité ;
+- un service d'archivage électronique à valeur probante (SAE) ;
+- un cabinet d'expertise comptable ou de commissariat aux comptes ;
+- un certificateur de conformité fiscale ;
+- un intermédiaire financier, un établissement de paiement ou un séquestre.
 
 ### 2.2 — Absence totale d'intermédiation financière
 
-L'Éditeur **n'intervient pas** dans les flux financiers entre l'Utilisateur et ses Clients finaux. Il **ne détient, ne séquestre et ne fait transiter aucun fonds**. Il **ne prélève aucune commission** sur les transactions de l'Utilisateur. Les seuls flux financiers traités concernent exclusivement le règlement des abonnements à l'application.
+L'Éditeur **n'intervient pas** dans les flux financiers entre l'Utilisateur et ses Clients finaux. Il **ne détient, ne séquestre et ne fait transiter aucun fonds**. Il **ne prélève aucune commission** sur les transactions de l'Utilisateur.
 
 ### 2.3 — Aucune vérification par l'Éditeur
 
@@ -63,8 +61,6 @@ L'accès et l'utilisation du Service sont subordonnés à l'acceptation pleine, 
 - l'utilisation du Service à quelque titre que ce soit.
 
 **En cas de refus des CGU, l'Utilisateur doit immédiatement cesser toute utilisation du Service.**
-
-L'Éditeur se réserve le droit de modifier les présentes CGU à tout moment, conformément à l'article 19.
 
 ---
 
@@ -83,11 +79,11 @@ L'Utilisateur est **seul responsable** :
 - de toutes les actions effectuées depuis son compte ;
 - de la sécurité des appareils sur lesquels il se connecte.
 
-**Toute connexion effectuée avec les identifiants de l'Utilisateur est réputée avoir été effectuée par lui.** L'Éditeur ne saurait être tenu responsable d'un accès frauduleux résultant d'une négligence de l'Utilisateur.
+**Toute connexion effectuée avec les identifiants de l'Utilisateur est réputée avoir été effectuée par lui.**
 
 ### 4.3 — Unicité du compte
 
-L'Utilisateur s'engage à ne créer qu'un seul compte par numéro de téléphone. Toute tentative de création multiple pour contourner les limites du Service peut entraîner la suspension immédiate.
+L'Utilisateur s'engage à ne créer qu'un seul compte par numéro de téléphone.
 
 ---
 
@@ -98,8 +94,6 @@ L'Utilisateur déclare :
 - être âgé d'au moins **18 ans** ;
 - disposer de la pleine capacité juridique pour contracter ;
 - agir pour son propre compte ou disposer des pouvoirs nécessaires s'il agit pour une personne morale.
-
-L'Éditeur se réserve le droit de demander tout justificatif et de suspendre le compte en cas de doute.
 
 ---
 
@@ -131,15 +125,15 @@ L'Utilisateur reconnaît et accepte expressément que :
 
 ### 8.1 — Contenu Utilisateur
 
-L'Utilisateur est **seul et unique responsable** de l'ensemble des Contenus Utilisateurs qu'il saisit, téléverse ou génère via le Service, y compris :
+L'Utilisateur est **seul et unique responsable** de l'ensemble des Contenus Utilisateurs qu'il saisit, téléverse ou génère, y compris :
 
-- les données relatives à ses Clients finaux (noms, adresses, coordonnées, identifiants fiscaux) ;
+- les données relatives à ses Clients finaux ;
 - les descriptions de prestations, prix, taxes, remises, totaux ;
 - les mentions légales, fiscales et commerciales ;
 - ses logos, signatures, cachets, en-têtes et CGV ;
 - la légalité de son activité commerciale ;
 - la conformité de ses Documents aux réglementations applicables ;
-- le respect des droits de tiers (propriété intellectuelle, données personnelles, image).
+- le respect des droits de tiers.
 
 ### 8.2 — Garantie de conformité des données
 
@@ -153,7 +147,7 @@ L'Utilisateur garantit :
 
 L'Utilisateur est **seul responsable** de la conservation légale de ses Documents (durée légale : 10 ans selon la réglementation applicable). Il doit télécharger et archiver personnellement chaque Document généré.
 
-**MyCashBill n'est PAS un service d'archivage électronique à valeur probante (SAE).** Aucune garantie de conservation, d'intégrité à long terme ou de récupération n'est fournie au-delà de la période de rétention prévue par le forfait.
+**MyCashBill n'est PAS un service d'archivage électronique à valeur probante (SAE).**
 
 ---
 
@@ -164,10 +158,10 @@ L'Utilisateur s'engage à **ne jamais** utiliser le Service pour :
 - générer, diffuser, stocker ou faciliter la création de documents faux, falsifiés, frauduleux ou contrefaits ;
 - faciliter le blanchiment d'argent, la fraude fiscale, l'escroquerie, l'abus de confiance ou tout autre délit ;
 - usurper l'identité d'un tiers ;
-- porter atteinte aux droits de tiers (propriété intellectuelle, vie privée, image, données personnelles) ;
+- porter atteinte aux droits de tiers ;
 - diffuser des contenus illicites, haineux, diffamatoires ou contraires à l'ordre public ;
 - contourner des obligations légales de déclaration ou de facturation ;
-- tenter de porter atteinte à la sécurité ou à l'intégrité du Service (piratage, injection, déni de service) ;
+- tenter de porter atteinte à la sécurité ou à l'intégrité du Service ;
 - extraire massivement les données du Service (scraping) ;
 - revendre, sous-licencier ou exploiter commercialement le Service sans autorisation écrite ;
 - utiliser le Service pour un usage contraire aux lois camerounaises ou aux traités internationaux applicables.
@@ -186,7 +180,7 @@ Toute reproduction, modification, décompilation, ingénierie inverse, distribut
 
 ### 10.2 — Propriété de l'Utilisateur
 
-Les Contenus Utilisateurs et les Documents générés **appartiennent à l'Utilisateur**. L'Éditeur ne revendique aucun droit sur ces contenus. L'Utilisateur concède à l'Éditeur une licence technique limitée, non exclusive et strictement nécessaire à la fourniture du Service (stockage, génération PDF, envoi WhatsApp/email).
+Les Contenus Utilisateurs et les Documents générés **appartiennent à l'Utilisateur**. L'Éditeur ne revendique aucun droit sur ces contenus. L'Utilisateur concède à l'Éditeur une licence technique limitée, non exclusive et strictement nécessaire à la fourniture du Service.
 
 ---
 
@@ -196,7 +190,7 @@ Le traitement des données personnelles est régi par la **Politique de Confiden
 
 L'Utilisateur reconnaît que :
 
-- l'Éditeur est Responsable de Traitement pour les données du compte (téléphone, PIN, profil) ;
+- l'Éditeur est Responsable de Traitement pour les données du compte ;
 - l'Éditeur est Sous-traitant technique pour les données des Clients finaux saisies par l'Utilisateur, qui en est le seul Responsable de Traitement ;
 - l'Utilisateur garantit disposer des consentements nécessaires pour traiter les données de ses Clients finaux.
 
@@ -210,15 +204,15 @@ Le Service est fourni **« en l'état »** et **« tel que disponible »**, sans
 
 ### 12.2 — Aucune garantie de disponibilité
 
-L'Éditeur **ne garantit aucun niveau de disponibilité, de performance ou de continuité**. Le Service peut être interrompu à tout moment pour maintenance, mise à jour, incident technique, force majeure, ou toute autre raison, sans préavis ni indemnisation.
+L'Éditeur **ne garantit aucun niveau de disponibilité, de performance ou de continuité**. Le Service peut être interrompu à tout moment sans préavis ni indemnisation.
 
 ### 12.3 — Aucune garantie de conservation
 
-L'Éditeur **ne garantit aucune conservation permanente** des Documents ou Contenus Utilisateurs. Les données peuvent être supprimées selon la politique de rétention du forfait souscrit.
+L'Éditeur **ne garantit aucune conservation permanente** des Documents ou Contenus Utilisateurs.
 
 ### 12.4 — Aucune garantie de compatibilité
 
-L'Éditeur **ne garantit pas** la compatibilité du Service avec tous les navigateurs, appareils ou systèmes d'exploitation. L'Utilisateur est responsable de disposer d'un environnement compatible.
+L'Éditeur **ne garantit pas** la compatibilité du Service avec tous les navigateurs, appareils ou systèmes d'exploitation.
 
 ---
 
@@ -242,7 +236,7 @@ L'Éditeur peut modifier les tarifs à tout moment. Les modifications ne s'appli
 
 ### 13.5 — Remboursement
 
-Les conditions de remboursement sont définies dans la **Politique de Remboursement** accessible à https://mycashbill.app/fr/legal/refund. En règle générale, **aucun remboursement n'est accordé** après le début de la période souscrite.
+Les conditions de remboursement sont définies dans la **Politique de Remboursement** accessible à https://mycashbill.app/fr/legal/refund.
 
 ---
 
@@ -258,19 +252,15 @@ L'Éditeur se réserve le droit de **suspendre, restreindre ou résilier sans pr
 - non-paiement ;
 - demande d'une autorité administrative ou judiciaire ;
 - comportement portant atteinte à la réputation de MyCashBill ;
-- comportement menaçant, insultant ou harcelant envers l'Éditeur ou son support.
+- comportement menaçant, insultant ou harcelant.
 
 ### 14.2 — Aucun remboursement en cas de suspension
 
-Toute suspension pour violation des CGU **ne donne droit à aucun remboursement**, y compris pour les périodes déjà payées.
+Toute suspension pour violation des CGU **ne donne droit à aucun remboursement**.
 
 ### 14.3 — Résiliation par l'Utilisateur
 
-L'Utilisateur peut supprimer son compte à tout moment. La suppression entraîne :
-
-- la perte définitive de l'accès au Service ;
-- l'impossibilité de récupérer les Documents non téléchargés ;
-- la conservation ou l'anonymisation des données conformément à la Politique de Confidentialité.
+L'Utilisateur peut supprimer son compte à tout moment.
 
 ### 14.4 — Effet de la résiliation
 
@@ -305,19 +295,19 @@ L'Éditeur **exclut expressément toute responsabilité** pour les dommages indi
 
 ### 15.3 — Absence de garantie de résultat
 
-L'Éditeur ne fournit **aucune garantie de résultat**. L'Utilisateur reconnaît que le Service est un outil dont les résultats dépendent exclusivement de son usage.
+L'Éditeur ne fournit **aucune garantie de résultat**.
 
 ### 15.4 — Force majeure
 
-L'Éditeur ne saurait être tenu responsable en cas d'inexécution ou de retard résultant d'un cas de **force majeure** au sens du droit camerounais (catastrophe naturelle, panne généralisée d'Internet, cyberattaque massive, décision administrative, changement réglementaire, défaillance d'un fournisseur technique, événement extérieur indépendant de sa volonté).
+L'Éditeur ne saurait être tenu responsable en cas d'inexécution ou de retard résultant d'un cas de **force majeure**.
 
 ### 15.5 — Faute lourde et dol
 
-Les limitations et exclusions ci-dessus **ne s'appliquent pas** en cas de faute lourde ou dolosive de l'Éditeur, de fraude, d'atteinte à la vie privée ou de violation d'une disposition légale impérative. Dans ces cas, la responsabilité est engagée dans les conditions du droit commun.
+Les limitations et exclusions ci-dessus **ne s'appliquent pas** en cas de faute lourde ou dolosive de l'Éditeur, de fraude, d'atteinte à la vie privée ou de violation d'une disposition légale impérative.
 
 ### 15.6 — Délai de prescription
 
-Toute réclamation relative à l'utilisation du Service doit être adressée à l'Éditeur par écrit dans un délai maximum de **six (6) mois** à compter de la survenance du fait générateur. Passé ce délai, la réclamation sera **irrecevable**, sauf disposition légale impérative contraire.
+Toute réclamation relative à l'utilisation du Service doit être adressée à l'Éditeur par écrit dans un délai maximum de **six (6) mois** à compter de la survenance du fait générateur. Passé ce délai, la réclamation sera **irrecevable**.
 
 ---
 
@@ -339,8 +329,6 @@ Cette clause d'indemnisation **demeure en vigueur après la résiliation** ou la
 
 L'Éditeur ne saurait être tenu responsable en cas d'inexécution ou de retard dans l'exécution de ses obligations résultant d'un cas de force majeure au sens du droit camerounais et des textes OHADA.
 
-Sont notamment considérés comme force majeure : catastrophe naturelle, guerre, émeute, attentat, décision administrative, panne généralisée d'Internet, cyberattaque massive, défaillance d'un fournisseur technique (hébergeur, prestataire de paiement, opérateur télécom), ou tout événement extérieur indépendant de la volonté de l'Éditeur.
-
 ---
 
 ## ARTICLE 18 — NON-RENONCIATION
@@ -355,8 +343,6 @@ L'Éditeur se réserve le droit de **modifier les présentes CGU à tout moment*
 
 Les modifications majeures feront l'objet d'une notification aux Utilisateurs inscrits. **La poursuite de l'utilisation du Service après modification vaut acceptation des nouvelles CGU.**
 
-En cas de refus, l'Utilisateur doit cesser toute utilisation et peut supprimer son compte.
-
 ---
 
 ## ARTICLE 20 — DROIT APPLICABLE ET JURIDICTION
@@ -365,7 +351,7 @@ Les présentes CGU sont régies par le **droit camerounais**.
 
 En cas de litige, l'Utilisateur est invité à contacter préalablement l'Éditeur à **support@mycashbill.app** pour rechercher une solution amiable dans un délai de **trente (30) jours**.
 
-À défaut d'accord amiable, le litige sera porté **exclusivement** devant les **tribunaux compétents de Douala, Cameroun**. L'Utilisateur reconnaît la compétence exclusive de ces juridictions et **renonce expressément à tout autre for** (notamment son lieu de résidence, son domicile ou le siège de son activité).
+À défaut d'accord amiable, le litige sera porté **exclusivement** devant les **tribunaux compétents de Douala, Cameroun**. L'Utilisateur reconnaît la compétence exclusive de ces juridictions et **renonce expressément à tout autre for**.
 
 ---
 
@@ -373,19 +359,19 @@ En cas de litige, l'Utilisateur est invité à contacter préalablement l'Édite
 
 ### 21.1 — Divisibilité
 
-Si une clause des présentes CGU est déclarée nulle ou inapplicable par une juridiction compétente, les autres clauses resteront pleinement en vigueur. La clause nulle sera remplacée par une clause valide se rapprochant le plus possible de son intention initiale.
+Si une clause des présentes CGU est déclarée nulle ou inapplicable, les autres clauses resteront pleinement en vigueur. La clause nulle sera remplacée par une clause valide se rapprochant le plus possible de son intention initiale.
 
 ### 21.2 — Intégralité
 
-Les présentes CGU, ensemble avec les Mentions Légales, la Politique de Confidentialité, les CGV et la Politique de Remboursement, constituent **l'intégralité de l'accord** entre l'Éditeur et l'Utilisateur. Elles remplacent tout accord ou communication antérieure.
+Les présentes CGU, ensemble avec les Mentions Légales, la Politique de Confidentialité, les CGV et la Politique de Remboursement, constituent **l'intégralité de l'accord** entre l'Éditeur et l'Utilisateur.
 
 ### 21.3 — Absence de tiers bénéficiaire
 
-Les présentes CGU ne confèrent **aucun droit à un tiers**. Aucune disposition ne saurait être invoquée par un Client final ou toute autre personne non partie aux CGU.
+Les présentes CGU ne confèrent **aucun droit à un tiers**.
 
 ### 21.4 — Cession
 
-L'Utilisateur **ne peut céder** ses droits et obligations au titre des présentes CGU sans l'accord écrit préalable de l'Éditeur. L'Éditeur peut librement céder tout ou partie de ses droits.
+L'Utilisateur **ne peut céder** ses droits et obligations au titre des présentes CGU sans l'accord écrit préalable de l'Éditeur.
 
 ### 21.5 — Langue
 
@@ -404,7 +390,7 @@ L'Utilisateur reconnaît expressément avoir :
 - été informé qu'il **indemnise** Dany Mouelnjock contre tout litige résultant de son usage ;
 - été informé que la responsabilité de l'Éditeur est **strictement plafonnée à 10 000 FCFA** ;
 - été informé que la juridiction compétente est **exclusivement** celle de Douala, Cameroun ;
-- été informé qu'il **renonce à tout autre for** pour tout litige lié au Service ;
-- accepté que l'Éditeur puisse **modifier les CGU à tout moment** et que la poursuite de l'utilisation vaut acceptation.
+- été informé qu'il **renonce à tout autre for** ;
+- accepté que l'Éditeur puisse **modifier les CGU à tout moment**.
 
 **L'Utilisateur déclare avoir disposé du temps nécessaire pour lire et comprendre les présentes CGU, et avoir eu la possibilité de consulter un conseil juridique avant acceptation.**

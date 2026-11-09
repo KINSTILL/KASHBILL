@@ -29,7 +29,7 @@ describe('Uploads crypto (AES-256-GCM)', () => {
     const encrypted = encryptBuffer(plain);
 
     // Altération d'un octet dans le payload
-    encrypted[encrypted.length - 1] ^= 0xff;
+    encrypted[encrypted.length - 1] = (encrypted[encrypted.length - 1] ?? 0) ^ 0xff;
     expect(() => decryptBuffer(encrypted)).toThrow();
   });
 });

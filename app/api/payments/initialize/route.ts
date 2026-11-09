@@ -56,6 +56,12 @@ export async function POST(req: NextRequest): Promise<Response> {
           endsAt: new Date(now.getTime() + PRO_DURATION_DAYS * 24 * 60 * 60 * 1000),
           amountXaf: PRO_PRICE_FCFA,
           providerRef: null, // rempli plus tard par le webhook
+          consumerWithdrawalWaiver:
+            user.accountType === 'CONSUMER' && Boolean(user.consumerWaiverAcceptedAt),
+          consumerWithdrawalWaivedAt:
+            user.accountType === 'CONSUMER' && user.consumerWaiverAcceptedAt
+              ? user.consumerWaiverAcceptedAt
+              : null,
         },
       });
 

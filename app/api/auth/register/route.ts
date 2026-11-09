@@ -79,6 +79,11 @@ export async function POST(req: NextRequest): Promise<Response> {
       const user = await tx.user.create({
         data: {
           phone: data.phone,
+          accountType: data.accountType,
+          consumerWaiverAcceptedAt:
+            data.accountType === 'CONSUMER' && data.acceptTerms
+              ? new Date()
+              : null,
           pinHash,
           name: data.name ?? null,
           businessName: data.businessName ?? null,
@@ -147,6 +152,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         user: {
           id: created.id,
           phone: created.phone,
+          accountType: created.accountType,
           name: created.name,
           businessName: created.businessName,
           city: created.city,

@@ -11,6 +11,11 @@ datasource db {
 // ENUMS
 // ─────────────────────────────────────────────
 
+enum AccountType {
+  PROFESSIONAL
+  CONSUMER
+}
+
 enum Role {
   USER
   SUPPORT
@@ -83,6 +88,8 @@ model User {
   city           String?
   locale         Locale    @default(FR)
   role           Role      @default(USER)
+  accountType     AccountType @default(PROFESSIONAL)
+  consumerWaiverAcceptedAt DateTime?
   mode           Mode      @default(ECOMMERCE)
   proUntil       DateTime?
   pendingProDays Int       @default(0)
@@ -276,6 +283,8 @@ model Subscription {
   providerRef String?
   amountXaf   Int?
   createdAt   DateTime  @default(now())
+  consumerWithdrawalWaiver   Boolean   @default(false)
+  consumerWithdrawalWaivedAt DateTime?
   invoice     SubscriptionInvoice?
   addOns      UserAddOn[]
 
