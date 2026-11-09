@@ -14,8 +14,8 @@ import {
   getRenumerationsLimit,
   getEditsPerDocumentLimit,
   getHistoryWindowDays,
-  maybeResetMonthlyCounters,
 } from '@/lib/auth/plan';
+import { maybeResetMonthlyCounters } from '@/lib/auth/plan-server';
 import {
   FREE_CLIENTS_LIMIT,
   FREE_HISTORY_DAYS,

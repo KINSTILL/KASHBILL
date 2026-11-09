@@ -16,7 +16,7 @@ export function Header() {
   const { user } = useCurrentUser();
 
   return (
-    <header className="bg-white/80 backdrop-blur-md transition-smooth sticky top-0 z-30 border-b border-slate-100">
+    <header className="bg-white/80 backdrop-blur-md transition-smooth sticky top-0 z-30 border-b border-slate-200/70">
       <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-4">
         <Logo href={`/${locale}`} />
         <div className="flex items-center gap-2">

@@ -70,26 +70,3 @@ export function getEditsPerDocumentLimit(user: Pick<User, 'proUntil'>): number {
   return isPro(user) ? Infinity : FREE_EDITS_PER_DOCUMENT;
 }
 
-/**
- * Reset les compteurs mensuels si on a changé de mois.
- * Appelé avant toute lecture de compteur mensuel.
- */
-export async function maybeResetMonthlyCounters(
-  user: Pick<User, 'id' | 'monthlyCountersResetAt' | 'duplicationsThisMonth' | 'renumerationsThisMonth'>
-): Promise<void> {
-  const now = new Date();
-  const last = user.monthlyCountersResetAt;
-  if (last.getFullYear() === now.getFullYear() && last.getMonth() === now.getMonth()) {
-    return;
-  }
-  const { prisma } = await import('@/lib/db');
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      duplicationsThisMonth: 0,
-      renumerationsThisMonth: 0,
-      monthlyCountersResetAt: now,
-    },
-  });
-}
-

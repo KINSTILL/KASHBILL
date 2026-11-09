@@ -40,6 +40,8 @@
 body {
   color: #0b1220;
   background-color: #fafbfc;
+  background-image: radial-gradient(900px 360px at 50% -8%, rgba(61, 129, 89, 0.07), transparent 70%);
+  background-repeat: no-repeat;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -55,6 +57,12 @@ body {
 .status-warning { background: #fffbeb; color: #b45309; }
 .status-error { background: #fef2f2; color: #b91c1c; }
 .status-neutral { background: #f3f4f6; color: #4b5563; }
+
+/* Titres : crénage serré, plus éditorial */
+h1, h2, h3 {
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
 
 /* Montants signature — JetBrains Mono tabular */
 .money {
