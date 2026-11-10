@@ -36,10 +36,10 @@ export function Logo({
         xmlns="http://www.w3.org/2000/svg"
         className={isSm ? 'h-7 w-7' : isLg ? 'h-10 w-10' : 'h-8 w-8'}
       >
-        {/* Boucle 1 : Document / Émetteur (Noir carbone net / s'adapte en mode sombre) */}
+        {/* Boucle 1 : Document / Émetteur (Noir carbone net et garanti visible) */}
         <path
           d="M6 22V10C6 7.79086 7.79086 6 10 6H16C18.2091 6 20 7.79086 20 10V11"
-          className="stroke-slate-950 dark:stroke-white transition-colors"
+          stroke="#09090b"
           strokeWidth="3.2"
           strokeLinecap="round"
         />
@@ -66,8 +66,8 @@ export function Logo({
               isSm ? 'text-[16px] sm:text-[17px]' : isLg ? 'text-2xl' : 'text-lg sm:text-xl'
             }`}
           >
-            <span className="font-bold text-slate-800 dark:text-slate-200">My</span>
-            <span className="font-black text-slate-950 dark:text-white ml-0.5">Cash</span>
+            <span className="font-bold text-slate-800">My</span>
+            <span className="font-black text-slate-950 ml-0.5">Cash</span>
             <span className="font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent ml-0.5">
               Bill
             </span>
