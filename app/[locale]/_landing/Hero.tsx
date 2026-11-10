@@ -83,26 +83,26 @@ export function Hero({
           ))}
         </div>
 
-        {/* CTAs principaux */}
-        <div className="mt-4 sm:mt-6 flex flex-col items-center justify-center gap-2.5 sm:flex-row sm:gap-3">
-          <Link href={`/${locale}/register` as Route} className="w-full sm:w-auto">
+        {/* CTAs principaux côte à côte (sur téléphone, tablette et ordinateur) */}
+        <div className="mt-3.5 sm:mt-6 flex flex-row items-center justify-center gap-2 sm:gap-3">
+          <Link href={`/${locale}/register` as Route} className="w-auto">
             <Button
               size="lg"
-              className="w-full sm:w-auto min-h-[46px] sm:min-h-[50px] px-6 sm:px-8 gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold shadow-md shadow-emerald-700/20 hover:from-emerald-700 hover:to-teal-700 active:scale-98 text-sm sm:text-base"
+              className="min-h-[40px] sm:min-h-[50px] px-3.5 sm:px-8 gap-1.5 sm:gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold shadow-md shadow-emerald-700/20 hover:from-emerald-700 hover:to-teal-700 active:scale-98 text-xs sm:text-base whitespace-nowrap"
             >
               <span>{isFr ? 'Essayer gratuitement' : 'Try for free'}</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </Link>
           
-          <a href="#demo" className="w-full sm:w-auto">
+          <a href="#demo" className="w-auto">
             <Button
               size="lg"
               variant="secondary"
-              className="w-full sm:w-auto min-h-[42px] sm:min-h-[50px] border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 text-xs sm:text-sm shadow-xs"
+              className="min-h-[40px] sm:min-h-[50px] px-3 sm:px-6 border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-50 text-xs sm:text-sm shadow-xs whitespace-nowrap"
             >
               <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-500" />
-              <span>{isFr ? 'Voir la démo en direct' : 'Watch live demo'}</span>
+              <span>{isFr ? 'Voir la démo' : 'Watch live demo'}</span>
             </Button>
           </a>
         </div>
