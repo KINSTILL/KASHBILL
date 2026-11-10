@@ -64,16 +64,22 @@ export function SocialProofStrip({ locale = 'fr' }: { locale?: string }) {
         )}
 
         {/* 4 piliers d'autorité et réassurance institutionnelle */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-4">
           {trustPillars.map((p, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/70 p-2.5 sm:p-3 transition hover:bg-slate-50"
+              className="flex flex-col items-start gap-1.5 sm:gap-2 rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-3.5 shadow-xs hover:border-emerald-300 hover:shadow-sm transition-all"
             >
-              <span className="text-xl shrink-0">{p.icon}</span>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-ink truncate">{p.title}</p>
-                <p className="text-[11px] text-slate-500 truncate">{p.desc}</p>
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-emerald-50 text-base sm:text-lg shrink-0">
+                {p.icon}
+              </div>
+              <div className="w-full">
+                <p className="text-xs sm:text-sm font-bold text-slate-950 leading-snug">
+                  {p.title}
+                </p>
+                <p className="text-[11px] sm:text-xs text-slate-600 leading-snug mt-0.5 font-normal">
+                  {p.desc}
+                </p>
               </div>
             </div>
           ))}

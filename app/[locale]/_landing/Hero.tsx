@@ -49,8 +49,8 @@ export function Hero({
 
       <div className="relative mx-auto max-w-4xl text-center">
         {/* Badge d'autorité compact */}
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white px-3 py-0.5 text-[11px] sm:text-xs font-medium text-slate-700 shadow-xs">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white px-3 py-1 text-xs font-semibold text-slate-800 shadow-xs">
+          <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
           <span>{badgeText}</span>
         </div>
 
@@ -118,18 +118,18 @@ export function Hero({
         </div>
 
         {/* Micro-preuves de confiance */}
-        <div className="mt-2.5 sm:mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] sm:text-xs text-slate-500">
-          <span className="flex items-center gap-1 font-medium">
-            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-            {isFr ? '10 docs offerts/mois' : '10 free docs/mo'}
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 text-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white px-2.5 py-1 font-semibold text-slate-800 shadow-2xs">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+            <span>{isFr ? '10 docs offerts/mois' : '10 free docs/mo'}</span>
           </span>
-          <span className="flex items-center gap-1 font-medium">
-            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-            {isFr ? 'Sans carte bancaire' : 'No credit card'}
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white px-2.5 py-1 font-semibold text-slate-800 shadow-2xs">
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+            <span>{isFr ? 'Sans carte bancaire' : 'No credit card'}</span>
           </span>
-          <span className="flex items-center gap-1 font-medium">
-            <ShieldCheck className="h-3 w-3 text-emerald-600" />
-            {isFr ? 'Conforme OHADA' : 'OHADA Compliant'}
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white px-2.5 py-1 font-semibold text-slate-800 shadow-2xs">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+            <span>{isFr ? '100% Conforme OHADA' : '100% OHADA Compliant'}</span>
           </span>
         </div>
 
