@@ -34,8 +34,18 @@ export function Hero({
       />
 
       <div className="relative mx-auto max-w-4xl text-center">
+        {/* Badge de valeur épuré (Proposition 2A) */}
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/95 px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold text-slate-800 shadow-xs">
+          <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+          <span>
+            {isFr
+              ? '⚡ Devis & Factures en 60s sur smartphone'
+              : '⚡ Quotes & Invoices in 60s on smartphone'}
+          </span>
+        </div>
+
         {/* Titre SEO en forme de question percutante */}
-        <h1 className="mt-1 sm:mt-4 text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.18] sm:leading-[1.12]">
+        <h1 className="mt-2.5 sm:mt-4 text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.18] sm:leading-[1.12]">
           {isFr ? (
             <>
               Besoin d&apos;envoyer un devis ou une facture pro{' '}
