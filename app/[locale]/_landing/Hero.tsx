@@ -107,7 +107,7 @@ export function Hero({
   const currentDoc = docsData[activeDoc];
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-sage-50 to-white px-4 pt-16 pb-20">
+    <section className="relative overflow-hidden bg-white px-4 pt-20 pb-24">
       <div className="mx-auto max-w-5xl">
         {fromWhatsApp && (
           <div className="mb-6 rounded-full bg-whatsapp/10 px-4 py-2 text-center text-sm text-whatsapp-dark font-medium">
@@ -121,13 +121,13 @@ export function Hero({
           </span>
 
           {/* Titre percutant axé sur la douleur des entrepreneurs */}
-          <h1 className="mt-6 font-display text-3xl font-extrabold leading-tight tracking-tight text-ink md:text-5xl">
+          <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] tracking-[-0.03em] text-ink md:text-6xl">
             {isFr
               ? 'Vos clients hésitent à vous payer ? Envoyez des documents qui imposent le respect.'
               : 'Clients hesitate to pay you? Send documents that command respect.'}
           </h1>
 
-          <p className="mx-auto mt-4 max-w-2xl text-base text-slate-600 md:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-500 md:text-lg">
             {isFr
               ? `Devis, factures, reçus et bons de livraison générés en 47 secondes sur votre ${deviceLabel}. Envoyez sur WhatsApp, faites-vous payer sans délai et sans négociation.`
               : `Compliant quotes, invoices, delivery notes and receipts generated in 47 seconds on your ${deviceLabel}. Share via WhatsApp, get paid on time.`}
@@ -174,7 +174,7 @@ export function Hero({
             ))}
           </div>
 
-          <div className="relative mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+          <div className="relative mt-3 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_60px_-20px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/[0.03]">
             {/* Barre supérieure : Commutateur Mode Gratuit vs Mode Pro */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/90 px-4 py-3 sm:px-6">
               <div className="flex items-center gap-2">
