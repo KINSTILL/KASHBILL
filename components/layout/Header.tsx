@@ -10,6 +10,7 @@ import { InstallButton } from '@/components/pwa/InstallButton';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { Button } from '@/components/ui/Button';
 import { ShieldCheck } from 'lucide-react';
+import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 
 export function Header() {
   const t = useTranslations('nav');
@@ -23,16 +24,19 @@ export function Header() {
         
         <div className="flex items-center gap-1.5 sm:gap-2">
           {(user?.role === 'ADMIN' || user?.role === 'SUPPORT') && (
-            <Link href={`/${locale}/admin` as Route}>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 gap-1 border-emerald-300 bg-emerald-50 px-2 text-xs font-semibold text-emerald-900 shadow-xs hover:bg-emerald-100"
-              >
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-700" />
-                <span className="hidden sm:inline">Admin</span>
-              </Button>
-            </Link>
+            <>
+              <Link href={`/${locale}/admin` as Route}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 gap-1 border-emerald-300 bg-emerald-50 px-2 text-xs font-semibold text-emerald-900 shadow-xs hover:bg-emerald-100"
+                >
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-700" />
+                  <span className="hidden sm:inline">Admin</span>
+                </Button>
+              </Link>
+              <AdminTestProToggle />
+            </>
           )}
 
           <InstallButton variant="header" />

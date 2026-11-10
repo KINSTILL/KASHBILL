@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Logo } from '@/components/layout/Logo';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { canDo, type AdminAction } from '@/lib/admin/roles';
+import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 
 export function AdminSidebar() {
   const locale = useLocale();
@@ -69,7 +70,11 @@ export function AdminSidebar() {
           </nav>
         </div>
 
-        <div className="border-t p-4 bg-slate-50">
+        <div className="border-t p-4 bg-slate-50 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-slate-500 font-medium">Formule Test :</span>
+            <AdminTestProToggle />
+          </div>
           <Link
             href={`/${locale}/dashboard` as Route}
             className="flex items-center justify-between rounded-lg border border-sage-200 bg-white px-3 py-2 text-xs font-semibold text-sage-900 shadow-xs hover:bg-sage-100 transition-colors"
@@ -85,6 +90,7 @@ export function AdminSidebar() {
         <div className="flex items-center justify-between mb-2">
           <Logo href={`/${locale}/admin`} size="sm" />
           <div className="flex items-center gap-2">
+            <AdminTestProToggle />
             <Link
               href={`/${locale}/dashboard` as Route}
               className="text-xs px-2.5 py-1 rounded bg-sage-50 text-sage-800 hover:bg-sage-100 font-semibold border border-sage-200"

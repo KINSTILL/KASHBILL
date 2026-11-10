@@ -11,6 +11,7 @@ import { MiniFAQ } from '@/components/faq/MiniFAQ';
 import { PaymentBadges } from '@/components/ui/PaymentBadges';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { isSupportedPaymentCountry, getOperatorsForCountry } from '@/lib/countries/mobile-money';
+import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 
 export default function UpgradePage() {
   const locale = useLocale();
@@ -96,6 +97,22 @@ export default function UpgradePage() {
         <h1 className="text-2xl font-semibold tracking-tight text-ink">Passer Pro</h1>
         <p className="mt-1 text-sm text-slate-500">2 000 FCFA / 30 jours</p>
       </div>
+
+      {user?.role === 'ADMIN' && (
+        <Card className="mb-4 border-amber-300 bg-amber-50/70 p-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                🛠️ Mode Test Administrateur
+              </p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                En tant qu&apos;administrateur, vous pouvez basculer instantanément votre compte en Pro pour tester l&apos;application sans passer par le paiement.
+              </p>
+            </div>
+            <AdminTestProToggle />
+          </div>
+        </Card>
+      )}
 
       {isActive && (
         <Card className="p-4">
