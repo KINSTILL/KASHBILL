@@ -114,6 +114,24 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
   const isFr = user.locale === 'FR';
   // Abonnement offert par MyCashBill (aucun paiement) : mentions adaptées.
   const isGift = subscription.source === 'ADMIN_GIFT';
+  // Nature du document : attestation (offre), reçu (particulier), facture (professionnel).
+  const docKind = isGift ? 'ATTESTATION' : user.accountType === 'CONSUMER' ? 'RECU' : 'FACTURE';
+  const docTitle = {
+    FACTURE: isFr ? "FACTURE D'ABONNEMENT" : 'SUBSCRIPTION INVOICE',
+    RECU: isFr ? "REÇU D'ABONNEMENT" : 'SUBSCRIPTION RECEIPT',
+    ATTESTATION: isFr ? "ATTESTATION D'ABONNEMENT OFFERT" : 'GIFTED SUBSCRIPTION CERTIFICATE',
+  }[docKind];
+  const footerNote = {
+    FACTURE: isFr
+      ? "Document émis électroniquement par MyCashBill. Facture d'abonnement — ne constitue pas une facture de vente de biens ou services à un tiers."
+      : 'Electronically issued by MyCashBill. Subscription invoice — does not constitute a sale invoice to a third party.',
+    RECU: isFr
+      ? "Reçu émis électroniquement par MyCashBill — preuve de paiement de l'abonnement."
+      : 'Electronically issued by MyCashBill — proof of subscription payment.',
+    ATTESTATION: isFr
+      ? "Attestation émise électroniquement par MyCashBill — abonnement offert, aucun paiement. Ce document n'a pas valeur de facture."
+      : 'Electronically issued by MyCashBill — complimentary subscription, no payment made. This document is not an invoice.',
+  }[docKind];
 
   // Une information non renseignée (ou « À_COMPLÉTER ») n'est pas imprimée sur la facture.
   const known = (v?: string | null) => (v && v.trim() !== '' && !v.includes('À_COMPLÉTER') ? v.trim() : null);
@@ -163,7 +181,7 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
         </View>
 
         <View style={styles.titleBlock}>
-          <Text style={styles.title}>{isFr ? "FACTURE D'ABONNEMENT" : 'SUBSCRIPTION INVOICE'}</Text>
+          <Text style={styles.title}>{docTitle}</Text>
           <Text style={styles.number}>N° {number}</Text>
           <View style={styles.proBadge}><Text>PRO</Text></View>
         </View>
@@ -248,7 +266,7 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
             <Text style={styles.grandTotalLabel}>TOTAL</Text>
             <Text style={styles.grandTotalValue}>{fmt(total)}</Text>
           </View>
-          <Text style={styles.vatNote}>{vatMention}</Text>
+          {!isGift && <Text style={styles.vatNote}>{vatMention}</Text>}
         </View>
 
         <View style={styles.paidRow}>
@@ -279,11 +297,7 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
           <Text style={styles.footerStrong}>{company.legalName}</Text>
           {contactLine ? <Text style={styles.footerText}>{contactLine}</Text> : null}
           {legalLine ? <Text style={styles.footerText}>{legalLine}</Text> : null}
-          <Text style={[styles.footerText, { marginTop: 8 }]}>
-            {isFr
-              ? "Document émis électroniquement par MyCashBill. Facture d'abonnement — ne constitue pas une facture de vente de biens ou services à un tiers."
-              : 'Electronically issued by MyCashBill. Subscription invoice — does not constitute a sale invoice to a third party.'}
-          </Text>
+          <Text style={[styles.footerText, { marginTop: 8 }]}>{footerNote}</Text>
         </View>
       </Page>
     </Document>
