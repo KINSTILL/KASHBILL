@@ -35,15 +35,16 @@ export async function POST(req: NextRequest): Promise<Response> {
       const price = ADDON_PRICES[data.type];
 
       const now = new Date();
-      const endsAt = new Date(now.getTime() + 30 * 86_400_000);
 
       // Subscription record pour tracer
+      // Ligne en attente : endsAt = startsAt = maintenant, donc non active.
+      // Le webhook de paiement confirmé fixe les vraies dates.
       const subscription = await prisma.subscription.create({
         data: {
           userId: user.id,
           source: 'NOTCH_PAY',
           startsAt: now,
-          endsAt,
+          endsAt: now,
           amountXaf: price,
         },
       });

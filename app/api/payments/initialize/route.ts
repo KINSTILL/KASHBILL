@@ -48,12 +48,14 @@ export async function POST(req: NextRequest): Promise<Response> {
       const data = schema.parse(body);
 
       // Créer la Subscription en PENDING (id utilisé comme référence Notch Pay)
+      // Ligne en attente : endsAt = startsAt = maintenant, donc non active.
+      // Le webhook de paiement confirmé fixe les vraies dates.
       const subscription = await prisma.subscription.create({
         data: {
           userId: user.id,
           source: 'NOTCH_PAY',
           startsAt: now,
-          endsAt: new Date(now.getTime() + PRO_DURATION_DAYS * 24 * 60 * 60 * 1000),
+          endsAt: now,
           amountXaf: PRO_PRICE_FCFA,
           providerRef: null, // rempli plus tard par le webhook
           consumerWithdrawalWaiver:

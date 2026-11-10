@@ -137,16 +137,23 @@ export async function POST(req: NextRequest): Promise<Response> {
         const startsAt = new Date();
         const endsAt = new Date(startsAt.getTime() + 30 * 86_400_000);
 
-        await prisma.userAddOn.create({
-          data: {
-            userId: subscription.userId,
-            type,
-            startsAt,
-            endsAt,
-            amountXaf: subscription.amountXaf!,
-            subscriptionId: subscription.id,
-          },
-        });
+        await prisma.$transaction([
+          prisma.userAddOn.create({
+            data: {
+              userId: subscription.userId,
+              type,
+              startsAt,
+              endsAt,
+              amountXaf: subscription.amountXaf!,
+              subscriptionId: subscription.id,
+            },
+          }),
+          // La ligne d'abonnement n'est active qu'après confirmation du paiement
+          prisma.subscription.update({
+            where: { id: subscription.id },
+            data: { startsAt, endsAt },
+          }),
+        ]);
       }
 
       await writeAudit({
