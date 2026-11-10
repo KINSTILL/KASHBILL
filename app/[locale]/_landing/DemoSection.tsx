@@ -69,7 +69,7 @@ export function DemoSection({
 
   return (
     <section id="demo" className="bg-gradient-to-b from-white to-sage-50 px-4 py-16">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-5xl">
         <div className="text-center">
           <span className="inline-block rounded-full bg-sage-100 px-3 py-1 text-xs font-bold text-sage-800">
             ⚡ {isFr ? 'Démonstrateur en direct' : 'Live Demonstrator'}
@@ -169,7 +169,7 @@ export function DemoSection({
             </Button>
           </div>
         ) : (
-          <div className="mx-auto mt-8 max-w-3xl space-y-6">
+          <div className="mx-auto mt-8 max-w-4xl space-y-6">
             {/* Contrôleur de comparaison Mode Gratuit vs Mode Pro */}
             <div className="flex flex-col items-center gap-3">
               <div className="inline-flex rounded-xl bg-slate-200/80 p-1.5 shadow-inner">
@@ -217,8 +217,8 @@ export function DemoSection({
               )}
             </div>
 
-            {/* Facture Réelle conforme au SaaS A4 */}
-            <div className="relative overflow-hidden rounded-2xl border border-slate-300 bg-white p-3.5 sm:p-8 shadow-2xl transition-all">
+            {/* Facture Réelle conforme au format A4 — Plus spacieuse, plus ergonomique */}
+            <div className="relative overflow-hidden rounded-3xl border border-slate-300 bg-white p-4 sm:p-10 shadow-2xl transition-all">
               {/* Filigrane en diagonale pour le Mode Gratuit UNIQUEMENT */}
               {previewTier === 'free' && (
                 <div
@@ -238,7 +238,7 @@ export function DemoSection({
 
               {/* Barre supérieure */}
               <div
-                className={`h-2 w-full rounded-t-lg mb-6 ${
+                className={`h-2.5 w-full rounded-t-lg mb-6 sm:mb-8 ${
                   previewTier === 'pro'
                     ? 'bg-gradient-to-r from-emerald-600 via-teal-600 to-sage-600'
                     : 'bg-slate-400'
@@ -246,37 +246,37 @@ export function DemoSection({
               />
 
               {/* En-tête : Logo & Informations émetteur */}
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-slate-200 pb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-slate-200 pb-6 sm:pb-8">
                 <div>
                   {previewTier === 'pro' ? (
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3.5">
                       {/* Logo officiel d'entreprise */}
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white font-black text-base shadow-md ring-2 ring-emerald-100">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white font-black text-lg shadow-md ring-2 ring-emerald-100">
                         {name ? name.slice(0, 2).toUpperCase() : 'MB'}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-xl font-extrabold text-ink tracking-tight">{name}</h3>
-                          <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-                            ✓ {isFr ? 'Pro Certifié' : 'Pro Verified'}
+                          <h3 className="text-xl sm:text-2xl font-extrabold text-slate-950 tracking-tight">{name}</h3>
+                          <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 uppercase tracking-wide">
+                            ✓ {isFr ? 'Certifié Pro' : 'Pro Verified'}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 font-medium mt-0.5">
-                          NIU : M022417894521X · RCCM : RC/DLA/2026/B/0042
+                        <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
+                          NIU : M052300045812Z · RCCM : RC/DLA/2026/B/0042
                         </p>
-                        <p className="text-xs text-slate-400">
-                          Douala / Yaoundé · Afrique Centrale · contact@{name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'entreprise'}.com
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Douala / Yaoundé · contact@{name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'entreprise'}.cm
                         </p>
                       </div>
                     </div>
                   ) : (
                     <div>
                       {/* Placeholder logo absent en Gratuit */}
-                      <div className="mb-2 inline-flex items-center gap-1.5 rounded border border-dashed border-slate-300 bg-slate-50 px-2 py-1 text-[11px] text-slate-400">
+                      <div className="mb-2 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-2.5 py-1 text-xs text-slate-400">
                         <span>🚫</span>
                         <span>{isFr ? 'Logo indisponible en version gratuite' : 'Logo unavailable in free tier'}</span>
                       </div>
-                      <h3 className="text-lg font-bold text-ink">{name}</h3>
+                      <h3 className="text-lg sm:text-xl font-bold text-slate-900">{name}</h3>
                       <p className="text-xs text-slate-500">Douala / Yaoundé</p>
                     </div>
                   )}
@@ -284,10 +284,10 @@ export function DemoSection({
 
                 <div className="text-left sm:text-right shrink-0">
                   <span
-                    className={`inline-block rounded px-2.5 py-1 text-xs font-bold ${
+                    className={`inline-block rounded-lg px-3 py-1.5 text-xs sm:text-sm font-extrabold tracking-wide ${
                       previewTier === 'pro'
-                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-200'
-                        : 'bg-slate-100 text-slate-700'
+                        ? 'bg-emerald-100 text-emerald-950 border border-emerald-300'
+                        : 'bg-slate-100 text-slate-700 border border-slate-200'
                     }`}
                   >
                     {previewTier === 'pro'
@@ -298,50 +298,62 @@ export function DemoSection({
                         ? 'FACTURE SIMPLE'
                         : 'SIMPLE INVOICE'}
                   </span>
-                  <p className="mt-1 font-mono text-xs font-bold text-slate-700">N° FA-2026-0042</p>
-                  <p className="text-xs text-slate-500">{dateFormatted}</p>
-                  <p className="text-[11px] text-slate-400">{isFr ? 'Paiement à réception' : 'Due on receipt'}</p>
+                  <p className="mt-1.5 font-mono text-xs sm:text-sm font-bold text-slate-800">N° FA-2026-0042</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{dateFormatted}</p>
+                  <p className="text-xs font-semibold text-emerald-700 mt-0.5">{isFr ? '● Paiement à réception' : '● Due on receipt'}</p>
                 </div>
               </div>
 
               {/* Bloc Client Destinataire */}
-              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  {isFr ? 'Facturé à :' : 'Billed to:'}
+                  {isFr ? 'Facturé à (Client destinataire) :' : 'Billed to (Client):'}
                 </p>
                 <div className="mt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                  <p className="text-sm font-bold text-ink">Société Partenaire Commerciale SARL</p>
-                  <span className="text-xs text-slate-500">{isFr ? 'Client Professionnel' : 'Corporate Client'}</span>
+                  <p className="text-sm sm:text-base font-bold text-slate-950">Société Partenaire Commerciale SARL</p>
+                  <span className="text-xs font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60 w-fit">
+                    {isFr ? 'Client Professionnel (B2B)' : 'Corporate Client (B2B)'}
+                  </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5">Quartier Bonanjo, Douala · Cameroun</p>
+                <p className="text-xs text-slate-500 mt-1">Quartier Bonanjo, BP 1245 Douala · Cameroun · NIU: P0987654321</p>
               </div>
 
-              {/* Table des prestations */}
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full text-left text-xs sm:text-sm">
+              {/* Table des prestations avec en-têtes comptables professionnels */}
+              <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+                <table className="w-full text-left border-collapse min-w-[520px]">
                   <thead>
-                    <tr className="border-b-2 border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                      <th className="pb-3">{isFr ? 'Désignation de la prestation' : 'Service description'}</th>
-                      <th className="pb-3 text-center">{isFr ? 'Qté' : 'Qty'}</th>
-                      <th className="pb-3 text-right">{isFr ? 'Prix unitaire' : 'Unit price'}</th>
-                      <th className="pb-3 text-right">Total HT</th>
+                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider">
+                      <th className="py-3 px-4">
+                        {isFr ? 'Désignation des prestations / articles' : 'Description of goods / services'}
+                      </th>
+                      <th className="py-3 px-3 text-center w-24">
+                        {isFr ? 'Qté' : 'Qty'}
+                      </th>
+                      <th className="py-3 px-4 text-right w-36">
+                        {isFr ? 'Prix Unitaire HT' : 'Unit Price HT'}
+                      </th>
+                      <th className="py-3 px-4 text-right w-40">
+                        {isFr ? 'Montant Total HT' : 'Total Amount HT'}
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    <tr>
-                      <td className="py-3.5 pr-2">
-                        <p className="font-semibold text-ink">{service}</p>
+                  <tbody className="divide-y divide-slate-100 bg-white text-xs sm:text-sm">
+                    <tr className="hover:bg-slate-50/40 transition-colors">
+                      <td className="py-4 px-4">
+                        <p className="font-bold text-slate-900 text-sm sm:text-base">{service}</p>
                         {previewTier === 'pro' && (
-                          <p className="text-[11px] text-slate-400 mt-0.5">
-                            {isFr ? 'Livrable conforme aux spécifications contractuelles' : 'Deliverable conforming to contractual specs'}
+                          <p className="text-xs text-slate-500 mt-1">
+                            {isFr ? 'Livrable certifié conforme aux spécifications contractuelles' : 'Deliverable conforming to contractual specs'}
                           </p>
                         )}
                       </td>
-                      <td className="py-3.5 text-center text-slate-600">1</td>
-                      <td className="py-3.5 text-right text-slate-600 font-mono">
+                      <td className="py-4 px-3 text-center font-mono font-semibold text-slate-700 text-sm">
+                        1
+                      </td>
+                      <td className="py-4 px-4 text-right font-mono font-semibold text-slate-700 whitespace-nowrap text-sm">
                         {amountFormatted} {currencyLabel}
                       </td>
-                      <td className="py-3.5 text-right font-bold text-ink font-mono">
+                      <td className="py-4 px-4 text-right font-mono font-bold text-slate-950 text-sm sm:text-base whitespace-nowrap">
                         {amountFormatted} {currencyLabel}
                       </td>
                     </tr>
@@ -350,25 +362,25 @@ export function DemoSection({
               </div>
 
               {/* Totaux & Règlement */}
-              <div className="mt-5 flex justify-end border-t border-slate-200 pt-4">
-                <div className="w-full max-w-[260px] space-y-2 text-right">
-                  <div className="flex justify-between text-xs text-slate-500">
-                    <span>{isFr ? 'Sous-total HT :' : 'Subtotal:'}</span>
-                    <span className="font-mono">{amountFormatted} {currencyLabel}</span>
+              <div className="mt-6 flex justify-end border-t border-slate-200 pt-5">
+                <div className="w-full sm:max-w-xs space-y-2 text-right">
+                  <div className="flex justify-between text-xs sm:text-sm text-slate-600">
+                    <span className="font-medium">{isFr ? 'Sous-total Brut HT :' : 'Subtotal Pre-tax:'}</span>
+                    <span className="font-mono font-semibold text-slate-800">{amountFormatted} {currencyLabel}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-slate-500">
-                    <span>{isFr ? 'TVA (Régime simplifié) :' : 'VAT:'}</span>
-                    <span className="font-mono italic">{isFr ? 'Exonéré (0%)' : 'Exempt (0%)'}</span>
+                  <div className="flex justify-between text-xs sm:text-sm text-slate-600">
+                    <span className="font-medium">{isFr ? 'TVA (Régime simplifié 0%) :' : 'VAT (0% Exempt):'}</span>
+                    <span className="font-mono text-slate-500 italic">0 {currencyLabel}</span>
                   </div>
                   <div
-                    className={`flex justify-between items-baseline border-t-2 pt-2.5 text-base sm:text-lg font-extrabold ${
+                    className={`flex justify-between items-baseline border-t-2 pt-3 text-base sm:text-xl font-extrabold ${
                       previewTier === 'pro'
-                        ? 'border-emerald-600 text-emerald-900'
-                        : 'border-slate-800 text-ink'
+                        ? 'border-emerald-600 text-emerald-950'
+                        : 'border-slate-800 text-slate-950'
                     }`}
                   >
-                    <span>NET À PAYER :</span>
-                    <span className="font-mono">{amountFormatted} {currencyLabel}</span>
+                    <span>{isFr ? 'NET À PAYER :' : 'TOTAL DUE:'}</span>
+                    <span className="font-mono text-xl sm:text-2xl text-emerald-700 font-black">{amountFormatted} {currencyLabel}</span>
                   </div>
                 </div>
               </div>

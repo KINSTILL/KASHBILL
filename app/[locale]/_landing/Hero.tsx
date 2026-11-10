@@ -58,26 +58,26 @@ export function Hero({
         <h1 className="mt-3 sm:mt-5 text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.18] sm:leading-[1.12]">
           {isFr ? (
             <>
-              Besoin d&apos;un devis ou d&apos;une facture pro{' '}
+              Besoin d&apos;envoyer un devis ou une facture pro{' '}
               <span className="block bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 bg-clip-text text-transparent">
-                en moins de 60 secondes ?
+                à un client ?
               </span>
             </>
           ) : (
             <>
-              Need a professional quote or invoice{' '}
+              Need to send a quote or professional invoice{' '}
               <span className="block bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 bg-clip-text text-transparent">
-                in less than 60 seconds?
+                to a client?
               </span>
             </>
           )}
         </h1>
 
-        {/* Sous-titre clarifié (règlement sur Mobile Money / Banque, partage via WhatsApp) */}
+        {/* Sous-titre avec mots-clés longue traîne ciblés (e-commerçants & prestataires, smartphone, PDF WhatsApp) */}
         <p className="mx-auto mt-2.5 sm:mt-4 max-w-2xl text-xs sm:text-base md:text-lg text-slate-600 leading-relaxed">
           {isFr
-            ? 'Générez vos documents commerciaux sur votre smartphone et partagez-les en un clic sur WhatsApp. Vos clients règlent directement sur vos coordonnées Mobile Money ou bancaires.'
-            : 'Generate your commercial documents on your smartphone and share them in one click on WhatsApp. Your clients pay directly to your Mobile Money or bank details.'}
+            ? "L'application de facturation pour e-commerçants et prestataires de services. Créez vos devis, factures et reçus en 60 secondes sur smartphone et partagez le PDF sur WhatsApp."
+            : 'The invoicing app for online sellers and service professionals. Create quotes, invoices and receipts in 60 seconds on mobile and share the PDF on WhatsApp.'}
         </p>
 
         {/* Pastilles des 7 types de documents générables en quelques clics */}
@@ -146,8 +146,8 @@ export function Hero({
 
         {/* Aperçu Mobile Réaliste : Kmer Chic Boutique (< 640px) */}
         <div className="sm:hidden mx-auto mt-4 max-w-sm">
-          <div className="rounded-xl border border-slate-200/90 bg-white p-3 text-left shadow-md ring-1 ring-black/5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 text-left shadow-lg ring-1 ring-black/5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
@@ -155,16 +155,26 @@ export function Hero({
                     Kmer Chic Boutique
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400">Facture N° FA-2026-0042 · Estelle Ndongo</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Facture FA-2026-0042 · Estelle Ndongo</p>
               </div>
-              <span className="font-mono text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md shrink-0">
+              <span className="font-mono text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg shrink-0 border border-emerald-200/60">
                 77 500 FCFA
               </span>
             </div>
+
+            {/* Mini ligne avec intitulé Qté et Prix HT sur mobile */}
+            <div className="mt-2 text-[11px] bg-slate-50 rounded-lg p-2 flex items-center justify-between">
+              <span className="text-slate-700 font-medium truncate flex-1 pr-2">
+                Robe Soie &amp; Wax + Sac cuir
+              </span>
+              <span className="text-slate-400 font-mono shrink-0">
+                Qté: <strong className="text-slate-700">2</strong> · HT: <strong className="text-slate-900">75 000</strong>
+              </span>
+            </div>
             
-            <div className="mt-2 flex items-center justify-between text-[10px] text-slate-600">
+            <div className="mt-2 flex items-center justify-between text-[10px] text-slate-600 pt-1">
               <span className="flex items-center gap-1 text-emerald-700 font-semibold truncate">
-                <span>💬</span> {isFr ? 'Partagé sur WhatsApp' : 'Shared on WhatsApp'}
+                <span>💬</span> {isFr ? 'Prêt à envoyer sur WhatsApp' : 'Ready for WhatsApp'}
               </span>
               <span className="text-slate-400 font-medium shrink-0">Orange &amp; MTN MoMo</span>
             </div>
@@ -172,73 +182,95 @@ export function Hero({
         </div>
 
         {/* Aperçu Desktop Réaliste : Option A Kmer Chic Boutique (>= 640px) */}
-        <div className="hidden sm:block relative mx-auto mt-8 max-w-md">
-          <div className="relative rounded-2xl border border-slate-200/90 bg-white p-5 text-left shadow-2xl shadow-slate-900/10 ring-1 ring-black/5">
+        <div className="hidden sm:block relative mx-auto mt-8 max-w-lg">
+          <div className="relative rounded-2xl border border-slate-200/90 bg-white p-6 text-left shadow-2xl shadow-slate-900/10 ring-1 ring-black/5">
             {/* En-tête de l'entreprise & Statut */}
-            <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-start justify-between border-b border-slate-200 pb-3.5">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-sm font-bold text-slate-900">
+                  <span className="text-base font-bold text-slate-900">
                     Kmer Chic Boutique
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 mt-0.5">
                   Douala, Akwa · Prêt-à-porter &amp; Accessoires
                 </p>
               </div>
-              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
+              <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
                 {isFr ? '✓ Prête à envoyer' : '✓ Ready to send'}
               </span>
             </div>
 
             {/* Client & Détails document */}
-            <div className="mt-3 flex items-center justify-between text-xs">
+            <div className="mt-3.5 flex items-center justify-between text-xs">
               <div>
-                <p className="text-slate-400 font-medium">{isFr ? 'Facturé à :' : 'Billed to:'}</p>
-                <p className="font-bold text-slate-900">Mme Estelle Ndongo</p>
+                <p className="text-slate-400 font-medium uppercase text-[10px] tracking-wider">
+                  {isFr ? 'Facturé à :' : 'Billed to:'}
+                </p>
+                <p className="font-bold text-slate-900 text-sm mt-0.5">Mme Estelle Ndongo</p>
+                <p className="text-[11px] text-slate-400">Bonanjo, Douala</p>
               </div>
               <div className="text-right">
-                <p className="text-slate-400 font-medium">Facture N° FA-2026-0042</p>
-                <p className="font-medium text-slate-700">10 Nov 2026</p>
+                <span className="inline-block bg-slate-100 font-mono text-[11px] font-bold text-slate-800 px-2 py-0.5 rounded">
+                  FA-2026-0042
+                </span>
+                <p className="font-medium text-slate-600 text-xs mt-1">10 Nov 2026</p>
+                <p className="text-[10px] text-emerald-700 font-semibold">{isFr ? '● Paiement à réception' : '● Due on receipt'}</p>
               </div>
             </div>
 
-            {/* Lignes d'articles réalistes (Option A) */}
-            <div className="mt-3 divide-y divide-slate-100 rounded-xl bg-slate-50/80 p-2.5 text-xs">
-              <div className="flex items-center justify-between py-1">
-                <span className="font-medium text-slate-800">
-                  Robe de soirée Soie &amp; Wax brodé (Taille M)
-                </span>
-                <span className="font-mono font-bold text-slate-900 ml-2 whitespace-nowrap">45 000 FCFA</span>
+            {/* Table d'articles avec en-têtes comptables clairs : Qté, Prix HT */}
+            <div className="mt-3.5 rounded-xl border border-slate-200 overflow-hidden text-xs">
+              <div className="grid grid-cols-12 bg-slate-50 py-2 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-600 border-b border-slate-200">
+                <span className="col-span-6">{isFr ? 'Désignation / Article' : 'Item / Description'}</span>
+                <span className="col-span-2 text-center">{isFr ? 'Qté' : 'Qty'}</span>
+                <span className="col-span-4 text-right">{isFr ? 'Prix HT' : 'Price HT'}</span>
               </div>
-              <div className="flex items-center justify-between py-1">
-                <span className="font-medium text-slate-800">
-                  Sac à main cuir artisanal finition or
-                </span>
-                <span className="font-mono font-bold text-slate-900 ml-2 whitespace-nowrap">30 000 FCFA</span>
-              </div>
-              <div className="flex items-center justify-between py-1">
-                <span className="font-medium text-slate-800">
-                  Livraison express coursier (Douala)
-                </span>
-                <span className="font-mono font-bold text-slate-900 ml-2 whitespace-nowrap">2 500 FCFA</span>
+              <div className="divide-y divide-slate-100 bg-white">
+                <div className="grid grid-cols-12 items-center py-2.5 px-3">
+                  <span className="col-span-6 font-semibold text-slate-900 truncate">
+                    Robe soirée Soie &amp; Wax brodé (M)
+                  </span>
+                  <span className="col-span-2 text-center font-mono text-slate-600">1</span>
+                  <span className="col-span-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                    45 000 FCFA
+                  </span>
+                </div>
+                <div className="grid grid-cols-12 items-center py-2.5 px-3">
+                  <span className="col-span-6 font-semibold text-slate-900 truncate">
+                    Sac à main cuir artisanal finition or
+                  </span>
+                  <span className="col-span-2 text-center font-mono text-slate-600">1</span>
+                  <span className="col-span-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                    30 000 FCFA
+                  </span>
+                </div>
+                <div className="grid grid-cols-12 items-center py-2.5 px-3">
+                  <span className="col-span-6 font-semibold text-slate-900 truncate">
+                    Livraison express coursier (Douala)
+                  </span>
+                  <span className="col-span-2 text-center font-mono text-slate-600">1</span>
+                  <span className="col-span-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                    2 500 FCFA
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Total pro */}
-            <div className="mt-3 flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-2.5 text-white shadow-sm">
+            <div className="mt-3.5 flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 px-4 py-3 text-white shadow-sm">
               <div>
                 <span className="text-[10px] font-semibold tracking-wide uppercase text-emerald-100 block">
                   {isFr ? 'Total net à payer' : 'Total due'}
                 </span>
                 <span className="text-[11px] text-emerald-200">Règlement : Orange Money &amp; MTN MoMo</span>
               </div>
-              <span className="font-mono text-xl font-extrabold tracking-tight">77 500 FCFA</span>
+              <span className="font-mono text-2xl font-extrabold tracking-tight">77 500 FCFA</span>
             </div>
 
             {/* Bulle d'envoi WhatsApp intégrée */}
-            <div className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-50/80 p-2 text-xs text-emerald-950 border border-emerald-100">
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-50/80 p-2.5 text-xs text-emerald-950 border border-emerald-100">
               <span className="text-base shrink-0">💬</span>
               <p className="flex-1 truncate font-medium text-[11px]">
                 « Bonjour Mme Ndongo, voici votre facture officielle N° FA-2026-0042. Merci pour votre commande chez Kmer Chic ! »

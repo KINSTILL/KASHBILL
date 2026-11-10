@@ -10,13 +10,13 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.APP_URL),
-  title: 'MyCashBill — Factures pro en 60 secondes, depuis WhatsApp',
+  title: 'MyCashBill — Factures & Devis Pro pour E-commerce et Prestataires',
   description:
-    'Générez devis, factures et reçus conformes en 60 secondes. Envoyez par WhatsApp. Conçu pour les entrepreneurs africains.',
+    'Besoin d’envoyer un devis ou une facture pro à un client ? Créez vos documents conformes OHADA en 60 secondes sur smartphone et partagez le PDF sur WhatsApp.',
   openGraph: {
-    title: 'MyCashBill — Facturation pro en 60 secondes',
+    title: 'MyCashBill — Factures & Devis Pro pour E-commerce et Prestataires',
     description:
-      'Devis, factures, reçus. Conforme OHADA et multidevise. Mobile Money ou carte bancaire.',
+      'Devis, factures et reçus conformes OHADA. Partagez vos PDF sur WhatsApp, règlements directs par Mobile Money ou banque.',
     images: ['/og/landing.png'],
     locale: 'fr_FR',
     type: 'website',
