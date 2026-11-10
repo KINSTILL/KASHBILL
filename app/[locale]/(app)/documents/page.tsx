@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ExportPeriodSelector } from '@/components/documents/ExportPeriodSelector';
+import { DeleteDocumentButton } from '@/components/documents/DeleteDocumentButton';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import { formatFCFA } from '@/lib/utils';
 import { Plus, FileText, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
@@ -100,8 +101,8 @@ export default async function DocumentsPage({
               const isSent = Boolean(doc.sentViaWhatsAppAt);
 
               return (
+                <div key={doc.id} className="relative">
                 <Link
-                  key={doc.id}
                   href={`/${locale}/documents/${doc.id}` as Route}
                   className="block rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs transition-all active:scale-[0.98] active:bg-slate-50 focus:outline-none"
                 >
@@ -140,7 +141,7 @@ export default async function DocumentsPage({
                     </div>
                   </div>
 
-                  <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2 text-xs text-slate-500">
+                  <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2 pr-8 text-xs text-slate-500">
                     <p className="truncate font-medium text-slate-700">
                       Client : <span className="font-semibold text-slate-900">{doc.client?.name ?? '—'}</span>
                     </p>
@@ -152,6 +153,14 @@ export default async function DocumentsPage({
                     </span>
                   </div>
                 </Link>
+                <div className="absolute bottom-2 right-2">
+                  <DeleteDocumentButton
+                    documentId={doc.id}
+                    documentNumber={doc.number}
+                    isSent={Boolean(doc.sentViaWhatsAppAt || doc.sentViaEmailAt)}
+                  />
+                </div>
+                </div>
               );
             })}
           </div>
@@ -206,12 +215,19 @@ export default async function DocumentsPage({
                           </span>
                         </td>
                         <td className="text-right">
-                          <Link
-                            href={`/${locale}/documents/${doc.id}` as Route}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900"
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </Link>
+                          <div className="flex items-center justify-end gap-1">
+                            <Link
+                              href={`/${locale}/documents/${doc.id}` as Route}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900"
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Link>
+                            <DeleteDocumentButton
+                              documentId={doc.id}
+                              documentNumber={doc.number}
+                              isSent={Boolean(doc.sentViaWhatsAppAt || doc.sentViaEmailAt)}
+                            />
+                          </div>
                         </td>
                       </tr>
                     );
