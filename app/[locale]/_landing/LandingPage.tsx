@@ -15,6 +15,7 @@ import { MiniFAQ } from './MiniFAQ';
 import { FinalCTA } from './FinalCTA';
 import { LandingFooter } from './LandingFooter';
 import { StickyCTA } from './StickyCTA';
+import { ScrollToTop } from './ScrollToTop';
 import type { LandingPersonalization } from '@/lib/landing/types';
 
 export function LandingPage({
@@ -49,6 +50,7 @@ export function LandingPage({
       </main>
       <LandingFooter personalization={personalization} locale={locale} />
       <StickyCTA personalization={personalization} locale={locale} />
+      <ScrollToTop />
     </>
   );
 }

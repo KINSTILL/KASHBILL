@@ -34,40 +34,40 @@ export function Logo({
         viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className={isSm ? 'h-5.5 w-5.5' : isLg ? 'h-9 w-9' : 'h-7 w-7'}
+        className={isSm ? 'h-7 w-7' : isLg ? 'h-10 w-10' : 'h-8 w-8'}
       >
-        {/* Boucle 1 : Document / Émetteur (Noir carbone / s'adapte en mode sombre) */}
+        {/* Boucle 1 : Document / Émetteur (Noir carbone net / s'adapte en mode sombre) */}
         <path
           d="M6 22V10C6 7.79086 7.79086 6 10 6H16C18.2091 6 20 7.79086 20 10V11"
-          className="stroke-slate-900 dark:stroke-white transition-colors"
-          strokeWidth="2.8"
+          className="stroke-slate-950 dark:stroke-white transition-colors"
+          strokeWidth="3.2"
           strokeLinecap="round"
         />
         {/* Boucle 2 : Cashflow / Envoi & Règlement (Vert émeraude néon) */}
         <path
           d="M26 10V22C26 24.2091 24.2091 26 22 26H16C13.7909 26 12 24.2091 12 22V21"
           stroke="#10B981"
-          strokeWidth="2.8"
+          strokeWidth="3.2"
           strokeLinecap="round"
         />
         {/* Puce centrale de transfert / validation certifiée */}
-        <circle cx="16" cy="16" r="2.1" fill="#10B981" />
+        <circle cx="16" cy="16" r="2.3" fill="#10B981" />
       </svg>
     </span>
   );
 
   const content = (
-    <span className={`group inline-flex items-center gap-2.5 ${className}`}>
+    <span className={`group inline-flex items-center gap-2 sm:gap-2.5 whitespace-nowrap shrink-0 ${className}`}>
       {iconSvg}
       {!iconOnly && (
         <span className="flex flex-col">
           <span
             className={`font-sans tracking-tight leading-none flex items-center ${
-              isSm ? 'text-[15px]' : isLg ? 'text-2xl' : 'text-lg sm:text-xl'
+              isSm ? 'text-[16px] sm:text-[17px]' : isLg ? 'text-2xl' : 'text-lg sm:text-xl'
             }`}
           >
-            <span className="font-semibold text-slate-500 dark:text-slate-400">My</span>
-            <span className="font-extrabold text-slate-950 dark:text-white ml-0.5">Cash</span>
+            <span className="font-bold text-slate-800 dark:text-slate-200">My</span>
+            <span className="font-black text-slate-950 dark:text-white ml-0.5">Cash</span>
             <span className="font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent ml-0.5">
               Bill
             </span>

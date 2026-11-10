@@ -21,7 +21,7 @@ export function LandingHeader({
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-all">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-2.5 sm:px-4">
-        <div className="flex items-center min-w-0 shrink">
+        <div className="flex items-center shrink-0">
           <Logo href={`/${locale}`} size="sm" hideSubtitleOnMobile />
         </div>
 
