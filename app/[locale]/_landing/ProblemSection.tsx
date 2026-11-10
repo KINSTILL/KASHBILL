@@ -19,13 +19,13 @@ export function ProblemSection() {
   ];
 
   return (
-    <section className="bg-slate-50 py-16 px-4">
+    <section className="bg-slate-50 py-24 px-4">
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-ink md:text-3xl">
+          <h2 className="font-display text-3xl font-bold tracking-[-0.03em] text-ink md:text-4xl">
             {t('title')}
           </h2>
-          <p className="mt-3 text-sm text-slate-600 md:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-500">
             {t('subtitle')}
           </p>
         </div>
@@ -34,7 +34,7 @@ export function ProblemSection() {
           {problems.map((p, idx) => (
             <div
               key={idx}
-              className="rounded-xl border border-red-100 bg-white p-6 shadow-sm transition hover:shadow-md"
+              className="rounded-2xl border border-slate-200/80 bg-white p-7 shadow-sm transition-shadow hover:shadow-md"
             >
               <div className="flex items-center gap-2 text-sm font-semibold text-red-600">
                 <span>❌</span>

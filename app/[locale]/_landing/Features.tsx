@@ -13,13 +13,13 @@ export function Features() {
   ];
 
   return (
-    <section id="features" className="bg-slate-50 py-16 px-4">
+    <section id="features" className="bg-white py-24 px-4">
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-ink md:text-3xl">
+          <h2 className="font-display text-3xl font-bold tracking-[-0.03em] text-ink md:text-4xl">
             {t('title')}
           </h2>
-          <p className="mt-3 text-sm text-slate-600 md:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-500">
             {t('subtitle')}
           </p>
         </div>
@@ -28,9 +28,9 @@ export function Features() {
           {features.map((f, idx) => (
             <div
               key={idx}
-              className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm transition hover:shadow-md"
+              className="rounded-2xl border border-slate-200/80 bg-white p-7 shadow-sm transition-shadow hover:shadow-md"
             >
-              <div className="text-2xl">{f.icon}</div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sage-50 text-xl">{f.icon}</div>
               <h3 className="mt-3 text-base font-bold text-ink">{f.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.desc}</p>
             </div>
