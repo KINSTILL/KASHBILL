@@ -34,7 +34,14 @@ export type PdfPayload = {
   deliveryAddress?: string | null;
 };
 
+/** Couleurs de marque (white label). Absent / null = palette MyCashBill par défaut. */
+export type PdfBrand = {
+  primary: string;
+  accent: string;
+};
+
 export type PdfCompany = {
+  brand?: PdfBrand | null;
   businessName: string | null;
   legalName: string | null;
   city: string | null;

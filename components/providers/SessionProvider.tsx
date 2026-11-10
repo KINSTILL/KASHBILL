@@ -41,6 +41,9 @@ export type SessionUser = {
   headerText?: string | null;
   footerText?: string | null;
   cgvText?: string | null;
+  whiteLabel?: boolean;
+  brandPrimaryColor?: string | null;
+  brandAccentColor?: string | null;
   createdAt?: string;
 } | null;
 

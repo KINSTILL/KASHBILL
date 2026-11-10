@@ -3,7 +3,10 @@ import { z } from 'zod';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { clearSessionCookie } from '@/lib/auth/session';
+import { isWhiteLabelActive } from '@/lib/addons/queries';
 import { prisma } from '@/lib/db';
+
+const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
 
 const updateProfileSchema = z.object({
   name: z.string().max(100).optional().nullable(),
@@ -22,11 +25,15 @@ const updateProfileSchema = z.object({
   headerText: z.string().max(200).optional().nullable(),
   footerText: z.string().max(500).optional().nullable(),
   cgvText: z.string().max(2000).optional().nullable(),
+  // Couleurs de marque : white label uniquement (vérifié dans PATCH)
+  brandPrimaryColor: z.string().regex(HEX_COLOR).optional().nullable(),
+  brandAccentColor: z.string().regex(HEX_COLOR).optional().nullable(),
 });
 
 export async function GET(req: NextRequest): Promise<Response> {
   try {
     return await requireAuth(req, async (_req, { user, deviceId }) => {
+      const whiteLabel = await isWhiteLabelActive(user.id);
       return jsonOk({
         user: {
           id: user.id,
@@ -52,6 +59,9 @@ export async function GET(req: NextRequest): Promise<Response> {
           headerText: user.headerText,
           footerText: user.footerText,
           cgvText: user.cgvText,
+          whiteLabel,
+          brandPrimaryColor: user.brandPrimaryColor,
+          brandAccentColor: user.brandAccentColor,
           createdAt: user.createdAt,
         },
         deviceId,
@@ -89,6 +99,7 @@ export async function DELETE(req: NextRequest): Promise<Response> {
             businessName: null, legalName: null, legalAddress: null, city: null,
             taxId: null, rccm: null, logoUrl: null, signatureUrl: null, stampUrl: null,
             headerText: null, footerText: null, cgvText: null, legalForm: null,
+            brandPrimaryColor: null, brandAccentColor: null,
             bannedAt: now, banReason: "Compte supprimé par l'utilisateur",
           },
         });
@@ -120,6 +131,16 @@ export async function PATCH(req: NextRequest): Promise<Response> {
         return jsonError('BAD_REQUEST', 'Données de profil invalides', 400);
       }
 
+      const touchesBrand =
+        parsed.data.brandPrimaryColor !== undefined || parsed.data.brandAccentColor !== undefined;
+      if (touchesBrand && !(await isWhiteLabelActive(user.id))) {
+        return jsonError(
+          'FORBIDDEN',
+          "La personnalisation des couleurs est réservée à l'option White label.",
+          403
+        );
+      }
+
       const updated = await prisma.user.update({
         where: { id: user.id },
         data: parsed.data,
@@ -149,6 +170,9 @@ export async function PATCH(req: NextRequest): Promise<Response> {
           headerText: updated.headerText,
           footerText: updated.footerText,
           cgvText: updated.cgvText,
+          whiteLabel: await isWhiteLabelActive(user.id),
+          brandPrimaryColor: updated.brandPrimaryColor,
+          brandAccentColor: updated.brandAccentColor,
           createdAt: updated.createdAt,
         },
       });

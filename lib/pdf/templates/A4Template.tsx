@@ -8,6 +8,7 @@ import { ItemsTable } from '../shared/ItemsTable';
 import { Totals } from '../shared/Totals';
 import { Footer } from '../shared/Footer';
 import { formatDateShort } from '../shared/format';
+import { resolveBrand } from '../brand';
 
 const styles = StyleSheet.create({
   page: {
@@ -81,6 +82,7 @@ export function A4Document({
   const config = DOC_TYPE_CONFIG[doc.type];
   const isEn = doc.locale === 'EN';
   const hidePrices = doc.type === 'BORDEREAU' && doc.payload.total === 0;
+  const brand = resolveBrand(doc.company);
 
   const clientBlockLabel =
     doc.type === 'BORDEREAU'
@@ -99,7 +101,9 @@ export function A4Document({
     <Document>
       <Page size="A4" style={styles.page}>
         <CompanyHeader company={doc.company} compact={false} locale={doc.locale} />
-        <Text style={styles.docTitle}>{isEn ? config.labelEn : config.label}</Text>
+        <Text style={[styles.docTitle, { color: brand.primary }]}>
+          {isEn ? config.labelEn : config.label}
+        </Text>
         <Text style={styles.docNumber}>
           N° {doc.number} · {formatDateShort(doc.createdAt, doc.locale)}
         </Text>
@@ -121,6 +125,7 @@ export function A4Document({
           showVat={config.showVat}
           hidePrices={hidePrices}
           locale={doc.locale}
+          primaryColor={brand.primary}
         />
         <Totals
           payload={doc.payload}
@@ -129,6 +134,8 @@ export function A4Document({
           showVat={config.showVat}
           hidePrices={hidePrices}
           locale={doc.locale}
+          primaryColor={brand.primary}
+          accentColor={brand.accent}
         />
         {doc.payload.notes && (
           <Text style={styles.notes}>

@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { Locale } from '@prisma/client';
 import type { PdfLine } from '../types';
 import { formatCurrency } from './format';
+import { DEFAULT_BRAND } from '../brand';
 
 type Props = {
   lines: PdfLine[];
@@ -10,6 +11,7 @@ type Props = {
   showVat?: boolean;
   hidePrices?: boolean;
   locale?: Locale;
+  primaryColor?: string;
 };
 
 export function ItemsTable({
@@ -19,11 +21,12 @@ export function ItemsTable({
   showVat = false,
   hidePrices = false,
   locale = 'FR',
+  primaryColor = DEFAULT_BRAND.primary,
 }: Props) {
   const isEn = locale === 'EN';
 
   const styles = StyleSheet.create({
-    header: { flexDirection: 'row', borderBottomWidth: 1, borderColor: '#0F172A', paddingBottom: 3, marginBottom: 3 },
+    header: { flexDirection: 'row', borderBottomWidth: 1, borderColor: primaryColor, paddingBottom: 3, marginBottom: 3 },
     row: { flexDirection: 'row', paddingVertical: 2, borderBottomWidth: 0.5, borderColor: '#E2E8F0', borderStyle: 'dashed' },
     colDesc: { flex: 3, fontSize: compact ? 8 : 10 },
     colQty: { width: hidePrices ? 60 : 30, fontSize: compact ? 8 : 10, textAlign: hidePrices ? 'right' : 'center' },

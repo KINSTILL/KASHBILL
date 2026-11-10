@@ -11,6 +11,7 @@ import { ProBadge } from '@/components/ui/ProBadge';
 import { ImagePicker } from '@/components/documents/ImagePicker';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { isPro, isWithinLogoGracePeriod } from '@/lib/auth/plan';
+import { DEFAULT_BRAND } from '@/lib/pdf/brand';
 
 export default function BusinessSettingsPage() {
   const t = useTranslations('settings');
@@ -20,6 +21,10 @@ export default function BusinessSettingsPage() {
   const pro = user ? isPro(user) : false;
   const inGrace = user ? isWithinLogoGracePeriod(user) : false;
   const canUseBranding = pro || inGrace;
+  const canUseWhiteLabel = user?.whiteLabel === true;
+
+  const [brandPrimary, setBrandPrimary] = useState<string>(DEFAULT_BRAND.primary);
+  const [brandAccent, setBrandAccent] = useState<string>(DEFAULT_BRAND.accent);
 
   const [country, setCountry] = useState('CM');
   const [businessName, setBusinessName] = useState('');
@@ -54,6 +59,8 @@ export default function BusinessSettingsPage() {
       setLogoUrl(user.logoUrl || null);
       setSignatureUrl(user.signatureUrl || null);
       setStampUrl(user.stampUrl || null);
+      setBrandPrimary(user.brandPrimaryColor || DEFAULT_BRAND.primary);
+      setBrandAccent(user.brandAccentColor || DEFAULT_BRAND.accent);
     }
   }, [user]);
 
@@ -63,6 +70,17 @@ export default function BusinessSettingsPage() {
     setSaving(true);
 
     try {
+      // Couleurs envoyées uniquement en white label (sinon le serveur refuse la modification).
+      // Les valeurs par défaut sont enregistrées comme null => palette MyCashBill.
+      const isDefaultBrand =
+        brandPrimary === DEFAULT_BRAND.primary && brandAccent === DEFAULT_BRAND.accent;
+      const brandFields = canUseWhiteLabel
+        ? {
+            brandPrimaryColor: isDefaultBrand ? null : brandPrimary,
+            brandAccentColor: isDefaultBrand ? null : brandAccent,
+          }
+        : {};
+
       const res = await fetch('/api/auth/me', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -80,6 +98,7 @@ export default function BusinessSettingsPage() {
           logoUrl,
           signatureUrl,
           stampUrl,
+          ...brandFields,
         }),
       });
 
@@ -167,6 +186,78 @@ export default function BusinessSettingsPage() {
               />
             </div>
           </div>
+        </Card>
+
+        {/* White label : couleurs de la facture */}
+        <Card className="p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-slate-800">Couleurs de vos documents</h2>
+            {!canUseWhiteLabel && <ProBadge label="White label" />}
+          </div>
+
+          {canUseWhiteLabel ? (
+            <p className="text-xs text-slate-500">
+              Ces couleurs remplacent la palette MyCashBill sur vos factures, devis et reçus.
+            </p>
+          ) : (
+            <p className="text-xs text-slate-500">
+              Personnalisez vos documents aux couleurs de votre entreprise avec l&apos;option White label.{' '}
+              <Link href={'/upgrade' as Route} className="font-medium text-sage-700 underline">
+                Découvrir l&apos;option
+              </Link>
+            </p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="brandPrimary" className="block text-sm font-medium text-slate-700">
+                Couleur principale
+              </label>
+              <p className="text-[11px] text-slate-500">Titres, nom de l&apos;entreprise, filets</p>
+              <div className="mt-1 flex items-center gap-2">
+                <input
+                  id="brandPrimary"
+                  type="color"
+                  value={brandPrimary}
+                  disabled={!canUseWhiteLabel}
+                  onChange={(e) => setBrandPrimary(e.target.value)}
+                  className="h-10 w-14 cursor-pointer rounded border border-slate-300 bg-white p-1 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <span className="font-mono text-xs text-slate-600">{brandPrimary.toUpperCase()}</span>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="brandAccent" className="block text-sm font-medium text-slate-700">
+                Couleur d&apos;accent
+              </label>
+              <p className="text-[11px] text-slate-500">Montant total mis en avant</p>
+              <div className="mt-1 flex items-center gap-2">
+                <input
+                  id="brandAccent"
+                  type="color"
+                  value={brandAccent}
+                  disabled={!canUseWhiteLabel}
+                  onChange={(e) => setBrandAccent(e.target.value)}
+                  className="h-10 w-14 cursor-pointer rounded border border-slate-300 bg-white p-1 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <span className="font-mono text-xs text-slate-600">{brandAccent.toUpperCase()}</span>
+              </div>
+            </div>
+          </div>
+
+          {canUseWhiteLabel && (
+            <button
+              type="button"
+              onClick={() => {
+                setBrandPrimary(DEFAULT_BRAND.primary);
+                setBrandAccent(DEFAULT_BRAND.accent);
+              }}
+              className="text-xs font-medium text-slate-500 hover:text-slate-800 underline"
+            >
+              Revenir à la palette MyCashBill
+            </button>
+          )}
         </Card>
 
         {/* Legal mentions */}

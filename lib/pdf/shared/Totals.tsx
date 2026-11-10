@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { Locale } from '@prisma/client';
 import type { PdfPayload } from '../types';
 import { formatCurrency } from './format';
+import { DEFAULT_BRAND } from '../brand';
 
 export function Totals({
   payload,
@@ -10,6 +11,8 @@ export function Totals({
   showVat = false,
   hidePrices = false,
   locale = 'FR',
+  primaryColor = DEFAULT_BRAND.primary,
+  accentColor = DEFAULT_BRAND.accent,
 }: {
   payload: PdfPayload;
   compact: boolean;
@@ -17,6 +20,8 @@ export function Totals({
   showVat?: boolean;
   hidePrices?: boolean;
   locale?: Locale;
+  primaryColor?: string;
+  accentColor?: string;
 }) {
   const isEn = locale === 'EN';
 
@@ -25,9 +30,9 @@ export function Totals({
     line: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 2 },
     label: { fontSize: compact ? 8 : 10, color: '#64748B', marginRight: 8 },
     value: { fontSize: compact ? 8 : 10, color: '#0F172A' },
-    totalRow: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 6, paddingTop: 4, borderTopWidth: 1, borderColor: '#0F172A' },
+    totalRow: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 6, paddingTop: 4, borderTopWidth: 1, borderColor: primaryColor },
     totalLabel: { fontSize: compact ? 10 : 12, fontWeight: 'bold', marginRight: 8 },
-    totalValue: { fontSize: compact ? 14 : 18, fontWeight: 'bold', color: '#C98773' },
+    totalValue: { fontSize: compact ? 14 : 18, fontWeight: 'bold', color: accentColor },
   });
 
   if (hidePrices) {

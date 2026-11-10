@@ -66,6 +66,11 @@ export default async function DocumentDetailPage({
       legalForm: doc.user.legalForm,
       country: doc.user.country,
       currency: getCurrencyForCountry(doc.user.country),
+      // Couleurs de marque : réservées au white label (sinon palette MyCashBill par défaut)
+      brand:
+        whiteLabel && doc.user.brandPrimaryColor && doc.user.brandAccentColor
+          ? { primary: doc.user.brandPrimaryColor, accent: doc.user.brandAccentColor }
+          : null,
     },
     client: doc.client
       ? {

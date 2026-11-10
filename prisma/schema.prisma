@@ -80,20 +80,20 @@ enum FraudStatus {
 // ─────────────────────────────────────────────
 
 model User {
-  id             String    @id @default(cuid())
-  phone          String    @unique
-  pinHash        String
-  name           String?
-  businessName   String?
-  city           String?
-  locale         Locale    @default(FR)
-  role           Role      @default(USER)
-  accountType     AccountType @default(PROFESSIONAL)
+  id                       String      @id @default(cuid())
+  phone                    String      @unique
+  pinHash                  String
+  name                     String?
+  businessName             String?
+  city                     String?
+  locale                   Locale      @default(FR)
+  role                     Role        @default(USER)
+  accountType              AccountType @default(PROFESSIONAL)
   consumerWaiverAcceptedAt DateTime?
-  mode           Mode      @default(ECOMMERCE)
-  proUntil       DateTime?
-  pendingProDays Int       @default(0)
-  referralCode   String    @unique
+  mode                     Mode        @default(ECOMMERCE)
+  proUntil                 DateTime?
+  pendingProDays           Int         @default(0)
+  referralCode             String      @unique
 
   // ─── Freemium ───
   duplicationsThisMonth  Int      @default(0)
@@ -125,27 +125,31 @@ model User {
   email        String?
   legalForm    String?
 
+  // ─── Personnalisation des documents (white label uniquement) ───
+  brandPrimaryColor String?
+  brandAccentColor  String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // ─── Relations ───
-  devices            Device[]
-  deviceApprovals    DeviceApproval[]
-  recoveryCodes      RecoveryCode[]
-  clients            Client[]
-  documents          Document[]
-  documentSequences  DocumentSequence[]
-  subscriptions        Subscription[]
-  subscriptionInvoices SubscriptionInvoice[]
-  referralsMade      Referral[]          @relation("ReferralParrain")
-  referralReceived   Referral?           @relation("ReferralFilleul")
-  fraudFlags         FraudFlag[]         @relation("FraudFlagUser")
-  fraudFlagsReviewed FraudFlag[]         @relation("FraudFlagReviewer")
-  blacklistEntries   BlacklistEntry[]
-  thresholdsUpdated  FraudThreshold[]
-  recurringSchedules RecurringSchedule[]
-  bulkJobs           BulkJob[]
-  legalDocumentsAuthored LegalDocument[] @relation("LegalDocumentAuthor")
+  devices                Device[]
+  deviceApprovals        DeviceApproval[]
+  recoveryCodes          RecoveryCode[]
+  clients                Client[]
+  documents              Document[]
+  documentSequences      DocumentSequence[]
+  subscriptions          Subscription[]
+  subscriptionInvoices   SubscriptionInvoice[]
+  referralsMade          Referral[]            @relation("ReferralParrain")
+  referralReceived       Referral?             @relation("ReferralFilleul")
+  fraudFlags             FraudFlag[]           @relation("FraudFlagUser")
+  fraudFlagsReviewed     FraudFlag[]           @relation("FraudFlagReviewer")
+  blacklistEntries       BlacklistEntry[]
+  thresholdsUpdated      FraudThreshold[]
+  recurringSchedules     RecurringSchedule[]
+  bulkJobs               BulkJob[]
+  legalDocumentsAuthored LegalDocument[]       @relation("LegalDocumentAuthor")
   consents               UserConsent[]
   addOns                 UserAddOn[]
 
@@ -274,19 +278,19 @@ model DocumentVerification {
 }
 
 model Subscription {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  source      SubSource
-  startsAt    DateTime
-  endsAt      DateTime
-  providerRef String?
-  amountXaf   Int?
-  createdAt   DateTime  @default(now())
-  consumerWithdrawalWaiver   Boolean   @default(false)
+  id                         String               @id @default(cuid())
+  userId                     String
+  user                       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source                     SubSource
+  startsAt                   DateTime
+  endsAt                     DateTime
+  providerRef                String?
+  amountXaf                  Int?
+  createdAt                  DateTime             @default(now())
+  consumerWithdrawalWaiver   Boolean              @default(false)
   consumerWithdrawalWaivedAt DateTime?
-  invoice     SubscriptionInvoice?
-  addOns      UserAddOn[]
+  invoice                    SubscriptionInvoice?
+  addOns                     UserAddOn[]
 
   @@index([userId, endsAt])
 }
@@ -562,7 +566,7 @@ model LegalDocument {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  consents    UserConsent[]
+  consents UserConsent[]
 
   @@unique([slug, version, locale])
   @@index([slug, status, locale])
@@ -645,8 +649,8 @@ model UnifiedArticle {
   title       String
   excerpt     String   @db.Text
   content     String   @db.Text
-  category    String   // "BLOG" ou "FAQ"
-  locale      String   // "fr" ou "en"
+  category    String // "BLOG" ou "FAQ"
+  locale      String // "fr" ou "en"
   tags        String[]
   published   Boolean  @default(false)
   views       Int      @default(0)
@@ -659,7 +663,3 @@ model UnifiedArticle {
   @@index([locale, published, createdAt])
   @@map("articles_unified")
 }
-
-
-
-

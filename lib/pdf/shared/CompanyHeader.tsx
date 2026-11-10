@@ -2,6 +2,7 @@
 import { View, Text, Image, StyleSheet } from '@react-pdf/renderer';
 import type { Locale } from '@prisma/client';
 import type { PdfCompany } from '../types';
+import { resolveBrand } from '../brand';
 
 export function CompanyHeader({
   company,
@@ -13,11 +14,12 @@ export function CompanyHeader({
   locale?: Locale;
 }) {
   const isEn = locale === 'EN';
+  const brand = resolveBrand(company);
   const styles = StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: compact ? 6 : 12 },
     logo: { width: compact ? 40 : 60, height: compact ? 40 : 60, objectFit: 'contain', marginRight: 10 },
     info: { flex: 1 },
-    name: { fontSize: compact ? 12 : 16, fontWeight: 'bold', color: '#0F172A' },
+    name: { fontSize: compact ? 12 : 16, fontWeight: 'bold', color: brand.primary },
     line: { fontSize: compact ? 7 : 9, color: '#475569', marginTop: 1 },
     legalForm: { fontSize: compact ? 7 : 9, color: '#64748B', fontStyle: 'italic', marginTop: 1 },
   });

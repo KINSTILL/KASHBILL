@@ -8,6 +8,7 @@ import { ItemsTable } from '../shared/ItemsTable';
 import { Totals } from '../shared/Totals';
 import { Footer } from '../shared/Footer';
 import { formatDateShort } from '../shared/format';
+import { resolveBrand } from '../brand';
 
 const styles = StyleSheet.create({
   page: {
@@ -69,6 +70,7 @@ export function TicketDocument({
   const config = DOC_TYPE_CONFIG[doc.type];
   const isEn = doc.locale === 'EN';
   const hidePrices = doc.type === 'BORDEREAU' && doc.payload.total === 0;
+  const brand = resolveBrand(doc.company);
 
   const clientLabel =
     doc.type === 'BORDEREAU'
@@ -86,10 +88,12 @@ export function TicketDocument({
   return (
     <Document>
       <Page size={{ width: 226.77, height: 600 }} style={styles.page}>
-        <View style={styles.header}>
+        <View style={[styles.header, { borderColor: brand.primary }]}>
           <CompanyHeader company={doc.company} compact locale={doc.locale} />
         </View>
-        <Text style={styles.docTitle}>{isEn ? config.labelEn : config.label}</Text>
+        <Text style={[styles.docTitle, { color: brand.primary }]}>
+          {isEn ? config.labelEn : config.label}
+        </Text>
         <Text style={styles.docNumber}>
           N° {doc.number} · {formatDateShort(doc.createdAt, doc.locale)}
         </Text>
@@ -109,6 +113,7 @@ export function TicketDocument({
           showVat={config.showVat}
           hidePrices={hidePrices}
           locale={doc.locale}
+          primaryColor={brand.primary}
         />
         <Totals
           payload={doc.payload}
@@ -117,6 +122,8 @@ export function TicketDocument({
           showVat={config.showVat}
           hidePrices={hidePrices}
           locale={doc.locale}
+          primaryColor={brand.primary}
+          accentColor={brand.accent}
         />
         <Footer doc={doc} compact />
         {options.showWatermark && !doc.whiteLabel && (

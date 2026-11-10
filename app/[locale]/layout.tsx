@@ -8,6 +8,7 @@ import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ToastProvider } from '@/components/ui/Toast';
 import { getCurrentUser } from '@/lib/auth/session';
+import { isWhiteLabelActive } from '@/lib/addons/queries';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL ?? 'https://mycashbill.app'),
@@ -58,6 +59,9 @@ export default async function LocaleLayout({
         headerText: current.user.headerText,
         footerText: current.user.footerText,
         cgvText: current.user.cgvText,
+        whiteLabel: await isWhiteLabelActive(current.user.id),
+        brandPrimaryColor: current.user.brandPrimaryColor,
+        brandAccentColor: current.user.brandAccentColor,
         createdAt: current.user.createdAt.toISOString(),
       }
     : null;
