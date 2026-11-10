@@ -495,7 +495,7 @@ export function Hero({
                     </div>
                   </div>
                   <p className="text-[10px] text-slate-500 italic mt-1">
-                    * Merci d'indiquer la référence « FA-2026-0042 » lors de votre transfert Mobile Money.
+                    * Merci d&apos;indiquer la référence « FA-2026-0042 » lors de votre transfert Mobile Money.
                   </p>
                 </div>
 

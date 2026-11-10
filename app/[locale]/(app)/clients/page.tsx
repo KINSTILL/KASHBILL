@@ -24,7 +24,7 @@ export default async function ClientsPage({
   }
 
   const { user } = current;
-  const t = await getTranslations();
+  const _t = await getTranslations();
   const pro = isPro(user);
 
   const clients = await prisma.client.findMany({
