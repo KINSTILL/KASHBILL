@@ -123,8 +123,8 @@ export function Hero({
           {/* Titre percutant axé sur la douleur des entrepreneurs */}
           <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] tracking-[-0.03em] text-ink md:text-6xl">
             {isFr
-              ? 'Vos clients hésitent à vous payer ? Envoyez des documents qui imposent le respect.'
-              : 'Clients hesitate to pay you? Send documents that command respect.'}
+              ? 'Vos factures restent-elles impayées ?'
+              : 'Are your invoices still unpaid?'}
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-500 md:text-lg">
