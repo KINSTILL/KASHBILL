@@ -3,6 +3,7 @@
 import type { Route } from 'next';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { QuotaBadge } from './QuotaBadge';
 import { Logo } from './Logo';
@@ -15,7 +16,15 @@ import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 export function Header() {
   const t = useTranslations('nav');
   const locale = useLocale();
-  const { user } = useCurrentUser();
+  const { user, refresh } = useCurrentUser();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    await refresh();
+    router.push(`/${locale}/login` as Route);
+    router.refresh();
+  };
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md transition-all">
@@ -51,6 +60,17 @@ export function Header() {
           </Link>
 
           <LocaleSwitcher />
+
+          {user && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 px-2.5 text-xs text-red-600 hover:bg-red-50"
+              onClick={handleLogout}
+            >
+              {t('logout')}
+            </Button>
+          )}
 
           {!user && (
             <Link href={`/${locale}/login` as Route}>
