@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/alt-text */
+/* eslint-disable jsx-a11yg/alt-text */
 import { Document, Page, View, Text, Image, Svg, Path, Circle, StyleSheet } from '@react-pdf/renderer';
 import type { SubscriptionInvoicePdfInput } from './types';
 import { BRAND } from '../../brand';
@@ -182,7 +182,6 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
 
         <View style={styles.titleBlock}>
           <Text style={styles.title}>{docTitle}</Text>
-          <Text style={styles.number}>N° {number}</Text>
           <View style={styles.proBadge}><Text>PRO</Text></View>
         </View>
 
@@ -218,14 +217,21 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
           </View>
         </View>
 
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-          <Text style={{ fontSize: 9, color: SLATE }}>
-            {isGift ? (isFr ? "Date d'activation" : 'Activation date') : (isFr ? 'Date de paiement' : 'Payment date')} : {fmtDate(paidAt)}
-          </Text>
-          {!isGift && (
+                <View style={{ marginBottom: 12 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={{ fontSize: 9, color: SLATE }}>
-              {isFr ? 'Mode' : 'Method'} : Notch Pay (Mobile Money)
+              {isGift ? (isFr ? 'N° du document' : 'Document No.') : (isFr ? 'N° de facture' : 'Invoice No.')} : {number}
             </Text>
+            <Text style={{ fontSize: 9, color: SLATE }}>
+              {isGift ? (isFr ? "Date d'activation" : 'Activation date') : (isFr ? 'Date de paiement' : 'Payment date')} : {fmtDate(paidAt)}
+            </Text>
+          </View>
+          {!isGift && (
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 4 }}>
+              <Text style={{ fontSize: 9, color: SLATE }}>
+                {isFr ? 'Mode' : 'Method'} : Notch Pay (Mobile Money)
+              </Text>
+            </View>
           )}
         </View>
 
