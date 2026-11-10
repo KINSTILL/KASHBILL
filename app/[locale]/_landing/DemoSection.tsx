@@ -85,7 +85,7 @@ export function DemoSection({
         </div>
 
         {!generated ? (
-          <div className="surface mx-auto mt-8 max-w-md space-y-4 p-6 shadow-xl border border-slate-200 rounded-2xl">
+          <div className="surface mx-auto mt-8 max-w-md space-y-4 p-4 sm:p-6 shadow-xl border border-slate-200 rounded-2xl">
             {/* Suggestions rapides en 1 clic */}
             <div>
               <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2">

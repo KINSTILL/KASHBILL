@@ -30,7 +30,7 @@ export function Pricing({
         </p>
 
         <div className="mt-10 grid gap-4 md:grid-cols-2">
-          <div className="surface p-6">
+          <div className="surface p-4 sm:p-6">
             <h3 className="text-lg font-bold text-ink">{isFr ? 'Gratuit' : 'Free'}</h3>
             <p className="mt-1">
               <span className="text-3xl font-extrabold text-ink">0</span>{' '}
@@ -50,8 +50,8 @@ export function Pricing({
             </Link>
           </div>
 
-          <div className="surface border-2 border-sage-500 p-6 shadow-lg">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-sage-700">
+          <div className="surface border-2 border-emerald-500 p-4 sm:p-6 shadow-lg">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-emerald-700">
               ⭐ {isFr ? 'Populaire — Statut Pro' : 'Popular — Pro Status'}
             </p>
             <h3 className="text-lg font-bold text-ink">Pro</h3>

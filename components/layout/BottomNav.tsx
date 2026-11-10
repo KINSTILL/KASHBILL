@@ -98,7 +98,7 @@ export function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href as Route}
-                onClick={() => haptic('selection')}
+                onClick={() => haptic('light')}
                 className={cn(
                   'flex min-h-[46px] flex-col items-center justify-center rounded-xl py-1 text-[11px] transition-all duration-150 active:scale-95 focus:outline-none',
                   active

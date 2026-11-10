@@ -16,12 +16,13 @@ export function LandingHeader({
   locale: string;
 }) {
   const t = useTranslations('landing.nav');
+  const isFr = locale === 'fr';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md transition-all">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-3 sm:px-4">
-        <div className="flex items-center gap-2">
-          <Logo href={`/${locale}`} size="sm" />
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-all">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-3 sm:px-4">
+        <div className="flex items-center min-w-0 shrink">
+          <Logo href={`/${locale}`} size="sm" hideSubtitleOnMobile />
         </div>
 
         <nav className="hidden items-center gap-6 text-sm text-slate-600 md:flex">
@@ -42,9 +43,13 @@ export function LandingHeader({
             {t('login')}
           </Link>
 
-          <Link href={`/${locale}/register` as Route}>
-            <Button size="sm" className="h-8 px-3 text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs">
-              {t('try')}
+          <Link href={`/${locale}/register` as Route} className="shrink-0">
+            <Button
+              size="sm"
+              className="h-8 px-2.5 sm:px-3 text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs whitespace-nowrap"
+            >
+              <span className="sm:hidden">{isFr ? 'Essayer gratuit' : 'Try free'}</span>
+              <span className="hidden sm:inline">{t('try')}</span>
             </Button>
           </Link>
         </div>
