@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/Button';
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
 import { Logo } from '@/components/layout/Logo';
 import type { LandingPersonalization } from '@/lib/landing/types';
@@ -33,25 +32,15 @@ export function LandingHeader({
           <Link href={`/${locale}/faq` as Route} className="hover:text-slate-900 transition-colors">FAQ</Link>
         </nav>
 
-        {/* Zone d'actions visible et optimisée pour smartphone */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {/* Zone d'actions visible et épurée (Locale + Connexion) */}
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <LocaleSwitcher />
           
           <Link
             href={`/${locale}/login` as Route}
-            className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-950 px-1.5 sm:px-2 py-1 transition-colors whitespace-nowrap"
+            className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-950 px-2 py-1 transition-colors whitespace-nowrap"
           >
             {t('login')}
-          </Link>
-
-          <Link href={`/${locale}/register` as Route} className="shrink-0">
-            <Button
-              size="sm"
-              className="h-7 sm:h-8 px-2 sm:px-3 text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xs whitespace-nowrap"
-            >
-              <span className="sm:hidden">{isFr ? 'Essayer' : 'Try'}</span>
-              <span className="hidden sm:inline">{t('try')}</span>
-            </Button>
           </Link>
         </div>
       </div>
