@@ -36,6 +36,7 @@ export type ComputedPayload = {
   vatRate: number | null;
   vatAmount: number | null;
   depositAmount: number | null;
+  depositPercentage: number | null;
   deliveryFee: number | null;
   notes: string | null;
   validityDays: number | null;
@@ -85,6 +86,7 @@ export function computePayload(input: DocumentPayloadInput): ComputedPayload {
     vatRate: input.vatRate,
     vatAmount,
     depositAmount,
+    depositPercentage: input.depositPercentage,
     deliveryFee,
     notes: input.notes,
     validityDays: input.validityDays ?? null,

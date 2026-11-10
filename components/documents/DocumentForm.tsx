@@ -23,6 +23,7 @@ import { getOperatorsForCountry, isSupportedPaymentCountry } from '@/lib/countri
 import { getCurrencyForCountry } from '@/lib/countries/currency';
 import type { DocType } from '@prisma/client';
 import type { PdfFormat } from '@/lib/pdf/types';
+import type { ComputedPayload } from '@/lib/documents/payload';
 
 type Line = { description: string; quantity: number; unitPrice: number };
 type DraftState = {
@@ -52,14 +53,55 @@ type DraftState = {
   exchangeRateNote: string | null;
 };
 
+/** Brouillon existant (document non envoyé) à modifier. */
+export type EditableDocument = {
+  id: string;
+  type: DocType;
+  locale: 'FR' | 'EN';
+  clientId: string | null;
+  payload: ComputedPayload;
+};
+
+function buildEditState(doc: EditableDocument): DraftState {
+  const p = doc.payload;
+  return {
+    type: doc.type,
+    clientId: doc.clientId,
+    clientMode: 'existing',
+    newClient: { name: '', phone: '', email: '', address: '', taxId: '' },
+    lines: p.lines.map((l) => ({ description: l.description, quantity: l.quantity, unitPrice: l.unitPrice })),
+    vatRate: p.vatRate ?? null,
+    depositPercentage: p.depositPercentage ?? null,
+    deliveryFee: p.deliveryFee ?? null,
+    notes: p.notes ?? null,
+    validityDays: p.validityDays ?? null,
+    format: 'a4',
+    dueDate: p.dueDate ?? null,
+    referenceNumber: p.referenceNumber ?? null,
+    paymentMethod: p.paymentMethod ?? null,
+    paymentReference: p.paymentReference ?? null,
+    deliveryDate: p.deliveryDate ?? null,
+    deliveryAddress: p.deliveryAddress ?? null,
+    documentLocale: doc.locale,
+    paymentOperator: p.paymentOperator ?? null,
+    paymentOperatorFreeText: p.paymentOperatorFreeText ?? null,
+    equivalentCurrency: p.equivalentCurrency ?? null,
+    equivalentAmount: p.equivalentAmount ?? null,
+    exchangeRate: p.exchangeRate ?? null,
+    exchangeRateNote: p.exchangeRateNote ?? null,
+  };
+}
+
 export function DocumentForm({
   clients,
   initialDraftId,
+  editDocument,
   userCountry = 'CM',
   userCurrency: _userCurrency = 'XAF',
 }: {
   clients: { id: string; name: string; country?: string | null }[];
   initialDraftId?: string;
+  editDocument?: EditableDocument;
   userCountry?: string;
   userCurrency?: string;
 }) {
@@ -69,7 +111,7 @@ export function DocumentForm({
   const router = useRouter();
   const { user } = useCurrentUser();
 
-  const [state, setState] = useState<DraftState>({
+  const [state, setState] = useState<DraftState>(editDocument ? buildEditState(editDocument) : {
     type: 'DEVIS',
     clientId: null,
     clientMode: 'existing',
@@ -114,7 +156,10 @@ export function DocumentForm({
   useWakeLock(!submitting);
   const toast = useToast();
   const [existingDraft, setExistingDraft] = useState<DraftState | null>(null);
-  const draftId = useMemo(() => initialDraftId ?? 'default-document-draft', [initialDraftId]);
+  const draftId = useMemo(
+    () => (editDocument ? `edit-${editDocument.id}` : initialDraftId ?? 'default-document-draft'),
+    [editDocument, initialDraftId]
+  );
   const { status, lastSavedAt } = useAutoSave(draftId, state.type, state);
 
   useEffect(() => {
@@ -225,8 +270,8 @@ export function DocumentForm({
         finalClientId = client.id;
       }
 
-      const res = await fetch('/api/documents', {
-        method: 'POST',
+      const res = await fetch(editDocument ? `/api/documents/${editDocument.id}` : '/api/documents', {
+        method: editDocument ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
         body: JSON.stringify({
           clientId: finalClientId,

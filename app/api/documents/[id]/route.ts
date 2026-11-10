@@ -2,6 +2,8 @@ import type { NextRequest } from 'next/server';
 import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
+import { createDocumentSchema } from '@/lib/validators/documents';
+import { updateDraftDocument } from '@/lib/documents/update';
 
 export async function GET(
   req: NextRequest,
@@ -55,6 +57,71 @@ export async function DELETE(
       });
 
       return jsonOk({ ok: true });
+    });
+  } catch (err) {
+    return handleApiError(err);
+  }
+}
+
+/** Modifie un brouillon (document non envoyé). Les documents envoyés sont refusés. */
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  try {
+    return await requireAuth(req, async (req2, { user, ip, userAgent }) => {
+      const { id } = await params;
+      const body = await req2.json().catch(() => null);
+      const parsed = createDocumentSchema.safeParse(body);
+      if (!parsed.success) {
+        return jsonError('VALIDATION_ERROR', 'Données invalides', 422, parsed.error.flatten().fieldErrors);
+      }
+
+      const result = await updateDraftDocument({
+        user,
+        documentId: id,
+        type: parsed.data.type,
+        clientId: parsed.data.clientId ?? null,
+        locale: parsed.data.locale,
+        payload: parsed.data.payload,
+      });
+
+      if (!result.ok) {
+        switch (result.reason) {
+          case 'NOT_FOUND':
+          case 'CLIENT_NOT_FOUND':
+            return jsonError('NOT_FOUND', 'Document introuvable', 404);
+          case 'ALREADY_SENT':
+            return jsonError('FORBIDDEN', 'Un document envoyé ne peut plus être modifié.', 403);
+          case 'TYPE_CHANGED':
+            return jsonError('VALIDATION_ERROR', "Le type d'un brouillon ne peut pas être changé.", 422);
+          case 'MISSING_COMPANY_FIELDS':
+            return jsonError('VALIDATION_ERROR', result.message, 422, { missingFields: result.missingFields });
+          case 'BLOCKED':
+            await writeAudit({
+              actorId: user.id,
+              targetId: id,
+              action: 'document_blocked',
+              meta: { reasons: result.blockedReasons, operation: 'update' },
+              ip,
+              userAgent,
+            });
+            return jsonError('DOCUMENT_BLOCKED', 'Document bloqué par la détection de fraude', 422, {
+              reasons: result.blockedReasons,
+            });
+        }
+      }
+
+      await writeAudit({
+        actorId: user.id,
+        targetId: id,
+        action: 'document_updated',
+        meta: { number: result.number },
+        ip,
+        userAgent,
+      });
+
+      return jsonOk({ documentId: result.documentId, number: result.number });
     });
   } catch (err) {
     return handleApiError(err);
