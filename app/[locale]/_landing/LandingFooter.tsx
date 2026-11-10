@@ -82,7 +82,7 @@ export function LandingFooter({
               </li>
               <li>
                 <Link
-                  href={`/${locale}/legal/politique-confidentialite` as Route}
+                  href={`/${locale}/legal/privacy` as Route}
                   className="hover:text-ink"
                 >
                   Politique de confidentialité
@@ -90,7 +90,7 @@ export function LandingFooter({
               </li>
               <li>
                 <Link
-                  href={`/${locale}/legal/conditions-generales-utilisation` as Route}
+                  href={`/${locale}/legal/cgu` as Route}
                   className="hover:text-ink"
                 >
                   Conditions Générales
