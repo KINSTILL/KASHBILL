@@ -12,7 +12,7 @@ effectiveDate: "2026-11-09"
 
 ## PRÉAMBULE
 
-La présente Politique définit les conditions dans lesquelles un remboursement peut être accordé à un Utilisateur de MyCashBill (édité par Dany Mouelnjock, entrepreneur individuel, Douala, NIU P118816334425R). Elle complète les Conditions Générales de Vente accessibles à https://mycashbill.app/fr/legal/cgv.
+La présente Politique définit les conditions dans lesquelles un remboursement peut être accordé à un Utilisateur de MyCashBill (édité par DANY, entrepreneur individuel, Douala, NIU P118816334425R). Elle complète les Conditions Générales de Vente accessibles à https://mycashbill.app/fr/legal/cgv.
 
 **Cette Politique s'applique exclusivement aux abonnements payants (formule Pro et add-ons).**
 

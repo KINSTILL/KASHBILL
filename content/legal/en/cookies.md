@@ -12,7 +12,7 @@ effectiveDate: "2026-11-09"
 
 ## PREAMBLE
 
-This Policy explains how MyCashBill (published by Dany Mouelnjock, sole proprietor, Douala, NIU P118816334425R) uses cookies and similar technologies when using the Service accessible at https://mycashbill.app.
+This Policy explains how MyCashBill (published by DANY, sole proprietor, Douala, NIU P118816334425R) uses cookies and similar technologies when using the Service accessible at https://mycashbill.app.
 
 **By continuing to use the Service, you accept the use of essential cookies.** Non-essential cookies (analytics) are only set with your explicit consent via the cookie banner.
 
@@ -108,5 +108,5 @@ This Policy may be updated. The last update date appears at the top. Major chang
 ## ARTICLE 9 — CONTACT
 
 - **Email:** support@mycashbill.app
-- **Address:** Dany Mouelnjock — MyCashBill, Douala, Cameroon
+- **Address:** DANY — MyCashBill, Douala, Cameroon
 - **NIU:** P118816334425R

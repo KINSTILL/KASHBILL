@@ -12,7 +12,7 @@ effectiveDate: "2026-11-09"
 
 ## PREAMBLE
 
-This Policy defines the conditions under which a refund may be granted to a User of MyCashBill (published by Dany Mouelnjock, sole proprietor, Douala, NIU P118816334425R). It supplements the Terms of Sale accessible at https://mycashbill.app/en/legal/cgv.
+This Policy defines the conditions under which a refund may be granted to a User of MyCashBill (published by DANY, sole proprietor, Douala, NIU P118816334425R). It supplements the Terms of Sale accessible at https://mycashbill.app/en/legal/cgv.
 
 **This Policy applies exclusively to paid subscriptions (Pro plan and add-ons).**
 

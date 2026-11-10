@@ -12,7 +12,7 @@ effectiveDate: "2026-11-09"
 
 ## PRÉAMBULE
 
-La présente Clause précise les limites de la responsabilité de Dany Mouelnjock, éditeur de MyCashBill (entrepreneur individuel, Douala, NIU P118816334425R). Elle complète les CGU et les CGV.
+La présente Clause précise les limites de la responsabilité de DANY, éditeur de MyCashBill (entrepreneur individuel, Douala, NIU P118816334425R). Elle complète les CGU et les CGV.
 
 **En utilisant MyCashBill, vous reconnaissez avoir lu, compris et accepté l'intégralité de la présente Clause.**
 
@@ -52,7 +52,7 @@ L'Utilisateur est **seul et unique responsable** : de l'exactitude des informati
 
 ### 5.1 — Plafond de responsabilité
 
-La **responsabilité totale et cumulée** de Dany Mouelnjock envers un Utilisateur est **strictement limitée au plus faible des deux montants suivants** :
+La **responsabilité totale et cumulée** de DANY envers un Utilisateur est **strictement limitée au plus faible des deux montants suivants** :
 
 - **(a)** le montant total effectivement payé par l'Utilisateur au cours des **douze (12) derniers mois** ;
 - **(b)** un plafond absolu de **dix mille (10 000) francs CFA**.
@@ -89,7 +89,7 @@ MyCashBill recommande à l'Utilisateur : (1) télécharger chaque document immé
 
 ## ARTICLE 7 — INDEMNISATION
 
-L'Utilisateur s'engage à **indemniser, défendre et dégager de toute responsabilité** Dany Mouelnjock contre **toute réclamation, plainte, action en justice, sanction, amende, perte financière, frais de justice ou honoraires d'avocat** résultant directement ou indirectement de son usage. Cette clause **survit à la résiliation**.
+L'Utilisateur s'engage à **indemniser, défendre et dégager de toute responsabilité** DANY contre **toute réclamation, plainte, action en justice, sanction, amende, perte financière, frais de justice ou honoraires d'avocat** résultant directement ou indirectement de son usage. Cette clause **survit à la résiliation**.
 
 ---
 
@@ -101,4 +101,4 @@ La présente Clause est régie par le **droit camerounais**. En cas de litige, s
 
 ## ARTICLE 9 — RECONNAISSANCE PAR L'UTILISATEUR
 
-L'Utilisateur reconnaît avoir lu et compris l'intégralité de la présente Clause, avoir été informé que MyCashBill est un **outil technique** et non un conseiller juridique, fiscal ou comptable, être **seul responsable** de la conformité de ses documents, **indemniser** Dany Mouelnjock, et accepter que la responsabilité soit **strictement plafonnée à 10 000 FCFA** et la juridiction **exclusivement** celle de Douala.
+L'Utilisateur reconnaît avoir lu et compris l'intégralité de la présente Clause, avoir été informé que MyCashBill est un **outil technique** et non un conseiller juridique, fiscal ou comptable, être **seul responsable** de la conformité de ses documents, **indemniser** DANY, et accepter que la responsabilité soit **strictement plafonnée à 10 000 FCFA** et la juridiction **exclusivement** celle de Douala.

@@ -14,12 +14,12 @@ effectiveDate: "2026-11-09"
 
 The **MyCashBill** service (SaaS application accessible at https://mycashbill.app) is published by:
 
-- **Name:** Dany Mouelnjock
+- **Name:** DANY
 - **Status:** Sole proprietor (natural person)
 - **Address:** Douala, Cameroon
 - **Unique Identification Number (NIU):** P118816334425R
 - **Contact:** support@mycashbill.app
-- **Publication director:** Dany Mouelnjock, as publisher.
+- **Publication director:** DANY, as publisher.
 
 ---
 
@@ -61,7 +61,7 @@ User banking data never passes through MyCashBill servers. It is processed direc
 
 ## 5. Intellectual Property
 
-All elements constituting the MyCashBill application (software architecture, source code, user interfaces, algorithms, trademarks, logos and graphic identities) are the **exclusive property of Dany Mouelnjock**, holder of the rights.
+All elements constituting the MyCashBill application (software architecture, source code, user interfaces, algorithms, trademarks, logos and graphic identities) are the **exclusive property of DANY**, holder of the rights.
 
 Any reproduction, copying, reverse engineering, decompilation or distribution, in whole or in part, without prior written authorization, is **strictly prohibited** and constitutes infringement punishable by the Cameroonian Penal Code and applicable OHADA texts.
 
@@ -100,7 +100,7 @@ The user is **solely responsible** for the compliance of their documents, the le
 
 The user is **solely and exclusively responsible** for the content they enter, upload or generate. They undertake **not to use MyCashBill** to generate false or fraudulent documents, or to facilitate money laundering, tax fraud or any other offence.
 
-The user undertakes to **indemnify, defend and hold harmless** Dany Mouelnjock against **any claim, complaint, legal action, sanction, fine, financial loss, legal costs or attorney fees** arising directly or indirectly from their use. This clause **survives termination**.
+The user undertakes to **indemnify, defend and hold harmless** DANY against **any claim, complaint, legal action, sanction, fine, financial loss, legal costs or attorney fees** arising directly or indirectly from their use. This clause **survives termination**.
 
 ---
 
@@ -108,7 +108,7 @@ The user undertakes to **indemnify, defend and hold harmless** Dany Mouelnjock a
 
 ### 10.1 — Liability cap
 
-To the fullest extent permitted by applicable law, the **total and cumulative liability** of Dany Mouelnjock towards a user is **strictly limited to the lower of the following two amounts**:
+To the fullest extent permitted by applicable law, the **total and cumulative liability** of DANY towards a user is **strictly limited to the lower of the following two amounts**:
 
 - **(a)** the total amount actually paid by the user during the **twelve (12) months** preceding the triggering event of the damage;
 - **(b)** an absolute cap of **ten thousand (10,000) CFA francs**.
@@ -117,7 +117,7 @@ For users of the free plan, this cap is **zero (0) CFA francs**.
 
 ### 10.2 — Exclusion of indirect damages
 
-Dany Mouelnjock **expressly excludes all liability** for indirect or immaterial damages, including: loss of turnover, loss of customers, loss of opportunity, damage to image, loss of data, service interruption, input error, dispute with an end customer, tax sanctions, fines and penalties.
+DANY **expressly excludes all liability** for indirect or immaterial damages, including: loss of turnover, loss of customers, loss of opportunity, damage to image, loss of data, service interruption, input error, dispute with an end customer, tax sanctions, fines and penalties.
 
 ### 10.3 — Service provided "as is"
 
@@ -129,7 +129,7 @@ MyCashBill cannot be held liable for non-performance resulting from a **force ma
 
 ### 10.5 — Gross negligence and fraud
 
-The limitations above **do not apply** in case of **gross negligence or wilful misconduct** by Dany Mouelnjock, **fraud**, **privacy breach** or **violation of a mandatory legal provision**.
+The limitations above **do not apply** in case of **gross negligence or wilful misconduct** by DANY, **fraud**, **privacy breach** or **violation of a mandatory legal provision**.
 
 ### 10.6 — Claim limitation period
 
@@ -177,6 +177,6 @@ The user acknowledges having read, understood and accepted all of this Legal Not
 
 - MyCashBill is a **technical tool** and not a legal, tax or accounting advisor;
 - The user is **solely responsible** for the compliance of their documents and their activity;
-- The user **indemnifies** Dany Mouelnjock against any dispute arising from their use;
+- The user **indemnifies** DANY against any dispute arising from their use;
 - MyCashBill's liability is **strictly capped** in accordance with Article 10;
 - The competent jurisdiction is **exclusively** that of Douala, Cameroon.

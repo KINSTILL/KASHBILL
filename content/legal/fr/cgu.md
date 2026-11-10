@@ -12,7 +12,7 @@ effectiveDate: "2026-11-09"
 
 ## PRÉAMBULE
 
-Les présentes Conditions Générales d'Utilisation (ci-après « **CGU** ») ont pour objet de définir les conditions dans lesquelles **Dany Mouelnjock**, entrepreneur individuel, exerçant sous le nom commercial **MyCashBill**, NIU P118816334425R, domicilié à Douala, Cameroun (ci-après « **l'Éditeur** »), met à disposition des utilisateurs (ci-après « **l'Utilisateur** ») l'application **MyCashBill** accessible à https://mycashbill.app (ci-après « **le Service** »).
+Les présentes Conditions Générales d'Utilisation (ci-après « **CGU** ») ont pour objet de définir les conditions dans lesquelles **DANY**, entrepreneur individuel, exerçant sous le nom commercial **MyCashBill**, NIU P118816334425R, domicilié à Douala, Cameroun (ci-après « **l'Éditeur** »), met à disposition des utilisateurs (ci-après « **l'Utilisateur** ») l'application **MyCashBill** accessible à https://mycashbill.app (ci-après « **le Service** »).
 
 **L'Utilisateur reconnaît que l'acceptation des présentes CGU est une condition sine qua non de son accès au Service.** En cochant la case d'acceptation lors de son inscription, ou en utilisant le Service de quelque manière que ce soit, l'Utilisateur reconnaît avoir lu, compris et accepté sans réserve l'intégralité des présentes CGU.
 
@@ -21,7 +21,7 @@ Les présentes Conditions Générales d'Utilisation (ci-après « **CGU** ») on
 ## ARTICLE 1 — DÉFINITIONS
 
 - **« Service »** : l'application SaaS MyCashBill, accessible via le web (PWA), permettant à l'Utilisateur de générer, stocker et partager des documents commerciaux (devis, factures, reçus, bons de commande, bordereaux de livraison).
-- **« Éditeur »** : Dany Mouelnjock, personne physique éditrice du Service.
+- **« Éditeur »** : DANY, personne physique éditrice du Service.
 - **« Utilisateur »** : toute personne physique ou morale ayant créé un compte et accédant au Service.
 - **« Contenu Utilisateur »** : toute information saisie par l'Utilisateur dans le Service.
 - **« Document »** : tout fichier généré par le Service à la demande de l'Utilisateur.
@@ -174,7 +174,7 @@ L'Utilisateur s'engage à **ne jamais** utiliser le Service pour :
 
 ### 10.1 — Propriété de l'Éditeur
 
-L'ensemble des éléments du Service (code source, architecture, interfaces, algorithmes, marques, logos, chartes graphiques, documentation) est la **propriété exclusive de Dany Mouelnjock**, protégée par le Code de la propriété intellectuelle camerounais et les textes OHADA.
+L'ensemble des éléments du Service (code source, architecture, interfaces, algorithmes, marques, logos, chartes graphiques, documentation) est la **propriété exclusive de DANY**, protégée par le Code de la propriété intellectuelle camerounais et les textes OHADA.
 
 Toute reproduction, modification, décompilation, ingénierie inverse, distribution ou exploitation non autorisée constitue une **contrefaçon** passible de poursuites pénales et civiles.
 
@@ -272,7 +272,7 @@ En cas de résiliation, l'Utilisateur doit immédiatement cesser toute utilisati
 
 ### 15.1 — Plafond de responsabilité
 
-Dans toute la mesure permise par le droit applicable, la **responsabilité totale et cumulée** de Dany Mouelnjock envers un Utilisateur, toutes causes confondues, est **strictement limitée au plus faible des deux montants suivants** :
+Dans toute la mesure permise par le droit applicable, la **responsabilité totale et cumulée** de DANY envers un Utilisateur, toutes causes confondues, est **strictement limitée au plus faible des deux montants suivants** :
 
 - **(a)** le montant total effectivement payé par l'Utilisateur au cours des **douze (12) derniers mois** précédant le fait générateur du dommage ;
 - **(b)** un plafond absolu de **dix mille (10 000) francs CFA**.
@@ -313,7 +313,7 @@ Toute réclamation relative à l'utilisation du Service doit être adressée à 
 
 ## ARTICLE 16 — INDEMNISATION
 
-L'Utilisateur s'engage à **indemniser, défendre et dégager de toute responsabilité** Dany Mouelnjock, éditeur de MyCashBill, contre **toute réclamation, plainte, action en justice, sanction, amende, perte financière, frais de justice ou honoraires d'avocat** résultant directement ou indirectement :
+L'Utilisateur s'engage à **indemniser, défendre et dégager de toute responsabilité** DANY, éditeur de MyCashBill, contre **toute réclamation, plainte, action en justice, sanction, amende, perte financière, frais de justice ou honoraires d'avocat** résultant directement ou indirectement :
 
 - de l'utilisation du Service par l'Utilisateur ;
 - des Contenus Utilisateurs qu'il génère ou diffuse ;
@@ -387,7 +387,7 @@ L'Utilisateur reconnaît expressément avoir :
 - accepté sans réserve l'ensemble de leurs dispositions ;
 - été informé que MyCashBill est un **outil technique** et non un conseiller juridique, fiscal ou comptable ;
 - été informé qu'il est **seul responsable** de la conformité de ses Documents et de son activité ;
-- été informé qu'il **indemnise** Dany Mouelnjock contre tout litige résultant de son usage ;
+- été informé qu'il **indemnise** DANY contre tout litige résultant de son usage ;
 - été informé que la responsabilité de l'Éditeur est **strictement plafonnée à 10 000 FCFA** ;
 - été informé que la juridiction compétente est **exclusivement** celle de Douala, Cameroun ;
 - été informé qu'il **renonce à tout autre for** ;

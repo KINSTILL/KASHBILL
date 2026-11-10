@@ -12,7 +12,7 @@ effectiveDate: "2026-11-09"
 
 ## PREAMBLE
 
-These Terms of Sale (the "**Terms**") govern exclusively the conditions under which **Dany Mouelnjock**, sole proprietor operating under the trade name **MyCashBill**, NIU P118816334425R, domiciled in Douala, Cameroon (the "**Publisher**"), sells to the User (the "**Customer**") the paid subscriptions (Pro plan and add-ons) to the MyCashBill application (the "**Service**").
+These Terms of Sale (the "**Terms**") govern exclusively the conditions under which **DANY**, sole proprietor operating under the trade name **MyCashBill**, NIU P118816334425R, domiciled in Douala, Cameroon (the "**Publisher**"), sells to the User (the "**Customer**") the paid subscriptions (Pro plan and add-ons) to the MyCashBill application (the "**Service**").
 
 **These Terms concern only the commercial relationship between the Publisher and the Customer.** Free use of the Service is governed by the Terms of Service (ToS).
 
@@ -191,7 +191,7 @@ Pro access suspended, switch to free plan, retention according to policy, surviv
 
 ### 10.1 — Liability cap
 
-To the fullest extent permitted by applicable law, the **total and cumulative liability** of Dany Mouelnjock towards the Customer is **strictly limited to the lower of the following two amounts**:
+To the fullest extent permitted by applicable law, the **total and cumulative liability** of DANY towards the Customer is **strictly limited to the lower of the following two amounts**:
 
 - **(a)** the total amount actually paid by the Customer during the **twelve (12) months** preceding the triggering event;
 - **(b)** an absolute cap of **ten thousand (10,000) CFA francs**.
@@ -216,13 +216,13 @@ Any claim must be addressed in writing within **six (6) months**. After this per
 
 ## ARTICLE 11 — INDEMNIFICATION
 
-The Customer undertakes to **indemnify, defend and hold harmless** Dany Mouelnjock against **any claim, complaint, legal action, sanction, fine, financial loss, legal costs or attorney fees** arising directly or indirectly from use of the Service, generated content, breach of Terms/ToS, dispute with an end customer, or violation of law. This clause **survives termination**.
+The Customer undertakes to **indemnify, defend and hold harmless** DANY against **any claim, complaint, legal action, sanction, fine, financial loss, legal costs or attorney fees** arising directly or indirectly from use of the Service, generated content, breach of Terms/ToS, dispute with an end customer, or violation of law. This clause **survives termination**.
 
 ---
 
 ## ARTICLE 12 — INTELLECTUAL PROPERTY
 
-The Service and its components remain the **exclusive property of Dany Mouelnjock**. Subscription **confers no ownership rights** on the Customer, only a personal, non-exclusive, non-transferable right of use, for the duration of the subscription.
+The Service and its components remain the **exclusive property of DANY**. Subscription **confers no ownership rights** on the Customer, only a personal, non-exclusive, non-transferable right of use, for the duration of the subscription.
 
 ---
 

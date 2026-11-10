@@ -14,12 +14,12 @@ effectiveDate: "2026-11-09"
 
 Le service **MyCashBill** (application SaaS accessible à https://mycashbill.app) est édité par :
 
-- **Nom et prénom :** Dany Mouelnjock
+- **Nom et prénom :** DANY
 - **Statut :** Entrepreneur individuel (personne physique)
 - **Adresse :** Douala, Cameroun
 - **Numéro d'Identifiant Unique (NIU) :** P118816334425R
 - **Contact :** support@mycashbill.app
-- **Directeur de la publication :** Dany Mouelnjock, en qualité d'éditeur.
+- **Directeur de la publication :** DANY, en qualité d'éditeur.
 
 ---
 
@@ -61,7 +61,7 @@ Les données bancaires des utilisateurs ne transitent jamais par les serveurs de
 
 ## 5. Propriété Intellectuelle
 
-L'ensemble des éléments constituant l'application MyCashBill (architecture logicielle, code source, interfaces utilisateur, algorithmes, marques, logos et chartes graphiques) est la **propriété exclusive de Dany Mouelnjock**, titulaire des droits.
+L'ensemble des éléments constituant l'application MyCashBill (architecture logicielle, code source, interfaces utilisateur, algorithmes, marques, logos et chartes graphiques) est la **propriété exclusive de DANY**, titulaire des droits.
 
 Toute reproduction, copie, ingénierie inverse, décompilation ou diffusion, totale ou partielle, sans autorisation préalable écrite, est **formellement interdite** et constitue une contrefaçon sanctionnée par le Code pénal camerounais et les textes OHADA applicables.
 
@@ -100,7 +100,7 @@ L'utilisateur est **seul responsable** de la conformité de ses documents, de la
 
 L'utilisateur est **seul et unique responsable** des contenus qu'il saisit, téléverse ou génère. Il s'engage à **ne pas utiliser MyCashBill** pour générer des documents faux, frauduleux, ou pour faciliter le blanchiment, la fraude fiscale ou tout autre délit.
 
-L'utilisateur s'engage à **indemniser, défendre et dégager de toute responsabilité** Dany Mouelnjock contre **toute réclamation, plainte, action en justice, sanction, amende, perte financière, frais de justice ou honoraires d'avocat** résultant directement ou indirectement de son usage. Cette clause **survit à la résiliation**.
+L'utilisateur s'engage à **indemniser, défendre et dégager de toute responsabilité** DANY contre **toute réclamation, plainte, action en justice, sanction, amende, perte financière, frais de justice ou honoraires d'avocat** résultant directement ou indirectement de son usage. Cette clause **survit à la résiliation**.
 
 ---
 
@@ -108,7 +108,7 @@ L'utilisateur s'engage à **indemniser, défendre et dégager de toute responsab
 
 ### 10.1 — Plafond de responsabilité
 
-Dans toute la mesure permise par le droit applicable, la **responsabilité totale et cumulée** de Dany Mouelnjock envers un utilisateur, toutes causes confondues, est **strictement limitée au plus faible des deux montants suivants** :
+Dans toute la mesure permise par le droit applicable, la **responsabilité totale et cumulée** de DANY envers un utilisateur, toutes causes confondues, est **strictement limitée au plus faible des deux montants suivants** :
 
 - **(a)** le montant total effectivement payé par l'utilisateur au cours des **douze (12) derniers mois** précédant le fait générateur du dommage ;
 - **(b)** un plafond absolu de **dix mille (10 000) francs CFA**.
@@ -117,7 +117,7 @@ Pour l'utilisateur de l'offre gratuite, ce plafond est de **zéro (0) franc CFA*
 
 ### 10.2 — Exclusion des dommages indirects
 
-Dany Mouelnjock **exclut expressément toute responsabilité** pour les dommages indirects ou immatériels, y compris : perte de chiffre d'affaires, perte de clientèle, perte de chance, atteinte à l'image, perte de données, interruption du service, erreur de saisie, litige avec un client final, sanctions fiscales, amendes et pénalités.
+DANY **exclut expressément toute responsabilité** pour les dommages indirects ou immatériels, y compris : perte de chiffre d'affaires, perte de clientèle, perte de chance, atteinte à l'image, perte de données, interruption du service, erreur de saisie, litige avec un client final, sanctions fiscales, amendes et pénalités.
 
 ### 10.3 — Service fourni « en l'état »
 
@@ -129,7 +129,7 @@ MyCashBill ne saurait être tenu responsable en cas d'inexécution résultant d'
 
 ### 10.5 — Faute lourde et dol
 
-Les limitations ci-dessus **ne s'appliquent pas** en cas de **faute lourde ou dolosive** de Dany Mouelnjock, de **fraude**, d'**atteinte à la vie privée** ou de **violation d'une disposition légale impérative**.
+Les limitations ci-dessus **ne s'appliquent pas** en cas de **faute lourde ou dolosive** de DANY, de **fraude**, d'**atteinte à la vie privée** ou de **violation d'une disposition légale impérative**.
 
 ### 10.6 — Délai de prescription
 
@@ -177,6 +177,6 @@ L'utilisateur reconnaît avoir lu, compris et accepté l'intégralité des prés
 
 - Que MyCashBill est un **outil technique** et non un conseiller juridique, fiscal ou comptable ;
 - Qu'il est **seul responsable** de la conformité de ses documents et de son activité ;
-- Qu'il **indemnise** Dany Mouelnjock contre tout litige résultant de son usage ;
+- Qu'il **indemnise** DANY contre tout litige résultant de son usage ;
 - Que la responsabilité de MyCashBill est **strictement plafonnée** conformément à l'article 10 ;
 - Que la juridiction compétente est **exclusivement** celle de Douala, Cameroun.

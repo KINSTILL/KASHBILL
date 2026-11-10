@@ -16,7 +16,7 @@ In accordance with **Cameroonian Law No. 2024/017 of December 23, 2024** on the 
 
 The Data Controller is:
 
-- **Dany Mouelnjock**, sole proprietor
+- **DANY**, sole proprietor
 - **Address:** Douala, Cameroon
 - **NIU:** P118816334425R
 - **Contact:** support@mycashbill.app
@@ -255,7 +255,7 @@ The version in force is the one published at the date of consultation. Major cha
 
 ## 16. Limitation of liability
 
-To the fullest extent permitted by applicable law, the **total and cumulative liability** of Dany Mouelnjock towards a User, in connection with the processing of personal data, is **strictly limited to the lower of the following two amounts**:
+To the fullest extent permitted by applicable law, the **total and cumulative liability** of DANY towards a User, in connection with the processing of personal data, is **strictly limited to the lower of the following two amounts**:
 
 - **(a)** the total amount actually paid by the User during the **twelve (12) months** preceding the triggering event of the damage;
 - **(b)** an absolute cap of **ten thousand (10,000) CFA francs**.
@@ -271,5 +271,5 @@ This limitation **does not apply** in case of gross negligence or wilful miscond
 For any question relating to this Policy:
 
 - **Email:** support@mycashbill.app
-- **Address:** Dany Mouelnjock — MyCashBill, Douala, Cameroon
+- **Address:** DANY — MyCashBill, Douala, Cameroon
 - **NIU:** P118816334425R

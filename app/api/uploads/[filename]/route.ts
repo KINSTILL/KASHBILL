@@ -16,7 +16,7 @@ export async function GET(
       }
 
       // Protection contre directory traversal
-      if (filename.includes('..') || filename.includes('/')) {
+      if (filename.includes('..') || filename.includes('/') || filename.includes('\\') || filename.includes('\0')) {
         return jsonError('FORBIDDEN', 'Nom de fichier invalide', 403);
       }
 

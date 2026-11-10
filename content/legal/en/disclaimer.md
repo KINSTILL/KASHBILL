@@ -12,7 +12,7 @@ effectiveDate: "2026-11-09"
 
 ## PREAMBLE
 
-This Disclaimer specifies the limits of liability of Dany Mouelnjock, publisher of MyCashBill (sole proprietor, Douala, NIU P118816334425R). It supplements the Terms of Service and the Terms of Sale.
+This Disclaimer specifies the limits of liability of DANY, publisher of MyCashBill (sole proprietor, Douala, NIU P118816334425R). It supplements the Terms of Service and the Terms of Sale.
 
 **By using MyCashBill, you acknowledge having read, understood and accepted all of this Disclaimer.**
 
@@ -52,7 +52,7 @@ The User is **solely and exclusively responsible** for: the accuracy of informat
 
 ### 5.1 — Liability cap
 
-The **total and cumulative liability** of Dany Mouelnjock towards a User is **strictly limited to the lower of the following two amounts**:
+The **total and cumulative liability** of DANY towards a User is **strictly limited to the lower of the following two amounts**:
 
 - **(a)** the total amount actually paid by the User during the **twelve (12) months** preceding the triggering event;
 - **(b)** an absolute cap of **ten thousand (10,000) CFA francs**.
@@ -89,7 +89,7 @@ MyCashBill recommends that the User: (1) download each document immediately; (2)
 
 ## ARTICLE 7 — INDEMNIFICATION
 
-The User undertakes to **indemnify, defend and hold harmless** Dany Mouelnjock against **any claim, complaint, legal action, sanction, fine, financial loss, legal costs or attorney fees** arising directly or indirectly from their use. This clause **survives termination**.
+The User undertakes to **indemnify, defend and hold harmless** DANY against **any claim, complaint, legal action, sanction, fine, financial loss, legal costs or attorney fees** arising directly or indirectly from their use. This clause **survives termination**.
 
 ---
 
@@ -101,4 +101,4 @@ This Disclaimer is governed by **Cameroonian law**. In case of dispute, amicable
 
 ## ARTICLE 9 — ACKNOWLEDGEMENT BY THE USER
 
-The User acknowledges having read and understood all of this Disclaimer, having been informed that MyCashBill is a **technical tool** and not a legal, tax or accounting advisor, being **solely responsible** for the compliance of their documents, **indemnifying** Dany Mouelnjock, and accepting that liability is **strictly capped at 10,000 FCFA** and the jurisdiction is **exclusively** that of Douala.
+The User acknowledges having read and understood all of this Disclaimer, having been informed that MyCashBill is a **technical tool** and not a legal, tax or accounting advisor, being **solely responsible** for the compliance of their documents, **indemnifying** DANY, and accepting that liability is **strictly capped at 10,000 FCFA** and the jurisdiction is **exclusively** that of Douala.

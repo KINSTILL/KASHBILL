@@ -16,7 +16,7 @@ Conformément à la **loi camerounaise n°2024/017 du 23 décembre 2024** relati
 
 Le Responsable de Traitement est :
 
-- **Dany Mouelnjock**, entrepreneur individuel
+- **DANY**, entrepreneur individuel
 - **Adresse :** Douala, Cameroun
 - **NIU :** P118816334425R
 - **Contact :** support@mycashbill.app
@@ -255,7 +255,7 @@ La version en vigueur est celle publiée à la date de consultation. Les modific
 
 ## 16. Limitation de responsabilité
 
-Dans toute la mesure permise par le droit applicable, la **responsabilité totale et cumulée** de Dany Mouelnjock envers un Utilisateur, en lien avec le traitement des données personnelles, est **strictement limitée au plus faible des deux montants suivants** :
+Dans toute la mesure permise par le droit applicable, la **responsabilité totale et cumulée** de DANY envers un Utilisateur, en lien avec le traitement des données personnelles, est **strictement limitée au plus faible des deux montants suivants** :
 
 - **(a)** le montant total effectivement payé par l'Utilisateur au cours des **douze (12) derniers mois** ;
 - **(b)** un plafond absolu de **dix mille (10 000) francs CFA**.
@@ -271,5 +271,5 @@ Cette limitation **ne s'applique pas** en cas de faute lourde ou dolosive, de fr
 Pour toute question relative à la présente Politique :
 
 - **Email :** support@mycashbill.app
-- **Adresse :** Dany Mouelnjock — MyCashBill, Douala, Cameroun
+- **Adresse :** DANY — MyCashBill, Douala, Cameroun
 - **NIU :** P118816334425R

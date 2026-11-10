@@ -12,7 +12,7 @@ effectiveDate: "2026-11-09"
 
 ## PRÉAMBULE
 
-Les présentes Conditions Générales de Vente (ci-après « **CGV** ») régissent exclusivement les conditions dans lesquelles **Dany Mouelnjock**, entrepreneur individuel exerçant sous le nom commercial **MyCashBill**, NIU P118816334425R, domicilié à Douala, Cameroun (ci-après « **l'Éditeur** »), vend à l'Utilisateur (ci-après « **le Client** ») les abonnements payants (formule Pro et add-ons) à l'application MyCashBill (ci-après « **le Service** »).
+Les présentes Conditions Générales de Vente (ci-après « **CGV** ») régissent exclusivement les conditions dans lesquelles **DANY**, entrepreneur individuel exerçant sous le nom commercial **MyCashBill**, NIU P118816334425R, domicilié à Douala, Cameroun (ci-après « **l'Éditeur** »), vend à l'Utilisateur (ci-après « **le Client** ») les abonnements payants (formule Pro et add-ons) à l'application MyCashBill (ci-après « **le Service** »).
 
 **Les CGV ne concernent que la relation commerciale entre l'Éditeur et le Client.** L'utilisation gratuite du Service est régie par les Conditions Générales d'Utilisation (CGU).
 
@@ -191,7 +191,7 @@ Accès Pro suspendu, bascule sur offre gratuite, conservation selon politique, s
 
 ### 10.1 — Plafond de responsabilité
 
-Dans toute la mesure permise par le droit applicable, la **responsabilité totale et cumulée** de Dany Mouelnjock envers le Client est **strictement limitée au plus faible des deux montants suivants** :
+Dans toute la mesure permise par le droit applicable, la **responsabilité totale et cumulée** de DANY envers le Client est **strictement limitée au plus faible des deux montants suivants** :
 
 - **(a)** le montant total effectivement payé par le Client au cours des **douze (12) derniers mois** ;
 - **(b)** un plafond absolu de **dix mille (10 000) francs CFA**.
@@ -216,13 +216,13 @@ Toute réclamation doit être adressée par écrit dans un délai maximum de **s
 
 ## ARTICLE 11 — INDEMNISATION
 
-Le Client s'engage à **indemniser, défendre et dégager de toute responsabilité** Dany Mouelnjock contre **toute réclamation, plainte, action en justice, sanction, amende, perte financière, frais de justice ou honoraires d'avocat** résultant directement ou indirectement de l'utilisation du Service, des contenus générés, d'un manquement aux CGV/CGU, d'un litige avec un client final, ou d'une violation de la loi. Cette clause **survit à la résiliation**.
+Le Client s'engage à **indemniser, défendre et dégager de toute responsabilité** DANY contre **toute réclamation, plainte, action en justice, sanction, amende, perte financière, frais de justice ou honoraires d'avocat** résultant directement ou indirectement de l'utilisation du Service, des contenus générés, d'un manquement aux CGV/CGU, d'un litige avec un client final, ou d'une violation de la loi. Cette clause **survit à la résiliation**.
 
 ---
 
 ## ARTICLE 12 — PROPRIÉTÉ INTELLECTUELLE
 
-Le Service et ses composants restent la **propriété exclusive de Dany Mouelnjock**. La souscription **ne confère aucun droit de propriété** au Client, seulement un droit d'usage personnel, non exclusif et non transférable, pendant la durée de l'abonnement.
+Le Service et ses composants restent la **propriété exclusive de DANY**. La souscription **ne confère aucun droit de propriété** au Client, seulement un droit d'usage personnel, non exclusif et non transférable, pendant la durée de l'abonnement.
 
 ---
 
