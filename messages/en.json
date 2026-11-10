@@ -767,14 +767,14 @@
     },
     "problem": {
       "title": "Invoicing should not be a headache",
-      "subtitle": "You are losing precious time with outdated tools",
-      "word_title": "Broken Word templates",
-      "word_desc": "Messy formatting, misaligned tables, and unprofessional looks.",
+      "subtitle": "You are wasting precious time on outdated tools",
+      "word_title": "Clunky Word templates",
+      "word_desc": "Messy formatting, misaligned tables, and an unprofessional look.",
       "excel_title": "Complex Excel formulas",
       "excel_desc": "VAT calculation mistakes, lost spreadsheets, and manual re-entry.",
       "paper_title": "Paper receipt booklets",
-      "paper_desc": "No backup, lost records, and impossible to send over WhatsApp.",
-      "transition": "There is a better way ↓"
+      "paper_desc": "No backups, lost records, and no easy way to send them over WhatsApp.",
+      "transition": "There’s a better way ↓"
     },
     "how": {
       "title": "How it works",
@@ -782,47 +782,47 @@
       "step1_title": "1. Enter invoice details",
       "step1_desc": "Client name, service, amount, and automatic tax calculations.",
       "step2_title": "2. Instant generation",
-      "step2_desc": "Polished, OHADA-compliant invoice generated immediately.",
+      "step2_desc": "A polished, OHADA-compliant invoice, generated instantly.",
       "step3_title": "3. Share on WhatsApp",
-      "step3_desc": "Send the PDF or secure link directly to your customer."
+      "step3_desc": "Send the PDF or a secure link straight to your customer."
     },
     "features": {
       "title": "Built for your everyday workflow",
       "subtitle": "All the essential tools to manage invoices and quotes",
       "f1_title": "OHADA & Local Compliance",
-      "f1_desc": "Required legal notices, local currencies (FCFA, GHS, KES, USD), and taxes.",
+      "f1_desc": "Mandatory legal notices, local currencies (FCFA, GHS, KES, USD) and tax rules.",
       "f2_title": "Clear Payment Instructions",
-      "f2_desc": "Display your Mobile Money numbers, bank details or cash options directly on your invoices.",
+      "f2_desc": "Show your Mobile Money number, bank details or cash payment options right on your invoices.",
       "f3_title": "Direct WhatsApp Sharing",
       "f3_desc": "Send invoices in one click right where your clients already are.",
       "f4_title": "Invoice Status Tracking",
-      "f4_desc": "Quickly mark invoices as paid and follow up on pending balances in one click.",
-      "f5_title": "Lightning-fast on mobile",
+      "f4_desc": "Mark invoices as paid in one click and follow up on outstanding balances.",
+      "f5_title": "Fast on mobile",
       "f5_desc": "Mobile-first design that loads quickly even on slower connections.",
       "f6_title": "Secure cloud backups",
-      "f6_desc": "Your client data and documents are encrypted and always safe."
+      "f6_desc": "Your client data and documents are encrypted and backed up."
     },
     "faq": {
       "title": "Frequently Asked Questions",
       "subtitle": "Everything you need to know before getting started",
       "view_all": "View full FAQ →",
       "q1": "Are my invoices compliant with OHADA regulations?",
-      "a1": "Yes, fully. Mandatory legal mentions, sequential numbering, tax breakdowns, and local currencies strictly comply with OHADA standards.",
+      "a1": "Yes. Mandatory legal notices, sequential numbering, tax breakdowns and local currencies follow OHADA rules.",
       "q2": "How do my clients pay me?",
-      "a2": "Directly to your own accounts! MyCashBill is a document creation tool, not a payment gateway. Your invoices clearly display your payment details (Mobile Money, bank transfer, cash) and your clients pay you directly with zero commission.",
+      "a2": "Straight into your own accounts! MyCashBill is a document tool, not a payment gateway. Your invoices show your payment details (Mobile Money, bank transfer, cash), and your clients pay you directly, with no commission.",
       "q3": "Does the application work on mobile?",
       "a3": "Yes! MyCashBill is a lightweight Progressive Web App designed mobile-first. You can add it directly to your home screen.",
       "q4": "How does the free plan work and when should I go Pro?",
-      "a4": "The free plan requires no credit card and allows you to create up to 10 invoices per month. As your business grows, you can unlock Pro (2,000 FCFA for 30 days via the secure Notch Pay gateway, by Mobile Money or credit card) to remove watermarks and get unlimited volume.",
+      "a4": "The free plan requires no credit card and lets you create up to 10 invoices per month. As your business grows, you can upgrade to Pro (2,000 FCFA for 30 days, paid securely via Notch Pay by Mobile Money or card) to remove watermarks and get unlimited documents.",
       "q5": "Can I send invoices directly via WhatsApp?",
-      "a5": "Absolutely. A single tap drafts a professional WhatsApp message with your invoice link and PDF attachment ready to send."
+      "a5": "Absolutely. One tap opens a ready-to-send WhatsApp message with your invoice link and PDF attached."
     },
     "finalCta": {
       "title": "Ready to invoice like a pro?",
       "subtitle": "Join thousands of African entrepreneurs and freelancers saving time every day.",
       "btn_primary": "Create my first invoice",
-      "btn_secondary": "Try demo without signing up",
-      "guarantee": "✓ Free plan with no card required · Ready in 60 seconds · Unlock Pro for 2,000 FCFA/mo"
+      "btn_secondary": "Try the demo without signing up",
+      "guarantee": "✓ Free plan, no card required · Ready in 60 seconds · Upgrade to Pro for 2,000 FCFA a month"
     },
     "footer": {
       "tagline": "🌍 Made in Africa, for Africa",
@@ -830,7 +830,7 @@
       "col_product": "Product",
       "col_legal": "Legal",
       "col_resources": "Resources",
-      "col_countries": "Tier 1 Countries",
+      "col_countries": "Supported countries",
       "rights": "All rights reserved."
     }
   }

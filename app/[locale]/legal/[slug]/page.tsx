@@ -51,7 +51,7 @@ export default async function LegalPage({ params }: Props) {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <header className="mb-8 border-b border-slate-200 pb-4">
-        <h1 className="text-2xl font-bold text-ink">{doc.title}</h1>
+        <h1 className="text-3xl font-bold text-ink">{doc.title}</h1>
         <p className="mt-2 text-sm text-slate-500">
           Version {doc.version} ·{' '}
           {new Date(doc.effectiveDate).toLocaleDateString(
@@ -60,7 +60,7 @@ export default async function LegalPage({ params }: Props) {
         </p>
       </header>
       <article
-        className="prose prose-slate max-w-none"
+        className="legal-prose"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </main>
