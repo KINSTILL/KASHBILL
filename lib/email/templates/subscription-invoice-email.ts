@@ -27,11 +27,11 @@ export function buildSubscriptionInvoiceEmail(input: Input) {
 <body style="margin:0;background:#FAFBFC;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:#0B1220;">
 <table role="presentation" width="100%" style="padding:24px 0;"><tr><td align="center">
 <table role="presentation" width="100%" style="max-width:560px;background:#FFFFFF;border-radius:12px;padding:32px;"><tr><td>
-<div style="height:3px;background:#B8935A;margin-bottom:24px;"></div>
-<h1 style="margin:0 0 16px;font-size:18px;font-weight:600;">MyCashBill Pro</h1>
+<div style="height:3px;background:#3D8159;margin-bottom:24px;"></div>
+<h1 style="margin:0 0 16px;font-size:20px;font-weight:700;letter-spacing:-0.03em;">My<span style="color:#3D8159;">CashBill</span> <span style="font-weight:500;color:#64748B;">Pro</span></h1>
 <p style="margin:0 0 8px;font-size:14px;">${escapeHtml(greeting)}</p>
 <p style="margin:0 0 8px;font-size:14px;">${escapeHtml(intro)}</p>
-<div style="margin:16px 0;padding:12px;background:#FAFBFC;border-left:3px solid #B8935A;border-radius:4px;">
+<div style="margin:16px 0;padding:12px;background:#FAFBFC;border-left:3px solid #3D8159;border-radius:4px;">
 <p style="margin:0;font-size:13px;color:#334155;">${escapeHtml(summary)}</p>
 </div>
 <p style="margin:24px 0 0;font-size:14px;">${isFr ? 'Cordialement' : 'Best regards'},<br/>MyCashBill</p>

@@ -1,11 +1,11 @@
 /* eslint-disable jsx-a11y/alt-text */
 import { Document, Page, View, Text, Image, Svg, Path, StyleSheet } from '@react-pdf/renderer';
 import type { SubscriptionInvoicePdfInput } from './types';
+import { BRAND } from '../../brand';
 
-const SAGE = '#3D8159'; // sage-600 : couleur de marque MyCashBill (identique à l'app et à la landing)
-const BRASS = '#B8935A';
-const BRASS_LIGHT = '#D4B584';
-const INK = '#0B1220';
+const SAGE = BRAND.sage; // couleur de marque MyCashBill, identique à l'app, la landing et le favicon
+const SAGE_LIGHT = BRAND.sageLight;
+const INK = BRAND.ink;
 const SLATE = '#475569';
 const BORDER = '#E2E8F0';
 
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   number: { fontSize: 10, color: SLATE, fontFamily: 'Courier' },
   proBadge: {
     position: 'absolute', top: 0, right: 0,
-    backgroundColor: BRASS_LIGHT, color: '#FFFFFF',
+    backgroundColor: SAGE_LIGHT, color: '#FFFFFF',
     paddingHorizontal: 10, paddingVertical: 4, borderRadius: 3,
     fontSize: 9, fontWeight: 'bold', letterSpacing: 0.5,
   },
@@ -52,10 +52,10 @@ const styles = StyleSheet.create({
   grandTotalRow: {
     flexDirection: 'row', justifyContent: 'flex-end',
     marginTop: 8, paddingTop: 8,
-    borderTopWidth: 1.5, borderTopColor: BRASS,
+    borderTopWidth: 1.5, borderTopColor: SAGE,
   },
   grandTotalLabel: { fontSize: 13, fontWeight: 'bold', marginRight: 12, color: INK },
-  grandTotalValue: { fontSize: 16, fontWeight: 'bold', color: BRASS, textAlign: 'right', minWidth: 120 },
+  grandTotalValue: { fontSize: 16, fontWeight: 'bold', color: SAGE, textAlign: 'right', minWidth: 120 },
   paidRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -64,11 +64,11 @@ const styles = StyleSheet.create({
   },
   paidStamp: {
     alignSelf: 'flex-start',
-    borderWidth: 2, borderColor: BRASS,
+    borderWidth: 2, borderColor: SAGE,
     paddingHorizontal: 16, paddingVertical: 6, borderRadius: 4,
     transform: 'rotate(-3deg)',
   },
-  paidText: { fontSize: 14, fontWeight: 'bold', color: BRASS, letterSpacing: 2 },
+  paidText: { fontSize: 14, fontWeight: 'bold', color: SAGE, letterSpacing: 2 },
   qrContainer: {
     alignItems: 'center',
     padding: 6,

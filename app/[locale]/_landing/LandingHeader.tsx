@@ -18,7 +18,7 @@ export function LandingHeader({
   const t = useTranslations('landing.nav');
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-2.5">
           <Logo href={`/${locale}`} />
