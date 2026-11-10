@@ -81,22 +81,6 @@ export function LandingFooter({
                   {LEGAL_TITLES['mentions-legales']}
                 </Link>
               </li>
-              <li>
-                <Link
-                  href={`/${locale}/legal/privacy` as Route}
-                  className="hover:text-ink"
-                >
-                  {LEGAL_TITLES.privacy}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={`/${locale}/legal/cgu` as Route}
-                  className="hover:text-ink"
-                >
-                  {LEGAL_TITLES.cgu}
-                </Link>
-              </li>
             </ul>
           </div>
 

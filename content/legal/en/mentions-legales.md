@@ -180,3 +180,9 @@ The user acknowledges having read, understood and accepted all of this Legal Not
 - The user **indemnifies** DANY against any dispute arising from their use;
 - MyCashBill's liability is **strictly capped** in accordance with Article 10;
 - The competent jurisdiction is **exclusively** that of Douala, Cameroon.
+
+## Other legal documents
+
+- [Terms of Use (CGU)](/en/legal/cgu)
+- [Terms of Sale (CGV)](/en/legal/cgv)
+- [Privacy Policy](/en/legal/privacy)

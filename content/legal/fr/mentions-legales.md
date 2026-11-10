@@ -180,3 +180,9 @@ L'utilisateur reconnaît avoir lu, compris et accepté l'intégralité des prés
 - Qu'il **indemnise** DANY contre tout litige résultant de son usage ;
 - Que la responsabilité de MyCashBill est **strictement plafonnée** conformément à l'article 10 ;
 - Que la juridiction compétente est **exclusivement** celle de Douala, Cameroun.
+
+## Autres documents juridiques
+
+- [Conditions générales d'utilisation (CGU)](/fr/legal/cgu)
+- [Conditions générales de vente (CGV)](/fr/legal/cgv)
+- [Politique de confidentialité](/fr/legal/privacy)
