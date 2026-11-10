@@ -153,13 +153,11 @@ export default async function DocumentsPage({
                     </span>
                   </div>
                 </Link>
-                <div className="absolute bottom-2 right-2">
-                  <DeleteDocumentButton
-                    documentId={doc.id}
-                    documentNumber={doc.number}
-                    isSent={Boolean(doc.sentViaWhatsAppAt || doc.sentViaEmailAt)}
-                  />
-                </div>
+                {!doc.sentViaWhatsAppAt && !doc.sentViaEmailAt && (
+                  <div className="absolute bottom-2 right-2">
+                    <DeleteDocumentButton documentId={doc.id} documentNumber={doc.number} />
+                  </div>
+                )}
                 </div>
               );
             })}
@@ -222,11 +220,9 @@ export default async function DocumentsPage({
                             >
                               <ChevronRight className="h-4 w-4" />
                             </Link>
-                            <DeleteDocumentButton
-                              documentId={doc.id}
-                              documentNumber={doc.number}
-                              isSent={Boolean(doc.sentViaWhatsAppAt || doc.sentViaEmailAt)}
-                            />
+                            {!doc.sentViaWhatsAppAt && !doc.sentViaEmailAt && (
+                              <DeleteDocumentButton documentId={doc.id} documentNumber={doc.number} />
+                            )}
                           </div>
                         </td>
                       </tr>

@@ -31,9 +31,15 @@ export async function DELETE(
       const { id } = await params;
       const doc = await prisma.document.findFirst({
         where: { id, userId: user.id },
-        select: { id: true, number: true },
+        select: { id: true, number: true, sentViaWhatsAppAt: true, sentViaEmailAt: true },
       });
       if (!doc) return jsonError('NOT_FOUND', 'Document introuvable', 404);
+
+      // Seuls les brouillons peuvent être supprimés : un document envoyé reste dans l'historique
+      // (numérotation continue).
+      if (doc.sentViaWhatsAppAt || doc.sentViaEmailAt) {
+        return jsonError('FORBIDDEN', 'Un document envoyé ne peut pas être supprimé.', 403);
+      }
 
       // La suppression est définitive. La vérification (DocumentVerification) est
       // supprimée en cascade ; les flags de fraude liés passent à null (onDelete: SetNull).

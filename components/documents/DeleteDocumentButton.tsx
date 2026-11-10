@@ -10,16 +10,15 @@ import { haptic } from '@/lib/device/haptics';
 type Props = {
   documentId: string;
   documentNumber: string;
-  /** Document déjà envoyé au client : la confirmation le signale. */
-  isSent: boolean;
   className?: string;
 };
 
 /**
- * Bouton supprimer un document (brouillon ou envoyé) avec confirmation.
+ * Bouton supprimer un BROUILLON, avec confirmation. À n'afficher que pour les brouillons :
+ * l'API refuse la suppression d'un document envoyé.
  * Appelle DELETE /api/documents/[id] puis rafraîchit la liste.
  */
-export function DeleteDocumentButton({ documentId, documentNumber, isSent, className }: Props) {
+export function DeleteDocumentButton({ documentId, documentNumber, className }: Props) {
   const t = useTranslations('documents.list');
   const router = useRouter();
   const toast = useToast();
@@ -80,9 +79,7 @@ export function DeleteDocumentButton({ documentId, documentNumber, isSent, class
               {t('delete')} {documentNumber} ?
             </p>
             <p className="mt-2 text-[13px] text-slate-600">
-              {isSent
-                ? "Ce document a déjà été envoyé à votre client. Sa suppression est définitive et laisse un trou dans votre numérotation."
-                : t('deleteConfirm')}
+              {t('deleteConfirm')}
             </p>
             <div className="mt-4 flex gap-2">
               <button
