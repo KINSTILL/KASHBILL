@@ -112,6 +112,8 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
     isTestMode,
   } = input;
   const isFr = user.locale === 'FR';
+  // Abonnement offert par MyCashBill (aucun paiement) : mentions adaptées.
+  const isGift = subscription.source === 'ADMIN_GIFT';
 
   // Une information non renseignée (ou « À_COMPLÉTER ») n'est pas imprimée sur la facture.
   const known = (v?: string | null) => (v && v.trim() !== '' && !v.includes('À_COMPLÉTER') ? v.trim() : null);
@@ -200,11 +202,13 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
           <Text style={{ fontSize: 9, color: SLATE }}>
-            {isFr ? 'Date de paiement' : 'Payment date'} : {fmtDate(paidAt)}
+            {isGift ? (isFr ? "Date d'activation" : 'Activation date') : (isFr ? 'Date de paiement' : 'Payment date')} : {fmtDate(paidAt)}
           </Text>
-          <Text style={{ fontSize: 9, color: SLATE }}>
-            {isFr ? 'Mode' : 'Method'} : Notch Pay (Mobile Money)
-          </Text>
+          {!isGift && (
+            <Text style={{ fontSize: 9, color: SLATE }}>
+              {isFr ? 'Mode' : 'Method'} : Notch Pay (Mobile Money)
+            </Text>
+          )}
         </View>
 
         <View style={styles.table}>
@@ -217,7 +221,9 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
             <View style={styles.colDesc}>
               <Text style={styles.td}>MyCashBill Pro</Text>
               <Text style={{ fontSize: 8, color: SLATE, marginTop: 2 }}>
-                {isFr ? 'Abonnement mensuel — toutes fonctionnalités' : 'Monthly subscription — all features'}
+                {isGift
+                  ? (isFr ? 'Abonnement offert par MyCashBill — toutes fonctionnalités' : 'Subscription offered by MyCashBill — all features')
+                  : (isFr ? 'Abonnement mensuel — toutes fonctionnalités' : 'Monthly subscription — all features')}
               </Text>
             </View>
             <Text style={[styles.td, styles.colPeriod]}>
@@ -248,9 +254,9 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
         <View style={styles.paidRow}>
           <View>
             <View style={styles.paidStamp}>
-              <Text style={styles.paidText}>{isFr ? 'PAYÉ' : 'PAID'}</Text>
+              <Text style={styles.paidText}>{isGift ? (isFr ? 'OFFERT' : 'GIFTED') : (isFr ? 'PAYÉ' : 'PAID')}</Text>
             </View>
-            {subscription.providerRef && (
+            {!isGift && subscription.providerRef && (
               <Text style={{ fontSize: 8, color: SLATE, marginTop: 10 }}>
                 {isFr ? 'Référence de paiement' : 'Payment reference'} : {subscription.providerRef}
               </Text>
