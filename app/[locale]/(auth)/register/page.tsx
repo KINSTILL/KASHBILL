@@ -172,7 +172,7 @@ function RegisterForm() {
 
   return (
     <>
-      <Card className="p-6 shadow-md sm:p-8">
+      <Card className="p-4 sm:p-8 shadow-md">
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             {t('register.title')}

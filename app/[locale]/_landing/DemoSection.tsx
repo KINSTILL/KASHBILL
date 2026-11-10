@@ -124,7 +124,7 @@ export function DemoSection({
                 placeholder={isFr ? 'Ex : Atelier Amina Couture' : 'e.g. Amina Fashion Studio'}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-sage-500 focus:ring-2 focus:ring-sage-100 focus:outline-none"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-base sm:text-sm focus:border-sage-500 focus:ring-2 focus:ring-sage-100 focus:outline-none"
                 maxLength={100}
               />
             </div>
@@ -137,7 +137,7 @@ export function DemoSection({
                 placeholder={isFr ? 'Ex : Confection ensemble 3 pièces' : 'e.g. 3-piece tailored suit'}
                 value={service}
                 onChange={(e) => setService(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-sage-500 focus:ring-2 focus:ring-sage-100 focus:outline-none"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-base sm:text-sm focus:border-sage-500 focus:ring-2 focus:ring-sage-100 focus:outline-none"
                 maxLength={200}
               />
             </div>
@@ -152,7 +152,7 @@ export function DemoSection({
                 inputMode="numeric"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-sage-500 focus:ring-2 focus:ring-sage-100 focus:outline-none"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-base sm:text-sm focus:border-sage-500 focus:ring-2 focus:ring-sage-100 focus:outline-none"
                 min="1"
               />
             </div>
@@ -218,7 +218,7 @@ export function DemoSection({
             </div>
 
             {/* Facture Réelle conforme au SaaS A4 */}
-            <div className="relative overflow-hidden rounded-2xl border border-slate-300 bg-white p-6 shadow-2xl sm:p-10 transition-all">
+            <div className="relative overflow-hidden rounded-2xl border border-slate-300 bg-white p-3.5 sm:p-8 shadow-2xl transition-all">
               {/* Filigrane en diagonale pour le Mode Gratuit UNIQUEMENT */}
               {previewTier === 'free' && (
                 <div

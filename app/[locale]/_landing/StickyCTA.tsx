@@ -30,7 +30,7 @@ export function StickyCTA({
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[60] border-t border-slate-200 bg-white/95 p-3 backdrop-blur md:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-[60] border-t border-slate-200/90 bg-white/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] shadow-lg backdrop-blur-md md:hidden">
       <div className="flex items-center gap-2">
         <p className="flex-1 text-xs text-slate-600">
           {isFr ? '30 jours Pro offerts' : '30-day Pro trial'}

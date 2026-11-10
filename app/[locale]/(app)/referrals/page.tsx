@@ -57,12 +57,12 @@ export default function ReferralsPage() {
 
       <Card>
         <p className="text-sm text-slate-500">{t('yourCode')}</p>
-        <p className="text-2xl font-mono font-bold">{data.referralCode}</p>
-        <div className="mt-2 flex gap-2">
-          <Button onClick={copyLink} variant="secondary" size="sm">
+        <p className="text-2xl font-mono font-bold tracking-wider">{data.referralCode}</p>
+        <div className="mt-3 flex flex-col sm:flex-row gap-2">
+          <Button onClick={copyLink} variant="secondary" size="sm" className="w-full sm:w-auto">
             {t('copyLink')}
           </Button>
-          <Button onClick={shareWhatsApp} variant="whatsapp" size="sm">
+          <Button onClick={shareWhatsApp} variant="whatsapp" size="sm" className="w-full sm:w-auto">
             {t('shareWhatsApp')}
           </Button>
         </div>

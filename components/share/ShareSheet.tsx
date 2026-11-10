@@ -251,7 +251,7 @@ export function ShareSheet({
             onChange={(e) => handleEdit(e.target.value)}
             maxLength={1500}
             rows={5}
-            className="thumb-zone w-full rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm"
+            className="thumb-zone w-full rounded-lg border border-slate-300 bg-slate-50 p-3 text-[16px] sm:text-sm"
           />
           <p className="mt-1 text-xs text-slate-500">{t('modal.message.hint')}</p>
         </div>
@@ -267,7 +267,7 @@ export function ShareSheet({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t('modal.clientEmailPlaceholder')}
-            className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm"
+            className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-[16px] sm:text-sm"
           />
         </div>
 

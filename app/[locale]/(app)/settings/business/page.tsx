@@ -130,7 +130,7 @@ export default function BusinessSettingsPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Visual Identity / Branding */}
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-slate-800">
               Identité visuelle &amp; Signatures
@@ -170,7 +170,7 @@ export default function BusinessSettingsPage() {
         </Card>
 
         {/* Legal mentions */}
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-6 space-y-4">
           <h2 className="text-sm font-bold text-slate-800">
             Mentions légales panafricaines
           </h2>
@@ -286,7 +286,8 @@ export default function BusinessSettingsPage() {
         </Card>
 
         {/* Custom headers / footers / CGV */}
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-6 space-y-4">
+
           <h2 className="text-sm font-bold text-slate-800">
             En-tête, Pied de page &amp; CGV
           </h2>
@@ -327,7 +328,7 @@ export default function BusinessSettingsPage() {
               value={cgvText}
               onChange={(e) => setCgvText(e.target.value)}
               placeholder="Conditions Générales de Vente qui s'afficheront en annexe..."
-              className="mt-1 block w-full rounded-lg border border-slate-300 bg-white p-2.5 text-xs shadow-sm focus:border-sage-500 focus:ring-sage-500"
+              className="mt-1 block w-full rounded-lg border border-slate-300 bg-white p-2.5 text-[16px] sm:text-xs shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
             />
           </div>
         </Card>

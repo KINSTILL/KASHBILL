@@ -9,6 +9,7 @@ import { Logo } from './Logo';
 import { InstallButton } from '@/components/pwa/InstallButton';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { Button } from '@/components/ui/Button';
+import { ShieldCheck } from 'lucide-react';
 
 export function Header() {
   const t = useTranslations('nav');
@@ -16,34 +17,40 @@ export function Header() {
   const { user } = useCurrentUser();
 
   return (
-    <header className="bg-white/80 backdrop-blur-md transition-smooth sticky top-0 z-30 border-b border-slate-200/70">
-      <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-4">
-        <Logo href={`/${locale}`} />
-        <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md transition-all">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-3 sm:px-4">
+        <Logo href={`/${locale}`} size="sm" />
+        
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {(user?.role === 'ADMIN' || user?.role === 'SUPPORT') && (
             <Link href={`/${locale}/admin` as Route}>
               <Button
                 size="sm"
                 variant="outline"
-                className="h-8 gap-1.5 border-sage-300 bg-sage-50 text-xs font-semibold text-sage-900 shadow-xs hover:bg-sage-100"
+                className="h-8 gap-1 border-emerald-300 bg-emerald-50 px-2 text-xs font-semibold text-emerald-900 shadow-xs hover:bg-emerald-100"
               >
-                <span>🛡️</span>
-                <span className="hidden sm:inline">Console Admin</span>
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-700" />
+                <span className="hidden sm:inline">Admin</span>
               </Button>
             </Link>
           )}
+
           <InstallButton variant="header" />
+          
           <QuotaBadge />
+
           <Link
             href={`/${locale}/blog` as Route}
-            className="text-xs font-semibold text-slate-600 hover:text-sage-700 px-2 py-1 rounded hover:bg-slate-50 transition"
+            className="hidden text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-emerald-700 sm:inline-block rounded-lg px-2 py-1"
           >
             Blog
           </Link>
+
           <LocaleSwitcher />
+
           {!user && (
             <Link href={`/${locale}/login` as Route}>
-              <Button size="sm" variant="ghost">
+              <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs">
                 {t('login')}
               </Button>
             </Link>
@@ -53,4 +60,3 @@ export function Header() {
     </header>
   );
 }
-

@@ -29,8 +29,8 @@ export default async function AuthLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-      <header className="flex w-full items-center justify-between px-6 py-4">
-        <Logo href={`/${locale}`} subtitle={t('brandSubtitle')} />
+      <header className="flex w-full items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
+        <Logo href={`/${locale}`} subtitle={t('brandSubtitle')} hideSubtitleOnMobile size="sm" />
         <LocaleToggle />
       </header>
       <main className="flex flex-1 items-center justify-center p-4">

@@ -802,6 +802,32 @@ export function DocumentForm({
       >
         {t('generate')}
       </Button>
+
+      {/* Barre d'action collante sur téléphone (ergonomie mobile au-dessus de la barre de navigation) */}
+      <div className="fixed inset-x-3 bottom-[64px] z-30 md:hidden pointer-events-none">
+        <div className="pointer-events-auto flex items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-white/95 p-3 shadow-xl shadow-slate-950/15 backdrop-blur-xl ring-1 ring-black/5">
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
+              {hidePriceInput ? t('totalItemsDelivered') : isReceipt ? t('totalReceived') : t('total')}
+            </span>
+            <span className="money text-base font-extrabold text-slate-950 truncate block">
+              {hidePriceInput ? totalQuantity : formatFCFA(total)}
+            </span>
+          </div>
+          <Button
+            type="button"
+            size="md"
+            className="shrink-0 font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-700/20"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+            isLoading={submitting}
+          >
+            {t('generate')}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

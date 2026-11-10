@@ -142,7 +142,7 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="p-6 shadow-sm sm:p-8">
+    <Card className="p-4 sm:p-8 shadow-sm">
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
           {t('login.title')}

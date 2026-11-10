@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ExportPeriodSelector } from '@/components/documents/ExportPeriodSelector';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import { formatFCFA } from '@/lib/utils';
+import { Plus, FileText, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
 
 export default async function DocumentsPage({
   params,
@@ -42,30 +43,38 @@ export default async function DocumentsPage({
   });
 
   return (
-    <div className="space-y-6">
-      <div className="mb-5 flex items-center justify-between">
+    <div className="space-y-5">
+      {/* En-tête de page optimisé mobile */}
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">Documents</h1>
-          <p className="mt-1 text-sm text-slate-500">{documents.length} documents</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-950">
+            Documents
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            {documents.length} {documents.length > 1 ? 'documents enregistrés' : 'document'}
+          </p>
         </div>
-        <Link href={`/${locale}/documents/new` as Route}>
-          <Button size="md" variant="primary">+ Nouveau</Button>
+        <Link href={`/${locale}/documents/new` as Route} className="shrink-0">
+          <Button size="md" className="gap-1.5 font-bold shadow-md shadow-emerald-900/10">
+            <Plus className="h-4 w-4 stroke-[2.5]" />
+            <span>Nouveau</span>
+          </Button>
         </Link>
       </div>
 
       <ExportPeriodSelector />
 
       {!pro && (
-        <Card className="border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-          <div className="flex items-center justify-between">
+        <Card className="border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-900">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
             <span>
               ℹ️ Historique gratuit limité aux {historyDays} derniers jours.
             </span>
             <Link
               href={`/${locale}/upgrade` as Route}
-              className="font-semibold text-amber-900 underline hover:no-underline ml-2"
+              className="font-bold text-amber-950 underline hover:no-underline"
             >
-              Passer Pro
+              Débloquer l&apos;historique illimité Pro &rarr;
             </Link>
           </div>
         </Card>
@@ -82,52 +91,137 @@ export default async function DocumentsPage({
           }
         />
       ) : (
-        <div className="rounded-xl border border-slate-100 bg-white">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Numéro</th>
-                <th className="hidden sm:table-cell">Type</th>
-                <th>Client</th>
-                <th className="hidden sm:table-cell">Date</th>
-                <th className="text-right">Total</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {documents.map((doc) => {
-                const total = (doc.payload as { total?: number } | null)?.total ?? 0;
-                return (
-                  <tr key={doc.id}>
-                    <td className="font-mono text-xs text-slate-500">
-                      <Link
-                        href={`/${locale}/documents/${doc.id}` as Route}
-                        className="hover:text-sage-700"
-                      >
-                        {doc.number}
-                      </Link>
-                    </td>
-                    <td className="hidden sm:table-cell">{DOC_TYPE_CONFIG[doc.type]?.label}</td>
-                    <td className="text-slate-600">{doc.client?.name ?? '—'}</td>
-                    <td className="hidden text-xs text-slate-500 sm:table-cell">
-                      {new Date(doc.createdAt).toLocaleDateString('fr-FR')}
-                    </td>
-                    <td className="text-right font-medium">{formatFCFA(total)}</td>
-                    <td>
-                      <span
-                        className={`status-badge ${doc.sentViaWhatsAppAt ? 'status-success' : 'status-neutral'}`}
-                      >
-                        {doc.sentViaWhatsAppAt ? 'Envoyé' : 'Brouillon'}
+        <>
+          {/* VUE MOBILE (Cartes tactiles sans aucun scroll horizontal) */}
+          <div className="space-y-2.5 sm:hidden">
+            {documents.map((doc) => {
+              const total = (doc.payload as { total?: number } | null)?.total ?? 0;
+              const typeCfg = DOC_TYPE_CONFIG[doc.type];
+              const isSent = Boolean(doc.sentViaWhatsAppAt);
+
+              return (
+                <Link
+                  key={doc.id}
+                  href={`/${locale}/documents/${doc.id}` as Route}
+                  className="block rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs transition-all active:scale-[0.98] active:bg-slate-50 focus:outline-none"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
+                        <FileText className="h-4 w-4 stroke-[2.2]" />
                       </span>
-                    </td>
+                      <div className="min-w-0">
+                        <span className="inline-block rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-700">
+                          {typeCfg?.label || doc.type}
+                        </span>
+                        <p className="truncate text-xs font-mono font-semibold text-slate-500 mt-0.5">
+                          {doc.number}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="money text-sm font-bold text-slate-950">
+                        {formatFCFA(total)}
+                      </span>
+                      <div className="mt-1 flex items-center justify-end gap-1">
+                        {isSent ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200/60">
+                            <CheckCircle2 className="h-2.5 w-2.5" />
+                            Envoyé
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                            <Clock className="h-2.5 w-2.5" />
+                            Brouillon
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 flex items-center justify-between border-t border-slate-100 pt-2 text-xs text-slate-500">
+                    <p className="truncate font-medium text-slate-700">
+                      Client : <span className="font-semibold text-slate-900">{doc.client?.name ?? '—'}</span>
+                    </p>
+                    <span className="text-[11px] text-slate-400 shrink-0 ml-2">
+                      {new Date(doc.createdAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                      })}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* VUE TABLETTE & DESKTOP (Tableau classique avec conteneur anti-débordement) */}
+          <div className="hidden sm:block overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Numéro</th>
+                    <th>Type</th>
+                    <th>Client</th>
+                    <th>Date</th>
+                    <th className="text-right">Total</th>
+                    <th>Statut</th>
+                    <th className="w-10"></th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {documents.map((doc) => {
+                    const total = (doc.payload as { total?: number } | null)?.total ?? 0;
+                    return (
+                      <tr key={doc.id} className="group">
+                        <td className="font-mono text-xs font-semibold text-slate-700">
+                          <Link
+                            href={`/${locale}/documents/${doc.id}` as Route}
+                            className="hover:text-emerald-700"
+                          >
+                            {doc.number}
+                          </Link>
+                        </td>
+                        <td>
+                          <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                            {DOC_TYPE_CONFIG[doc.type]?.label}
+                          </span>
+                        </td>
+                        <td className="font-medium text-slate-900">{doc.client?.name ?? '—'}</td>
+                        <td className="text-xs text-slate-500">
+                          {new Date(doc.createdAt).toLocaleDateString('fr-FR')}
+                        </td>
+                        <td className="text-right font-mono font-bold text-slate-900">
+                          {formatFCFA(total)}
+                        </td>
+                        <td>
+                          <span
+                            className={`status-badge ${
+                              doc.sentViaWhatsAppAt ? 'status-success' : 'status-neutral'
+                            }`}
+                          >
+                            {doc.sentViaWhatsAppAt ? 'Envoyé' : 'Brouillon'}
+                          </span>
+                        </td>
+                        <td className="text-right">
+                          <Link
+                            href={`/${locale}/documents/${doc.id}` as Route}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
 }
-

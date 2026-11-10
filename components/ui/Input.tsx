@@ -27,12 +27,12 @@ export const Input = forwardRef<HTMLInputElement, Props>(function Input(
         {...rest}
         className={cn(
           'transition-smooth focus-ring',
-          'thumb-zone w-full rounded-btn border bg-white px-3.5 text-[15px] text-ink',
+          'thumb-zone w-full rounded-btn border bg-white px-3.5 text-[16px] sm:text-sm text-ink',
           'placeholder:text-slate-400',
           'focus:outline-none',
           error
             ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-            : 'border-slate-200 focus:border-sage-500 focus:ring-2 focus:ring-sage-100',
+            : 'border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100',
           className
         )}
       />

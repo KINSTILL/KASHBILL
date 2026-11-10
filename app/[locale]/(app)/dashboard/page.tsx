@@ -16,6 +16,7 @@ import { HeroCard } from '@/components/ui/HeroCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { formatDate, formatFCFA } from '@/lib/utils';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
+import { Plus, FileText, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
 
 export default async function DashboardPage({
   params,
@@ -102,28 +103,38 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-4">
-      <div className="mb-6 flex items-center justify-between">
+      {/* En-tête mobile sans overflow */}
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">Tableau de bord</h1>
-          <p className="mt-1 text-sm text-slate-500">Vue d&apos;ensemble de votre activité</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-950">
+            Tableau de bord
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">Vue d&apos;ensemble de votre activité</p>
         </div>
-        <Link href={`/${locale}/documents/new` as Route}>
-          <Button size="md" variant="primary">+ Nouveau document</Button>
+        <Link href={`/${locale}/documents/new` as Route} className="shrink-0">
+          <Button size="md" className="gap-1.5 font-bold shadow-md shadow-emerald-900/10">
+            <Plus className="h-4 w-4 stroke-[2.5]" />
+            <span>Nouveau</span>
+          </Button>
         </Link>
       </div>
+
       <UnsupportedCountryBanner />
+
       {isGiftedPro && latestGiftSub && (
         <ProGiftBanner
           endsAtFormatted={formattedGiftDate}
           subId={latestGiftSub.id}
         />
       )}
+
       {!isGiftedPro && proDaysLeft !== null && <ProExpiryBanner daysLeft={proDaysLeft} />}
+
       <HeroCard
         eyebrow={t('dashboard.welcomeBack')}
         title={
           <span className="flex items-center gap-2">
-            {displayName}
+            <span className="truncate">{displayName}</span>
             {userIsPro && (
               <ProBadge
                 label={isGiftedPro ? t('dashboard.proGiftedBadge') : undefined}
@@ -134,7 +145,7 @@ export default async function DashboardPage({
         subtitle={heroSubtitle}
         action={
           <Link href={`/${locale}/documents/new` as Route} className="block">
-            <Button size="lg" variant="secondary" fullWidth>
+            <Button size="lg" variant="secondary" fullWidth className="font-semibold">
               + {t('nav.new')}
             </Button>
           </Link>
@@ -143,6 +154,7 @@ export default async function DashboardPage({
 
       {!userIsPro && <UpgradeCTA reason="removeWatermark" />}
 
+      {/* Grille de stats 2 colonnes sur mobile, 3 sur desktop */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard
           label={t('dashboard.stats.documents')}
@@ -156,11 +168,11 @@ export default async function DashboardPage({
           value={clientsCount}
           hint={t('dashboard.stats.clientsHint')}
           icon="👥"
-          accent="brass"
+          accent="sage"
         />
         <Link
           href={`/${locale}/recurring` as Route}
-          className="col-span-2 block transition sm:col-span-1 hover:opacity-90"
+          className="col-span-2 block transition sm:col-span-1 hover:opacity-95"
         >
           <StatCard
             label={t('dashboard.stats.recurring')}
@@ -172,17 +184,17 @@ export default async function DashboardPage({
         </Link>
       </div>
 
-      <section>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-[13px] font-semibold uppercase tracking-[0.06em] text-slate-500">
+      <section className="space-y-3 pt-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[12px] font-bold uppercase tracking-[0.08em] text-slate-500">
             {t('dashboard.recentDocuments')}
           </h2>
           {recentDocs.length > 0 && (
             <Link
               href={`/${locale}/documents` as Route}
-              className="text-[12px] font-semibold text-sage-600 hover:text-sage-700"
+              className="text-[12px] font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
             >
-              {t('dashboard.seeAll')}
+              {t('dashboard.seeAll')} &rarr;
             </Link>
           )}
         </div>
@@ -198,46 +210,132 @@ export default async function DashboardPage({
             }
           />
         ) : (
-          <div className="rounded-xl border border-slate-100 bg-white">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Numéro</th>
-                  <th className="hidden sm:table-cell">Type</th>
-                  <th>Client</th>
-                  <th className="text-right">Total</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentDocs.slice(0, 5).map((doc) => {
-                  const total = (doc.payload as { total?: number } | null)?.total ?? 0;
-                  return (
-                    <tr key={doc.id}>
-                      <td className="font-mono text-xs text-slate-500">
-                        <Link
-                          href={`/${locale}/documents/${doc.id}` as Route}
-                          className="hover:text-sage-700"
-                        >
-                          {doc.number}
-                        </Link>
-                      </td>
-                      <td className="hidden sm:table-cell">{DOC_TYPE_CONFIG[doc.type]?.label}</td>
-                      <td className="text-slate-600">{doc.client?.name ?? '—'}</td>
-                      <td className="text-right font-medium">{formatFCFA(total)}</td>
-                      <td>
-                        <span
-                          className={`status-badge ${doc.sentViaWhatsAppAt ? 'status-success' : 'status-neutral'}`}
-                        >
-                          {doc.sentViaWhatsAppAt ? 'Envoyé' : 'Brouillon'}
+          <>
+            {/* VUE MOBILE (Cartes tactiles sans scroll horizontal) */}
+            <div className="space-y-2 sm:hidden">
+              {recentDocs.slice(0, 5).map((doc) => {
+                const total = (doc.payload as { total?: number } | null)?.total ?? 0;
+                const typeCfg = DOC_TYPE_CONFIG[doc.type];
+                const isSent = Boolean(doc.sentViaWhatsAppAt);
+
+                return (
+                  <Link
+                    key={doc.id}
+                    href={`/${locale}/documents/${doc.id}` as Route}
+                    className="block rounded-2xl border border-slate-200/90 bg-white p-3 shadow-xs transition-all active:scale-[0.98] active:bg-slate-50"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          <FileText className="h-4 w-4 stroke-[2.2]" />
                         </span>
-                      </td>
+                        <div className="min-w-0">
+                          <span className="inline-block rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-700">
+                            {typeCfg?.label || doc.type}
+                          </span>
+                          <p className="truncate text-xs font-mono font-semibold text-slate-500 mt-0.5">
+                            {doc.number}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="money text-sm font-bold text-slate-950">
+                          {formatFCFA(total)}
+                        </span>
+                        <div className="mt-1 flex items-center justify-end gap-1">
+                          {isSent ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                              <CheckCircle2 className="h-2.5 w-2.5" />
+                              Envoyé
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                              <Clock className="h-2.5 w-2.5" />
+                              Brouillon
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-1.5 text-xs text-slate-500">
+                      <p className="truncate font-medium text-slate-700">
+                        Client : <span className="font-semibold text-slate-900">{doc.client?.name ?? '—'}</span>
+                      </p>
+                      <span className="text-[11px] text-slate-400 shrink-0 ml-2">
+                        {new Date(doc.createdAt).toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'short',
+                        })}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* VUE TABLETTE & DESKTOP (Tableau classique anti-débordement) */}
+            <div className="hidden sm:block overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+              <div className="overflow-x-auto">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Numéro</th>
+                      <th>Type</th>
+                      <th>Client</th>
+                      <th className="text-right">Total</th>
+                      <th>Statut</th>
+                      <th className="w-10"></th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {recentDocs.slice(0, 5).map((doc) => {
+                      const total = (doc.payload as { total?: number } | null)?.total ?? 0;
+                      return (
+                        <tr key={doc.id} className="group">
+                          <td className="font-mono text-xs font-semibold text-slate-700">
+                            <Link
+                              href={`/${locale}/documents/${doc.id}` as Route}
+                              className="hover:text-emerald-700"
+                            >
+                              {doc.number}
+                            </Link>
+                          </td>
+                          <td>
+                            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                              {DOC_TYPE_CONFIG[doc.type]?.label}
+                            </span>
+                          </td>
+                          <td className="font-medium text-slate-900">{doc.client?.name ?? '—'}</td>
+                          <td className="text-right font-mono font-bold text-slate-900">
+                            {formatFCFA(total)}
+                          </td>
+                          <td>
+                            <span
+                              className={`status-badge ${
+                                doc.sentViaWhatsAppAt ? 'status-success' : 'status-neutral'
+                              }`}
+                            >
+                              {doc.sentViaWhatsAppAt ? 'Envoyé' : 'Brouillon'}
+                            </span>
+                          </td>
+                          <td className="text-right">
+                            <Link
+                              href={`/${locale}/documents/${doc.id}` as Route}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900"
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </section>
     </div>
