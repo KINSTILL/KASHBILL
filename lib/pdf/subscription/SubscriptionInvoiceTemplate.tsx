@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { Document, Page, View, Text, Image, Svg, Path, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, View, Text, Image, Svg, Path, Circle, StyleSheet } from '@react-pdf/renderer';
 import type { SubscriptionInvoicePdfInput } from './types';
 import { BRAND } from '../../brand';
 
@@ -12,12 +12,10 @@ const BORDER = '#E2E8F0';
 const styles = StyleSheet.create({
   page: { padding: 40, fontSize: 10, fontFamily: 'Helvetica', color: INK, backgroundColor: '#FFFFFF' },
   headerBar: { height: 4, backgroundColor: SAGE, marginBottom: 20 },
-  markBox: { width: 40, height: 40, borderRadius: 10, backgroundColor: SAGE, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  headerRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 24 },
-  logo: { width: 80, height: 40, objectFit: 'contain', marginRight: 16 },
-  brandBlock: { flex: 1 },
-  brandName: { fontSize: 22, fontWeight: 'bold', letterSpacing: -0.3 },
-  brandTagline: { fontSize: 9, color: SLATE, marginTop: 2 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
+  brandRow: { flexDirection: 'row', alignItems: 'center' },
+  brandWordmark: { fontSize: 20, fontWeight: 'bold', letterSpacing: -0.3 },
+  brandDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981', marginLeft: 4 },
   titleBlock: { marginBottom: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: BORDER },
   title: { fontSize: 16, fontWeight: 'bold', marginBottom: 4 },
   number: { fontSize: 10, color: SLATE, fontFamily: 'Courier' },
@@ -111,8 +109,22 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
     subscription,
     publicToken,
     qrCode,
+    isTestMode,
   } = input;
   const isFr = user.locale === 'FR';
+
+  // Une information non renseignée (ou « À_COMPLÉTER ») n'est pas imprimée sur la facture.
+  const known = (v?: string | null) => (v && v.trim() !== '' && !v.includes('À_COMPLÉTER') ? v.trim() : null);
+  const address = known(company.address);
+  const city = known(company.city);
+  const country = known(company.country);
+  const phone = known(company.phone);
+  const email = known(company.email);
+  const web = known(company.web);
+  const taxId = known(company.taxId);
+  const rccm = known(company.rccm);
+  const contactLine = [address, city, country, phone, email].filter(Boolean).join(' · ');
+  const legalLine = [taxId && 'NIU : ' + taxId, rccm && 'RCCM : ' + rccm, web].filter(Boolean).join(' · ');
 
   const fmt = (n: number) =>
     `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n).replace(/\s/g, '\u00A0')}\u00A0FCFA`;
@@ -132,18 +144,19 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
         <View style={styles.headerBar} />
 
         <View style={styles.headerRow}>
-          {company.logoUrl ? <Image src={company.logoUrl} style={styles.logo} /> : null}
-          <View style={styles.markBox}>
-            <Svg viewBox="0 0 24 24" style={{ width: 22, height: 22 }}>
-              <Path d="M12 3 4 6.5v5c0 4.6 3.2 8 8 9.5 4.8-1.5 8-4.9 8-9.5v-5L12 3Z" stroke="#FFFFFF" strokeWidth={2} fill="none" />
-              <Path d="m9 12 2 2 4-4" stroke="#FFFFFF" strokeWidth={2} fill="none" />
+          {/* Logo identique à components/layout/Logo.tsx (landing, en-têtes) */}
+          <View style={styles.brandRow}>
+            <Svg viewBox="0 0 32 32" style={{ width: 34, height: 34, marginRight: 8 }}>
+              <Path d="M6 22V10C6 7.79086 7.79086 6 10 6H16C18.2091 6 20 7.79086 20 10V11" stroke="#09090b" strokeWidth={3.4} strokeLinecap="round" fill="none" />
+              <Path d="M26 10V22C26 24.2091 24.2091 26 22 26H16C13.7909 26 12 24.2091 12 22V21" stroke="#10B981" strokeWidth={3.4} strokeLinecap="round" fill="none" />
+              <Circle cx={16} cy={16} r={2.4} fill="#10B981" />
             </Svg>
-          </View>
-          <View style={styles.brandBlock}>
-            <Text style={styles.brandName}>My<Text style={{ color: SAGE }}>CashBill</Text></Text>
-            <Text style={styles.brandTagline}>
-              {isFr ? "Facturation professionnelle pour l'Afrique" : 'Professional invoicing for Africa'}
+            <Text style={styles.brandWordmark}>
+              <Text style={{ color: '#1e293b' }}>My</Text>
+              <Text style={{ color: '#09090b' }}>Cash</Text>
+              <Text style={{ color: '#059669' }}>Bill</Text>
             </Text>
+            <View style={styles.brandDot} />
           </View>
         </View>
 
@@ -153,7 +166,7 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
           <View style={styles.proBadge}><Text>PRO</Text></View>
         </View>
 
-        {!company.isFullyConfigured && (
+        {isTestMode && (
           <View style={styles.warningBanner}>
             <Text style={styles.warningText}>
               {isFr
@@ -167,12 +180,12 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
           <View style={styles.box}>
             <Text style={styles.boxLabel}>{isFr ? 'Émetteur' : 'Issuer'}</Text>
             <Text style={styles.boxTitle}>{company.legalName}</Text>
-            <Text style={styles.boxLine}>{company.address}</Text>
-            <Text style={styles.boxLine}>{company.city}, {company.country}</Text>
-            <Text style={styles.boxLine}>{isFr ? 'NIU' : 'Tax ID'} : {company.taxId}</Text>
-            <Text style={styles.boxLine}>RCCM : {company.rccm}</Text>
-            <Text style={styles.boxLine}>{company.phone}</Text>
-            <Text style={styles.boxLine}>{company.email}</Text>
+            {address && <Text style={styles.boxLine}>{address}</Text>}
+            {(city || country) && <Text style={styles.boxLine}>{[city, country].filter(Boolean).join(', ')}</Text>}
+            {taxId && <Text style={styles.boxLine}>{isFr ? 'NIU' : 'Tax ID'} : {taxId}</Text>}
+            {rccm && <Text style={styles.boxLine}>RCCM : {rccm}</Text>}
+            {phone && <Text style={styles.boxLine}>{phone}</Text>}
+            {email && <Text style={styles.boxLine}>{email}</Text>}
           </View>
           <View style={styles.box}>
             <Text style={styles.boxLabel}>{isFr ? 'Client' : 'Client'}</Text>
@@ -258,12 +271,8 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
 
         <View style={styles.footer}>
           <Text style={styles.footerStrong}>{company.legalName}</Text>
-          <Text style={styles.footerText}>
-            {company.address}, {company.city}, {company.country} · {company.phone} · {company.email}
-          </Text>
-          <Text style={styles.footerText}>
-            NIU : {company.taxId} · RCCM : {company.rccm} · {company.web}
-          </Text>
+          {contactLine ? <Text style={styles.footerText}>{contactLine}</Text> : null}
+          {legalLine ? <Text style={styles.footerText}>{legalLine}</Text> : null}
           <Text style={[styles.footerText, { marginTop: 8 }]}>
             {isFr
               ? "Document émis électroniquement par MyCashBill. Facture d'abonnement — ne constitue pas une facture de vente de biens ou services à un tiers."

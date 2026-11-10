@@ -73,6 +73,7 @@ export async function generateSubscriptionInvoice(
       user,
       subscription,
       company,
+      isTestMode: user.role === 'ADMIN' && subscription.source === 'ADMIN_GIFT',
       amount,
       vatRate,
       vatAmount,

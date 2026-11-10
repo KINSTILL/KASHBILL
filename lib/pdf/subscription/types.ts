@@ -12,6 +12,8 @@ export type SubscriptionInvoicePdfInput = {
   vatAmount: number | null;
   total: number;
   paidAt: Date;
+  /** Facture générée en mode test par un admin : seul cas où le bandeau « démonstration » apparaît. */
+  isTestMode?: boolean;
   publicToken?: string;
   qrCode?: string;
 };
