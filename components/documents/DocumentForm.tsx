@@ -256,8 +256,8 @@ export function DocumentForm({
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        toast.show(err.error?.message ?? t('errorGeneric'), 'error');
+        const err = await res.json().catch(() => ({}));
+        toast.show(err?.error?.message ?? t('errorGeneric'), 'error');
         return;
       }
 
@@ -766,6 +766,8 @@ export function DocumentForm({
         </div>
       </Card>
 
+      {/* Sur mobile, le total et le bouton sont dans la barre collante en bas : pas de doublon */}
+      <div className="hidden md:block space-y-4">
       <Card className="border-none bg-gradient-to-br from-sage-500 to-sage-600 text-white">
         {hidePriceInput ? (
           <div className="flex items-center justify-between">
@@ -802,6 +804,7 @@ export function DocumentForm({
       >
         {t('generate')}
       </Button>
+      </div>
 
       {/* Barre d'action collante sur téléphone (ergonomie mobile au-dessus de la barre de navigation) */}
       <div className="fixed inset-x-3 bottom-[64px] z-30 md:hidden pointer-events-none">

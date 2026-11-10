@@ -280,7 +280,7 @@ export const DOC_TYPE_CONFIG: Record<DocType, DocTypeConfig> = {
       fr: ['Prestation de service', 'Vente de marchandises', 'Main d\'œuvre', 'Frais de conseil'],
       en: ['Service fee', 'Sale of goods', 'Labor', 'Consulting fee'],
     },
-    requiredCompanyFields: ['taxId', 'rccm'],
+    requiredCompanyFields: [],
     showRecipientSignature: false,
     shareGroup: 'FACTURE_BON_COMMANDE',
     defaultFormat: 'a4',
