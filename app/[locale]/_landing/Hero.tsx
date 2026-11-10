@@ -7,27 +7,13 @@ import type { LandingPersonalization } from '@/lib/landing/types';
 import { ArrowRight, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
 
 export function Hero({
-  personalization,
+  personalization: _personalization,
   locale,
 }: {
   personalization: LandingPersonalization;
   locale: string;
 }) {
-  const { tier, country, fromWhatsApp } = personalization;
   const isFr = locale === 'fr';
-
-  const badgeText =
-    fromWhatsApp
-      ? isFr
-        ? '💬 Partage instantané sur WhatsApp · Envoi PDF en 60s'
-        : '💬 Instant WhatsApp share · 60s PDF delivery'
-      : tier === 'tier1'
-      ? isFr
-        ? `${country.flag} Facturation officielle ${country.name} · Conforme OHADA`
-        : `${country.flag} Official Invoicing in ${country.name} · OHADA Compliant`
-      : isFr
-        ? '🌍 Facturation pro WhatsApp & Mobile Money · Conforme OHADA'
-        : '🌍 Pro WhatsApp & Mobile Money Invoicing · OHADA Compliant';
 
   const documentTypes = [
     { label: isFr ? '📄 Devis' : '📄 Quotes', desc: isFr ? 'Offres & estimations' : 'Estimates' },
@@ -48,14 +34,8 @@ export function Hero({
       />
 
       <div className="relative mx-auto max-w-4xl text-center">
-        {/* Badge d'autorité compact */}
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white px-3 py-1 text-xs font-semibold text-slate-800 shadow-xs">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-          <span>{badgeText}</span>
-        </div>
-
         {/* Titre SEO en forme de question percutante */}
-        <h1 className="mt-3 sm:mt-5 text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.18] sm:leading-[1.12]">
+        <h1 className="mt-1 sm:mt-4 text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.18] sm:leading-[1.12]">
           {isFr ? (
             <>
               Besoin d&apos;envoyer un devis ou une facture pro{' '}
