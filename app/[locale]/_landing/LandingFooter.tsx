@@ -102,7 +102,8 @@ export function LandingFooter({
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 border-t border-slate-100 pt-6 text-center text-xs text-slate-500">
+        <div className="mt-12 border-t border-slate-100 pt-6 space-y-4 text-center text-xs text-slate-500">
+          <PaymentBadges size="sm" />
           <p>© {year} MyCashBill. {t('rights')}</p>
         </div>
       </div>
