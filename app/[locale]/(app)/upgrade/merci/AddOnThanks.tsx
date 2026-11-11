@@ -29,7 +29,10 @@ export function AddOnThanks({ locale, subscriptionId }: { locale: string; subscr
   useEffect(() => {
     // Le retour du paiement ne doit pas rester dans l'historique : on retire l'identifiant de l'URL.
     window.history.replaceState(null, '', window.location.pathname);
-    if (!subscriptionId) return;
+    if (!subscriptionId) {
+      setTimedOut(true); // pas d'identifiant : on affiche le message neutre
+      return;
+    }
 
     let polls = 0;
     let cancelled = false;

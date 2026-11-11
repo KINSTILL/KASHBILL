@@ -260,6 +260,7 @@ export function SendDocumentView({
       <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
         {method === 'whatsapp' && (
           <Input
+            id="send-phone"
             type="tel"
             inputMode="tel"
             label={fr ? 'Numéro WhatsApp du client' : 'Client WhatsApp number'}
@@ -272,6 +273,7 @@ export function SendDocumentView({
 
         {method === 'email' && (
           <Input
+            id="send-email"
             type="email"
             inputMode="email"
             autoComplete="email"
