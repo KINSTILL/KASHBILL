@@ -12,8 +12,9 @@ export function LocaleSwitcher({ fullOnMobile = false }: { fullOnMobile?: boolea
   const switchTo = (newLocale: 'fr' | 'en') => {
     const segments = pathname.split('/');
     segments[1] = newLocale;
+    const search = typeof window !== 'undefined' ? window.location.search : '';
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=${365 * 24 * 3600}`;
-    router.push(segments.join('/') as Route);
+    router.push(`${segments.join('/')}${search}` as Route);
   };
 
   const nextLocale = locale === 'fr' ? 'en' : 'fr';

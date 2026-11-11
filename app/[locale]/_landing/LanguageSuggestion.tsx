@@ -36,7 +36,7 @@ export function LanguageSuggestion({
         </div>
         <div className="flex items-center gap-3">
           <Link
-            href={`/${targetLocale}` as Route}
+            href={`/${targetLocale}?landing=1` as Route}
             className="rounded bg-white/20 px-2.5 py-1 font-semibold text-white transition hover:bg-white/30"
           >
             {targetLabel}
