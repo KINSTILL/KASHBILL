@@ -54,6 +54,13 @@ enum Locale {
   EN
 }
 
+enum EInvoiceFormat {
+  NONE
+  UBL
+  CII
+  FACTURX
+}
+
 enum ReferralStatus {
   PENDING
   ACTIVATED
@@ -235,6 +242,8 @@ model Document {
   sentViaEmailAt    DateTime?
   contentHash       String?
   qrCodeUrl         String?
+  xmlPayload        String?   @db.Text
+  xmlGeneratedAt    DateTime?
   editCount         Int       @default(0)
   retainUntil       DateTime?
   dueDate           DateTime?
@@ -325,8 +334,9 @@ model CountryTaxConfig {
   vatRate               Decimal? @db.Decimal(5, 2)
   requiredFields        Json
   legalMentionsTemplate String
-  isActive              Boolean  @default(true)
-  mobileMoneyEnabled    Boolean  @default(false)
+  isActive              Boolean        @default(true)
+  einvoiceFormat        EInvoiceFormat @default(NONE)
+  mobileMoneyEnabled    Boolean        @default(false)
   paymentOperators      Json?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt

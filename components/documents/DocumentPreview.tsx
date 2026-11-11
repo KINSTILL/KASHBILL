@@ -67,7 +67,14 @@ export function DocumentPreview({
     };
   }, [pdfDoc, initialFormat, options]);
 
-  if (loading) return <Spinner size="lg" />;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 py-16">
+        <Spinner size="lg" />
+        <span className="text-sm text-slate-500">{t('loadingPdf')}</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
