@@ -8,6 +8,9 @@ import { DocumentPreview } from '@/components/documents/DocumentPreview';
 import type { PdfDocument, PdfFormat, PdfPayload } from '@/lib/pdf/types';
 import { getCurrencyForCountry } from '@/lib/countries/currency';
 import { isWhiteLabelActive } from '@/lib/addons/queries';
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
+import { Pencil } from 'lucide-react';
 
 export default async function DocumentDetailPage({
   params,
@@ -98,12 +101,23 @@ export default async function DocumentDetailPage({
       ? 'ticket'
       : 'a4';
 
+  // Un document n'est modifiable qu'en brouillon (tant qu'il n'a pas été envoyé).
+  const isDraft = !doc.sentViaWhatsAppAt && !doc.sentViaEmailAt;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-bold tracking-tight text-slate-900">
           {doc.number} ({doc.type})
         </h1>
+        {isDraft && (
+          <Link href={`/${locale}/documents/${id}/edit` as Route} className="shrink-0">
+            <Button size="sm" variant="secondary" className="gap-1.5 font-bold">
+              <Pencil className="h-4 w-4" />
+              <span>Modifier</span>
+            </Button>
+          </Link>
+        )}
       </div>
       <DocumentPreview pdfDoc={pdfDoc} initialFormat={initialFormat} />
     </div>
