@@ -347,8 +347,17 @@ export default async function DashboardPage({
         )}
       </section>
 
+      {/* Démarcation épurée entre les documents récents et l'encadré vitrine */}
+      <div className="pt-4 pb-1" aria-hidden="true">
+        <div className="flex items-center justify-center gap-3">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300/80 to-emerald-500/30" />
+          <span className="h-1.5 w-1.5 rotate-45 rounded-[1px] bg-emerald-500/60 ring-4 ring-emerald-500/10" />
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent via-slate-300/80 to-emerald-500/30" />
+        </div>
+      </div>
+
       {/* Accès rapide à la Landing Page en bas du tableau de bord */}
-      <div className="pt-2">
+      <div>
         <Link
           href={`/${locale}?landing=1` as Route}
           className="flex items-center justify-between rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs transition hover:border-emerald-300 hover:bg-emerald-50/30 active:scale-[0.99]"
