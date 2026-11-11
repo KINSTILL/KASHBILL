@@ -52,6 +52,8 @@ export type PdfCompany = {
   logoUrl: string | null;
   signatureUrl: string | null;
   stampUrl: string | null;
+  /** Ticket 80 mm : afficher le cachet (option utilisateur). Jamais de signature sur les tickets. */
+  showStampOnTicket?: boolean;
   headerText: string | null;
   footerText: string | null;
   cgvText: string | null;

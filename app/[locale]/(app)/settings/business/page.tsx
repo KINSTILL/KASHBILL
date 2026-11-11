@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   ArrowLeft,
   Building2,
@@ -21,6 +21,7 @@ import { ImagePicker } from '@/components/documents/ImagePicker';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { isPro, isWithinLogoGracePeriod } from '@/lib/auth/plan';
 import { DEFAULT_BRAND } from '@/lib/pdf/brand';
+import { InfoTip } from '@/components/ui/InfoTip';
 
 export default function BusinessSettingsPage() {
   const t = useTranslations('settings');
@@ -28,8 +29,12 @@ export default function BusinessSettingsPage() {
   const { user, refresh } = useCurrentUser();
 
   const pro = user ? isPro(user) : false;
-  const inGrace = user ? isWithinLogoGracePeriod(user) : false;
-  const canUseBranding = pro || inGrace;
+  const locale = useLocale();
+  const fr = locale !== 'en';
+  // Logo, signature et cachet : réservés au Pro
+  const canUseBranding = pro;
+  // Logo : gratuit pendant 7 jours après l'inscription, puis Pro
+  const canUseLogoField = pro || (user ? isWithinLogoGracePeriod(user) : false);
   const canUseWhiteLabel = user?.whiteLabel === true;
 
   const [brandPrimary, setBrandPrimary] = useState<string>(DEFAULT_BRAND.primary);
@@ -49,6 +54,7 @@ export default function BusinessSettingsPage() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
   const [stampUrl, setStampUrl] = useState<string | null>(null);
+  const [showStampOnTicket, setShowStampOnTicket] = useState(false);
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ text: string; error?: boolean } | null>(null);
@@ -68,6 +74,7 @@ export default function BusinessSettingsPage() {
       setLogoUrl(user.logoUrl || null);
       setSignatureUrl(user.signatureUrl || null);
       setStampUrl(user.stampUrl || null);
+      setShowStampOnTicket(user.showStampOnTicket ?? false);
       setBrandPrimary(user.brandPrimaryColor || DEFAULT_BRAND.primary);
       setBrandAccent(user.brandAccentColor || DEFAULT_BRAND.accent);
     }
@@ -107,6 +114,7 @@ export default function BusinessSettingsPage() {
           logoUrl,
           signatureUrl,
           stampUrl,
+          showStampOnTicket,
           ...brandFields,
         }),
       });
@@ -177,7 +185,13 @@ export default function BusinessSettingsPage() {
                 Identité visuelle &amp; Signatures
               </h2>
             </div>
-            {!canUseBranding && <ProBadge label={t('proRequired')} />}
+            <div className="flex items-center gap-2">
+              <InfoTip id="guide-branding" label={fr ? 'Infos' : 'Info'} title={fr ? 'Logo, signature et cachet' : 'Logo, signature and stamp'}>
+                <p>{fr ? "Signature et cachet : réservés aux comptes Pro. Logo : gratuit pendant 7 jours après l'inscription, puis réservé au Pro. Si votre abonnement expire, ces images ne figurent plus sur les nouveaux documents." : 'Signature and stamp: Pro only. Logo: free for 7 days after sign-up, then Pro only. If your subscription expires, these images no longer appear on new documents.'}</p>
+                <p>{fr ? 'Vos images restent enregistrées : elles reviennent automatiquement au renouvellement, sans nouveau téléversement.' : 'Your images stay saved: they come back automatically on renewal, with no new upload.'}</p>
+              </InfoTip>
+              {!canUseBranding && <ProBadge label={t('proRequired')} />}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -185,15 +199,25 @@ export default function BusinessSettingsPage() {
               <ImagePicker
                 kind="logo"
                 label={t('logo')}
+                guide={{
+                  id: 'guide-logo',
+                  title: fr ? 'Logo de votre entreprise' : 'Company logo',
+                  body: fr ? (<><p>Apparaît en haut de chacun de vos documents.</p><p>PNG ou JPEG, 200 Ko maximum.</p><p>Un PNG à fond transparent donne le meilleur rendu.</p><p>Gratuit pendant 7 jours après l'inscription, puis réservé au Pro.</p></>) : (<><p>Shown at the top of each of your documents.</p><p>PNG or JPEG, 200 KB maximum.</p><p>A PNG with a transparent background gives the best result.</p><p>Free for 7 days after sign-up, then Pro only.</p></>),
+                }}
                 value={logoUrl}
                 onChange={setLogoUrl}
-                disabled={!canUseBranding}
+                disabled={!canUseLogoField}
               />
             </div>
             <div>
               <ImagePicker
                 kind="signature"
                 label={t('signature')}
+                guide={{
+                  id: 'guide-signature',
+                  title: fr ? 'Votre signature' : 'Your signature',
+                  body: fr ? (<><p>Signez sur une feuille blanche, puis photographiez-la ou scannez-la.</p><p>PNG à fond transparent de préférence, 50 Ko maximum.</p><p>Elle apparaît au bas de vos documents, à côté du cachet.</p><p>Réservée au Pro.</p></>) : (<><p>Sign on a white sheet, then photograph or scan it.</p><p>Transparent-background PNG preferred, 50 KB maximum.</p><p>It appears at the bottom of your documents, next to the stamp.</p><p>Pro only.</p></>),
+                }}
                 value={signatureUrl}
                 onChange={setSignatureUrl}
                 disabled={!canUseBranding}
@@ -203,12 +227,40 @@ export default function BusinessSettingsPage() {
               <ImagePicker
                 kind="stamp"
                 label={t('stamp')}
+                guide={{
+                  id: 'guide-stamp',
+                  title: fr ? 'Votre cachet' : 'Your stamp',
+                  body: fr ? (<><p>Le tampon de votre entreprise, photographié ou scanné sur fond blanc.</p><p>PNG à fond transparent conseillé, 50 Ko maximum.</p><p>Il s’affiche à côté de votre signature.</p><p>Réservé au Pro. Sur les tickets 80 mm, il est facultatif (voir ci-dessous).</p></>) : (<><p>Your company stamp, photographed or scanned on a white background.</p><p>Transparent-background PNG recommended, 50 KB maximum.</p><p>It appears next to your signature.</p><p>Pro only. On 80 mm tickets it is optional (see below).</p></>),
+                }}
                 value={stampUrl}
                 onChange={setStampUrl}
                 disabled={!canUseBranding}
               />
             </div>
           </div>
+        </Card>
+
+        {/* Cachet sur les tickets 80 mm (aucune signature sur les tickets) */}
+        <Card className="p-4 sm:p-6 space-y-3">
+          <label className={`flex items-start gap-3 ${canUseBranding ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}>
+            <input
+              type="checkbox"
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-600"
+              checked={showStampOnTicket}
+              disabled={!canUseBranding}
+              onChange={(e) => setShowStampOnTicket(e.target.checked)}
+            />
+            <span className="space-y-0.5">
+              <span className="block text-sm font-semibold text-slate-900">
+                {fr ? 'Afficher le cachet sur les tickets 80 mm' : 'Show the stamp on 80 mm tickets'}
+              </span>
+              <span className="block text-xs text-slate-500">
+                {fr
+                  ? 'Facultatif. Les tickets n’affichent jamais la signature.'
+                  : 'Optional. Tickets never show the signature.'}
+              </span>
+            </span>
+          </label>
         </Card>
 
         {/* White label : couleurs de la facture */}

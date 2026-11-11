@@ -20,13 +20,10 @@ export default async function SendDocumentPage({
   const { doc, pdfDoc } = loaded;
 
   const config = DOC_TYPE_CONFIG[doc.type];
-  const format = doc.type === 'TICKET' || doc.type === 'RECU' ? 'ticket' : 'a4';
-
   return (
     <SendDocumentView
       documentId={doc.id}
       pdfDoc={pdfDoc}
-      format={format}
       locale={locale === 'en' ? 'en' : 'fr'}
       docLabel={locale === 'en' ? config.labelEn : config.label}
       defaultPhone={doc.client?.phone ?? ''}

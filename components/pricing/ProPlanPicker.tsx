@@ -31,7 +31,8 @@ export function ProPlanPicker({
   onSelect?: (id: ProPlanId) => void;
 }) {
   const isFr = locale !== 'en';
-  const [currencyCode, setCurrencyCode] = useState<DisplayCurrency['code']>('XAF');
+  // null = prix en FCFA uniquement (par défaut)
+  const [currencyCode, setCurrencyCode] = useState<DisplayCurrency['code'] | null>(null);
   const [live, setLive] = useState<RatesPayload | null>(null);
 
   // Mémorise la devise choisie sur cet appareil.
@@ -50,18 +51,21 @@ export function ProPlanPicker({
       .catch(() => setLive(null));
   }, []);
 
-  const currency = DISPLAY_CURRENCIES.find((c) => c.code === currencyCode) ?? DISPLAY_CURRENCIES[0]!;
-  const isApprox = currency.fixedPerXaf === null;
+  const currency: DisplayCurrency | null = DISPLAY_CURRENCIES.find((c) => c.code === currencyCode) ?? null;
+  const isApprox = currency?.fixedPerXaf === null;
 
+  // Touche la devise active : la désélectionne (retour au FCFA seul)
   const chooseCurrency = (code: DisplayCurrency['code']) => {
-    setCurrencyCode(code);
+    const next = currencyCode === code ? null : code;
+    setCurrencyCode(next);
     try {
-      localStorage.setItem(CURRENCY_KEY, code);
+      if (next) localStorage.setItem(CURRENCY_KEY, next);
+      else localStorage.removeItem(CURRENCY_KEY);
     } catch {}
   };
 
   const priceLine = (xaf: number) => {
-    if (currency.code === 'XAF') return null;
+    if (!currency) return null;
     const value = convertFromXaf(xaf, currency, live?.rates ?? null);
     if (value === null) {
       return isFr ? 'Taux indisponible' : 'Rate unavailable';
@@ -71,29 +75,32 @@ export function ProPlanPicker({
 
   return (
     <div className="space-y-4">
-      {/* Sélecteur de devise d'affichage (le paiement reste en FCFA) */}
-      <div>
-        <p className="mb-2 text-xs font-medium text-slate-600">
-          {isFr ? 'Afficher les prix en' : 'Show prices in'}
-        </p>
-        <div role="radiogroup" className="flex flex-wrap gap-1.5">
-          {DISPLAY_CURRENCIES.map((c) => (
-            <button
-              key={c.code}
-              type="button"
-              role="radio"
-              aria-checked={currencyCode === c.code}
-              onClick={() => chooseCurrency(c.code)}
-              className={cn(
-                'min-h-10 min-w-[3.25rem] rounded-full border px-3 text-xs font-semibold transition',
-                currencyCode === c.code
-                  ? 'border-sage-500 bg-sage-500 text-white shadow-xs'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-sage-300'
-              )}
-            >
-              {c.label}
-            </button>
-          ))}
+      {/* Équivalences indicatives : le paiement reste en FCFA */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-slate-600">
+          {isFr ? 'Voir aussi en' : 'Also show in'}
+        </span>
+        <div role="group" aria-label={isFr ? 'Devise d’équivalence' : 'Equivalent currency'} className="flex gap-1.5">
+          {DISPLAY_CURRENCIES.map((c) => {
+            const active = currencyCode === c.code;
+            return (
+              <button
+                key={c.code}
+                type="button"
+                aria-pressed={active}
+                onClick={() => chooseCurrency(c.code)}
+                className={cn(
+                  'inline-flex min-h-10 min-w-12 items-center justify-center gap-1 rounded-full border px-3 text-sm font-semibold transition',
+                  active
+                    ? 'border-sage-500 bg-sage-500 text-white shadow-xs'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-sage-300 hover:text-slate-900'
+                )}
+              >
+                {c.label}
+                <span className="sr-only">{c.code}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -166,7 +173,7 @@ export function ProPlanPicker({
         })}
       </div>
 
-      {currency.code !== 'XAF' && (
+      {currency && (
         <p className="text-[11px] leading-relaxed text-slate-500">
           {isApprox
             ? isFr

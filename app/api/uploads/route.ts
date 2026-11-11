@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/api/server';
 import { jsonError, jsonOk, handleApiError } from '@/lib/api-helpers';
 import { saveImage } from '@/lib/uploads/image';
 import type { ImageKind } from '@/lib/validators/image';
+import { canUseImage } from '@/lib/branding/policy';
 
 export async function POST(req: NextRequest): Promise<Response> {
   try {
@@ -19,6 +20,16 @@ export async function POST(req: NextRequest): Promise<Response> {
       const kind: ImageKind = validKinds.includes(kindStr as ImageKind)
         ? (kindStr as ImageKind)
         : 'logo';
+
+      if (!canUseImage(user, kind)) {
+        return jsonError(
+          'FORBIDDEN',
+          kind === 'logo'
+            ? "Le logo est réservé aux comptes Pro (gratuit pendant 7 jours après l'inscription)."
+            : 'La signature et le cachet sont réservés aux comptes Pro.',
+          403
+        );
+      }
 
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);

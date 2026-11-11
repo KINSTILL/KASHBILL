@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { compressImage } from '@/lib/device/camera';
 import type { ImageKind } from '@/lib/validators/image';
+import { InfoTip } from '@/components/ui/InfoTip';
+import type { ReactNode } from 'react';
 
 interface ImagePickerProps {
   value?: string | null;
@@ -12,6 +14,8 @@ interface ImagePickerProps {
   kind?: ImageKind;
   label?: string;
   disabled?: boolean;
+  /** Guide affiché dans une infobulle à côté du libellé. */
+  guide?: { id: string; title: string; body: ReactNode };
 }
 
 export function ImagePicker({
@@ -20,6 +24,7 @@ export function ImagePicker({
   kind = 'logo',
   label = 'Image',
   disabled = false,
+  guide,
 }: ImagePickerProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +69,16 @@ export function ImagePicker({
 
   return (
     <div className="space-y-2">
-      {label && <label className="block text-sm font-medium text-slate-700">{label}</label>}
+      {(label || guide) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {label && <label className="text-sm font-medium text-slate-700">{label}</label>}
+          {guide && (
+            <InfoTip id={guide.id} label="Guide" title={guide.title}>
+              {guide.body}
+            </InfoTip>
+          )}
+        </div>
+      )}
 
       {error && <p className="text-xs text-red-600">{error}</p>}
 

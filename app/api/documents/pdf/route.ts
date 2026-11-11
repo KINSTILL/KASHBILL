@@ -2,12 +2,14 @@ import type { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/api/server';
 import { jsonError, handleApiError } from '@/lib/api-helpers';
 import type { PdfDocument, PdfFormat, PdfRenderOptions } from '@/lib/pdf/types';
+import { applyImageBrandingPolicy } from '@/lib/branding/policy';
+import { isPro } from '@/lib/auth/plan';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest): Promise<Response> {
   try {
-    return await requireAuth(req, async (req2) => {
+    return await requireAuth(req, async (req2, { user }) => {
       const body = (await req2.json().catch(() => null)) as {
         doc?: PdfDocument;
         format?: PdfFormat;
@@ -22,6 +24,11 @@ export async function POST(req: NextRequest): Promise<Response> {
       const normalizedDoc: PdfDocument = {
         ...doc,
         createdAt: doc.createdAt instanceof Date ? doc.createdAt : new Date(doc.createdAt),
+        // Logo, signature et cachet : refusés côté serveur si le compte n'est pas Pro
+        company: {
+          ...applyImageBrandingPolicy(doc.company, user),
+          showStampOnTicket: user.showStampOnTicket && isPro(user),
+        },
       };
 
       const { pdf, Font } = await import('@react-pdf/renderer');

@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import type { PdfDocument, PdfRenderOptions } from '../types';
 import { CompanyHeader } from '../shared/CompanyHeader';
@@ -125,6 +125,11 @@ export function TicketDocument({
           primaryColor={brand.primary}
           accentColor={brand.accent}
         />
+        {doc.company.showStampOnTicket && doc.company.stampUrl && (
+          <View style={{ alignItems: 'center', marginTop: 8 }}>
+            <Image src={doc.company.stampUrl} style={{ width: 70, height: 70, objectFit: 'contain' }} />
+          </View>
+        )}
         <Footer doc={doc} compact />
         {options.showWatermark && !doc.whiteLabel && (
           <>

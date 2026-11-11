@@ -56,6 +56,7 @@ export default async function LocaleLayout({
         logoUrl: current.user.logoUrl,
         signatureUrl: current.user.signatureUrl,
         stampUrl: current.user.stampUrl,
+        showStampOnTicket: current.user.showStampOnTicket,
         headerText: current.user.headerText,
         footerText: current.user.footerText,
         cgvText: current.user.cgvText,

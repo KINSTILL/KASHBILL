@@ -376,15 +376,35 @@ function AddOnCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
             <h3 className="text-base font-semibold text-ink">{title}</h3>
-            <button
-              type="button"
-              onClick={() => setInfoOpen((v) => !v)}
-              aria-expanded={infoOpen}
-              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 transition"
-            >
-              <Info className="h-3 w-3 text-emerald-600" />
-              <span>{locale === 'fr' ? 'Explication' : 'How it works'}</span>
-            </button>
+            <div className="group/info relative inline-flex">
+              <button
+                type="button"
+                onClick={() => setInfoOpen((v) => !v)}
+                aria-expanded={infoOpen}
+                aria-describedby={`addon-tip-${type}`}
+                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 transition"
+              >
+                <Info className="h-3 w-3 text-emerald-600" />
+                <span>{locale === 'fr' ? 'Explication' : 'How it works'}</span>
+              </button>
+
+              {/* Infobulle ancrée sous le bouton : survol sur PC, clic sur mobile */}
+              <div
+                id={`addon-tip-${type}`}
+                role="tooltip"
+                className={`absolute left-0 top-full z-30 mt-2 w-72 max-w-[85vw] rounded-xl border border-emerald-200 bg-white p-3 text-xs leading-relaxed text-slate-700 shadow-lg transition-opacity duration-150 ${
+                  infoOpen
+                    ? 'visible opacity-100'
+                    : 'invisible opacity-0 group-hover/info:visible group-hover/info:opacity-100 pointer-events-none'
+                }`}
+              >
+                <span aria-hidden className="absolute -top-1.5 left-4 h-3 w-3 rotate-45 border-l border-t border-emerald-200 bg-white" />
+                <p className="mb-1 font-semibold text-slate-900">
+                  {locale === 'fr' ? 'Comment ça marche' : 'How it works'}
+                </p>
+                <p>{tooltip}</p>
+              </div>
+            </div>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
         </div>
@@ -392,18 +412,6 @@ function AddOnCard({
           +{price.toLocaleString('fr-FR')} FCFA/mois
         </span>
       </div>
-
-      {/* Infobulle au survol sur PC (sm+) */}
-      <div className="hidden sm:group-hover:block rounded-xl border border-emerald-200/90 bg-emerald-50/80 p-2.5 text-xs text-slate-700 leading-relaxed">
-        💡 {tooltip}
-      </div>
-
-      {/* Panneau explicatif au clic sur mobile (ou si cliqué explicitement sur PC) */}
-      {infoOpen && (
-        <div className="sm:group-hover:hidden rounded-xl border border-emerald-200/90 bg-emerald-50/80 p-2.5 text-xs text-slate-700 leading-relaxed">
-          💡 {tooltip}
-        </div>
-      )}
 
       <div className="pt-1">
         <Button

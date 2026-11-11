@@ -38,6 +38,7 @@ export type SessionUser = {
   logoUrl?: string | null;
   signatureUrl?: string | null;
   stampUrl?: string | null;
+  showStampOnTicket?: boolean;
   headerText?: string | null;
   footerText?: string | null;
   cgvText?: string | null;

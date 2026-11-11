@@ -4,11 +4,11 @@ import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { isCustomWhatsAppActive } from '@/lib/addons/queries';
+import { renderDocumentPdf } from '@/lib/pdf/render-document';
 
 const bodySchema = z.object({
   phone: z.string().min(1),
   message: z.string().max(2000).optional().default(''),
-  pdfBase64: z.string().min(10),
   filename: z.string().min(1).max(120),
   locale: z.enum(['fr', 'en']).optional(),
 });
@@ -204,7 +204,10 @@ export async function POST(
         return jsonError('VALIDATION_ERROR', 'Numéro WhatsApp invalide', 400);
       }
 
-      const cleanBase64 = parsed.pdfBase64.replace(/^data:application\/pdf;base64,/, '');
+      // PDF généré par le serveur à partir du document enregistré
+      const rendered = await renderDocumentPdf(doc.id, user.id);
+      if (!rendered) return jsonError('NOT_FOUND', 'Document introuvable', 404);
+      const cleanBase64 = rendered.buffer.toString('base64');
       const fileName = parsed.filename.endsWith('.pdf')
         ? parsed.filename
         : `${parsed.filename}.pdf`;

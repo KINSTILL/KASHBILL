@@ -5,6 +5,8 @@ import { getCurrencyForCountry } from '@/lib/countries/currency';
 import { isWhiteLabelActive } from '@/lib/addons/queries';
 import { readImageFile } from '@/lib/uploads/image';
 import type { PdfDocument, PdfPayload } from '@/lib/pdf/types';
+import { applyImageBrandingPolicy } from '@/lib/branding/policy';
+import { isPro } from '@/lib/auth/plan';
 
 async function resolveUploadDataUrl(url: string | null | undefined): Promise<string | null> {
   if (!url) return null;
@@ -98,6 +100,12 @@ export async function loadPdfDocument(
     referralCode: doc.user.referralCode,
     cgvText: doc.user.cgvText,
     whiteLabel,
+  };
+
+  // Logo, signature et cachet : uniquement si l'abonnement Pro est actif
+  pdfDoc.company = {
+    ...applyImageBrandingPolicy(pdfDoc.company, doc.user),
+    showStampOnTicket: doc.user.showStampOnTicket && isPro(doc.user),
   };
 
   return { doc, pdfDoc };

@@ -20,9 +20,11 @@ export type DisplayCurrency = {
   symbol: string;
 };
 
+/**
+ * Devises proposées pour l'équivalence. Le FCFA n'est pas listé : c'est la devise de
+ * paiement, déjà affichée en principal sur chaque prix.
+ */
 export const DISPLAY_CURRENCIES: DisplayCurrency[] = [
-  { code: 'XAF', label: 'FCFA', fixedPerXaf: 1, decimals: 0, symbol: 'FCFA' },
-  { code: 'XOF', label: 'XOF', fixedPerXaf: 1, decimals: 0, symbol: 'XOF' },
   { code: 'EUR', label: '€', fixedPerXaf: 1 / FCFA_PER_EUR, decimals: 2, symbol: '€' },
   { code: 'USD', label: '$', fixedPerXaf: null, decimals: 2, symbol: '$' },
 ];

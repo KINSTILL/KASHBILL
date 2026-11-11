@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import type { PdfDocument, PdfRenderOptions } from '../types';
 import { CompanyHeader } from '../shared/CompanyHeader';
@@ -28,6 +28,11 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   signatureLabel: { fontSize: 9, color: '#64748B' },
+  sellerBlock: { marginTop: 18, alignItems: 'flex-end' },
+  sellerLabel: { fontSize: 9, color: '#64748B', marginBottom: 4 },
+  sellerImages: { flexDirection: 'row', alignItems: 'center' },
+  sellerStamp: { width: 84, height: 84, objectFit: 'contain', marginRight: 8 },
+  sellerSignature: { width: 120, height: 48, objectFit: 'contain' },
   signatureLine: {
     marginTop: 40,
     borderTopWidth: 0.5,
@@ -141,6 +146,19 @@ export function A4Document({
           <Text style={styles.notes}>
             {isEn ? 'Note' : 'Note'} : {doc.payload.notes}
           </Text>
+        )}
+        {(doc.company.signatureUrl || doc.company.stampUrl) && (
+          <View style={styles.sellerBlock} wrap={false}>
+            <Text style={styles.sellerLabel}>
+              {isEn ? 'For' : 'Pour'} {doc.company.businessName ?? doc.company.legalName ?? ''}
+            </Text>
+            <View style={styles.sellerImages}>
+              {doc.company.stampUrl && <Image src={doc.company.stampUrl} style={styles.sellerStamp} />}
+              {doc.company.signatureUrl && (
+                <Image src={doc.company.signatureUrl} style={styles.sellerSignature} />
+              )}
+            </View>
+          </View>
         )}
         {config.showRecipientSignature && (
           <View style={styles.signatureBlock}>

@@ -4,6 +4,7 @@ import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { clearSessionCookie } from '@/lib/auth/session';
 import { isWhiteLabelActive } from '@/lib/addons/queries';
+import { canUseImage, type ImageKind } from '@/lib/branding/policy';
 import { prisma } from '@/lib/db';
 
 const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
@@ -22,6 +23,7 @@ const updateProfileSchema = z.object({
   logoUrl: z.string().max(500).optional().nullable(),
   signatureUrl: z.string().max(500).optional().nullable(),
   stampUrl: z.string().max(500).optional().nullable(),
+  showStampOnTicket: z.boolean().optional(),
   headerText: z.string().max(200).optional().nullable(),
   footerText: z.string().max(500).optional().nullable(),
   cgvText: z.string().max(2000).optional().nullable(),
@@ -56,6 +58,7 @@ export async function GET(req: NextRequest): Promise<Response> {
           logoUrl: user.logoUrl,
           signatureUrl: user.signatureUrl,
           stampUrl: user.stampUrl,
+          showStampOnTicket: user.showStampOnTicket,
           headerText: user.headerText,
           footerText: user.footerText,
           cgvText: user.cgvText,
@@ -141,6 +144,25 @@ export async function PATCH(req: NextRequest): Promise<Response> {
         );
       }
 
+      // Logo, signature, cachet : modifiables uniquement avec un abonnement Pro actif
+      const imageFields: { key: 'logoUrl' | 'signatureUrl' | 'stampUrl'; kind: ImageKind }[] = [
+        { key: 'logoUrl', kind: 'logo' },
+        { key: 'signatureUrl', kind: 'signature' },
+        { key: 'stampUrl', kind: 'stamp' },
+      ];
+      for (const { key, kind } of imageFields) {
+        const changed = parsed.data[key] !== undefined && parsed.data[key] !== (user as Record<string, unknown>)[key];
+        if (changed && !canUseImage(user, kind)) {
+          return jsonError(
+            'FORBIDDEN',
+            kind === 'logo'
+              ? "Le logo est réservé aux comptes Pro (gratuit pendant 7 jours après l'inscription)."
+              : 'La signature et le cachet sont réservés aux comptes Pro.',
+            403
+          );
+        }
+      }
+
       const updated = await prisma.user.update({
         where: { id: user.id },
         data: parsed.data,
@@ -167,6 +189,7 @@ export async function PATCH(req: NextRequest): Promise<Response> {
           logoUrl: updated.logoUrl,
           signatureUrl: updated.signatureUrl,
           stampUrl: updated.stampUrl,
+          showStampOnTicket: updated.showStampOnTicket,
           headerText: updated.headerText,
           footerText: updated.footerText,
           cgvText: updated.cgvText,

@@ -133,6 +133,8 @@ model User {
   logoUrl      String?
   signatureUrl String?
   stampUrl     String?
+  // Cachet affiché sur les tickets 80 mm (aucune signature sur les tickets)
+  showStampOnTicket Boolean @default(false)
   headerText   String?
   footerText   String?
   cgvText      String?

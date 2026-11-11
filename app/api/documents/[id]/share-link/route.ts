@@ -8,10 +8,10 @@ import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { encryptBuffer } from '@/lib/uploads/crypto';
 import { buildDocumentShareUrl, signDocumentShareToken } from '@/lib/share/pdf-token';
+import { renderDocumentPdf } from '@/lib/pdf/render-document';
 
-const bodySchema = z.object({
-  pdfBase64: z.string().min(10),
-});
+// Aucune donnée client : le PDF est généré par le serveur.
+const bodySchema = z.object({}).passthrough();
 
 const SHARED_PDF_DIR = path.join(
   process.env.UPLOADS_DIR ?? path.join(process.cwd(), 'uploads'),
@@ -48,9 +48,11 @@ export async function POST(
         );
       }
 
-      const parsed = bodySchema.parse(await req2.json());
-      const cleanBase64 = parsed.pdfBase64.replace(/^data:application\/pdf;base64,/, '');
-      const pdfBuffer = Buffer.from(cleanBase64, 'base64');
+      bodySchema.parse(await req2.json());
+      // PDF généré par le serveur à partir du document enregistré
+      const rendered = await renderDocumentPdf(doc.id, user.id);
+      if (!rendered) return jsonError('NOT_FOUND', 'Document introuvable', 404);
+      const pdfBuffer = rendered.buffer;
 
       await mkdir(SHARED_PDF_DIR, { recursive: true });
       const encrypted = encryptBuffer(pdfBuffer);

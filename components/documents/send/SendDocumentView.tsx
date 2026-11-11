@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { CheckCircle2, Download, Loader2, Mail, MessageCircle } from 'lucide-react';
+import { CheckCircle2, Download, Mail, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { renderPdfToBlob, downloadBlob } from '@/lib/pdf/render';
+import { downloadBlob } from '@/lib/pdf/render';
 import { buildWhatsAppUrl } from '@/lib/share/whatsapp';
-import type { PdfDocument, PdfFormat } from '@/lib/pdf/types';
+import type { PdfDocument } from '@/lib/pdf/types';
 
 type Method = 'whatsapp' | 'email' | 'download';
 
@@ -20,21 +20,11 @@ const METHODS: { id: Method; icon: typeof Mail; fr: string; en: string }[] = [
 
 type Done = { method: Method; recipient: string | null; fallback: boolean };
 
-function blobToBase64(b: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(typeof reader.result === 'string' ? reader.result : '');
-    reader.onerror = reject;
-    reader.readAsDataURL(b);
-  });
-}
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function SendDocumentView({
   documentId,
   pdfDoc,
-  format,
   locale,
   docLabel,
   defaultPhone,
@@ -43,7 +33,6 @@ export function SendDocumentView({
 }: {
   documentId: string;
   pdfDoc: PdfDocument;
-  format: PdfFormat;
   locale: 'fr' | 'en';
   docLabel: string;
   defaultPhone: string;
@@ -51,8 +40,6 @@ export function SendDocumentView({
   clientName: string | null;
 }) {
   const fr = locale === 'fr';
-  const [pdf, setPdf] = useState<Blob | null>(null);
-  const [pdfError, setPdfError] = useState(false);
   const [method, setMethod] = useState<Method>('whatsapp');
   const [phone, setPhone] = useState(defaultPhone);
   const [email, setEmail] = useState(defaultEmail);
@@ -65,25 +52,7 @@ export function SendDocumentView({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Done | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
-    renderPdfToBlob(pdfDoc, format, {
-      format,
-      showLogo: true,
-      showSignature: true,
-      showStamp: true,
-      showCgv: true,
-      showWatermark: pdfDoc.watermarked,
-      whiteLabel: pdfDoc.whiteLabel ?? false,
-    })
-      .then((b) => mounted && setPdf(b))
-      .catch(() => mounted && setPdfError(true));
-    return () => {
-      mounted = false;
-    };
-    // Le PDF ne dépend que du document chargé côté serveur
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documentId]);
+  const fileName = `${pdfDoc.number}.pdf`;
 
   const markSent = async () => {
     try {
@@ -94,14 +63,17 @@ export function SendDocumentView({
     } catch {}
   };
 
-  const fileName = `${pdfDoc.number}.pdf`;
+  // Le PDF est généré par le serveur à partir du document enregistré
+  const fetchPdf = async (): Promise<Blob> => {
+    const res = await fetch(`/api/documents/${documentId}/pdf`, {
+      headers: { 'X-Requested-With': 'fetch' },
+    });
+    if (!res.ok) throw new Error('pdf');
+    return res.blob();
+  };
 
   const submit = async () => {
     setError(null);
-    if (!pdf) {
-      setError(fr ? 'Le document n’est pas encore prêt.' : 'The document is not ready yet.');
-      return;
-    }
     if (method === 'whatsapp' && phone.replace(/\D/g, '').length < 6) {
       setError(fr ? 'Saisissez un numéro WhatsApp valide.' : 'Enter a valid WhatsApp number.');
       return;
@@ -114,19 +86,17 @@ export function SendDocumentView({
     setBusy(true);
     try {
       if (method === 'download') {
-        downloadBlob(pdf, fileName);
+        downloadBlob(await fetchPdf(), fileName);
         await markSent();
         setDone({ method, recipient: null, fallback: false });
         return;
       }
 
-      const pdfBase64 = await blobToBase64(pdf);
-
       if (method === 'whatsapp') {
         const res = await fetch(`/api/documents/${documentId}/send-whatsapp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-          body: JSON.stringify({ phone: phone.trim(), message, pdfBase64, filename: fileName, locale }),
+          body: JSON.stringify({ phone: phone.trim(), message, filename: fileName, locale }),
         });
         const data = await res.json().catch(() => ({}));
         if (res.status === 403 && data?.error?.code === 'PLAN_LIMIT_REACHED') {
@@ -138,7 +108,7 @@ export function SendDocumentView({
           return;
         }
         // Envoi direct indisponible : on télécharge le PDF et on ouvre WhatsApp pour le joindre
-        downloadBlob(pdf, fileName);
+        downloadBlob(await fetchPdf(), fileName);
         window.open(buildWhatsAppUrl(phone.trim(), message), '_blank');
         await markSent();
         setDone({ method, recipient: phone.trim(), fallback: true });
@@ -149,7 +119,7 @@ export function SendDocumentView({
       const res = await fetch(`/api/documents/${documentId}/send-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ to: email.trim(), customMessage: message.trim() || null, locale, pdfBase64 }),
+        body: JSON.stringify({ to: email.trim(), customMessage: message.trim() || null, locale }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -321,23 +291,11 @@ export function SendDocumentView({
           size="lg"
           className="min-h-12"
           onClick={submit}
-          disabled={busy || !pdf}
+          disabled={busy}
           isLoading={busy}
         >
-          {!pdf && !pdfError ? (
-            <span className="inline-flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {fr ? 'Préparation du PDF…' : 'Preparing PDF…'}
-            </span>
-          ) : (
-            submitLabel
-          )}
+          {submitLabel}
         </Button>
-        {pdfError && (
-          <p className="text-center text-xs text-red-600">
-            {fr ? 'Impossible de préparer le PDF. Rechargez la page.' : 'Could not prepare the PDF. Reload the page.'}
-          </p>
-        )}
       </div>
     </div>
   );
