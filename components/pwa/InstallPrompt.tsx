@@ -93,11 +93,7 @@ export function InstallPrompt() {
               </button>
             </div>
             <p className="mt-1 text-xs text-slate-600 leading-relaxed">
-              {isIOS
-                ? t('iosInstallHelp')
-                : isDesktop
-                  ? t('installHelpDesktop')
-                  : t('installHelp')}
+              {isIOS ? t('iosInstallHelp') : t('installHelp')}
             </p>
 
             <div className="mt-3 flex items-center gap-2">

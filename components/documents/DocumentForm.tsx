@@ -387,6 +387,18 @@ export function DocumentForm({
 
       <Card>
         <label className="mb-2 block text-sm font-medium">{t('type')}</label>
+        {editDocument ? (
+          // En édition le type est verrouillé : il fixe le préfixe de numérotation du document.
+          <div className="flex items-center gap-3 rounded-card border border-sage-500 bg-sage-50 p-3 ring-1 ring-sage-500/40">
+            <span className="text-xl">{DOC_TYPE_CONFIG[state.type].icon}</span>
+            <div>
+              <p className="text-sm font-semibold text-ink">
+                {isEn ? DOC_TYPE_CONFIG[state.type].shortLabelEn : DOC_TYPE_CONFIG[state.type].shortLabel}
+              </p>
+              <p className="text-xs text-slate-500">{t('typeLockedDraft')}</p>
+            </div>
+          </div>
+        ) : (
         <DocumentTypeSelector
           value={state.type}
           onChange={(type) => {
@@ -416,6 +428,7 @@ export function DocumentForm({
             }));
           }}
         />
+        )}
         <div className="mt-3">
           <label className="mb-1.5 block text-[13px] font-medium text-ink-soft">
             {t('documentLocale')}

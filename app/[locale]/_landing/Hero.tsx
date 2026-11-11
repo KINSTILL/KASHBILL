@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Button } from '@/components/ui/Button';
 import type { LandingPersonalization } from '@/lib/landing/types';
-import { ArrowRight, CheckCircle2, ShieldCheck, Zap, X, Eye, QrCode, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck, Zap, X, Eye, Download, Sparkles } from 'lucide-react';
 
 export function Hero({
   personalization: _personalization,
@@ -16,6 +16,22 @@ export function Hero({
 }) {
   const isFr = locale === 'fr';
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+
+  // Télécharge le PDF d'exemple (rendu par le moteur PDF du SaaS).
+  const downloadSampleInvoice = () => {
+    const link = document.createElement('a');
+    link.href = '/api/samples/invoice';
+    link.download = 'facture-exemple-mycashbill.pdf';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  // Clic sur la carte : téléchargement automatique, puis aperçu du même PDF dans la modale.
+  const openSampleInvoice = () => {
+    downloadSampleInvoice();
+    setIsInvoiceModalOpen(true);
+  };
 
   // Gestion de la touche Échap et du blocage du scroll de fond
   useEffect(() => {
@@ -156,9 +172,9 @@ export function Hero({
           <div
             role="button"
             tabIndex={0}
-            onClick={() => setIsInvoiceModalOpen(true)}
+            onClick={openSampleInvoice}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') setIsInvoiceModalOpen(true);
+              if (e.key === 'Enter' || e.key === ' ') openSampleInvoice();
             }}
             className="rounded-2xl border border-slate-200/90 bg-white p-3.5 text-left shadow-lg ring-1 ring-black/5 cursor-pointer hover:border-emerald-500 hover:shadow-xl transition-all duration-200 active:scale-[0.98] group"
           >
@@ -210,9 +226,9 @@ export function Hero({
           <div
             role="button"
             tabIndex={0}
-            onClick={() => setIsInvoiceModalOpen(true)}
+            onClick={openSampleInvoice}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') setIsInvoiceModalOpen(true);
+              if (e.key === 'Enter' || e.key === ' ') openSampleInvoice();
             }}
             className="relative rounded-2xl border border-slate-200/90 bg-white p-6 text-left shadow-2xl shadow-slate-900/10 ring-1 ring-black/5 cursor-pointer hover:border-emerald-500/80 hover:shadow-emerald-900/10 hover:shadow-2xl transition-all duration-200 group"
           >
@@ -316,7 +332,7 @@ export function Hero({
             <div className="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700 group-hover:text-emerald-800 transition-colors">
               <span className="flex items-center gap-1.5">
                 <Eye className="h-4 w-4" />
-                <span>{isFr ? 'Cliquer pour ouvrir la facture pro complète (format A4 officiel)' : 'Click to open full official A4 invoice'}</span>
+                <span>{isFr ? 'Cliquer pour télécharger la facture PDF exemple (format A4)' : 'Click to download the sample A4 PDF invoice'}</span>
               </span>
               <span className="text-[11px] bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 rounded-full font-bold">
                 Aperçu Pro ➔
@@ -363,185 +379,24 @@ export function Hero({
                 </button>
               </div>
 
-              {/* FEUILLE DE FACTURE OFFICIELLE (Style Papier Pro) */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-xs space-y-5">
-                
-                {/* 1. En-tête : Émetteur & Numéro officiel */}
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-slate-200 pb-4">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-black tracking-tight text-slate-950">
-                      Kmer Chic Boutique SARL
-                    </h3>
-                    <p className="text-xs font-semibold text-emerald-700 mt-0.5">
-                      Prêt-à-porter féminin &amp; Maroquinerie artisanale de luxe
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-1">
-                      Rue des Cocotiers, Akwa, Douala — Cameroun
-                    </p>
-                    <div className="mt-2 text-[10px] text-slate-500 font-mono space-y-0.5">
-                      <p><strong>NIU :</strong> M052300045812Z · <strong>RCCM :</strong> RC/DLA/2023/B/1429</p>
-                      <p><strong>Régime fiscal :</strong> Impôt Libératoire (Exonéré de TVA selon Art. 128 CGI)</p>
-                      <p><strong>Contact :</strong> +237 690 00 00 00 · contact@kmerchic.cm</p>
-                    </div>
-                  </div>
-
-                  <div className="text-left sm:text-right shrink-0">
-                    <span className="inline-block rounded-lg bg-emerald-600 px-3 py-1 text-xs font-black uppercase tracking-wider text-white shadow-xs">
-                      {isFr ? 'FACTURE OFFICIELLE' : 'OFFICIAL INVOICE'}
-                    </span>
-                    <p className="mt-2 text-sm font-mono font-extrabold text-slate-900">
-                      FA-2026-0042
-                    </p>
-                    <p className="text-xs text-slate-600 mt-0.5">
-                      {isFr ? 'Date :' : 'Date:'} <strong>10 Novembre 2026</strong>
-                    </p>
-                    <p className="text-[11px] text-emerald-700 font-semibold mt-0.5">
-                      ● {isFr ? 'Paiement à réception (24h)' : 'Due on receipt (24h)'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* 2. Coordonnées de la cliente (Facturé à) */}
-                <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 text-xs">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    {isFr ? 'FACTURÉ À / CLIENT :' : 'BILLED TO / CLIENT:'}
-                  </p>
-                  <p className="text-sm font-bold text-slate-950 mt-1">Mme Estelle Ndongo</p>
-                  <p className="text-slate-600 mt-0.5">Quartier Bonanjo, Douala — Cameroun</p>
-                  <p className="text-slate-500 font-mono mt-0.5">Tel : +237 670 00 00 00</p>
-                </div>
-
-                {/* 3. Tableau des articles avec mentions comptables complètes */}
-                <div className="rounded-xl border border-slate-200 overflow-hidden text-xs">
-                  <div className="grid grid-cols-12 bg-slate-100/90 py-2.5 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-700 border-b border-slate-200">
-                    <span className="col-span-6">{isFr ? 'Désignation des prestations / articles' : 'Description / Items'}</span>
-                    <span className="col-span-2 text-center">{isFr ? 'Qté' : 'Qty'}</span>
-                    <span className="col-span-4 text-right">{isFr ? 'Total HT' : 'Total HT'}</span>
-                  </div>
-                  <div className="divide-y divide-slate-100 bg-white">
-                    <div className="grid grid-cols-12 items-center py-2.5 px-3">
-                      <div className="col-span-6 pr-2">
-                        <p className="font-bold text-slate-900">Robe soirée Soie &amp; Wax brodé main</p>
-                        <p className="text-[10px] text-slate-500">Taille M · Modèle exclusif collection 2026</p>
-                      </div>
-                      <span className="col-span-2 text-center font-mono text-slate-700">1</span>
-                      <span className="col-span-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                        45 000 FCFA
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-12 items-center py-2.5 px-3">
-                      <div className="col-span-6 pr-2">
-                        <p className="font-bold text-slate-900">Sac à main cuir artisanal finition or brossé</p>
-                        <p className="text-[10px] text-slate-500">Cuir véritable tannage végétal</p>
-                      </div>
-                      <span className="col-span-2 text-center font-mono text-slate-700">1</span>
-                      <span className="col-span-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                        30 000 FCFA
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-12 items-center py-2.5 px-3">
-                      <div className="col-span-6 pr-2">
-                        <p className="font-bold text-slate-900">Livraison express coursier sécurisé</p>
-                        <p className="text-[10px] text-slate-500">Trajet Akwa ➔ Bonanjo (Douala)</p>
-                      </div>
-                      <span className="col-span-2 text-center font-mono text-slate-700">1</span>
-                      <span className="col-span-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                        2 500 FCFA
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. Récapitulatif des montants & Total Net à payer */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs text-slate-600 px-1">
-                    <span>Total Brut HT :</span>
-                    <span className="font-mono font-semibold">77 500 FCFA</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-600 px-1">
-                    <span>TVA (0% — Régime Simplifié) :</span>
-                    <span className="font-mono">0 FCFA</span>
-                  </div>
-                  
-                  {/* Total Net */}
-                  <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 p-4 text-white shadow-md">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-200 block">
-                        {isFr ? 'NET À PAYER' : 'TOTAL DUE'}
-                      </span>
-                      <span className="text-xs text-emerald-100 font-medium">Soixante-dix-sept mille cinq cents FCFA</span>
-                    </div>
-                    <span className="font-mono text-2xl sm:text-3xl font-black tracking-tight">
-                      77 500 FCFA
-                    </span>
-                  </div>
-                </div>
-
-                {/* 5. Coordonnées de paiement direct vendeur */}
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5 text-xs text-slate-800 space-y-1.5">
-                  <p className="font-bold text-emerald-950 flex items-center gap-1.5">
-                    <span>💳</span> {isFr ? 'Instructions de règlement direct :' : 'Direct payment instructions:'}
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono text-[11px]">
-                    <div className="bg-white p-2 rounded-lg border border-emerald-100">
-                      <span className="text-orange-600 font-bold block">🟠 Orange Money</span>
-                      <strong>+237 690 00 00 00</strong>
-                      <span className="text-[10px] text-slate-500 block">Kmer Chic Boutique</span>
-                    </div>
-                    <div className="bg-white p-2 rounded-lg border border-emerald-100">
-                      <span className="text-amber-600 font-bold block">🟡 MTN MoMo</span>
-                      <strong>+237 670 00 00 00</strong>
-                      <span className="text-[10px] text-slate-500 block">Kmer Chic Boutique</span>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-slate-500 italic mt-1">
-                    * Merci d&apos;indiquer la référence « FA-2026-0042 » lors de votre transfert Mobile Money.
-                  </p>
-                </div>
-
-                {/* 6. Authenticité : Cachet officiel, Signature & QR Code */}
-                <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
-                  {/* QR Code de vérification */}
-                  <div className="flex items-center gap-2.5 p-2 bg-slate-50 border border-slate-200 rounded-xl w-full sm:w-auto">
-                    <div className="h-12 w-12 p-1 bg-white border border-slate-200 rounded-lg flex items-center justify-center shrink-0">
-                      <QrCode className="h-10 w-10 text-slate-800" />
-                    </div>
-                    <div className="text-[10px] leading-tight text-slate-600">
-                      <p className="font-bold text-slate-900">QR Code d&apos;Authenticité</p>
-                      <p className="text-slate-400 font-mono mt-0.5">ID: MCB-2026-KMER42</p>
-                      <p className="text-emerald-700 font-semibold mt-0.5">✓ Conforme OHADA</p>
-                    </div>
-                  </div>
-
-                  {/* Cachet & Signature */}
-                  <div className="flex items-center gap-3">
-                    {/* Cachet circulaire simulé */}
-                    <div className="relative inline-flex items-center justify-center p-1 rounded-full border-2 border-dashed border-indigo-700/60 text-indigo-800 rotate-[-8deg] bg-indigo-50/40">
-                      <div className="w-20 h-20 rounded-full border border-indigo-600/40 flex flex-col items-center justify-center text-center p-1">
-                        <span className="text-[6.5px] font-black uppercase tracking-wider">KMER CHIC BOUTIQUE</span>
-                        <span className="text-[5.5px] font-bold text-indigo-600">DOUALA · AKWA</span>
-                        <span className="text-[7.5px] font-extrabold text-indigo-900 my-0.5">✓ CERTIFIÉ</span>
-                        <span className="text-[5.5px] text-indigo-500 font-mono">OHADA 2026</span>
-                      </div>
-                    </div>
-
-                    {/* Signature */}
-                    <div className="text-center">
-                      <p className="text-[10px] font-semibold text-slate-500">Pour la Direction :</p>
-                      <svg viewBox="0 0 100 40" className="h-8 w-24 text-indigo-900" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                        <path d="M10 25 C25 10, 30 35, 45 15 C55 5, 50 30, 70 20 C80 15, 85 28, 95 18" />
-                        <path d="M20 32 C40 30, 70 33, 90 28" strokeWidth="1.5" />
-                      </svg>
-                      <p className="text-[9px] text-slate-400 font-mono">E. Ndongo (Gérante)</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 7. Mention légale de pied de page */}
-                <p className="text-center text-[9px] text-slate-400 pt-2 border-t border-slate-100">
-                  Document officiel édité avec le logiciel MyCashBill · Conforme aux exigences de l&apos;Acte Uniforme OHADA
+              {/* APERÇU DU PDF RÉEL : même template A4 que les factures générées dans le SaaS */}
+              <div className="space-y-3">
+                <iframe
+                  src="/api/samples/invoice?inline=1#toolbar=0&navpanes=0"
+                  title={isFr ? 'Facture exemple au format PDF' : 'Sample invoice in PDF'}
+                  className="hidden sm:block w-full h-[68vh] rounded-2xl border border-slate-200 bg-slate-100"
+                />
+                <p className="text-xs text-slate-600 text-center sm:hidden">
+                  {isFr
+                    ? 'Le PDF de la facture a été téléchargé. Ouvrez-le depuis vos téléchargements.'
+                    : 'The invoice PDF has been downloaded. Open it from your downloads.'}
                 </p>
-
+                <div className="flex justify-center">
+                  <Button variant="outline" size="md" onClick={downloadSampleInvoice} className="gap-2 font-bold">
+                    <Download className="h-4 w-4" />
+                    <span>{isFr ? 'Télécharger la facture PDF' : 'Download the PDF invoice'}</span>
+                  </Button>
+                </div>
               </div>
 
               {/* Bannière d'incitation & Inscription */}
