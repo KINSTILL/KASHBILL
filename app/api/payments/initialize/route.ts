@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { initNotchPayPayment } from '@/lib/payments/notchpay';
-import { PRO_PRICE_FCFA, PRO_DURATION_DAYS } from '@/lib/constants';
+import { PRO_PRICE_FCFA } from '@/lib/constants';
 import { env } from '@/lib/env';
 import { isPro } from '@/lib/auth/plan';
 

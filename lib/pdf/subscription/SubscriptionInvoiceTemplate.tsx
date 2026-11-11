@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11yg/alt-text */
+/* eslint-disable jsx-a11y/alt-text */
 import { Document, Page, View, Text, Image, Svg, Path, Circle, StyleSheet } from '@react-pdf/renderer';
 import type { SubscriptionInvoicePdfInput } from './types';
 import { BRAND } from '../../brand';
