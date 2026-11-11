@@ -96,7 +96,8 @@ export async function loadPdfDocument(
       : null,
     qrCodeDataUrl,
     publicToken,
-    watermarked: doc.watermarked,
+    // Filigrane selon le plan actuel : un compte non Pro garde le filigrane, même pour un ancien document
+    watermarked: doc.watermarked || !isPro(doc.user),
     referralCode: doc.user.referralCode,
     cgvText: doc.user.cgvText,
     whiteLabel,

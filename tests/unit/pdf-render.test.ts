@@ -1,7 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { renderPdfToBlob } from '@/lib/pdf/render';
+import { pdf } from '@react-pdf/renderer';
+import { A4Document } from '@/lib/pdf/templates/A4Template';
+import { TicketDocument } from '@/lib/pdf/templates/TicketTemplate';
 
-describe('renderPdfToBlob', () => {
+// Rendu serveur (même chemin que lib/pdf/render-document.ts), sans passer par le navigateur
+async function renderPdfToBlob(doc: any, format: 'a4' | 'ticket', options: any): Promise<Blob> {
+  const element = format === 'ticket' ? TicketDocument({ doc, options }) : A4Document({ doc, options });
+  return pdf(element as any).toBlob();
+}
+
+describe('renderPdfToBlob (serveur)', () => {
   it('renders A4 and Ticket PDFs without error', async () => {
     const doc: any = {
       id: '1',

@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 export type ErrorCode =
   | 'BAD_REQUEST'
   | 'VALIDATION_ERROR'
+  | 'WHATSAPP_NOT_CONNECTED'
   | 'INVALID_CREDENTIALS'
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'

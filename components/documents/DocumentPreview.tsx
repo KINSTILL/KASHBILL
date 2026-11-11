@@ -1,19 +1,17 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
-import { renderPdfToBlob } from '@/lib/pdf/render';
 import type { PdfDocument, PdfFormat } from '@/lib/pdf/types';
-import { RecurringSheet } from './RecurringSheet';
-import { BulkSheet } from './BulkSheet';
 import { PdfViewer } from './PdfViewer';
-import { HtmlDocumentPreview } from './HtmlDocumentPreview';
-import { ProPreviewToggle } from './ProPreviewToggle';
 import { haptic } from '@/lib/device/haptics';
 
+/**
+ * Aperçu = le PDF exact que le serveur produira (même source pour l'aperçu, l'envoi et le téléchargement).
+ */
 export function DocumentPreview({
   pdfDoc,
   initialFormat,
@@ -22,37 +20,26 @@ export function DocumentPreview({
   initialFormat: PdfFormat;
 }) {
   const t = useTranslations('documents.preview');
+  const locale = useLocale();
+  const router = useRouter();
   const [format, setFormat] = useState<PdfFormat>(initialFormat);
   const [blob, setBlob] = useState<Blob | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const locale = useLocale();
-  const router = useRouter();
-  const [recurringOpen, setRecurringOpen] = useState(false);
-  const [bulkOpen, setBulkOpen] = useState(false);
-  const [previewPro, setPreviewPro] = useState(false);
-
-  const showWatermark = previewPro ? false : pdfDoc.watermarked;
-
-  const options = useMemo(
-    () => ({
-      format,
-      showLogo: true,
-      showSignature: true,
-      showStamp: true,
-      showCgv: true,
-      showWatermark,
-      whiteLabel: pdfDoc.whiteLabel ?? false,
-    }),
-    [format, showWatermark, pdfDoc.whiteLabel]
-  );
 
   useEffect(() => {
     let mounted = true;
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
-    setBlob(null);
-    renderPdfToBlob(pdfDoc, format, options)
+    fetch(`/api/documents/${pdfDoc.id}/pdf?format=${format}`, {
+      headers: { 'X-Requested-With': 'fetch' },
+      signal: controller.signal,
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.blob();
+      })
       .then((b) => {
         if (mounted) {
           setBlob(b);
@@ -62,43 +49,40 @@ export function DocumentPreview({
         }
       })
       .catch((e) => {
-        if (mounted) setError(e instanceof Error ? e.message : 'PDF generation failed');
+        if (mounted && e?.name !== 'AbortError') setError(e instanceof Error ? e.message : 'PDF error');
       })
       .finally(() => {
         if (mounted) setLoading(false);
       });
     return () => {
       mounted = false;
+      controller.abort();
     };
-  }, [pdfDoc, format, options]);
+  }, [pdfDoc.id, format]);
+
+  const go = (path: string) => {
+    haptic('medium');
+    router.push(`/${locale}/documents/${pdfDoc.id}/${path}`);
+  };
 
   return (
     <div className="space-y-4">
-      {/* Sélecteur de format A4 / Ticket 80mm */}
+      {/* Format A4 / Ticket 80mm */}
       <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 p-1.5">
         <div className="flex gap-1">
-          <button
-            type="button"
-            onClick={() => setFormat('a4')}
-            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-              format === 'a4'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200/70'
-            }`}
-          >
-            📄 A4 Pro
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormat('ticket')}
-            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
-              format === 'ticket'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-200/70'
-            }`}
-          >
-            🧾 Ticket 80mm
-          </button>
+          {(['a4', 'ticket'] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => setFormat(f)}
+              aria-pressed={format === f}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                format === f ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
+              }`}
+            >
+              {f === 'a4' ? '📄 A4' : '🧾 Ticket 80mm'}
+            </button>
+          ))}
         </div>
         {loading && (
           <div className="flex items-center gap-1.5 pr-2 text-xs text-slate-500">
@@ -108,14 +92,6 @@ export function DocumentPreview({
         )}
       </div>
 
-      {/* Aperçu visuel HTML immédiat (toujours visible sur mobile et desktop) */}
-      <HtmlDocumentPreview
-        doc={pdfDoc}
-        format={format}
-        showWatermark={showWatermark}
-      />
-
-      {/* Lecteur / Téléchargement PDF natif */}
       {error ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
           {t('pdfError')} ({error})
@@ -125,57 +101,18 @@ export function DocumentPreview({
       )}
 
       <div className="space-y-2">
-        <Button
-          fullWidth
-          size="lg"
-          disabled={!blob}
-          onClick={() => {
-            haptic('medium');
-            router.push(`/${locale}/documents/${pdfDoc.id}/envoyer`);
-          }}
-        >
+        <Button fullWidth size="lg" disabled={!blob} onClick={() => go('envoyer')}>
           {t('send')}
         </Button>
-        <ProPreviewToggle
-          enabled={previewPro}
-          onToggle={setPreviewPro}
-          isPro={!pdfDoc.watermarked}
-        />
         <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            fullWidth
-            onClick={() => {
-              haptic('medium');
-              setRecurringOpen(true);
-            }}
-          >
+          <Button variant="outline" fullWidth onClick={() => go('programmer')}>
             ⏱️ {t('schedule')}
           </Button>
-          <Button
-            variant="outline"
-            fullWidth
-            onClick={() => {
-              haptic('medium');
-              setBulkOpen(true);
-            }}
-          >
+          <Button variant="outline" fullWidth onClick={() => go('envoi-masse')}>
             👥 {t('sendBulk')}
           </Button>
         </div>
       </div>
-      <RecurringSheet
-        open={recurringOpen}
-        onOpenChange={setRecurringOpen}
-        documentId={pdfDoc.id}
-        documentNumber={pdfDoc.number}
-      />
-      <BulkSheet
-        open={bulkOpen}
-        onOpenChange={setBulkOpen}
-        documentId={pdfDoc.id}
-        documentNumber={pdfDoc.number}
-      />
     </div>
   );
 }

@@ -133,6 +133,7 @@ model User {
   logoUrl      String?
   signatureUrl String?
   stampUrl     String?
+  personalWhatsAppNumber String?
   // Cachet affiché sur les tickets 80 mm (aucune signature sur les tickets)
   showStampOnTicket Boolean @default(false)
   headerText   String?
@@ -434,7 +435,7 @@ model RecurringSchedule {
   nextRunAt     DateTime
   lastRunAt     DateTime?
   isPaused      Boolean            @default(false)
-  autoSendEmail Boolean            @default(false)
+  autoSendWhatsApp Boolean         @default(false)
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
   runs          RecurringRun[]
@@ -486,14 +487,16 @@ model BulkJob {
 // EMAIL = auto via Resend
 // WHATSAPP_LINKS = retourne URLs wa.me (pas d'API)
 enum BulkChannel {
-  EMAIL
-  WHATSAPP_LINKS
+  EMAIL // historique : plus utilisé
+  WHATSAPP_LINKS // historique : plus utilisé
+  WHATSAPP
 }
 
 enum BulkStatus {
   PENDING
   PROCESSING
   COMPLETED
+  FAILED
 }
 
 model BulkJobItem {

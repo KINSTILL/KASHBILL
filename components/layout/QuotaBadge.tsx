@@ -64,7 +64,6 @@ export function QuotaBadge() {
           <div className="space-y-2">
             <QuotaRow label={t('docs')} quota={quota.docs} />
             <QuotaRow label={t('whatsapp')} quota={quota.whatsapp} />
-            <QuotaRow label={t('emails')} quota={quota.emails} />
             <QuotaRow label={t('clients')} quota={quota.clients} />
           </div>
           <Button fullWidth size="lg" onClick={() => { window.location.href = `/${locale}/upgrade`; }}>

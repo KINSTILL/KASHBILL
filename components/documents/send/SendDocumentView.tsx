@@ -3,24 +3,21 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { CheckCircle2, Download, Mail, MessageCircle } from 'lucide-react';
+import { CheckCircle2, Download, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { downloadBlob } from '@/lib/pdf/render';
-import { buildWhatsAppUrl } from '@/lib/share/whatsapp';
+import { useOnlineStatus } from '@/lib/device/network';
 import type { PdfDocument } from '@/lib/pdf/types';
 
-type Method = 'whatsapp' | 'email' | 'download';
+type Method = 'whatsapp' | 'download';
 
-const METHODS: { id: Method; icon: typeof Mail; fr: string; en: string }[] = [
+const METHODS: { id: Method; icon: typeof MessageCircle; fr: string; en: string }[] = [
   { id: 'whatsapp', icon: MessageCircle, fr: 'WhatsApp', en: 'WhatsApp' },
-  { id: 'email', icon: Mail, fr: 'Email', en: 'Email' },
   { id: 'download', icon: Download, fr: 'Télécharger', en: 'Download' },
 ];
 
-type Done = { method: Method; recipient: string | null; fallback: boolean };
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+type Done = { method: Method; recipient: string | null };
 
 export function SendDocumentView({
   documentId,
@@ -28,7 +25,6 @@ export function SendDocumentView({
   locale,
   docLabel,
   defaultPhone,
-  defaultEmail,
   clientName,
 }: {
   documentId: string;
@@ -36,13 +32,12 @@ export function SendDocumentView({
   locale: 'fr' | 'en';
   docLabel: string;
   defaultPhone: string;
-  defaultEmail: string;
   clientName: string | null;
 }) {
   const fr = locale === 'fr';
+  const online = useOnlineStatus();
   const [method, setMethod] = useState<Method>('whatsapp');
   const [phone, setPhone] = useState(defaultPhone);
-  const [email, setEmail] = useState(defaultEmail);
   const [message, setMessage] = useState(
     fr
       ? `Bonjour${clientName ? ` ${clientName}` : ''}, veuillez trouver ci-joint ${docLabel.toLowerCase()} ${pdfDoc.number}. Merci pour votre confiance.`
@@ -63,70 +58,60 @@ export function SendDocumentView({
     } catch {}
   };
 
-  // Le PDF est généré par le serveur à partir du document enregistré
+  // Le PDF est toujours généré par le serveur à partir du document enregistré
   const fetchPdf = async (): Promise<Blob> => {
-    const res = await fetch(`/api/documents/${documentId}/pdf`, {
-      headers: { 'X-Requested-With': 'fetch' },
-    });
+    const res = await fetch(`/api/documents/${documentId}/pdf`, { headers: { 'X-Requested-With': 'fetch' } });
     if (!res.ok) throw new Error('pdf');
     return res.blob();
   };
 
   const submit = async () => {
     setError(null);
-    if (method === 'whatsapp' && phone.replace(/\D/g, '').length < 6) {
-      setError(fr ? 'Saisissez un numéro WhatsApp valide.' : 'Enter a valid WhatsApp number.');
+    if (method === 'download') {
+      setBusy(true);
+      try {
+        downloadBlob(await fetchPdf(), fileName);
+        await markSent();
+        setDone({ method, recipient: null });
+      } catch {
+        setError(fr ? 'Téléchargement impossible. Vérifiez votre connexion.' : 'Download failed. Check your connection.');
+      } finally {
+        setBusy(false);
+      }
       return;
     }
-    if (method === 'email' && !EMAIL_RE.test(email.trim())) {
-      setError(fr ? 'Saisissez une adresse email valide.' : 'Enter a valid email address.');
+
+    // WhatsApp : envoi réseau obligatoire
+    if (!online) {
+      setError(fr ? 'Connexion requise pour envoyer. Le document reste prêt dans votre brouillon.' : 'Connection required to send.');
+      return;
+    }
+    if (phone.replace(/\D/g, '').length < 6) {
+      setError(fr ? 'Saisissez un numéro WhatsApp valide.' : 'Enter a valid WhatsApp number.');
       return;
     }
 
     setBusy(true);
     try {
-      if (method === 'download') {
-        downloadBlob(await fetchPdf(), fileName);
-        await markSent();
-        setDone({ method, recipient: null, fallback: false });
-        return;
-      }
-
-      if (method === 'whatsapp') {
-        const res = await fetch(`/api/documents/${documentId}/send-whatsapp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-          body: JSON.stringify({ phone: phone.trim(), message, filename: fileName, locale }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (res.status === 403 && data?.error?.code === 'PLAN_LIMIT_REACHED') {
-          setError(data.error.message);
-          return;
-        }
-        if (res.ok && data?.sentDirect) {
-          setDone({ method, recipient: phone.trim(), fallback: false });
-          return;
-        }
-        // Envoi direct indisponible : on télécharge le PDF et on ouvre WhatsApp pour le joindre
-        downloadBlob(await fetchPdf(), fileName);
-        window.open(buildWhatsAppUrl(phone.trim(), message), '_blank');
-        await markSent();
-        setDone({ method, recipient: phone.trim(), fallback: true });
-        return;
-      }
-
-      // email
-      const res = await fetch(`/api/documents/${documentId}/send-email`, {
+      const res = await fetch(`/api/documents/${documentId}/send-whatsapp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ to: email.trim(), customMessage: message.trim() || null, locale }),
+        body: JSON.stringify({ phone: phone.trim(), message, filename: fileName, locale }),
       });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setError(body?.error?.message ?? (fr ? 'Échec de l’envoi. Réessayez.' : 'Sending failed. Please try again.'));
+        setError(data?.error?.message ?? (fr ? 'Envoi impossible.' : 'Sending failed.'));
         return;
       }
-      setDone({ method, recipient: email.trim(), fallback: false });
+      if (!data?.sentDirect) {
+        setError(
+          fr
+            ? "L'envoi WhatsApp n'a pas abouti. Réessayez ou téléchargez le PDF."
+            : 'WhatsApp sending did not complete. Try again or download the PDF.'
+        );
+        return;
+      }
+      setDone({ method, recipient: phone.trim() });
     } catch {
       setError(fr ? 'Connexion interrompue. Réessayez.' : 'Connection lost. Please try again.');
     } finally {
@@ -135,22 +120,11 @@ export function SendDocumentView({
   };
 
   if (done) {
-    const title =
-      done.method === 'download'
-        ? fr ? 'Document téléchargé' : 'Document downloaded'
-        : done.fallback
-          ? fr ? 'Document prêt à être envoyé' : 'Document ready to send'
-          : fr ? 'Document envoyé' : 'Document sent';
+    const title = done.method === 'download' ? (fr ? 'Document téléchargé' : 'Document downloaded') : fr ? 'Document envoyé' : 'Document sent';
     const detail =
       done.method === 'download'
         ? fr ? 'Le PDF est enregistré sur votre appareil.' : 'The PDF is saved on your device.'
-        : done.fallback
-          ? fr
-            ? `Le PDF est téléchargé. Joignez-le dans la conversation WhatsApp avec ${done.recipient}.`
-            : `The PDF is downloaded. Attach it in the WhatsApp chat with ${done.recipient}.`
-          : fr
-            ? `Envoyé à ${done.recipient}.`
-            : `Sent to ${done.recipient}.`;
+        : fr ? `Envoyé à ${done.recipient} sur WhatsApp.` : `Sent to ${done.recipient} on WhatsApp.`;
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-10 text-center">
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
@@ -163,9 +137,7 @@ export function SendDocumentView({
         </div>
         <div className="flex w-full flex-col gap-2 pt-2 sm:flex-row">
           <Link href={`/${locale}/documents/${documentId}` as Route} className="flex-1">
-            <Button fullWidth variant="secondary">
-              {fr ? 'Retour au document' : 'Back to document'}
-            </Button>
+            <Button fullWidth variant="secondary">{fr ? 'Retour au document' : 'Back to document'}</Button>
           </Link>
           <Link href={`/${locale}/documents/new` as Route} className="flex-1">
             <Button fullWidth>{fr ? 'Nouveau document' : 'New document'}</Button>
@@ -176,19 +148,12 @@ export function SendDocumentView({
   }
 
   const submitLabel =
-    method === 'whatsapp'
-      ? fr ? 'Envoyer par WhatsApp' : 'Send via WhatsApp'
-      : method === 'email'
-        ? fr ? 'Envoyer par email' : 'Send by email'
-        : fr ? 'Télécharger le PDF' : 'Download PDF';
+    method === 'whatsapp' ? (fr ? 'Envoyer par WhatsApp' : 'Send via WhatsApp') : fr ? 'Télécharger le PDF' : 'Download PDF';
 
   return (
     <div className="mx-auto max-w-md space-y-5">
       <div className="space-y-1">
-        <Link
-          href={`/${locale}/documents/${documentId}` as Route}
-          className="text-xs font-medium text-slate-500 hover:text-slate-800"
-        >
+        <Link href={`/${locale}/documents/${documentId}` as Route} className="text-xs font-medium text-slate-500 hover:text-slate-800">
           ← {fr ? 'Retour au document' : 'Back to document'}
         </Link>
         <h1 className="text-xl font-bold tracking-tight text-slate-900">
@@ -200,8 +165,15 @@ export function SendDocumentView({
         </p>
       </div>
 
-      {/* Trois méthodes de même taille et même style : aucune n'est mise en avant */}
-      <div role="radiogroup" aria-label={fr ? 'Méthode d’envoi' : 'Send method'} className="grid grid-cols-3 gap-3">
+      {!online && (
+        <div role="status" className="rounded-xl border border-slate-200 bg-slate-100 p-3 text-sm text-slate-700">
+          {fr
+            ? 'Vous êtes hors ligne. Le document peut être préparé, mais l’envoi exige une connexion.'
+            : 'You are offline. The document can be prepared, but sending requires a connection.'}
+        </div>
+      )}
+
+      <div role="radiogroup" aria-label={fr ? 'Méthode d’envoi' : 'Send method'} className="grid grid-cols-2 gap-3">
         {METHODS.map(({ id, icon: Icon, fr: lf, en: le }) => {
           const selected = method === id;
           return (
@@ -215,9 +187,7 @@ export function SendDocumentView({
                 setError(null);
               }}
               className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border-2 p-3 text-center transition ${
-                selected
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
-                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                selected ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
               }`}
             >
               <Icon className="h-6 w-6" />
@@ -229,30 +199,31 @@ export function SendDocumentView({
 
       <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
         {method === 'whatsapp' && (
-          <Input
-            id="send-phone"
-            type="tel"
-            inputMode="tel"
-            label={fr ? 'Numéro WhatsApp du client' : 'Client WhatsApp number'}
-            placeholder="6 99 12 34 56"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="h-12"
-          />
-        )}
-
-        {method === 'email' && (
-          <Input
-            id="send-email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            label={fr ? 'Adresse email du client' : 'Client email address'}
-            placeholder="client@exemple.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-12"
-          />
+          <>
+            <Input
+              id="send-phone"
+              type="tel"
+              inputMode="tel"
+              label={fr ? 'Numéro WhatsApp du client' : 'Client WhatsApp number'}
+              placeholder="6 99 12 34 56"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="h-12"
+            />
+            <div>
+              <label htmlFor="send-message" className="mb-1.5 block text-[13px] font-medium text-slate-700">
+                {fr ? 'Message (facultatif)' : 'Message (optional)'}
+              </label>
+              <textarea
+                id="send-message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                maxLength={1000}
+                rows={4}
+                className="w-full rounded-xl border border-slate-200 bg-white p-3 text-[16px] sm:text-sm text-ink focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+              />
+            </div>
+          </>
         )}
 
         {method === 'download' && (
@@ -263,26 +234,8 @@ export function SendDocumentView({
           </p>
         )}
 
-        {method !== 'download' && (
-          <div>
-            <label htmlFor="send-message" className="mb-1.5 block text-[13px] font-medium text-slate-700">
-              {fr ? 'Message (facultatif)' : 'Message (optional)'}
-            </label>
-            <textarea
-              id="send-message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              maxLength={1000}
-              rows={4}
-              className="w-full rounded-xl border border-slate-200 bg-white p-3 text-[16px] sm:text-sm text-ink focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-            />
-          </div>
-        )}
-
         {error && (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </p>
+          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
         )}
 
         <Button
@@ -291,7 +244,7 @@ export function SendDocumentView({
           size="lg"
           className="min-h-12"
           onClick={submit}
-          disabled={busy}
+          disabled={busy || (method === 'whatsapp' && !online)}
           isLoading={busy}
         >
           {submitLabel}

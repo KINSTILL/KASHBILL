@@ -18,7 +18,7 @@ export type ScheduleItem = {
   nextRunAt: string | Date;
   lastRunAt: string | Date | null;
   isPaused: boolean;
-  autoSendEmail: boolean;
+  autoSendWhatsApp: boolean;
   client: { name: string } | null;
   _count: { runs: number };
 };
@@ -141,9 +141,9 @@ export function RecurringList({
                   <Badge variant={s.isPaused ? 'warning' : 'success'} size="sm">
                     {s.isPaused ? t('paused') : t('active')}
                   </Badge>
-                  {s.autoSendEmail && (
+                  {s.autoSendWhatsApp && (
                     <Badge variant="info" size="sm">
-                      ✉️ {t('emailAutoBadge')}
+                      💬 {t('emailAutoBadge')}
                     </Badge>
                   )}
                 </div>

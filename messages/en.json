@@ -654,7 +654,7 @@
     "nextRun": "Next execution",
     "never": "Never",
     "runsCount": "{count, plural, =0 {No runs} =1 {1 run} other {# runs}}",
-    "emailAutoBadge": "Auto email",
+    "emailAutoBadge": "Auto WhatsApp",
     "schedule": "Schedule",
     "list": "Recurring schedules",
     "daily": "Daily",

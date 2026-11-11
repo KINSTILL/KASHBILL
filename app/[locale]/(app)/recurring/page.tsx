@@ -39,7 +39,7 @@ export default async function RecurringPage({
     nextRunAt: s.nextRunAt.toISOString(),
     lastRunAt: s.lastRunAt ? s.lastRunAt.toISOString() : null,
     isPaused: s.isPaused,
-    autoSendEmail: s.autoSendEmail,
+    autoSendWhatsApp: s.autoSendWhatsApp,
     client: s.client,
     _count: s._count,
   }));

@@ -1,14 +1,10 @@
 import type { NextRequest } from 'next/server';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { env } from '@/lib/env';
 import { createDocument } from '@/lib/documents/create';
-import { getResendClient, EMAIL_FROM } from '@/lib/email/client';
-import { buildDocumentEmail } from '@/lib/email/templates/document-email';
-import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
-import { formatXaf } from '@/lib/pdf/shared/format';
+import { renderDocumentPdf } from '@/lib/pdf/render-document';
+import { sendDocumentViaWhatsApp } from '@/lib/whatsapp/send';
 import type { DocumentPayloadInput } from '@/lib/validators/documents';
 import type { RecurringFrequency } from '@prisma/client';
 
@@ -26,12 +22,18 @@ export async function POST(req: NextRequest): Promise<Response> {
       return jsonError('UNAUTHORIZED', 'Invalid cron secret', 401);
     }
     const now = new Date();
+    // Programmation réservée au Pro : sans abonnement actif, rien ne s'exécute.
+    // Les programmations reprennent au renouvellement.
     const due = await prisma.recurringSchedule.findMany({
-      where: { isPaused: false, nextRunAt: { lte: now } },
+      where: {
+        isPaused: false,
+        nextRunAt: { lte: now },
+        user: { proUntil: { gt: now } },
+      },
       include: { user: true, client: true },
       take: 50,
     });
-    let processed = 0, failed = 0, emailed = 0;
+    let processed = 0, failed = 0, sent = 0;
 
     for (const s of due) {
       try {
@@ -58,41 +60,27 @@ export async function POST(req: NextRequest): Promise<Response> {
           data: { scheduleId: s.id, documentId: result.documentId, status: 'SUCCESS' },
         });
 
-        // EMAIL AUTO uniquement (jamais WhatsApp)
-        if (s.autoSendEmail && s.client?.email) {
+        // Envoi automatique : WhatsApp uniquement, depuis l'instance MyCashBill (ou le numéro personnel)
+        if (s.autoSendWhatsApp && s.client?.phone) {
           try {
-            const doc = await prisma.document.findUnique({
-              where: { id: result.documentId },
-              include: { verification: true },
-            });
-            if (doc?.pdfPath) {
-              const pdfBuffer = await readFile(path.join(process.cwd(), doc.pdfPath));
-              const cfg = DOC_TYPE_CONFIG[doc.type];
-              const p = doc.payload as { total?: number };
-              const tpl = buildDocumentEmail({
-                locale: s.locale === 'FR' ? 'fr' : 'en',
-                senderName: s.user.businessName ?? s.user.name ?? 'MyCashBill',
-                docType: cfg.label,
-                docNumber: doc.number,
-                clientName: s.client.name,
-                totalFormatted: formatXaf(p.total ?? 0),
-                customMessage: null,
-                verificationUrl: doc.verification?.publicToken
-                  ? `${env.APP_URL}/verify/${doc.verification.publicToken}`
-                  : null,
+            const rendered = await renderDocumentPdf(result.documentId, s.userId);
+            if (rendered) {
+              const isEn = s.locale === 'EN';
+              const message = isEn
+                ? `Hello ${s.client.name}, please find your document ${result.number}.`
+                : `Bonjour ${s.client.name}, voici votre document ${result.number}.`;
+              const r = await sendDocumentViaWhatsApp({
+                user: s.user,
+                phone: s.client.phone,
+                message,
+                pdf: rendered.buffer,
+                fileName: `${result.number}.pdf`,
+                isEn,
               });
-              await getResendClient().emails.send({
-                from: EMAIL_FROM,
-                to: [s.client.email],
-                subject: tpl.subject,
-                html: tpl.html,
-                text: tpl.text,
-                attachments: [{ filename: `${doc.number}.pdf`, content: pdfBuffer }],
-              });
-              emailed++;
+              if (r.ok) sent++;
             }
           } catch {
-            /* non-blocking */
+            /* non bloquant : le document est créé, l'envoi est tracé comme non effectué */
           }
         }
 
@@ -112,9 +100,8 @@ export async function POST(req: NextRequest): Promise<Response> {
         failed++;
       }
     }
-    return jsonOk({ processed, failed, emailed, total: due.length });
+    return jsonOk({ processed, failed, sent, total: due.length });
   } catch (err) {
     return handleApiError(err);
   }
 }
-

@@ -27,12 +27,36 @@ export type RegisterDeviceResult =
   | { ok: true; device: Device }
   | { ok: false; reason: 'LIMIT_REACHED'; activeDevices: Device[] };
 
+/**
+ * Révoque les appareils au-delà de la limite actuelle (ex. après expiration du Pro).
+ * L'appareil en cours est conservé en priorité, puis les plus récemment vus.
+ */
+export async function enforceDeviceLimit(user: User, currentDeviceId: string): Promise<void> {
+  const limit = await getDeviceLimit(user);
+  const active = await prisma.device.findMany({
+    where: { userId: user.id, revokedAt: null },
+    orderBy: { lastSeenAt: 'desc' },
+  });
+  const ordered = [
+    ...active.filter((d) => d.deviceId === currentDeviceId),
+    ...active.filter((d) => d.deviceId !== currentDeviceId),
+  ];
+  const toRevoke = ordered.slice(limit).map((d) => d.id);
+  if (toRevoke.length > 0) {
+    await prisma.device.updateMany({
+      where: { id: { in: toRevoke } },
+      data: { revokedAt: new Date() },
+    });
+  }
+}
+
 export async function registerDevice(
   user: User,
   deviceId: string,
   userAgent: string | null,
   ip: string | null
 ): Promise<RegisterDeviceResult> {
+  await enforceDeviceLimit(user, deviceId);
   const existing = await prisma.device.findUnique({
     where: { userId_deviceId: { userId: user.id, deviceId } },
   });

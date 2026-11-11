@@ -20,6 +20,7 @@ export default async function SendDocumentPage({
   const { doc, pdfDoc } = loaded;
 
   const config = DOC_TYPE_CONFIG[doc.type];
+
   return (
     <SendDocumentView
       documentId={doc.id}
@@ -27,7 +28,6 @@ export default async function SendDocumentPage({
       locale={locale === 'en' ? 'en' : 'fr'}
       docLabel={locale === 'en' ? config.labelEn : config.label}
       defaultPhone={doc.client?.phone ?? ''}
-      defaultEmail={doc.client?.email ?? ''}
       clientName={doc.client?.name ?? null}
     />
   );

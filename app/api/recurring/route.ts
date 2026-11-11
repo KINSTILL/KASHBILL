@@ -3,12 +3,13 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth } from '@/lib/api/server';
+import { isPro } from '@/lib/auth/plan';
 
 const schema = z.object({
   documentId: z.string().min(1),
   label: z.string().min(1).max(120),
   frequency: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
-  autoSendEmail: z.boolean().default(false),
+  autoSendWhatsApp: z.boolean().default(false),
 });
 
 export async function GET(req: NextRequest): Promise<Response> {
@@ -29,6 +30,7 @@ export async function GET(req: NextRequest): Promise<Response> {
 export async function POST(req: NextRequest): Promise<Response> {
   try {
     return await requireAuth(req, async (req2, { user }) => {
+      if (!isPro(user)) return jsonError('PLAN_LIMIT_REACHED', 'La programmation est réservée aux comptes Pro.', 403);
       const data = schema.parse(await req2.json());
       const doc = await prisma.document.findFirst({
         where: { id: data.documentId, userId: user.id },
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest): Promise<Response> {
           payload: doc.payload as object,
           clientId: doc.clientId,
           frequency: data.frequency,
-          autoSendEmail: data.autoSendEmail,
+          autoSendWhatsApp: data.autoSendWhatsApp,
           nextRunAt,
         },
       });
