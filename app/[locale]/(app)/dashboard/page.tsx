@@ -11,6 +11,8 @@ import { UpgradeCTA } from '@/components/ui/UpgradeCTA';
 import { ProBadge } from '@/components/ui/ProBadge';
 import { ProExpiryBanner } from '@/components/ui/ProExpiryBanner';
 import { ProGiftBanner } from '@/components/ui/ProGiftBanner';
+import { AnnouncementBanner } from '@/components/ui/AnnouncementBanner';
+import { getActiveAnnouncement } from '@/lib/announcements';
 import { UnsupportedCountryBanner } from '@/components/layout/UnsupportedCountryBanner';
 import { HeroCard } from '@/components/ui/HeroCard';
 import { StatCard } from '@/components/ui/StatCard';
@@ -40,6 +42,7 @@ export default async function DashboardPage({
     activatedReferralsCount,
     recurringCount,
     latestGiftSub,
+    activeAnnouncement,
   ] = await Promise.all([
     prisma.document.findMany({
       where: { userId: user.id },
@@ -66,6 +69,7 @@ export default async function DashboardPage({
       },
       orderBy: { createdAt: 'desc' },
     }),
+    getActiveAnnouncement(),
   ]);
 
   const userIsPro = isPro(user);
@@ -120,6 +124,10 @@ export default async function DashboardPage({
       </div>
 
       <UnsupportedCountryBanner />
+
+      {activeAnnouncement && (
+        <AnnouncementBanner announcement={activeAnnouncement} dismissible />
+      )}
 
       {isGiftedPro && latestGiftSub && (
         <ProGiftBanner

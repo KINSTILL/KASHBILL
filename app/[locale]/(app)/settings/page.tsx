@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { DeleteAccountSection } from '@/components/settings/DeleteAccountSection';
+import { ProfileAnnouncementBox } from '@/components/ui/AnnouncementBanner';
 
 export default function SettingsPage() {
   const t = useTranslations();
@@ -58,6 +59,9 @@ export default function SettingsPage() {
           Préférences de l&apos;application et profil utilisateur.
         </p>
       </div>
+
+      {/* Annonce globale persistante jusqu'à expiration ou retrait par l'admin */}
+      <ProfileAnnouncementBox />
 
       {/* Profile summary */}
       <Card className="p-4 flex items-center justify-between">
