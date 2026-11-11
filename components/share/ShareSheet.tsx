@@ -191,6 +191,11 @@ export function ShareSheet({
           }),
         });
         const data = await res.json().catch(() => ({}));
+        if (res.status === 403 && data?.error?.code === 'PLAN_LIMIT_REACHED') {
+          toast.show(data.error.message, 'error');
+          setSendingWhatsApp(false);
+          return;
+        }
         if (res.ok && data?.sentDirect) {
           toast.show(
             locale === 'en'
