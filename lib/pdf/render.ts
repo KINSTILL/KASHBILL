@@ -21,16 +21,17 @@ export async function renderPdfToBlob(
     element = A4Document({ doc, options });
   }
 
-  // Diagnostic : si le rendu ne se termine jamais (image distante bloquée, etc.),
-  // on échoue au bout de 20 s au lieu de laisser le spinner tourner indéfiniment.
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error('PDF render timeout (20s)')), 20000)
-  );
+  let timerId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timerId = setTimeout(() => reject(new Error('PDF render timeout (20s)')), 20000);
+  });
   try {
     return await Promise.race([pdf(element as Parameters<typeof pdf>[0]).toBlob(), timeout]);
   } catch (err) {
     console.error('[pdf] échec du rendu', err);
     throw err;
+  } finally {
+    if (timerId) clearTimeout(timerId);
   }
 }
 

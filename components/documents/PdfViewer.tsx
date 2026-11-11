@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
+import { downloadBlob } from '@/lib/pdf/render';
 
 export function PdfViewer({
   blob,
@@ -33,32 +34,28 @@ export function PdfViewer({
     };
   }, [blob]);
 
-  if (!blob) {
+  if (!blob || !url) return null;
+
+  const isMobile =
+    typeof navigator !== 'undefined' &&
+    /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
+
+  if (isMobile) {
     return (
-      <div
-        className="flex items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50"
-        style={{ height: '300px' }}
-      >
-        <span className="text-sm text-slate-500">{t('loadingPdf')}</span>
-      </div>
-    );
-  }
-
-  if (!url) return null;
-
-  const isIos = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-  if (isIos) {
-    return (
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-center">
-        <p className="text-sm text-slate-600">{t('iosPreviewHelp')}</p>
+      <div className="flex flex-wrap items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
         <Button
-          variant="primary"
-          size="md"
+          variant="outline"
+          size="sm"
           onClick={() => window.open(url, '_blank')}
-          className="mt-3"
         >
-          {t('openPdf')}
+          📄 {t('openPdf')}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => downloadBlob(blob, filename)}
+        >
+          ⬇️ Télécharger PDF
         </Button>
       </div>
     );
@@ -66,6 +63,18 @@ export function PdfViewer({
 
   return (
     <div className="space-y-2">
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => downloadBlob(blob, filename)}
+        >
+          ⬇️ Télécharger PDF
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => window.open(url, '_blank')}>
+          {t('openInNewTab')}
+        </Button>
+      </div>
       <div
         className="overflow-hidden rounded-lg border border-slate-200 bg-white"
         style={{ height }}
@@ -74,13 +83,7 @@ export function PdfViewer({
           src={`${url}#toolbar=1&navpanes=0`}
           title={filename}
           className="h-full w-full"
-          loading="lazy"
         />
-      </div>
-      <div className="flex justify-end">
-        <Button variant="ghost" size="sm" onClick={() => window.open(url, '_blank')}>
-          {t('openInNewTab')}
-        </Button>
       </div>
     </div>
   );

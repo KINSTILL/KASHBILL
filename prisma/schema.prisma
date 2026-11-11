@@ -61,6 +61,12 @@ enum EInvoiceFormat {
   FACTURX
 }
 
+enum EInvoiceRegulatoryStatus {
+  NONE
+  UPCOMING
+  MANDATORY
+}
+
 enum ReferralStatus {
   PENDING
   ACTIVATED
@@ -328,9 +334,6 @@ model CountryTaxConfig {
   countryCode           String   @unique
   countryNameFr         String
   countryNameEn         String
-  currency              String
-  taxIdLabel            String
-  rccmLabel             String
   vatRate               Decimal? @db.Decimal(5, 2)
   requiredFields        Json
   legalMentionsTemplate String

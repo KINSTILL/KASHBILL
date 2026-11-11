@@ -11,6 +11,29 @@ import { isWhiteLabelActive } from '@/lib/addons/queries';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Pencil } from 'lucide-react';
+import { readImageFile } from '@/lib/uploads/image';
+
+async function resolveUploadDataUrl(url: string | null | undefined): Promise<string | null> {
+  if (!url) return null;
+  if (url.startsWith('data:')) return url;
+  if (url.startsWith('/api/uploads/')) {
+    const filename = url.slice('/api/uploads/'.length);
+    try {
+      const buffer = await readImageFile(filename);
+      const isPng =
+        buffer.length >= 8 &&
+        buffer[0] === 0x89 &&
+        buffer[1] === 0x50 &&
+        buffer[2] === 0x4e &&
+        buffer[3] === 0x47;
+      const mime = isPng ? 'image/png' : 'image/jpeg';
+      return `data:${mime};base64,${buffer.toString('base64')}`;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
 
 export default async function DocumentDetailPage({
   params,
@@ -41,9 +64,18 @@ export default async function DocumentDetailPage({
   }
 
   const publicToken = doc.verification?.publicToken ?? null;
-  const qrCodeDataUrl =
-    doc.qrCodeUrl || (publicToken ? await generateQrCode(publicToken, env.APP_URL) : null);
-  const whiteLabel = await isWhiteLabelActive(doc.userId);
+  const [qrCodeDataUrl, whiteLabel, resolvedLogoUrl, resolvedSignatureUrl, resolvedStampUrl] =
+    await Promise.all([
+      doc.qrCodeUrl
+        ? Promise.resolve(doc.qrCodeUrl)
+        : publicToken
+          ? generateQrCode(publicToken, env.APP_URL).catch(() => null)
+          : Promise.resolve(null),
+      isWhiteLabelActive(doc.userId),
+      resolveUploadDataUrl(doc.user.logoUrl),
+      resolveUploadDataUrl(doc.user.signatureUrl),
+      resolveUploadDataUrl(doc.user.stampUrl),
+    ]);
 
   const pdfDoc: PdfDocument = {
     id: doc.id,
@@ -60,9 +92,9 @@ export default async function DocumentDetailPage({
       phone: doc.user.phone,
       taxId: doc.user.taxId,
       rccm: doc.user.rccm,
-      logoUrl: doc.user.logoUrl,
-      signatureUrl: doc.user.signatureUrl,
-      stampUrl: doc.user.stampUrl,
+      logoUrl: resolvedLogoUrl,
+      signatureUrl: resolvedSignatureUrl,
+      stampUrl: resolvedStampUrl,
       headerText: doc.user.headerText,
       footerText: doc.user.footerText,
       cgvText: doc.user.cgvText,

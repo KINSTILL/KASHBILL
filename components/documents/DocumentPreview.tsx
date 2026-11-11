@@ -10,6 +10,7 @@ import { ShareSheet } from '@/components/share/ShareSheet';
 import { RecurringSheet } from './RecurringSheet';
 import { BulkSheet } from './BulkSheet';
 import { PdfViewer } from './PdfViewer';
+import { HtmlDocumentPreview } from './HtmlDocumentPreview';
 import { ProPreviewToggle } from './ProPreviewToggle';
 import { haptic } from '@/lib/device/haptics';
 
@@ -21,6 +22,7 @@ export function DocumentPreview({
   initialFormat: PdfFormat;
 }) {
   const t = useTranslations('documents.preview');
+  const [format, setFormat] = useState<PdfFormat>(initialFormat);
   const [blob, setBlob] = useState<Blob | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,17 +31,19 @@ export function DocumentPreview({
   const [bulkOpen, setBulkOpen] = useState(false);
   const [previewPro, setPreviewPro] = useState(false);
 
+  const showWatermark = previewPro ? false : pdfDoc.watermarked;
+
   const options = useMemo(
     () => ({
-      format: initialFormat,
+      format,
       showLogo: true,
       showSignature: true,
       showStamp: true,
       showCgv: true,
-      showWatermark: previewPro ? false : pdfDoc.watermarked,
+      showWatermark,
       whiteLabel: pdfDoc.whiteLabel ?? false,
     }),
-    [initialFormat, pdfDoc.watermarked, pdfDoc.whiteLabel, previewPro]
+    [format, showWatermark, pdfDoc.whiteLabel]
   );
 
   useEffect(() => {
@@ -47,7 +51,7 @@ export function DocumentPreview({
     setLoading(true);
     setError(null);
     setBlob(null);
-    renderPdfToBlob(pdfDoc, initialFormat, options)
+    renderPdfToBlob(pdfDoc, format, options)
       .then((b) => {
         if (mounted) {
           setBlob(b);
@@ -65,26 +69,60 @@ export function DocumentPreview({
     return () => {
       mounted = false;
     };
-  }, [pdfDoc, initialFormat, options]);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 py-16">
-        <Spinner size="lg" />
-        <span className="text-sm text-slate-500">{t('loadingPdf')}</span>
-      </div>
-    );
-  }
+  }, [pdfDoc, format, options]);
 
   return (
     <div className="space-y-4">
+      {/* Sélecteur de format A4 / Ticket 80mm */}
+      <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 p-1.5">
+        <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={() => setFormat('a4')}
+            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+              format === 'a4'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-200/70'
+            }`}
+          >
+            📄 A4 Pro
+          </button>
+          <button
+            type="button"
+            onClick={() => setFormat('ticket')}
+            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+              format === 'ticket'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-200/70'
+            }`}
+          >
+            🧾 Ticket 80mm
+          </button>
+        </div>
+        {loading && (
+          <div className="flex items-center gap-1.5 pr-2 text-xs text-slate-500">
+            <Spinner size="sm" />
+            <span>{t('loadingPdf')}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Aperçu visuel HTML immédiat (toujours visible sur mobile et desktop) */}
+      <HtmlDocumentPreview
+        doc={pdfDoc}
+        format={format}
+        showWatermark={showWatermark}
+      />
+
+      {/* Lecteur / Téléchargement PDF natif */}
       {error ? (
-        <div className="rounded-lg border border-error bg-red-50 p-4 text-sm text-error">
-          {t('pdfError')}
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+          {t('pdfError')} ({error})
         </div>
       ) : (
         <PdfViewer blob={blob} filename={`${pdfDoc.number}.pdf`} />
       )}
+
       <div className="space-y-2">
         <Button
           fullWidth
@@ -155,4 +193,3 @@ export function DocumentPreview({
     </div>
   );
 }
-
