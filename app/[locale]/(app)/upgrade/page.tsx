@@ -136,8 +136,6 @@ export default function UpgradePage() {
           <li>✓ {t('featureUnlimitedClients')}</li>
           <li>✓ {t('featureUnlimitedHistory')}</li>
           <li>✓ {t('feature2Devices')}</li>
-          <li>✓ {t('featureNfc')}</li>
-          <li>✓ {t('featureUsbPrint')}</li>
         </ul>
       </Card>
 

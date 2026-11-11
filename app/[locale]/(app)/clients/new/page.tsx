@@ -8,8 +8,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
-import { ContactPickerButton } from '@/components/clients/ContactPickerButton';
-import { NfcScannerButton } from '@/components/clients/NfcScannerButton';
 import countries from 'i18n-iso-countries';
 import frLocale from 'i18n-iso-countries/langs/fr.json';
 import enLocale from 'i18n-iso-countries/langs/en.json';
@@ -102,25 +100,6 @@ export default function NewClientPage() {
       )}
 
       <Card className="p-6">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pb-4 border-b border-slate-100">
-          <span className="text-xs text-slate-500">Remplissage rapide :</span>
-          <div className="flex items-center gap-2">
-            <ContactPickerButton
-              onSelect={({ name: n, phone: p }) => {
-                if (n) setName(n);
-                if (p) setPhone(p);
-              }}
-              onUpgradeRequired={() => router.push(`/${locale}/upgrade` as Route)}
-            />
-            <NfcScannerButton
-              onScan={(nfcData) => {
-                setNote((prev) => (prev ? `${prev} | NFC: ${nfcData}` : `NFC: ${nfcData}`));
-              }}
-              onUpgradeRequired={() => router.push(`/${locale}/upgrade` as Route)}
-            />
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-slate-700">
