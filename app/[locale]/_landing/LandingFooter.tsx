@@ -4,7 +4,6 @@ import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
 import type { LandingPersonalization } from '@/lib/landing/types';
 import { TIER1_CONFIG } from '@/lib/landing/data';
-import { LEGAL_TITLES } from '@/lib/legal/loader';
 
 export function LandingFooter({
   personalization: _personalization,
@@ -78,7 +77,7 @@ export function LandingFooter({
                   href={`/${locale}/legal/mentions-legales` as Route}
                   className="hover:text-ink"
                 >
-                  {LEGAL_TITLES['mentions-legales']}
+                  {locale === 'en' ? 'Legal Notice' : 'Mentions légales'}
                 </Link>
               </li>
             </ul>
