@@ -151,8 +151,42 @@ export function ShareSheet({
     } catch {}
   };
 
+  const triggerPdfDownload = () => {
+    const dlUrl = URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.href = dlUrl;
+    a.download = `${documentNumber}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(dlUrl);
+  };
+
+  const handleWhatsAppDirectNumber = async () => {
+    finalize();
+    triggerPdfDownload();
+    const url = buildWhatsAppUrl(phone, message);
+    window.open(url, '_blank');
+    await markDocumentSent();
+    onSent();
+    onOpenChange(false);
+  };
+
   const handleWhatsApp = async () => {
     finalize();
+    if (canShare) {
+      const result = await shareNative(pdfBlob, message, `${documentNumber}.pdf`);
+      if (result.ok) {
+        await markDocumentSent();
+        onSent();
+        onOpenChange(false);
+        return;
+      }
+      if (result.reason === 'USER_CANCELLED') {
+        return;
+      }
+    }
+    triggerPdfDownload();
     const url = buildWhatsAppUrl(phone, message);
     window.open(url, '_blank');
     await markDocumentSent();
@@ -317,8 +351,21 @@ export function ShareSheet({
           {/* Actions */}
           <div className="space-y-2 pt-2">
             <Button fullWidth variant="whatsapp" size="lg" onClick={handleWhatsApp}>
-              {t('modal.actions.whatsapp')}
+              📎 {t('modal.actions.whatsapp')} (PDF)
             </Button>
+            {canShare && phone.trim().length > 0 && (
+              <Button
+                fullWidth
+                variant="outline"
+                size="sm"
+                onClick={handleWhatsAppDirectNumber}
+                className="text-xs border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+              >
+                {locale === 'en'
+                  ? `Open chat with ${phone.trim()} (+ download PDF)`
+                  : `Ouvrir la discussion directe avec ${phone.trim()} (+ télécharger le PDF)`}
+              </Button>
+            )}
             <Button fullWidth variant="secondary" onClick={handleEmail}>
               {t('modal.actions.email')}
             </Button>
