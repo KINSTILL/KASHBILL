@@ -110,7 +110,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     if (eventType === 'payment.complete' && status === 'complete') {
       const now = new Date();
       const isAddon = Boolean(
-        subscription && subscription.amountXaf && [500, 3000].includes(subscription.amountXaf)
+        subscription && subscription.amountXaf && [500, 1000, 3000].includes(subscription.amountXaf)
       );
 
       let newPro: Date | null = null;
@@ -135,8 +135,13 @@ export async function POST(req: NextRequest): Promise<Response> {
         });
       }
 
-      if (subscription && [500, 3000].includes(subscription.amountXaf ?? 0)) {
-        const type = subscription.amountXaf === 3000 ? 'WHITE_LABEL' : 'EXTRA_DEVICE';
+      if (subscription && [500, 1000, 3000].includes(subscription.amountXaf ?? 0)) {
+        const type =
+          subscription.amountXaf === 3000
+            ? 'WHITE_LABEL'
+            : subscription.amountXaf === 1000
+              ? 'CUSTOM_WHATSAPP'
+              : 'EXTRA_DEVICE';
         const startsAt = new Date();
         const endsAt = new Date(startsAt.getTime() + 30 * 86_400_000);
 

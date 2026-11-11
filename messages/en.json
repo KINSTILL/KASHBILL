@@ -747,8 +747,13 @@
     "title": "Add-ons",
     "extraDevice": "Extra device",
     "extraDeviceDesc": "+1 active device on your account",
+    "extraDeviceTooltip": "Your Pro plan already includes 2 devices (e.g. 1 phone + 1 computer). This add-on unlocks 1 additional simultaneous device so you or a team member can work on a 3rd screen.",
+    "customWhatsapp": "My own WhatsApp number",
+    "customWhatsappDesc": "Send raw PDFs directly from your own WhatsApp number",
+    "customWhatsappTooltip": "Link your own WhatsApp in 1 click: your clients receive the raw PDF invoice directly from your personal/business WhatsApp number in your existing chat thread, with zero MyCashBill mention.",
     "whiteLabel": "White label",
     "whiteLabelDesc": "Removes all MyCashBill mentions from your PDFs",
+    "whiteLabelTooltip": "Removes the discreet 'Generated with MyCashBill' footer from your PDFs and unlocks custom brand colors on your A4 invoices.",
     "activate": "Activate +{price} FCFA/month"
   },
   "blog": {

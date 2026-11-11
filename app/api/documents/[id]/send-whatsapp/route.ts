@@ -3,12 +3,14 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
+import { isCustomWhatsAppActive } from '@/lib/addons/queries';
 
 const bodySchema = z.object({
   phone: z.string().min(1),
   message: z.string().max(2000).optional().default(''),
   pdfBase64: z.string().min(10),
   filename: z.string().min(1).max(120),
+  locale: z.enum(['fr', 'en']).optional(),
 });
 
 function normalizeWhatsAppNumber(rawPhone: string): string {
@@ -21,38 +23,76 @@ function normalizeWhatsAppNumber(rawPhone: string): string {
   return digits.startsWith('237') || digits.length > 9 ? digits : `237${digits}`;
 }
 
+/**
+ * Construit le message encadré (Idée 1) indiquant clairement au destinataire :
+ * - L'identité et le numéro de l'entreprise/émetteur (issu du profil utilisateur)
+ * - Le fait que MyCashBill n'est qu'un outil technique utilisé par l'émetteur
+ */
+function buildAttributedCaption(params: {
+  userMessage: string;
+  senderName: string;
+  senderPhone: string;
+  isEn: boolean;
+}): string {
+  const { userMessage, senderName, senderPhone, isEn } = params;
+  const trimmedMsg = userMessage.trim();
+
+  const senderLabel =
+    senderName && senderName !== senderPhone
+      ? `${senderName} (${senderPhone})`
+      : senderPhone;
+
+  if (isEn) {
+    const header = `📌 *Document sent on behalf of: ${senderLabel}*`;
+    const footer = `_ℹ️ This document is automatically delivered via MyCashBill at the request of ${senderName || senderPhone}. MyCashBill is solely a technical invoicing tool: for any inquiry or payment, please contact the sender directly at ${senderPhone}._`;
+    return trimmedMsg
+      ? `${header}\n───────────────\n${trimmedMsg}\n───────────────\n${footer}`
+      : `${header}\n───────────────\n${footer}`;
+  }
+
+  const header = `📌 *Document envoyé de la part de : ${senderLabel}*`;
+  const footer = `_ℹ️ Ce document vous est transmis automatiquement via MyCashBill à la demande de ${senderName || senderPhone}. MyCashBill est uniquement un outil technique d'édition : pour toute question ou règlement, veuillez contacter directement l'émetteur au ${senderPhone}._`;
+  return trimmedMsg
+    ? `${header}\n───────────────\n${trimmedMsg}\n───────────────\n${footer}`
+    : `${header}\n───────────────\n${footer}`;
+}
+
+async function fetchEvolutionInstances(
+  evolutionUrl: string,
+  evolutionKey: string
+): Promise<Array<{ name: string; status: string }>> {
+  try {
+    const res = await fetch(`${evolutionUrl}/instance/fetchInstances`, {
+      method: 'GET',
+      headers: { apikey: evolutionKey },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+    return data
+      .map((item) => ({
+        name: String(item?.name ?? item?.instance?.instanceName ?? item?.instanceName ?? ''),
+        status: String(
+          item?.connectionStatus ?? item?.instance?.status ?? item?.status ?? ''
+        ),
+      }))
+      .filter((i) => i.name.length > 0);
+  } catch {
+    return [];
+  }
+}
+
 async function resolveEvolutionInstance(
   evolutionUrl: string,
   evolutionKey: string,
   configuredInstance?: string
 ): Promise<string | null> {
   if (configuredInstance) return configuredInstance;
-
-  try {
-    const res = await fetch(`${evolutionUrl}/instance/fetchInstances`, {
-      method: 'GET',
-      headers: { apikey: evolutionKey },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) return null;
-
-    // Evolution API v2: item.name & item.connectionStatus === 'open'
-    // Evolution API v1: item.instance.instanceName & item.instance.status === 'open'
-    for (const item of data) {
-      const name = item?.name ?? item?.instance?.instanceName ?? item?.instanceName;
-      const status = item?.connectionStatus ?? item?.instance?.status ?? item?.status;
-      if (name && status === 'open') {
-        return String(name);
-      }
-    }
-
-    const first = data[0];
-    const fallbackName = first?.name ?? first?.instance?.instanceName ?? first?.instanceName;
-    return fallbackName ? String(fallbackName) : null;
-  } catch {
-    return null;
-  }
+  const instances = await fetchEvolutionInstances(evolutionUrl, evolutionKey);
+  if (instances.length === 0) return null;
+  const openInst = instances.find((i) => i.status === 'open');
+  return openInst?.name ?? instances[0]?.name ?? null;
 }
 
 async function sendMediaViaEvolution(params: {
@@ -130,7 +170,7 @@ export async function POST(
       const { id } = await context.params;
       const doc = await prisma.document.findFirst({
         where: { id, userId: user.id },
-        select: { id: true, number: true, sentViaWhatsAppAt: true },
+        select: { id: true, number: true, locale: true, sentViaWhatsAppAt: true },
       });
 
       if (!doc) {
@@ -158,16 +198,6 @@ export async function POST(
         return jsonOk({ sentDirect: false, reason: 'NOT_CONFIGURED' });
       }
 
-      const evolutionInstance = await resolveEvolutionInstance(
-        evolutionUrl,
-        evolutionKey,
-        configuredInstance
-      );
-
-      if (!evolutionInstance) {
-        return jsonOk({ sentDirect: false, reason: 'NO_INSTANCE_FOUND' });
-      }
-
       const parsed = bodySchema.parse(await req2.json());
       const number = normalizeWhatsAppNumber(parsed.phone);
       if (!number) {
@@ -179,18 +209,59 @@ export async function POST(
         ? parsed.filename
         : `${parsed.filename}.pdf`;
 
+      const isEn = parsed.locale ? parsed.locale === 'en' : doc.locale === 'EN';
+      const senderName =
+        user.businessName?.trim() ||
+        user.legalName?.trim() ||
+        user.name?.trim() ||
+        user.phone;
+
+      // Vérifier si le Mode B (Add-on CUSTOM_WHATSAPP + instance dédiée `user_${user.id}` ouverte) est actif
+      const hasCustomWhatsAppAddon = await isCustomWhatsAppActive(user.id);
+      let usePersonalInstance = false;
+      const personalInstanceName = `user_${user.id}`;
+
+      if (hasCustomWhatsAppAddon) {
+        const instances = await fetchEvolutionInstances(evolutionUrl, evolutionKey);
+        const personalInst = instances.find(
+          (i) => i.name === personalInstanceName && i.status === 'open'
+        );
+        if (personalInst) {
+          usePersonalInstance = true;
+        }
+      }
+
+      // En Mode B (propre numéro WhatsApp connecté), on envoie le message pur sans mention MyCashBill.
+      // En Mode A (instance globale MyCashBill), on encadre avec l'Idée 1 (Nom de l'entreprise + clause outil technique).
+      const finalCaption = usePersonalInstance
+        ? parsed.message || ''
+        : buildAttributedCaption({
+            userMessage: parsed.message || '',
+            senderName,
+            senderPhone: user.phone,
+            isEn,
+          });
+
+      const targetInstance = usePersonalInstance
+        ? personalInstanceName
+        : await resolveEvolutionInstance(evolutionUrl, evolutionKey, configuredInstance);
+
+      if (!targetInstance) {
+        return jsonOk({ sentDirect: false, reason: 'NO_INSTANCE_FOUND' });
+      }
+
       let sendResult = await sendMediaViaEvolution({
         evolutionUrl,
         evolutionKey,
-        instanceName: evolutionInstance,
+        instanceName: targetInstance,
         number,
-        caption: parsed.message || '',
+        caption: finalCaption,
         cleanBase64,
         fileName,
       });
 
       // Si le nom d'instance configuré renvoie 404, on tente une auto-détection d'instance active
-      if (!sendResult.ok && sendResult.status === 404 && configuredInstance) {
+      if (!sendResult.ok && sendResult.status === 404 && !usePersonalInstance && configuredInstance) {
         const autoInstance = await resolveEvolutionInstance(evolutionUrl, evolutionKey, undefined);
         if (autoInstance && autoInstance !== configuredInstance) {
           sendResult = await sendMediaViaEvolution({
@@ -198,7 +269,7 @@ export async function POST(
             evolutionKey,
             instanceName: autoInstance,
             number,
-            caption: parsed.message || '',
+            caption: finalCaption,
             cleanBase64,
             fileName,
           });
@@ -234,11 +305,12 @@ export async function POST(
         actorId: user.id,
         targetId: doc.id,
         action: 'document_sent_whatsapp',
+        meta: { mode: usePersonalInstance ? 'CUSTOM_INSTANCE' : 'SHARED_INSTANCE' },
         ip,
         userAgent,
       });
 
-      return jsonOk({ sentDirect: true });
+      return jsonOk({ sentDirect: true, mode: usePersonalInstance ? 'custom' : 'shared' });
     });
   } catch (err) {
     return handleApiError(err);

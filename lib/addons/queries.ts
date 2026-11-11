@@ -3,6 +3,7 @@ import type { AddOnType, User } from '@prisma/client';
 
 export const ADDON_PRICES = {
   EXTRA_DEVICE: 500,
+  CUSTOM_WHATSAPP: 1000,
   WHITE_LABEL: 3000,
 } as const;
 
@@ -32,4 +33,8 @@ export async function getDeviceLimitForUser(user: Pick<User, 'id' | 'proUntil'>)
 
 export async function isWhiteLabelActive(userId: string): Promise<boolean> {
   return hasActiveAddOn(userId, 'WHITE_LABEL');
+}
+
+export async function isCustomWhatsAppActive(userId: string): Promise<boolean> {
+  return hasActiveAddOn(userId, 'CUSTOM_WHATSAPP');
 }

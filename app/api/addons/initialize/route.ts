@@ -9,7 +9,7 @@ import { isPro } from '@/lib/auth/plan';
 import { ADDON_PRICES } from '@/lib/addons/queries';
 
 const schema = z.object({
-  type: z.enum(['EXTRA_DEVICE', 'WHITE_LABEL']),
+  type: z.enum(['EXTRA_DEVICE', 'CUSTOM_WHATSAPP', 'WHITE_LABEL']),
   method: z.enum(['mobile_money', 'card', 'auto']).optional().default('auto'),
   operatorCode: z.string().nullable().optional().default(null),
 });

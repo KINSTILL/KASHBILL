@@ -13,7 +13,7 @@ import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 import { ProPlanPicker } from '@/components/pricing/ProPlanPicker';
 import { DEFAULT_PRO_PLAN_ID, getProPlan, PRO_PLANS, type ProPlanId } from '@/lib/pricing/plans';
-import { ChevronRight, Gift } from 'lucide-react';
+import { ChevronRight, Gift, Info } from 'lucide-react';
 
 export default function UpgradePage() {
   const locale = useLocale();
@@ -205,12 +205,28 @@ export default function UpgradePage() {
 
       {user?.proUntil && new Date(user.proUntil) > new Date() && (
         <div className="space-y-3 pt-4 border-t">
-          <h2 className="text-lg font-bold">{tAddons('title')}</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">{tAddons('title')}</h2>
+            <span className="text-[11px] text-slate-500">
+              {locale === 'fr'
+                ? '💡 Survolez (PC) ou touchez ℹ️ (mobile) pour les détails'
+                : '💡 Hover (PC) or tap ℹ️ (mobile) for details'}
+            </span>
+          </div>
           <AddOnCard
             type="EXTRA_DEVICE"
             price={500}
             title={tAddons('extraDevice')}
             desc={tAddons('extraDeviceDesc')}
+            tooltip={tAddons('extraDeviceTooltip')}
+            locale={locale}
+          />
+          <AddOnCard
+            type="CUSTOM_WHATSAPP"
+            price={1000}
+            title={tAddons('customWhatsapp')}
+            desc={tAddons('customWhatsappDesc')}
+            tooltip={tAddons('customWhatsappTooltip')}
             locale={locale}
           />
           <AddOnCard
@@ -218,6 +234,7 @@ export default function UpgradePage() {
             price={3000}
             title={tAddons('whiteLabel')}
             desc={tAddons('whiteLabelDesc')}
+            tooltip={tAddons('whiteLabelTooltip')}
             locale={locale}
           />
         </div>
@@ -304,16 +321,19 @@ function AddOnCard({
   price,
   title,
   desc,
+  tooltip,
   locale,
 }: {
-  type: 'EXTRA_DEVICE' | 'WHITE_LABEL';
+  type: 'EXTRA_DEVICE' | 'CUSTOM_WHATSAPP' | 'WHITE_LABEL';
   price: number;
   title: string;
   desc: string;
+  tooltip: string;
   locale: string;
 }) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const startAddonPayment = async () => {
     setLoading(true);
@@ -335,16 +355,39 @@ function AddOnCard({
   };
 
   return (
-    <Card className="p-4 space-y-3">
+    <Card className="group relative p-4 space-y-3 transition hover:border-emerald-300">
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <h3 className="text-base font-semibold text-ink">{title}</h3>
-          <p className="text-xs text-slate-500">{desc}</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <h3 className="text-base font-semibold text-ink">{title}</h3>
+            <button
+              type="button"
+              onClick={() => setInfoOpen((v) => !v)}
+              aria-expanded={infoOpen}
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 transition"
+            >
+              <Info className="h-3 w-3 text-emerald-600" />
+              <span>{locale === 'fr' ? 'Explication' : 'How it works'}</span>
+            </button>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
         </div>
         <span className="shrink-0 rounded bg-sage-50 px-2 py-1 text-xs font-bold text-sage-800">
           +{price.toLocaleString('fr-FR')} FCFA/mois
         </span>
       </div>
+
+      {/* Infobulle au survol sur PC (sm+) */}
+      <div className="hidden sm:group-hover:block rounded-xl border border-emerald-200/90 bg-emerald-50/80 p-2.5 text-xs text-slate-700 leading-relaxed">
+        💡 {tooltip}
+      </div>
+
+      {/* Panneau explicatif au clic sur mobile (ou si cliqué explicitement sur PC) */}
+      {infoOpen && (
+        <div className="sm:group-hover:hidden rounded-xl border border-emerald-200/90 bg-emerald-50/80 p-2.5 text-xs text-slate-700 leading-relaxed">
+          💡 {tooltip}
+        </div>
+      )}
 
       <div className="pt-1">
         <Button

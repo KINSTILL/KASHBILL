@@ -2,13 +2,15 @@
  * Devises d'affichage (indicatif). Le paiement reste toujours en FCFA.
  * - XAF / XOF : parité fixe avec le FCFA (même valeur).
  * - EUR : parité fixe 1 € = 655,957 FCFA (garantie par la Banque de France / BCEAO).
- * - USD, GHS, KES, UGX : taux en ligne (approximatif), avec repli si indisponible.
+ * - USD : taux en ligne (approximatif), avec repli si indisponible.
+ * Les devises locales (GHS, KES, UGX) ne sont pas affichées : Notch Pay montre déjà
+ * l'équivalent dans la devise locale au moment du paiement.
  */
 
 export const FCFA_PER_EUR = 655.957;
 
 export type DisplayCurrency = {
-  code: 'XAF' | 'XOF' | 'EUR' | 'USD' | 'GHS' | 'KES' | 'UGX';
+  code: 'XAF' | 'XOF' | 'EUR' | 'USD';
   label: string;
   /** Unités de la devise pour 1 FCFA (taux fixe), sinon null = taux en ligne. */
   fixedPerXaf: number | null;
@@ -23,9 +25,6 @@ export const DISPLAY_CURRENCIES: DisplayCurrency[] = [
   { code: 'XOF', label: 'XOF', fixedPerXaf: 1, decimals: 0, symbol: 'XOF' },
   { code: 'EUR', label: '€', fixedPerXaf: 1 / FCFA_PER_EUR, decimals: 2, symbol: '€' },
   { code: 'USD', label: '$', fixedPerXaf: null, decimals: 2, symbol: '$' },
-  { code: 'GHS', label: 'GH₵', fixedPerXaf: null, decimals: 0, symbol: 'GH₵' },
-  { code: 'KES', label: 'KSh', fixedPerXaf: null, decimals: 0, symbol: 'KSh' },
-  { code: 'UGX', label: 'USh', fixedPerXaf: null, decimals: 0, symbol: 'USh' },
 ];
 
 /** Taux en ligne : unités de devise pour 1 FCFA. */

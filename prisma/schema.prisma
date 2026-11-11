@@ -46,6 +46,7 @@ enum SubSource {
 
 enum AddOnType {
   EXTRA_DEVICE
+  CUSTOM_WHATSAPP
   WHITE_LABEL
 }
 

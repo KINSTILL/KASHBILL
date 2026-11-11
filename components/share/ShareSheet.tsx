@@ -163,6 +163,11 @@ export function ShareSheet({
   };
 
   const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
+  const [sendingLinkWhatsApp, setSendingLinkWhatsApp] = useState(false);
+  const [whatsAppConfirmOpen, setWhatsAppConfirmOpen] = useState(false);
+
+  const senderDisplayName =
+    user?.businessName?.trim() || user?.name?.trim() || user?.phone || 'Votre entreprise';
 
   const blobToBase64 = (b: Blob): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -172,11 +177,28 @@ export function ShareSheet({
       reader.readAsDataURL(b);
     });
 
-  const handleWhatsApp = async () => {
+  // Clic sur le bouton principal WhatsApp -> ouvre la boîte de confirmation avec les 2 options
+  const handleWhatsApp = () => {
     finalize();
-    const trimmedPhone = phone.trim();
+    haptic('light');
+    setWhatsAppConfirmOpen(true);
+  };
 
-    if (documentId && trimmedPhone) {
+  // Option 1 : Envoi direct du PDF brut via l'application MyCashBill (Evolution API)
+  const handleDirectWhatsAppSend = async () => {
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone) {
+      toast.show(
+        locale === 'en'
+          ? 'Please enter the client WhatsApp phone number first.'
+          : 'Veuillez renseigner le numéro WhatsApp du client.',
+        'error'
+      );
+      setWhatsAppConfirmOpen(false);
+      return;
+    }
+
+    if (documentId) {
       setSendingWhatsApp(true);
       try {
         const pdfBase64 = await blobToBase64(pdfBlob);
@@ -188,33 +210,37 @@ export function ShareSheet({
             message,
             pdfBase64,
             filename: `${documentNumber}.pdf`,
+            locale: effectiveLocale,
           }),
         });
         const data = await res.json().catch(() => ({}));
         if (res.status === 403 && data?.error?.code === 'PLAN_LIMIT_REACHED') {
           toast.show(data.error.message, 'error');
           setSendingWhatsApp(false);
+          setWhatsAppConfirmOpen(false);
           return;
         }
         if (res.ok && data?.sentDirect) {
           toast.show(
             locale === 'en'
-              ? 'PDF document sent on WhatsApp!'
-              : 'Document PDF envoyé sur WhatsApp !',
+              ? 'PDF document sent directly on WhatsApp!'
+              : 'Document PDF envoyé directement sur WhatsApp !',
             'success'
           );
+          setWhatsAppConfirmOpen(false);
           onSent();
           onOpenChange(false);
           setSendingWhatsApp(false);
           return;
         }
       } catch {
-        // Fallback transparent ci-dessous
+        // Fallback transparent ci-dessous si le serveur d'envoi direct est indisponible
       } finally {
         setSendingWhatsApp(false);
       }
     }
 
+    setWhatsAppConfirmOpen(false);
     if (canShare) {
       const result = await shareNative(pdfBlob, message, `${documentNumber}.pdf`);
       if (result.ok) {
@@ -234,6 +260,55 @@ export function ShareSheet({
     await markDocumentSent();
     onSent();
     onOpenChange(false);
+  };
+
+  // Option 2 : Envoyer un lien de téléchargement direct du PDF depuis le propre WhatsApp de l'utilisateur
+  const handleOwnWhatsAppLinkSend = async () => {
+    const trimmedPhone = phone.trim();
+    setSendingLinkWhatsApp(true);
+    try {
+      let downloadUrl = '';
+      if (documentId) {
+        const pdfBase64 = await blobToBase64(pdfBlob);
+        const res = await fetch(`/api/documents/${documentId}/share-link`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
+          body: JSON.stringify({ pdfBase64 }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403 && data?.error?.code === 'PLAN_LIMIT_REACHED') {
+          toast.show(data.error.message, 'error');
+          setSendingLinkWhatsApp(false);
+          setWhatsAppConfirmOpen(false);
+          return;
+        }
+        if (res.ok && typeof data?.downloadUrl === 'string') {
+          downloadUrl = data.downloadUrl;
+        }
+      }
+
+      const linkLabel =
+        effectiveLocale === 'en'
+          ? `📄 Direct PDF download (${documentNumber}.pdf):`
+          : `📄 Télécharger le PDF (${documentNumber}.pdf) :`;
+
+      const combinedMessage = downloadUrl
+        ? `${message.trim()}\n\n${linkLabel}\n${downloadUrl}`
+        : message.trim();
+
+      if (!downloadUrl) {
+        triggerPdfDownload();
+        await markDocumentSent();
+      }
+
+      const waUrl = buildWhatsAppUrl(trimmedPhone, combinedMessage);
+      window.open(waUrl, '_blank');
+      setWhatsAppConfirmOpen(false);
+      onSent();
+      onOpenChange(false);
+    } finally {
+      setSendingLinkWhatsApp(false);
+    }
   };
 
   const handleEmail = async () => {
@@ -438,6 +513,102 @@ export function ShareSheet({
           </div>
         </div>
       </Sheet>
+
+      {whatsAppConfirmOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[120] flex items-center justify-center p-4"
+        >
+          <div
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs"
+            onClick={() => !sendingWhatsApp && !sendingLinkWhatsApp && setWhatsAppConfirmOpen(false)}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl space-y-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                {locale === 'en'
+                  ? 'Choose your WhatsApp sending mode'
+                  : 'Choisissez votre mode d’envoi WhatsApp'}
+              </h3>
+              <p className="mt-1 text-xs text-slate-500">
+                {locale === 'en'
+                  ? 'How would you like to send this document to your client?'
+                  : 'Comment souhaitez-vous transmettre ce document à votre client ?'}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {/* Option 1 : Envoi direct du PDF brut via MyCashBill App */}
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3.5 space-y-2.5">
+                <div>
+                  <p className="text-xs font-bold text-emerald-950">
+                    {locale === 'en'
+                      ? '1. Send PDF directly via MyCashBill App'
+                      : '1. Envoyer directement le PDF via MyCashBill App'}
+                  </p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
+                    {locale === 'en'
+                      ? `MyCashBill sends the raw PDF file and your message directly to the client on behalf of "${senderDisplayName}" (${user?.phone ?? ''}), clearly stating that MyCashBill is only a technical invoicing tool.`
+                      : `MyCashBill envoie directement le fichier PDF brut et votre message au client de la part de « ${senderDisplayName} » (${user?.phone ?? ''}), en indiquant clairement que nous ne sommes qu’un outil technique utilisé par vous.`}
+                  </p>
+                </div>
+                <Button
+                  fullWidth
+                  variant="whatsapp"
+                  size="md"
+                  onClick={handleDirectWhatsAppSend}
+                  isLoading={sendingWhatsApp}
+                  disabled={sendingLinkWhatsApp}
+                >
+                  {locale === 'en'
+                    ? 'Send PDF directly via MyCashBill'
+                    : 'Envoyer directement via MyCashBill'}
+                </Button>
+              </div>
+
+              {/* Option 2 : Envoyer un lien de téléchargement direct depuis le WhatsApp de l'utilisateur */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2.5">
+                <div>
+                  <p className="text-xs font-bold text-slate-900">
+                    {locale === 'en'
+                      ? '2. Send a direct download link from my WhatsApp'
+                      : '2. Envoyer un lien de téléchargement direct depuis mon WhatsApp'}
+                  </p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
+                    {locale === 'en'
+                      ? 'Opens the client chat on your own WhatsApp number with your message and a direct 1-click download link for the PDF document.'
+                      : 'Ouvre la discussion du client depuis votre propre numéro WhatsApp avec votre message et un lien de téléchargement direct du document PDF.'}
+                  </p>
+                </div>
+                <Button
+                  fullWidth
+                  variant="secondary"
+                  size="md"
+                  onClick={handleOwnWhatsAppLinkSend}
+                  isLoading={sendingLinkWhatsApp}
+                  disabled={sendingWhatsApp}
+                >
+                  {locale === 'en'
+                    ? 'Open my WhatsApp with direct PDF link'
+                    : 'Ouvrir mon WhatsApp avec le lien PDF'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="pt-1 text-center">
+              <button
+                type="button"
+                disabled={sendingWhatsApp || sendingLinkWhatsApp}
+                onClick={() => setWhatsAppConfirmOpen(false)}
+                className="text-xs font-medium text-slate-500 hover:text-slate-800 underline"
+              >
+                {locale === 'en' ? 'Cancel' : 'Annuler'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {documentId && (
         <EmailSendSheet

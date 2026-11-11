@@ -25,8 +25,10 @@ export function ProPlanPicker({
   onSelect,
 }: {
   locale: string;
-  selected: ProPlanId;
-  onSelect: (id: ProPlanId) => void;
+  /** Formule sélectionnée (page d'achat). Absent sur la vitrine. */
+  selected?: ProPlanId;
+  /** Absent = affichage seul (vitrine) : les cartes ne sont pas cliquables. */
+  onSelect?: (id: ProPlanId) => void;
 }) {
   const isFr = locale !== 'en';
   const [currencyCode, setCurrencyCode] = useState<DisplayCurrency['code']>('XAF');
@@ -103,12 +105,15 @@ export function ProPlanPicker({
           const isSelected = selected === plan.id;
           const best = plan.months === 12;
 
+          const Tag = onSelect ? 'button' : 'div';
+          const interactive = onSelect
+            ? { type: 'button' as const, 'aria-pressed': isSelected, onClick: () => onSelect(plan.id) }
+            : {};
+
           return (
-            <button
+            <Tag
               key={plan.id}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => onSelect(plan.id)}
+              {...interactive}
               className={cn(
                 'relative flex flex-col gap-2 rounded-card border p-4 text-left transition',
                 isSelected
@@ -154,7 +159,7 @@ export function ProPlanPicker({
                   <p className="text-xs font-semibold text-sage-800">{priceLine(plan.priceXaf)}</p>
                 )}
               </div>
-            </button>
+            </Tag>
           );
         })}
       </div>

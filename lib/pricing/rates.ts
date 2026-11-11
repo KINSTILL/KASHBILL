@@ -9,7 +9,7 @@ import type { LiveRates } from './currencies';
 
 const RATES_URL = 'https://open.er-api.com/v6/latest/XAF';
 const CACHE_MS = 12 * 60 * 60 * 1000;
-const WANTED = ['USD', 'GHS', 'KES', 'UGX'] as const;
+const WANTED = ['USD'] as const;
 
 export type RatesSnapshot = {
   rates: LiveRates;
