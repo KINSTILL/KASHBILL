@@ -796,14 +796,18 @@ export function DocumentForm({
       </Card>
 
       <Card>
-        <p className="text-sm">{t('format')} :</p>
-        <div className="mt-2 inline-flex rounded-lg border border-slate-300 p-0.5 text-sm">
+        <p className="text-sm font-medium text-slate-700">{t('format')} :</p>
+        <div className="mt-2 grid grid-cols-2 gap-2 text-sm sm:inline-flex sm:rounded-lg sm:border sm:border-slate-300 sm:p-0.5">
           {(['ticket', 'a4'] as const).map((f) => (
             <button
               key={f}
               type="button"
               onClick={() => setState((s) => ({ ...s, format: f }))}
-              className={`px-3 py-1 rounded ${state.format === f ? 'bg-sage-700 text-white font-medium' : ''}`}
+              className={`rounded-lg px-4 py-2.5 text-center font-semibold transition sm:px-3 sm:py-1.5 ${
+                state.format === f
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 sm:border-0 sm:bg-transparent'
+              }`}
             >
               {f === 'ticket' ? t('formatTicket') : t('formatA4')}
             </button>
@@ -811,34 +815,31 @@ export function DocumentForm({
         </div>
       </Card>
 
-      {/* Sur mobile, le total et le bouton sont dans la barre collante en bas : pas de doublon */}
-      <div className="hidden md:block space-y-4">
-      <Card className="border-none bg-gradient-to-br from-sage-500 to-sage-600 text-white">
-        {hidePriceInput ? (
-          <div className="flex items-center justify-between">
-            <p className="text-[13px] font-semibold uppercase tracking-[0.06em] text-white/80">
-              {t('totalItemsDelivered')}
-            </p>
-            <p className="money-lg text-[26px] text-white">{totalQuantity}</p>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between">
-            <p className="text-[13px] font-semibold uppercase tracking-[0.06em] text-white/80">
-              {isReceipt ? t('totalReceived') : t('total')}
-            </p>
-            <p className="money-lg text-[26px] text-white">{formatFCFA(total)}</p>
-          </div>
+      <div className="space-y-4 pb-6">
+        <Card className="border-none bg-gradient-to-br from-sage-500 to-sage-600 text-white">
+          {hidePriceInput ? (
+            <div className="flex items-center justify-between">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.06em] text-white/80">
+                {t('totalItemsDelivered')}
+              </p>
+              <p className="money-lg text-[26px] text-white">{totalQuantity}</p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.06em] text-white/80">
+                {isReceipt ? t('totalReceived') : t('total')}
+              </p>
+              <p className="money-lg text-[26px] text-white">{formatFCFA(total)}</p>
+            </div>
+          )}
+        </Card>
+
+        {status === 'saved' && lastSavedAt && (
+          <p className="text-center text-xs text-slate-600">
+            {t('draftSaved', { time: new Date(lastSavedAt).toLocaleTimeString() })}
+          </p>
         )}
-      </Card>
 
-      {status === 'saved' && lastSavedAt && (
-        <p className="text-center text-xs text-slate-600">
-          {t('draftSaved', { time: new Date(lastSavedAt).toLocaleTimeString() })}
-        </p>
-      )}
-
-      {/* Bouton principal sur tablette/desktop. Sur téléphone, c'est la barre collante ci-dessous. */}
-      <div className="hidden md:block">
         <Button
           type="button"
           fullWidth
@@ -851,33 +852,6 @@ export function DocumentForm({
         >
           {t('generate')}
         </Button>
-      </div>
-      </div>
-
-      {/* Barre d'action collante sur téléphone, posée au-dessus de la barre de navigation (safe-area incluse) */}
-      <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] z-30 md:hidden pointer-events-none">
-        <div className="pointer-events-auto mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-slate-200/90 bg-white/95 p-2.5 pl-4 shadow-xl shadow-slate-950/15 backdrop-blur-xl ring-1 ring-black/5">
-          <div className="min-w-0 flex-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
-              {hidePriceInput ? t('totalItemsDelivered') : isReceipt ? t('totalReceived') : t('total')}
-            </span>
-            <span className="money text-lg font-extrabold text-slate-950 truncate block">
-              {hidePriceInput ? totalQuantity : formatFCFA(total)}
-            </span>
-          </div>
-          <Button
-            type="button"
-            size="lg"
-            className="min-h-12 shrink-0 px-5 font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-700/20"
-            onClick={(e) => {
-              e.preventDefault();
-              handleSubmit();
-            }}
-            isLoading={submitting}
-          >
-            {t('generate')}
-          </Button>
-        </div>
       </div>
     </div>
   );
