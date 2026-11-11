@@ -921,16 +921,16 @@ async function seedFAQ() {
       category: 'billing',
       order: 3,
       locale: 'FR',
-      question: 'Comment payer par Mobile Money ?',
-      answer: 'Le paiement de votre abonnement Pro passe exclusivement par Notch Pay, notre passerelle de paiement agréée. Sur la page Passer Pro, choisissez votre opérateur (MTN Mobile Money ou Orange Money) et saisissez votre numéro de téléphone. Un message USSD s\'affiche sur votre mobile pour valider le paiement sécurisé de 2 000 FCFA pour un mois d\'accès. MyCashBill ne conserve aucun code PIN ni donnée de paiement. Voir nos CGU.',
+      question: 'Comment se passe le paiement par Mobile Money avec Notch Pay ?',
+      answer: 'Le paiement de votre abonnement Pro est traité par Notch Pay, notre passerelle de paiement agréée. Sur la page Passer Pro, choisissez votre formule (1, 3 ou 12 mois) : une page s\'ouvrira et vous pourrez indiquer votre numéro pour le paiement mobile. Une page d\'instructions vous guidera jusqu\'à la validation. Les opérateurs disponibles dépendent de votre pays et sont proposés automatiquement par Notch Pay. MyCashBill ne voit ni ne conserve votre code PIN. Le paiement est unique, sans renouvellement automatique. Voir nos CGU.',
       isPublished: true,
     },
     {
       category: 'billing',
       order: 3,
       locale: 'EN',
-      question: 'How do I pay using Mobile Money?',
-      answer: 'Payments for your Pro subscription are processed exclusively by Notch Pay, our licensed payment gateway. On the Upgrade page, choose your mobile provider (MTN MoMo or Orange Money) and type in your phone number. A secure USSD prompt appears on your phone to confirm the 2,000 FCFA monthly payment. MyCashBill never stores PIN codes or payment data. See our Terms of Service.',
+      question: 'How does Mobile Money payment work with Notch Pay?',
+      answer: 'Your Pro subscription payment is processed by Notch Pay, our licensed payment gateway. On the Upgrade page, choose your plan (1, 3 or 12 months): a page will open where you can enter your number for mobile payment. An instructions page will guide you through validation. Available mobile operators depend on your country and are offered automatically by Notch Pay. MyCashBill never sees or stores your PIN code. Payment is one-time, with no automatic renewal. See our Terms of Service.',
       isPublished: true,
     },
     {
@@ -1146,6 +1146,13 @@ async function seedFAQ() {
       isPublished: true,
     },
   ];
+
+  // Anciennes questions remplacées : évite un doublon après renommage
+  await prisma.fAQEntry.deleteMany({
+    where: {
+      question: { in: ['Comment payer par Mobile Money ?', 'How do I pay using Mobile Money?'] },
+    },
+  });
 
   for (const item of faqItems) {
     const existing = await prisma.fAQEntry.findFirst({
