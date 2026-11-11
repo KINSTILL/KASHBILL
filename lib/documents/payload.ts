@@ -56,6 +56,30 @@ export type ComputedPayload = {
 };
 
 /**
+ * Formule unique des totaux, partagée par le serveur et le formulaire (aperçu en direct).
+ *
+ * - Base HT de la TVA = sous-total des articles + frais de livraison (le transport est
+ *   une prestation accessoire soumise à la TVA).
+ * - TVA = base HT × taux, arrondie au franc.
+ * - Acompte = pourcentage du TTC (base HT + TVA).
+ * - Net à payer = TTC − acompte.
+ */
+export function computeTotals(input: {
+  subtotal: number;
+  deliveryFee: number | null;
+  vatRate: number | null;
+  depositPercentage: number | null;
+}): { htBase: number; vatAmount: number | null; ttc: number; depositAmount: number | null; total: number } {
+  const htBase = input.subtotal + (input.deliveryFee ?? 0);
+  const vatAmount = input.vatRate !== null ? Math.round(htBase * (input.vatRate / 100)) : null;
+  const ttc = htBase + (vatAmount ?? 0);
+  const depositAmount =
+    input.depositPercentage !== null ? Math.round(ttc * (input.depositPercentage / 100)) : null;
+  const total = ttc - (depositAmount ?? 0);
+  return { htBase, vatAmount, ttc, depositAmount, total };
+}
+
+/**
  * Calcule côté serveur. Ne jamais faire confiance au client pour les totaux.
  */
 export function computePayload(input: DocumentPayloadInput): ComputedPayload {
@@ -68,17 +92,13 @@ export function computePayload(input: DocumentPayloadInput): ComputedPayload {
   }));
 
   const subtotal = lines.reduce((acc, l) => acc + l.total, 0);
-  const vatAmount = input.vatRate !== null ? Math.round(subtotal * (input.vatRate / 100)) : null;
-  const depositAmount =
-    input.depositPercentage !== null
-      ? Math.round((subtotal + (vatAmount ?? 0)) * (input.depositPercentage / 100))
-      : null;
   const deliveryFee = input.deliveryFee ?? null;
-  const total =
-    subtotal +
-    (vatAmount ?? 0) +
-    (deliveryFee ?? 0) -
-    (depositAmount ?? 0);
+  const { vatAmount, depositAmount, total } = computeTotals({
+    subtotal,
+    deliveryFee,
+    vatRate: input.vatRate,
+    depositPercentage: input.depositPercentage,
+  });
 
   return {
     lines,

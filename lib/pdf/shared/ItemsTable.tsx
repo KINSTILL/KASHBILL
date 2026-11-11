@@ -18,7 +18,6 @@ export function ItemsTable({
   lines,
   compact,
   currency,
-  showVat = false,
   hidePrices = false,
   locale = 'FR',
   primaryColor = DEFAULT_BRAND.primary,
@@ -50,11 +49,6 @@ export function ItemsTable({
             <Text style={[styles.colPrice, styles.headerText]}>
               {isEn ? 'Unit price' : 'Prix unit.'}
             </Text>
-            {showVat ? (
-              <Text style={[styles.colVat, styles.headerText]}>
-                {isEn ? 'VAT' : 'TVA'}
-              </Text>
-            ) : null}
             <Text style={[styles.colTotal, styles.headerText]}>Total</Text>
           </>
         ) : null}
@@ -66,7 +60,6 @@ export function ItemsTable({
           {!hidePrices ? (
             <>
               <Text style={styles.colPrice}>{formatCurrency(line.unitPrice, currency, locale)}</Text>
-              {showVat ? <Text style={styles.colVat}>—</Text> : null}
               <Text style={styles.colTotal}>{formatCurrency(line.total, currency, locale)}</Text>
             </>
           ) : null}

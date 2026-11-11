@@ -55,20 +55,28 @@ export function Totals({
         <Text style={styles.label}>{isEn ? 'Subtotal' : 'Sous-total'}</Text>
         <Text style={styles.value}>{formatCurrency(payload.subtotal, currency, locale)}</Text>
       </View>
-      {showVat && payload.vatAmount !== null && payload.vatRate !== null ? (
-        <View style={styles.line}>
-          <Text style={styles.label}>
-            {isEn ? 'VAT' : 'TVA'} ({payload.vatRate}%)
-          </Text>
-          <Text style={styles.value}>{formatCurrency(payload.vatAmount, currency, locale)}</Text>
-        </View>
-      ) : null}
       {payload.deliveryFee !== null && payload.deliveryFee > 0 && (
         <View style={styles.line}>
           <Text style={styles.label}>{isEn ? 'Delivery' : 'Livraison'}</Text>
           <Text style={styles.value}>{formatCurrency(payload.deliveryFee, currency, locale)}</Text>
         </View>
       )}
+      {showVat && payload.vatAmount !== null && payload.vatRate !== null ? (
+        <>
+          <View style={styles.line}>
+            <Text style={styles.label}>{isEn ? 'Total excl. VAT' : 'Total HT'}</Text>
+            <Text style={styles.value}>
+              {formatCurrency(payload.subtotal + (payload.deliveryFee ?? 0), currency, locale)}
+            </Text>
+          </View>
+          <View style={styles.line}>
+            <Text style={styles.label}>
+              {isEn ? 'VAT' : 'TVA'} ({payload.vatRate}%)
+            </Text>
+            <Text style={styles.value}>{formatCurrency(payload.vatAmount, currency, locale)}</Text>
+          </View>
+        </>
+      ) : null}
       {payload.depositAmount !== null && payload.depositAmount > 0 && (
         <View style={styles.line}>
           <Text style={styles.label}>{isEn ? 'Deposit' : 'Acompte'}</Text>

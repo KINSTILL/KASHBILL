@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Button } from '@/components/ui/Button';
 import type { LandingPersonalization } from '@/lib/landing/types';
-import { ArrowRight, CheckCircle2, ShieldCheck, Zap, X, Eye, Download, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck, Zap, X, Eye, Sparkles } from 'lucide-react';
 
 export function Hero({
   personalization: _personalization,
@@ -16,6 +16,7 @@ export function Hero({
 }) {
   const isFr = locale === 'fr';
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [downloadStarted, setDownloadStarted] = useState(false);
 
   // Télécharge le PDF d'exemple (rendu par le moteur PDF du SaaS).
   const downloadSampleInvoice = () => {
@@ -30,6 +31,7 @@ export function Hero({
   // Clic sur la carte : téléchargement automatique, puis aperçu du même PDF dans la modale.
   const openSampleInvoice = () => {
     downloadSampleInvoice();
+    setDownloadStarted(true);
     setIsInvoiceModalOpen(true);
   };
 
@@ -381,22 +383,24 @@ export function Hero({
 
               {/* APERÇU DU PDF RÉEL : même template A4 que les factures générées dans le SaaS */}
               <div className="space-y-3">
+                {downloadStarted && (
+                  <div
+                    role="status"
+                    className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900"
+                  >
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                    <p>
+                      {isFr
+                        ? 'Téléchargement lancé : la facture exemple est en cours d’enregistrement. Consultez votre dossier de téléchargements.'
+                        : 'Download started: the sample invoice is being saved. Check your downloads folder.'}
+                    </p>
+                  </div>
+                )}
                 <iframe
                   src="/api/samples/invoice?inline=1#toolbar=0&navpanes=0"
                   title={isFr ? 'Facture exemple au format PDF' : 'Sample invoice in PDF'}
                   className="hidden sm:block w-full h-[68vh] rounded-2xl border border-slate-200 bg-slate-100"
                 />
-                <p className="text-xs text-slate-600 text-center sm:hidden">
-                  {isFr
-                    ? 'Le PDF de la facture a été téléchargé. Ouvrez-le depuis vos téléchargements.'
-                    : 'The invoice PDF has been downloaded. Open it from your downloads.'}
-                </p>
-                <div className="flex justify-center">
-                  <Button variant="outline" size="md" onClick={downloadSampleInvoice} className="gap-2 font-bold">
-                    <Download className="h-4 w-4" />
-                    <span>{isFr ? 'Télécharger la facture PDF' : 'Download the PDF invoice'}</span>
-                  </Button>
-                </div>
               </div>
 
               {/* Bannière d'incitation & Inscription */}

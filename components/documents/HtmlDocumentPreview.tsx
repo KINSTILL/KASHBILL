@@ -247,16 +247,6 @@ export function HtmlDocumentPreview({
                 {formatCurrency(doc.payload.subtotal, currency, doc.locale)}
               </span>
             </div>
-            {config.showVat && doc.payload.vatAmount !== null && doc.payload.vatRate !== null && (
-              <div className="flex gap-4">
-                <span className="text-slate-500">
-                  {isEn ? 'VAT' : 'TVA'} ({doc.payload.vatRate}%)
-                </span>
-                <span className="font-medium">
-                  {formatCurrency(doc.payload.vatAmount, currency, doc.locale)}
-                </span>
-              </div>
-            )}
             {doc.payload.deliveryFee !== null && doc.payload.deliveryFee > 0 && (
               <div className="flex gap-4">
                 <span className="text-slate-500">{isEn ? 'Delivery' : 'Livraison'}</span>
@@ -264,6 +254,28 @@ export function HtmlDocumentPreview({
                   {formatCurrency(doc.payload.deliveryFee, currency, doc.locale)}
                 </span>
               </div>
+            )}
+            {config.showVat && doc.payload.vatAmount !== null && doc.payload.vatRate !== null && (
+              <>
+                <div className="flex gap-4">
+                  <span className="text-slate-500">{isEn ? 'Total excl. VAT' : 'Total HT'}</span>
+                  <span className="font-medium">
+                    {formatCurrency(
+                      doc.payload.subtotal + (doc.payload.deliveryFee ?? 0),
+                      currency,
+                      doc.locale
+                    )}
+                  </span>
+                </div>
+                <div className="flex gap-4">
+                  <span className="text-slate-500">
+                    {isEn ? 'VAT' : 'TVA'} ({doc.payload.vatRate}%)
+                  </span>
+                  <span className="font-medium">
+                    {formatCurrency(doc.payload.vatAmount, currency, doc.locale)}
+                  </span>
+                </div>
+              </>
             )}
             {doc.payload.depositAmount !== null && doc.payload.depositAmount > 0 && (
               <div className="flex gap-4">

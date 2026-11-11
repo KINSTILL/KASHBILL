@@ -23,7 +23,7 @@ import { getOperatorsForCountry, isSupportedPaymentCountry } from '@/lib/countri
 import { getCurrencyForCountry } from '@/lib/countries/currency';
 import type { DocType } from '@prisma/client';
 import type { PdfFormat } from '@/lib/pdf/types';
-import type { ComputedPayload } from '@/lib/documents/payload';
+import { computeTotals, type ComputedPayload } from '@/lib/documents/payload';
 import type { UserSuggestions } from '@/lib/documents/suggestions';
 
 type Line = { description: string; quantity: number; unitPrice: number };
@@ -193,14 +193,18 @@ export function DocumentForm({
     });
   }, [user, state.type]);
 
-  const subtotal = state.lines.reduce((a, l) => a + l.quantity * l.unitPrice, 0);
+  // Même arrondi par ligne et même formule que le serveur (lib/documents/payload.ts).
+  const subtotal = state.lines.reduce((a, l) => a + Math.round(l.quantity * l.unitPrice), 0);
   const totalQuantity = state.lines.reduce((a, l) => a + (Number(l.quantity) || 0), 0);
-  const vatAmount = state.vatRate !== null ? Math.round((subtotal * state.vatRate) / 100) : 0;
-  const depositAmount =
-    state.depositPercentage !== null
-      ? Math.round(((subtotal + vatAmount) * state.depositPercentage) / 100)
-      : 0;
-  const total = subtotal + vatAmount + (state.deliveryFee ?? 0) - depositAmount;
+  const totals = computeTotals({
+    subtotal,
+    deliveryFee: state.deliveryFee ?? null,
+    vatRate: state.vatRate,
+    depositPercentage: state.depositPercentage,
+  });
+  const vatAmount = totals.vatAmount ?? 0;
+  const depositAmount = totals.depositAmount ?? 0;
+  const total = totals.total;
 
   const addLine = () =>
     setState((s) => ({ ...s, lines: [...s.lines, { description: '', quantity: 1, unitPrice: 0 }] }));
