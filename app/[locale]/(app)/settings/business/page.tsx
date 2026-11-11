@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
+import {
+  ArrowLeft,
+  Building2,
+  Palette,
+  Stamp,
+  FileText,
+  Eye,
+  CheckCircle2,
+} from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -119,41 +128,55 @@ export default function BusinessSettingsPage() {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            {t('business')}
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            {t('businessHelp')}
-          </p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white shadow-sm">
+            <Building2 className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-950 truncate">
+              {t('business')}
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">
+              {t('businessHelp')}
+            </p>
+          </div>
         </div>
         <Link
           href={'/settings' as Route}
-          className="text-xs font-medium text-slate-500 hover:text-slate-800"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-2xs hover:bg-slate-50 hover:text-slate-900 shrink-0 transition"
         >
-          {commonT('back')}
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>{commonT('back')}</span>
         </Link>
       </div>
 
       {message && (
         <div
           role="alert"
-          className={`rounded-lg p-3 text-sm font-medium ${
-            message.error ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'
+          className={`flex items-center gap-2 rounded-xl border p-3 text-sm font-medium ${
+            message.error
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-800'
           }`}
         >
-          {message.text}
+          {!message.error && <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />}
+          <span>{message.text}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Visual Identity / Branding */}
         <Card className="p-4 sm:p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-800">
-              Identité visuelle &amp; Signatures
-            </h2>
+          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
+                <Stamp className="h-4 w-4" />
+              </span>
+              <h2 className="text-sm font-bold text-slate-900">
+                Identité visuelle &amp; Signatures
+              </h2>
+            </div>
             {!canUseBranding && <ProBadge label={t('proRequired')} />}
           </div>
 
@@ -190,8 +213,13 @@ export default function BusinessSettingsPage() {
 
         {/* White label : couleurs de la facture */}
         <Card className="p-4 sm:p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-800">Couleurs de vos documents</h2>
+          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-50 text-teal-700 border border-teal-100">
+                <Palette className="h-4 w-4" />
+              </span>
+              <h2 className="text-sm font-bold text-slate-900">Couleurs de vos documents</h2>
+            </div>
             {!canUseWhiteLabel && <ProBadge label="White label" />}
           </div>
 
@@ -262,9 +290,14 @@ export default function BusinessSettingsPage() {
 
         {/* Legal mentions */}
         <Card className="p-4 sm:p-6 space-y-4">
-          <h2 className="text-sm font-bold text-slate-800">
-            Mentions légales panafricaines
-          </h2>
+          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
+              <Building2 className="h-4 w-4" />
+            </span>
+            <h2 className="text-sm font-bold text-slate-900">
+              Mentions légales panafricaines
+            </h2>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -378,10 +411,14 @@ export default function BusinessSettingsPage() {
 
         {/* Custom headers / footers / CGV */}
         <Card className="p-4 sm:p-6 space-y-4">
-
-          <h2 className="text-sm font-bold text-slate-800">
-            En-tête, Pied de page &amp; CGV
-          </h2>
+          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80">
+              <FileText className="h-4 w-4" />
+            </span>
+            <h2 className="text-sm font-bold text-slate-900">
+              En-tête, Pied de page &amp; CGV
+            </h2>
+          </div>
 
           <div>
             <label htmlFor="headerText" className="block text-sm font-medium text-slate-700">
@@ -425,15 +462,18 @@ export default function BusinessSettingsPage() {
         </Card>
 
         {/* Live Preview Box */}
-        <Card className="p-4 bg-slate-100 border border-slate-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-600">
-              Aperçu en direct sur document :
+        <Card className="p-4 bg-slate-50/80 border border-slate-200/90">
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <Eye className="h-3.5 w-3.5 text-emerald-600" />
+              <span>Aperçu en direct sur document :</span>
             </span>
-            <span className="text-[10px] text-slate-400">Simulation d&apos;en-tête</span>
+            <span className="rounded-full bg-white border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+              Simulation d&apos;en-tête
+            </span>
           </div>
 
-          <div className="rounded border border-slate-300 bg-white p-4 shadow-xs">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
             <div className="flex items-start justify-between">
               <div>
                 {businessName && (

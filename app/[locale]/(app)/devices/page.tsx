@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
+import { Smartphone, Laptop, ArrowLeft, ShieldAlert, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -143,21 +145,36 @@ export default function DevicesPage() {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          {t('title')}
-        </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Gérez vos sessions connectées et approuvez de nouveaux appareils.
-        </p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white shadow-sm">
+            <Smartphone className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-950 truncate">
+              {t('title')}
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">
+              Gérez vos sessions connectées et approuvez de nouveaux appareils.
+            </p>
+          </div>
+        </div>
+        <Link
+          href={`/${locale}/settings` as Route}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-2xs hover:bg-slate-50 hover:text-slate-900 shrink-0 transition"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>{commonT('back')}</span>
+        </Link>
       </div>
 
       {error && (
         <div
           role="alert"
-          className="rounded-lg bg-red-50 p-3 text-sm font-medium text-red-700"
+          className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700"
         >
-          {error}
+          <ShieldAlert className="h-4 w-4 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -175,18 +192,23 @@ export default function DevicesPage() {
             {approvals.map((appr) => (
               <div
                 key={appr.id}
-                className="rounded-lg bg-white p-3 border border-amber-200 text-xs shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                className="rounded-xl bg-white p-3.5 border border-amber-200 text-xs shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
               >
-                <div>
-                  <p className="font-semibold text-slate-800">
-                    {appr.userAgent || 'Appareil mobile'}
-                  </p>
-                  <p className="text-slate-400 text-[11px]">
-                    Demandé le {new Date(appr.createdAt).toLocaleString(locale)}
-                  </p>
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                    <Smartphone className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-800 truncate">
+                      {appr.userAgent || 'Appareil mobile'}
+                    </p>
+                    <p className="text-slate-400 text-[11px]">
+                      Demandé le {new Date(appr.createdAt).toLocaleString(locale)}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <Input
                     placeholder="Code à 6 chiffres"
                     maxLength={6}
@@ -216,8 +238,10 @@ export default function DevicesPage() {
       )}
 
       {/* Active devices list */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold text-slate-700">Appareils autorisés</h2>
+      <div className="space-y-2.5">
+        <h2 className="px-1 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">
+          Appareils autorisés
+        </h2>
 
         {loading ? (
           <div className="flex justify-center p-8">
@@ -228,44 +252,63 @@ export default function DevicesPage() {
             {t('noDevices')}
           </Card>
         ) : (
-          <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            {devices.map((dev) => (
-              <div
-                key={dev.deviceId}
-                className="flex items-center justify-between p-4"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-slate-900">
-                      {dev.userAgent || 'Navigateur'}
+          <div className="divide-y divide-slate-100 rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
+            {devices.map((dev) => {
+              const isMobileUA = /Mobile|Android|iPhone|iPad/i.test(dev.userAgent ?? '');
+              return (
+                <div
+                  key={dev.deviceId}
+                  className="flex items-center justify-between gap-3 p-4"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
+                        dev.isCurrent
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                          : 'bg-slate-100 text-slate-600 border-slate-200/80'
+                      }`}
+                    >
+                      {isMobileUA ? (
+                        <Smartphone className="h-5 w-5" />
+                      ) : (
+                        <Laptop className="h-5 w-5" />
+                      )}
                     </span>
-                    {dev.isCurrent && (
-                      <Badge variant="success" size="sm">
-                        {t('current')}
-                      </Badge>
-                    )}
+                    <div className="space-y-0.5 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-sm text-slate-900 truncate max-w-[220px] sm:max-w-md">
+                          {dev.userAgent || 'Navigateur'}
+                        </span>
+                        {dev.isCurrent && (
+                          <Badge variant="success" size="sm">
+                            {t('current')}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-400">
+                        {t('lastSeen')} :{' '}
+                        {new Date(dev.lastSeenAt).toLocaleString(locale)}
+                        {dev.lastIp ? ` • IP: ${dev.lastIp}` : ''}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-slate-400">
-                    {t('lastSeen')} :{' '}
-                    {new Date(dev.lastSeenAt).toLocaleString(locale)}
-                    {dev.lastIp ? ` • IP: ${dev.lastIp}` : ''}
-                  </p>
-                </div>
 
-                {!dev.isCurrent && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={actionLoading === dev.deviceId}
-                    loading={actionLoading === dev.deviceId}
-                    onClick={() => handleRevoke(dev.deviceId)}
-                    className="text-xs text-red-600 border-red-200 hover:bg-red-50"
-                  >
-                    {t('revoke')}
-                  </Button>
-                )}
-              </div>
-            ))}
+                  {!dev.isCurrent && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={actionLoading === dev.deviceId}
+                      loading={actionLoading === dev.deviceId}
+                      onClick={() => handleRevoke(dev.deviceId)}
+                      className="gap-1.5 text-xs text-red-600 border-red-200 hover:bg-red-50 shrink-0"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span>{t('revoke')}</span>
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
