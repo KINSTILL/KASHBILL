@@ -71,7 +71,7 @@ Les documents générés par l'utilisateur et les données qu'il y insère **lui
 
 ## 6. Protection des Données Personnelles
 
-Le traitement des données personnelles est régi par la **Politique de Confidentialité** accessible à https://mycashbill.app/fr/legal/privacy.
+Le traitement des données personnelles est régi par la **[Politique de Confidentialité](/fr/legal/privacy)**.
 
 Pour toute demande relative aux données personnelles : **support@mycashbill.app**
 
@@ -79,12 +79,12 @@ Pour toute demande relative aux données personnelles : **support@mycashbill.app
 
 ## 7. Documents Contractuels
 
-- Conditions Générales d'Utilisation : https://mycashbill.app/fr/legal/cgu
-- Conditions Générales de Vente : https://mycashbill.app/fr/legal/cgv
-- Politique de Confidentialité : https://mycashbill.app/fr/legal/privacy
-- Politique de Cookies : https://mycashbill.app/fr/legal/cookies
-- Clause de non-responsabilité : https://mycashbill.app/fr/legal/disclaimer
-- Politique de Remboursement : https://mycashbill.app/fr/legal/refund
+- [Conditions Générales d'Utilisation (CGU)](/fr/legal/cgu)
+- [Conditions Générales de Vente (CGV)](/fr/legal/cgv)
+- [Politique de Confidentialité](/fr/legal/privacy)
+- [Politique de Cookies](/fr/legal/cookies)
+- [Clause de non-responsabilité](/fr/legal/disclaimer)
+- [Politique de Remboursement](/fr/legal/refund)
 
 ---
 
@@ -180,9 +180,3 @@ L'utilisateur reconnaît avoir lu, compris et accepté l'intégralité des prés
 - Qu'il **indemnise** DANY contre tout litige résultant de son usage ;
 - Que la responsabilité de MyCashBill est **strictement plafonnée** conformément à l'article 10 ;
 - Que la juridiction compétente est **exclusivement** celle de Douala, Cameroun.
-
-## Autres documents juridiques
-
-- [Conditions générales d'utilisation (CGU)](/fr/legal/cgu)
-- [Conditions générales de vente (CGV)](/fr/legal/cgv)
-- [Politique de confidentialité](/fr/legal/privacy)
