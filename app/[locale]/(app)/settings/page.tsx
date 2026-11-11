@@ -83,7 +83,7 @@ export default function SettingsPage() {
           Choisissez la langue d&apos;affichage de MyCashBill.
         </p>
         <div className="pt-1">
-          <LocaleSwitcher />
+          <LocaleSwitcher fullOnMobile />
         </div>
       </Card>
 
