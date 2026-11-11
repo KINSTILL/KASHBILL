@@ -6,7 +6,8 @@ import type { SubscriptionInvoicePdfInput } from './types';
 const INVOICES_DIR = path.join(process.cwd(), 'uploads', 'subscription-invoices');
 
 export async function renderSubscriptionInvoicePdf(input: SubscriptionInvoicePdfInput): Promise<string> {
-  const { pdf } = await import('@react-pdf/renderer');
+  const { pdf, Font } = await import('@react-pdf/renderer');
+  Font.registerHyphenationCallback((word) => [word]);
   const { SubscriptionInvoiceDocument } = await import('./SubscriptionInvoiceTemplate');
 
   const resolvedCompany = { ...input.company };

@@ -68,6 +68,7 @@ if (isProd) {
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
+  serverExternalPackages: ['@react-pdf/renderer'],
   eslint: {
     ignoreDuringBuilds: true,
   },
