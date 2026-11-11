@@ -11,6 +11,7 @@ import { MiniFAQ } from '@/components/faq/MiniFAQ';
 import { PaymentBadges } from '@/components/ui/PaymentBadges';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
+import { ChevronRight, Gift } from 'lucide-react';
 
 export default function UpgradePage() {
   const locale = useLocale();
@@ -167,6 +168,27 @@ export default function UpgradePage() {
         </p>
       </div>
 
+      {/* Parrainage : mis en avant juste après le paiement principal */}
+      <Link
+        href={'/referrals' as Route}
+        className="group mt-4 flex items-center gap-3 rounded-2xl border border-sage-300 bg-gradient-to-r from-sage-50 to-emerald-50 p-4 shadow-sm transition hover:border-sage-500 hover:shadow-md active:scale-[0.99]"
+      >
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sage-500 text-white shadow-xs">
+          <Gift className="h-5 w-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold text-ink">
+            {locale === 'fr' ? 'Parrainez et gagnez 7 jours Pro' : 'Refer and earn 7 Pro days'}
+          </span>
+          <span className="block text-xs text-slate-600">
+            {locale === 'fr'
+              ? 'Pour chaque ami activé, vous recevez 7 jours Pro offerts.'
+              : 'For each friend who activates, you get 7 free Pro days.'}
+          </span>
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-sage-700 transition group-hover:translate-x-0.5" />
+      </Link>
+
       {user?.proUntil && new Date(user.proUntil) > new Date() && (
         <div className="space-y-3 pt-4 border-t">
           <h2 className="text-lg font-bold">{tAddons('title')}</h2>
@@ -195,12 +217,6 @@ export default function UpgradePage() {
         </Card>
       )}
 
-      <div className="border-t pt-4 text-center text-sm text-slate-500">
-        {t('or')}{' '}
-        <Link href={'/referrals' as Route} className="text-sage-700 underline">
-          {t('refer')}
-        </Link>
-      </div>
 
       <MiniFAQWrapper />
     </div>
@@ -318,8 +334,7 @@ function AddOnCard({
 
       <div className="pt-1">
         <Button
-          size="sm"
-          variant="outline"
+          size="lg"
           fullWidth
           onClick={startAddonPayment}
           isLoading={loading}
