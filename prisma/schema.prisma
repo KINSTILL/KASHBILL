@@ -330,19 +330,23 @@ model Referral {
 }
 
 model CountryTaxConfig {
-  id                    String   @id @default(cuid())
-  countryCode           String   @unique
-  countryNameFr         String
-  countryNameEn         String
-  vatRate               Decimal? @db.Decimal(5, 2)
-  requiredFields        Json
-  legalMentionsTemplate String
-  isActive              Boolean        @default(true)
-  einvoiceFormat        EInvoiceFormat @default(NONE)
-  mobileMoneyEnabled    Boolean        @default(false)
-  paymentOperators      Json?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                       String                   @id @default(cuid())
+  countryCode              String                   @unique
+  countryNameFr            String
+  countryNameEn            String
+  currency                 String
+  taxIdLabel               String
+  rccmLabel                String
+  vatRate                  Decimal?                 @db.Decimal(5, 2)
+  requiredFields           Json
+  legalMentionsTemplate    String
+  isActive                 Boolean                  @default(true)
+  einvoiceFormat           EInvoiceFormat           @default(UBL)
+  einvoiceRegulatoryStatus EInvoiceRegulatoryStatus @default(NONE)
+  mobileMoneyEnabled       Boolean                  @default(false)
+  paymentOperators         Json?
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
 }
 
 model FraudThreshold {
