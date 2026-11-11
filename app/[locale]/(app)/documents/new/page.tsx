@@ -5,6 +5,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { prisma } from '@/lib/db';
 import { DocumentForm } from '@/components/documents/DocumentForm';
 import { getCurrencyForCountry } from '@/lib/countries/currency';
+import { getUserSuggestions } from '@/lib/documents/suggestions';
 
 export default async function NewDocumentPage({
   params,
@@ -19,6 +20,7 @@ export default async function NewDocumentPage({
   }
 
   const t = await getTranslations('documents.new');
+  const suggestions = await getUserSuggestions(current.user.id);
 
   const clients = await prisma.client.findMany({
     where: { userId: current.user.id },
@@ -35,6 +37,7 @@ export default async function NewDocumentPage({
         clients={clients}
         userCountry={current.user.country}
         userCurrency={getCurrencyForCountry(current.user.country)}
+        suggestions={suggestions}
       />
     </div>
   );

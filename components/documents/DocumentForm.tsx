@@ -24,6 +24,7 @@ import { getCurrencyForCountry } from '@/lib/countries/currency';
 import type { DocType } from '@prisma/client';
 import type { PdfFormat } from '@/lib/pdf/types';
 import type { ComputedPayload } from '@/lib/documents/payload';
+import type { UserSuggestions } from '@/lib/documents/suggestions';
 
 type Line = { description: string; quantity: number; unitPrice: number };
 type DraftState = {
@@ -98,12 +99,15 @@ export function DocumentForm({
   editDocument,
   userCountry = 'CM',
   userCurrency: _userCurrency = 'XAF',
+  suggestions = {},
 }: {
   clients: { id: string; name: string; country?: string | null }[];
   initialDraftId?: string;
   editDocument?: EditableDocument;
   userCountry?: string;
   userCurrency?: string;
+  /** Motifs et articles déjà utilisés par l'utilisateur, par type de document. */
+  suggestions?: UserSuggestions;
 }) {
   const t = useTranslations('documents.new');
   const locale = useLocale();
@@ -317,6 +321,27 @@ export function DocumentForm({
 
   const isDocEn = state.documentLocale === 'EN';
   const presets = isDocEn ? currentConfig.quickPresets.en : currentConfig.quickPresets.fr;
+
+  // Suggestions personnalisées : l'historique de l'utilisateur pour ce type de document
+  // passe avant les suggestions par défaut, sans doublon ni article déjà présent dans la facture.
+  const typeHistory = suggestions[state.type];
+  const linesInUse = new Set(
+    state.lines.map((l) => l.description.trim().toLowerCase()).filter((d) => d.length > 0)
+  );
+  const historyArticles = (typeHistory?.articles ?? []).filter(
+    (a) => !linesInUse.has(a.toLowerCase())
+  );
+  const articleChips = [
+    ...historyArticles,
+    ...presets.filter(
+      (p) =>
+        !historyArticles.some((h) => h.toLowerCase() === p.toLowerCase()) &&
+        !linesInUse.has(p.toLowerCase())
+    ),
+  ].slice(0, 8);
+  const paymentChips = (typeHistory?.paymentReferences ?? []).filter(
+    (r) => r !== (state.paymentReference ?? '')
+  );
   const isDeliveryNote = state.type === 'BORDEREAU';
   const isReceipt = state.type === 'RECU';
   const hideQtyInput = isReceipt && !showReceiptQty;
@@ -530,7 +555,7 @@ export function DocumentForm({
         <div className="mb-3">
           <p className="mb-1.5 text-[11px] font-medium text-slate-500">{t('quickSuggestions')}</p>
           <div className="flex flex-wrap gap-1.5">
-            {presets.map((preset) => (
+            {articleChips.map((preset) => (
               <button
                 key={preset}
                 type="button"
@@ -721,6 +746,27 @@ export function DocumentForm({
                   setState((s) => ({ ...s, paymentReference: e.target.value || null }))
                 }
               />
+              {/* Motifs déjà utilisés par l'utilisateur pour ce type de document. Rien s'il n'y en a pas. */}
+              {paymentChips.length > 0 && (
+                <div>
+                  <p className="mb-1.5 text-[11px] font-medium text-slate-500">{t('recentReasons')}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {paymentChips.slice(0, 6).map((reason) => (
+                      <button
+                        key={reason}
+                        type="button"
+                        onClick={() => {
+                          haptic('light');
+                          setState((s) => ({ ...s, paymentReference: reason }));
+                        }}
+                        className="max-w-full truncate rounded-full border border-sage-200 bg-sage-50/70 px-2.5 py-1 text-xs font-medium text-sage-800 transition-colors hover:border-sage-400 hover:bg-sage-100"
+                      >
+                        {reason}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
           {isForeignClient && (

@@ -255,6 +255,7 @@
       "showPricesOnDelivery": "Afficher les prix (facultatif)",
       "showQtyOnReceipt": "Détailler les quantités",
       "quickSuggestions": "Suggestions rapides (cliquez pour ajouter) :",
+      "recentReasons": "Motifs récents (cliquez pour utiliser) :",
       "totalItemsDelivered": "Total colis / unités livrés",
       "totalReceived": "Montant total reçu",
       "errorGeneric": "Erreur lors de la création du document",

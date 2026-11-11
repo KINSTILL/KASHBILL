@@ -255,6 +255,7 @@
       "showPricesOnDelivery": "Show prices (optional)",
       "showQtyOnReceipt": "Show quantity breakdown",
       "quickSuggestions": "Quick suggestions (tap to add):",
+      "recentReasons": "Recent reasons (tap to use):",
       "totalItemsDelivered": "Total packages / units delivered",
       "totalReceived": "Total amount received",
       "errorGeneric": "Error creating document",

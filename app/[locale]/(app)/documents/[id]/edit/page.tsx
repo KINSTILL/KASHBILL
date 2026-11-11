@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { DocumentForm } from '@/components/documents/DocumentForm';
 import { getCurrencyForCountry } from '@/lib/countries/currency';
 import type { ComputedPayload } from '@/lib/documents/payload';
+import { getUserSuggestions } from '@/lib/documents/suggestions';
 
 export default async function EditDocumentPage({
   params,
@@ -28,6 +29,8 @@ export default async function EditDocumentPage({
     redirect(`/${locale}/documents/${id}` as Route);
   }
 
+  const suggestions = await getUserSuggestions(current.user.id);
+
   const clients = await prisma.client.findMany({
     where: { userId: current.user.id },
     select: { id: true, name: true, country: true },
@@ -42,6 +45,7 @@ export default async function EditDocumentPage({
       <DocumentForm
         clients={clients}
         userCountry={current.user.country}
+        suggestions={suggestions}
         userCurrency={getCurrencyForCountry(current.user.country)}
         editDocument={{
           id: doc.id,
