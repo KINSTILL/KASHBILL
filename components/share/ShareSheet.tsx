@@ -162,18 +162,54 @@ export function ShareSheet({
     URL.revokeObjectURL(dlUrl);
   };
 
-  const handleWhatsAppDirectNumber = async () => {
-    finalize();
-    triggerPdfDownload();
-    const url = buildWhatsAppUrl(phone, message);
-    window.open(url, '_blank');
-    await markDocumentSent();
-    onSent();
-    onOpenChange(false);
-  };
+  const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
+
+  const blobToBase64 = (b: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+      reader.onerror = reject;
+      reader.readAsDataURL(b);
+    });
 
   const handleWhatsApp = async () => {
     finalize();
+    const trimmedPhone = phone.trim();
+
+    if (documentId && trimmedPhone) {
+      setSendingWhatsApp(true);
+      try {
+        const pdfBase64 = await blobToBase64(pdfBlob);
+        const res = await fetch(`/api/documents/${documentId}/send-whatsapp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
+          body: JSON.stringify({
+            phone: trimmedPhone,
+            message,
+            pdfBase64,
+            filename: `${documentNumber}.pdf`,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data?.sentDirect) {
+          toast.show(
+            locale === 'en'
+              ? 'PDF document sent on WhatsApp!'
+              : 'Document PDF envoyé sur WhatsApp !',
+            'success'
+          );
+          onSent();
+          onOpenChange(false);
+          setSendingWhatsApp(false);
+          return;
+        }
+      } catch {
+        // Fallback transparent ci-dessous
+      } finally {
+        setSendingWhatsApp(false);
+      }
+    }
+
     if (canShare) {
       const result = await shareNative(pdfBlob, message, `${documentNumber}.pdf`);
       if (result.ok) {
@@ -186,8 +222,9 @@ export function ShareSheet({
         return;
       }
     }
+
     triggerPdfDownload();
-    const url = buildWhatsAppUrl(phone, message);
+    const url = buildWhatsAppUrl(trimmedPhone, message);
     window.open(url, '_blank');
     await markDocumentSent();
     onSent();
@@ -360,22 +397,15 @@ export function ShareSheet({
 
           {/* Actions */}
           <div className="space-y-2 pt-2">
-            <Button fullWidth variant="whatsapp" size="lg" onClick={handleWhatsApp}>
-              📎 {t('modal.actions.whatsapp')} (PDF)
+            <Button
+              fullWidth
+              variant="whatsapp"
+              size="lg"
+              onClick={handleWhatsApp}
+              isLoading={sendingWhatsApp}
+            >
+              {t('modal.actions.whatsapp')}
             </Button>
-            {canShare && phone.trim().length > 0 && (
-              <Button
-                fullWidth
-                variant="outline"
-                size="sm"
-                onClick={handleWhatsAppDirectNumber}
-                className="text-xs border-emerald-200 text-emerald-800 hover:bg-emerald-50"
-              >
-                {locale === 'en'
-                  ? `Open chat with ${phone.trim()} (+ download PDF)`
-                  : `Ouvrir la discussion directe avec ${phone.trim()} (+ télécharger le PDF)`}
-              </Button>
-            )}
             <Button fullWidth variant="secondary" onClick={handleEmail}>
               {t('modal.actions.email')}
             </Button>
