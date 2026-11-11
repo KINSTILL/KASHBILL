@@ -29,7 +29,15 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur-md transition-all">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-3.5 sm:px-4">
-        <Logo href={`/${locale}`} size="sm" />
+        <div className="flex items-center gap-2">
+          <Logo href={`/${locale}?landing=1`} size="sm" />
+          <Link
+            href={`/${locale}?landing=1` as Route}
+            className="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 transition hover:bg-emerald-100"
+          >
+            Site ↗
+          </Link>
+        </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Outils Admin et badges secondaires : affichés uniquement sur tablette/desktop (sm+) pour épurer le téléphone */}

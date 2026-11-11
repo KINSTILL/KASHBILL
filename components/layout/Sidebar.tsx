@@ -57,7 +57,16 @@ export function Sidebar() {
           </div>
         )}
 
-        <div className="pt-3 mt-3 border-t border-slate-200">
+        <div className="pt-3 mt-3 border-t border-slate-200 space-y-2">
+          <Link href={`/${locale}?landing=1` as Route} className="block">
+            <button
+              type="button"
+              className="w-full text-left rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700 flex items-center justify-between cursor-pointer"
+            >
+              <span>🌐 Site vitrine</span>
+              <span>↗</span>
+            </button>
+          </Link>
           <InstallButton variant="sidebar" />
         </div>
       </nav>

@@ -27,10 +27,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ landing?: string }>;
+}) {
   const { locale } = await params;
+  const sp = await searchParams;
+  const forceLanding = sp?.landing === '1';
+
   const current = await getCurrentUser();
-  if (current) {
+  if (current && !forceLanding) {
     if (isAdmin(current.user)) {
       redirect(`/${locale}/admin` as Route);
     }

@@ -16,7 +16,7 @@ import { HeroCard } from '@/components/ui/HeroCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { formatDate, formatFCFA } from '@/lib/utils';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
-import { Plus, FileText, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
+import { Plus, FileText, ChevronRight, CheckCircle2, Clock, Globe } from 'lucide-react';
 
 export default async function DashboardPage({
   params,
@@ -338,6 +338,33 @@ export default async function DashboardPage({
           </>
         )}
       </section>
+
+      {/* Accès rapide à la Landing Page en bas du tableau de bord */}
+      <div className="pt-2">
+        <Link
+          href={`/${locale}?landing=1` as Route}
+          className="flex items-center justify-between rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs transition hover:border-emerald-300 hover:bg-emerald-50/30 active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+              <Globe className="h-5 w-5" />
+            </span>
+            <div>
+              <div className="text-xs font-bold text-slate-900">
+                {locale === 'en' ? 'MyCashBill Showcase Website' : 'Site vitrine MyCashBill'}
+              </div>
+              <div className="text-[11px] text-slate-500">
+                {locale === 'en'
+                  ? 'Open the public presentation page (Landing Page)'
+                  : 'Ouvrir la page de présentation publique'}
+              </div>
+            </div>
+          </div>
+          <span className="shrink-0 text-xs font-bold text-emerald-600">
+            {locale === 'en' ? 'Open ↗' : 'Ouvrir ↗'}
+          </span>
+        </Link>
+      </div>
     </div>
   );
 }

@@ -184,6 +184,25 @@ export default function SettingsPage() {
           </div>
           <span className="text-slate-400 text-sm">&rarr;</span>
         </Link>
+
+        <Link
+          href={`/${locale}?landing=1` as Route}
+          className="flex items-center justify-between p-4 hover:bg-emerald-50/40 transition"
+        >
+          <div>
+            <div className="font-semibold text-sm text-slate-900">
+              {locale === 'en' ? 'MyCashBill Showcase Website' : 'Site vitrine MyCashBill'}
+            </div>
+            <div className="text-xs text-slate-500">
+              {locale === 'en'
+                ? 'Open the public presentation page (Landing Page)'
+                : 'Ouvrir la page de présentation publique'}
+            </div>
+          </div>
+          <span className="text-emerald-600 font-bold text-xs">
+            {locale === 'en' ? 'Open ↗' : 'Ouvrir ↗'}
+          </span>
+        </Link>
       </Card>
 
       {/* Logout */}
