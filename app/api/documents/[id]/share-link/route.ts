@@ -18,7 +18,8 @@ const SHARED_PDF_DIR = path.join(
   'shared-pdfs'
 );
 
-export function signDocumentShareToken(documentId: string): string {
+// Non exporté : Next.js refuse les exports autres que GET/POST/... dans un fichier de route.
+function signDocumentShareToken(documentId: string): string {
   return createHmac('sha256', env.JWT_SECRET)
     .update(`share-pdf:${documentId}`)
     .digest('hex')
