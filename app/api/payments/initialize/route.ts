@@ -9,14 +9,15 @@ import { env } from '@/lib/env';
 import { isPro } from '@/lib/auth/plan';
 
 const schema = z.object({
-  method: z.enum(['mobile_money', 'card']),
-  operatorCode: z.string().nullable().default(null),
+  method: z.enum(['mobile_money', 'card', 'auto']).optional().default('auto'),
+  operatorCode: z.string().nullable().optional().default(null),
 });
 
 function resolveNotchChannels(
-  method: 'mobile_money' | 'card',
+  method: 'mobile_money' | 'card' | 'auto',
   operatorCode: string | null
-): string[] {
+): string[] | undefined {
+  if (method === 'auto' && !operatorCode) return undefined;
   if (method === 'card') return ['card'];
   const MAP: Record<string, string> = {
     MTN_CM: 'cm.mtn', ORANGE_CM: 'cm.orange',
@@ -27,7 +28,7 @@ function resolveNotchChannels(
     MPESA_KE: 'ke.mpesa', AIRTEL_KE: 'ke.airtel',
     MTN_UG: 'ug.mtn', AIRTEL_UG: 'ug.airtel',
   };
-  if (!operatorCode) return ['cm.orange', 'cm.mtn'];
+  if (!operatorCode) return undefined;
   return [MAP[operatorCode] ?? 'cm.orange'];
 }
 

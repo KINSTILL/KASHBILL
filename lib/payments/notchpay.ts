@@ -23,7 +23,7 @@ export type NotchPayInitInput = {
  * https://notchpay.dev/docs
  */
 export async function initNotchPayPayment(input: NotchPayInitInput): Promise<NotchPayInitResult> {
-  const body = {
+  const body: Record<string, unknown> = {
     amount: input.amountXaf,
     currency: input.currency,
     reference: input.reference,
@@ -33,8 +33,10 @@ export async function initNotchPayPayment(input: NotchPayInitInput): Promise<Not
       phone: input.customerPhone,
     },
     callback: input.callbackUrl,
-    channels: input.channels ?? ['cm.orange', 'cm.mtn'],
   };
+  if (input.channels && input.channels.length > 0) {
+    body.channels = input.channels;
+  }
 
   try {
     const res = await fetch(`${BASE}/payments/initialize`, {

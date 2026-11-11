@@ -10,7 +10,6 @@ import { useToast } from '@/components/ui/Toast';
 import { MiniFAQ } from '@/components/faq/MiniFAQ';
 import { PaymentBadges } from '@/components/ui/PaymentBadges';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
-import { isSupportedPaymentCountry, getOperatorsForCountry } from '@/lib/countries/mobile-money';
 import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 
 export default function UpgradePage() {
@@ -20,14 +19,11 @@ export default function UpgradePage() {
   const toast = useToast();
   const search = useSearchParams();
   const { user } = useCurrentUser();
-  const [loading, setLoading] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ proUntil: string | null; role: string } | null>(null);
   const [pollCount, setPollCount] = useState(0);
 
   const isConsumer = user?.accountType === 'CONSUMER';
-  const userCountry = user?.country;
-  const canPayMobileMoney = isSupportedPaymentCountry(userCountry ?? 'CM');
-  const operators = canPayMobileMoney ? getOperatorsForCountry(userCountry ?? 'CM') : [];
 
   const ref = search.get('ref');
 
@@ -69,13 +65,13 @@ export default function UpgradePage() {
     };
   }, [ref, pollCount]);
 
-  const startPayment = async (method: 'mobile_money' | 'card', operatorCode: string | null) => {
-    setLoading(method === 'card' ? 'card' : (operatorCode ?? 'mobile_money'));
+  const startPayment = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/payments/initialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ method, operatorCode }),
+        body: JSON.stringify({ method: 'auto' }),
       });
       if (!res.ok) {
         toast.show("Erreur lors de l'initialisation du paiement", 'error');
@@ -84,7 +80,7 @@ export default function UpgradePage() {
       const { authorizationUrl } = await res.json();
       window.location.href = authorizationUrl;
     } finally {
-      setLoading(null);
+      setLoading(false);
     }
   };
 
@@ -146,58 +142,30 @@ export default function UpgradePage() {
         </div>
       )}
 
-      <div className="mb-4">
-        <p className="mb-2 text-xs font-medium text-slate-500">Moyens de paiement acceptés</p>
-        <PaymentBadges countryCode={user?.country ?? 'CM'} showCards={!canPayMobileMoney} />
+      <div className="my-5 rounded-xl border border-slate-200/80 bg-slate-50/70 p-4 text-center">
+        <p className="mb-2.5 text-xs font-medium text-slate-600">
+          {locale === 'fr'
+            ? 'Moyens de paiement pris en charge par Notch Pay selon votre pays'
+            : 'Payment methods supported by Notch Pay depending on your country'}
+        </p>
+        <PaymentBadges />
       </div>
 
-      {canPayMobileMoney ? (
-        <div className="space-y-2">
-          {operators.map((op) => (
-            <Button
-              key={op.code}
-              fullWidth
-              size="lg"
-              onClick={() => startPayment('mobile_money', op.code)}
-              isLoading={loading === op.code}
-            >
-              📱 {op.name} — 2 000 FCFA
-            </Button>
-          ))}
-          <button
-            type="button"
-            onClick={() => startPayment('card', null)}
-            className="w-full text-center text-xs text-slate-500 hover:text-slate-800 underline pt-1"
-          >
-            {t('payByCard')} (Visa, Mastercard) — 2 000 FCFA
-          </button>
-          <p className="text-center text-[11px] text-slate-400 pt-1">
-            🔒 {locale === 'fr'
-              ? 'Paiement traité et sécurisé par Notch Pay (aucun transfert direct vers un portefeuille personnel)'
-              : 'Payment processed and secured by Notch Pay (no direct transfer to personal wallets)'}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-            <p className="text-sm text-amber-900">⚠️ {t('mobileMoneyNotAvailable')}</p>
-            <p className="mt-1 text-xs text-amber-800">{t('cardPaymentAvailable')}</p>
-          </div>
-          <Button
-            fullWidth
-            size="lg"
-            onClick={() => startPayment('card', null)}
-            isLoading={loading === 'card'}
-          >
-            💳 {t('payByCard')} — 2 000 FCFA
-          </Button>
-          <p className="text-center text-[11px] text-slate-400 pt-1">
-            🔒 {locale === 'fr'
-              ? 'Paiement traité et sécurisé par Notch Pay (aucun transfert direct vers un portefeuille personnel)'
-              : 'Payment processed and secured by Notch Pay (no direct transfer to personal wallets)'}
-          </p>
-        </div>
-      )}
+      <div className="space-y-2">
+        <Button
+          fullWidth
+          size="lg"
+          onClick={startPayment}
+          isLoading={loading}
+        >
+          {locale === 'fr' ? 'Passer Pro — 2 000 FCFA' : 'Upgrade to Pro — 2,000 FCFA'}
+        </Button>
+        <p className="text-center text-[11px] text-slate-400 pt-1">
+          🔒 {locale === 'fr'
+            ? 'Paiement traité et sécurisé par Notch Pay (l’option disponible dans votre pays s’affiche automatiquement)'
+            : 'Payment processed and secured by Notch Pay (available options for your country appear automatically)'}
+        </p>
+      </div>
 
       {user?.proUntil && new Date(user.proUntil) > new Date() && (
         <div className="space-y-3 pt-4 border-t">
@@ -207,16 +175,14 @@ export default function UpgradePage() {
             price={500}
             title={tAddons('extraDevice')}
             desc={tAddons('extraDeviceDesc')}
-            canPayMobileMoney={canPayMobileMoney}
-            operators={operators}
+            locale={locale}
           />
           <AddOnCard
             type="WHITE_LABEL"
             price={3000}
             title={tAddons('whiteLabel')}
             desc={tAddons('whiteLabelDesc')}
-            canPayMobileMoney={canPayMobileMoney}
-            operators={operators}
+            locale={locale}
           />
         </div>
       )}
@@ -308,26 +274,24 @@ function AddOnCard({
   price,
   title,
   desc,
-  canPayMobileMoney,
-  operators,
+  locale,
 }: {
   type: 'EXTRA_DEVICE' | 'WHITE_LABEL';
   price: number;
   title: string;
   desc: string;
-  canPayMobileMoney: boolean;
-  operators: Array<{ code: string; name: string }>;
+  locale: string;
 }) {
   const toast = useToast();
-  const [loading, setLoading] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const startAddonPayment = async (method: 'mobile_money' | 'card', operatorCode: string | null) => {
-    setLoading(method === 'card' ? 'card' : (operatorCode ?? 'mobile_money'));
+  const startAddonPayment = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/addons/initialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ type, method, operatorCode }),
+        body: JSON.stringify({ type, method: 'auto' }),
       });
       if (!res.ok) {
         toast.show("Erreur lors de l'initialisation de l'extension", 'error');
@@ -336,7 +300,7 @@ function AddOnCard({
       const { authorizationUrl } = await res.json();
       window.location.href = authorizationUrl;
     } finally {
-      setLoading(null);
+      setLoading(false);
     }
   };
 
@@ -352,32 +316,18 @@ function AddOnCard({
         </span>
       </div>
 
-      <div className="space-y-1.5 pt-1">
-        {canPayMobileMoney ? (
-          <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-            {operators.map((op) => (
-              <Button
-                key={op.code}
-                size="sm"
-                variant="outline"
-                onClick={() => startAddonPayment('mobile_money', op.code)}
-                isLoading={loading === op.code}
-              >
-                Activer via {op.name}
-              </Button>
-            ))}
-          </div>
-        ) : (
-          <Button
-            size="sm"
-            variant="outline"
-            fullWidth
-            onClick={() => startAddonPayment('card', null)}
-            isLoading={loading === 'card'}
-          >
-            Activer par carte
-          </Button>
-        )}
+      <div className="pt-1">
+        <Button
+          size="sm"
+          variant="outline"
+          fullWidth
+          onClick={startAddonPayment}
+          isLoading={loading}
+        >
+          {locale === 'fr'
+            ? `Activer — +${price.toLocaleString('fr-FR')} FCFA`
+            : `Activate — +${price.toLocaleString('en-US')} FCFA`}
+        </Button>
       </div>
     </Card>
   );

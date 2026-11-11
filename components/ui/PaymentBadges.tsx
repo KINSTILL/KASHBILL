@@ -1,29 +1,24 @@
 'use client';
+
 import { useState } from 'react';
-import { getBadgesForCountry, getCardBadges } from '@/lib/countries/payment-badges';
+import { ALL_NOTCHPAY_BADGES } from '@/lib/countries/payment-badges';
 
 type Props = {
-  countryCode: string;
+  countryCode?: string;
   showCards?: boolean;
   size?: 'sm' | 'md';
 };
 
-export function PaymentBadges({ countryCode, showCards = true, size = 'md' }: Props) {
+export function PaymentBadges({ size = 'md' }: Props) {
   const [failed, setFailed] = useState<Record<string, boolean>>({});
-  const mobileBadges = getBadgesForCountry(countryCode);
-  const cardBadges = showCards ? getCardBadges() : [];
-  const all = [...mobileBadges, ...cardBadges];
-
-  if (all.length === 0) return null;
-
-  const height = size === 'sm' ? 20 : 28;
+  const height = size === 'sm' ? 24 : 32;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {all.map((badge) => (
+    <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+      {ALL_NOTCHPAY_BADGES.map((badge) => (
         <div
           key={badge.id}
-          className="flex items-center justify-center rounded-md border border-slate-100 bg-white px-2 py-1"
+          className="flex items-center justify-center rounded-lg border border-slate-200/80 bg-white px-2.5 py-1.5 shadow-2xs"
           title={badge.name}
         >
           {failed[badge.id] ? (
@@ -35,7 +30,7 @@ export function PaymentBadges({ countryCode, showCards = true, size = 'md' }: Pr
               src={badge.logoPath}
               alt={badge.name}
               height={height}
-              style={{ height, width: 'auto' }}
+              style={{ height, width: 'auto', maxWidth: 68, objectFit: 'contain' }}
               loading="lazy"
               onError={() => setFailed((f) => ({ ...f, [badge.id]: true }))}
             />

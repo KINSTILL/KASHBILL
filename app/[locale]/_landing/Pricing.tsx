@@ -77,9 +77,13 @@ export function Pricing({
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col items-center gap-2">
-          <p className="text-xs text-slate-500">{isFr ? 'Payez avec' : 'Pay with'}</p>
-          <PaymentBadges countryCode="CM" />
+        <div className="mt-6 flex flex-col items-center gap-2.5">
+          <p className="text-xs font-medium text-slate-600">
+            {isFr
+              ? 'Options de paiement prises en charge par Notch Pay selon votre pays'
+              : 'Payment options supported by Notch Pay depending on your country'}
+          </p>
+          <PaymentBadges />
         </div>
 
         <div className="mt-8 surface p-6">

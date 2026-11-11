@@ -84,6 +84,18 @@ async function seedAdmin() {
 // Keep provider-agnostic naming in code and UI.
 const MOBILE_MONEY_ENABLED = new Set(['CM', 'CI', 'SN', 'GA', 'GH', 'KE', 'UG']);
 
+// Statut réglementaire e-invoicing par pays (informatif, ne bloque rien)
+// UBL 2.1 est généré pour tous les pays, quel que soit ce statut
+const EINVOICE_STATUS: Record<string, 'MANDATORY' | 'UPCOMING' | 'NONE'> = {
+  CM: 'UPCOMING',
+  SN: 'MANDATORY',
+  GA: 'UPCOMING',
+  CI: 'UPCOMING',
+  KE: 'MANDATORY',
+  GH: 'UPCOMING',
+  UG: 'UPCOMING',
+};
+
 const COUNTRIES = [
   { countryCode: 'CM', countryNameFr: 'Cameroun', countryNameEn: 'Cameroon', currency: 'XAF', taxIdLabel: 'NIU', rccmLabel: 'RCCM', vatRate: 19.25, requiredFields: ['taxId','rccm','legalAddress'] },
   { countryCode: 'CI', countryNameFr: "Côte d'Ivoire", countryNameEn: 'Ivory Coast', currency: 'XOF', taxIdLabel: 'IFU', rccmLabel: 'RCCM', vatRate: 18.00, requiredFields: ['taxId','rccm','legalAddress'] },
@@ -117,6 +129,8 @@ async function seedCountries() {
       update: {
         ...country,
         vatRate: country.vatRate,
+        einvoiceFormat: 'UBL' as const,
+        einvoiceRegulatoryStatus: (EINVOICE_STATUS[country.countryCode] ?? 'NONE') as 'MANDATORY' | 'UPCOMING' | 'NONE',
         requiredFields: country.requiredFields,
         legalMentionsTemplate: (country as { legalMentionsTemplate?: string }).legalMentionsTemplate ?? '',
         mobileMoneyEnabled: MOBILE_MONEY_ENABLED.has(country.countryCode),
@@ -124,6 +138,8 @@ async function seedCountries() {
       create: {
         ...country,
         vatRate: country.vatRate,
+        einvoiceFormat: 'UBL' as const,
+        einvoiceRegulatoryStatus: (EINVOICE_STATUS[country.countryCode] ?? 'NONE') as 'MANDATORY' | 'UPCOMING' | 'NONE',
         requiredFields: country.requiredFields,
         legalMentionsTemplate: (country as { legalMentionsTemplate?: string }).legalMentionsTemplate ?? '',
         mobileMoneyEnabled: MOBILE_MONEY_ENABLED.has(country.countryCode),

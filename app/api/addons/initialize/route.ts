@@ -10,11 +10,12 @@ import { ADDON_PRICES } from '@/lib/addons/queries';
 
 const schema = z.object({
   type: z.enum(['EXTRA_DEVICE', 'WHITE_LABEL']),
-  method: z.enum(['mobile_money', 'card']),
-  operatorCode: z.string().nullable().default(null),
+  method: z.enum(['mobile_money', 'card', 'auto']).optional().default('auto'),
+  operatorCode: z.string().nullable().optional().default(null),
 });
 
-function resolveNotchChannels(method: string, operatorCode: string | null): string[] {
+function resolveNotchChannels(method: string, operatorCode: string | null): string[] | undefined {
+  if (method === 'auto' && !operatorCode) return undefined;
   if (method === 'card') return ['card'];
   const MAP: Record<string, string> = {
     MTN_CM: 'cm.mtn', ORANGE_CM: 'cm.orange', MTN_CI: 'ci.mtn', ORANGE_CI: 'ci.orange',
@@ -23,7 +24,7 @@ function resolveNotchChannels(method: string, operatorCode: string | null): stri
     AIRTELTIGO_GH: 'gh.airteltigo', MPESA_KE: 'ke.mpesa', AIRTEL_KE: 'ke.airtel',
     MTN_UG: 'ug.mtn', AIRTEL_UG: 'ug.airtel',
   };
-  if (!operatorCode) return ['cm.orange', 'cm.mtn'];
+  if (!operatorCode) return undefined;
   return [MAP[operatorCode] ?? 'cm.orange'];
 }
 
