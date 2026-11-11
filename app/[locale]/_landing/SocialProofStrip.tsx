@@ -48,11 +48,11 @@ export function SocialProofStrip({ locale = 'fr' }: { locale?: string }) {
   ];
 
   return (
-    <section className="border-y border-slate-200/80 bg-white py-4 shadow-xs">
-      <div className="mx-auto max-w-5xl px-4">
+    <section className="border-y border-slate-200/70 bg-slate-50/60 py-5">
+      <div className="mx-auto max-w-6xl px-4">
         {/* Compteur réel si count >= 500 */}
         {count !== null && count >= 500 && (
-          <div className="mb-3 flex items-center justify-center gap-2 text-center text-xs text-slate-700 sm:text-sm border-b border-slate-100 pb-2.5">
+          <div className="mb-4 flex items-center justify-center gap-2 text-center text-xs text-slate-700 sm:text-sm border-b border-slate-200/60 pb-3">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="font-bold text-ink">
               +{count.toLocaleString()} {isFr ? 'documents générés' : 'documents generated'}
@@ -63,21 +63,21 @@ export function SocialProofStrip({ locale = 'fr' }: { locale?: string }) {
           </div>
         )}
 
-        {/* 4 piliers d'autorité et réassurance institutionnelle */}
-        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-4">
+        {/* 4 piliers d'autorité en bande unifiée épurée (zéro boîte encadrée lourde) */}
+        <div className="grid grid-cols-2 gap-y-4 gap-x-3 sm:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-slate-200/80">
           {trustPillars.map((p, idx) => (
             <div
               key={idx}
-              className="flex flex-col items-start gap-1.5 sm:gap-2 rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-3.5 shadow-xs hover:border-emerald-300 hover:shadow-sm transition-all"
+              className="flex items-start gap-2.5 sm:px-4 first:sm:pl-0 last:sm:pr-0"
             >
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-emerald-50 text-base sm:text-lg shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100/70 text-base shrink-0">
                 {p.icon}
               </div>
-              <div className="w-full">
-                <p className="text-xs sm:text-sm font-bold text-slate-950 leading-snug">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
                   {p.title}
                 </p>
-                <p className="text-[11px] sm:text-xs text-slate-600 leading-snug mt-0.5 font-normal">
+                <p className="text-[11px] sm:text-xs text-slate-500 leading-snug mt-0.5">
                   {p.desc}
                 </p>
               </div>
