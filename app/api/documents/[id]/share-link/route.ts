@@ -1,5 +1,4 @@
 import type { NextRequest } from 'next/server';
-import { createHmac } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
@@ -8,6 +7,7 @@ import { env } from '@/lib/env';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { encryptBuffer } from '@/lib/uploads/crypto';
+import { buildDocumentShareUrl, signDocumentShareToken } from '@/lib/share/pdf-token';
 
 const bodySchema = z.object({
   pdfBase64: z.string().min(10),
@@ -18,13 +18,8 @@ const SHARED_PDF_DIR = path.join(
   'shared-pdfs'
 );
 
-// Non exporté : Next.js refuse les exports autres que GET/POST/... dans un fichier de route.
-function signDocumentShareToken(documentId: string): string {
-  return createHmac('sha256', env.JWT_SECRET)
-    .update(`share-pdf:${documentId}`)
-    .digest('hex')
-    .slice(0, 32);
-}
+// Aucun export hors handlers : Next.js rejette les autres exports dans un route.ts.
+// La signature du jeton vit dans @/lib/share/pdf-token.
 
 export async function POST(
   req: NextRequest,
@@ -85,7 +80,7 @@ export async function POST(
 
       const token = signDocumentShareToken(doc.id);
       const origin = req2.nextUrl.origin || env.APP_URL.replace(/\/+$/, '');
-      const downloadUrl = `${origin}/api/public/documents/${doc.id}/pdf?t=${token}`;
+      const downloadUrl = buildDocumentShareUrl(origin, doc.id, token);
 
       return jsonOk({ downloadUrl });
     });

@@ -1,28 +1,16 @@
 import type { NextRequest } from 'next/server';
-import { createHmac, timingSafeEqual } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { prisma } from '@/lib/db';
-import { env } from '@/lib/env';
 import { decryptBuffer } from '@/lib/uploads/crypto';
+import { verifyDocumentShareToken } from '@/lib/share/pdf-token';
 
 const SHARED_PDF_DIR = path.join(
   process.env.UPLOADS_DIR ?? path.join(process.cwd(), 'uploads'),
   'shared-pdfs'
 );
 
-function verifyShareToken(documentId: string, token: string): boolean {
-  const expected = createHmac('sha256', env.JWT_SECRET)
-    .update(`share-pdf:${documentId}`)
-    .digest('hex')
-    .slice(0, 32);
-  if (token.length !== expected.length) return false;
-  try {
-    return timingSafeEqual(Buffer.from(token), Buffer.from(expected));
-  } catch {
-    return false;
-  }
-}
+// La vérification du jeton vit dans @/lib/share/pdf-token (route.ts ne tolère que les handlers).
 
 export async function GET(
   req: NextRequest,
@@ -32,7 +20,7 @@ export async function GET(
     const { id } = await context.params;
     const token = req.nextUrl.searchParams.get('t') ?? '';
 
-    if (!verifyShareToken(id, token)) {
+    if (!verifyDocumentShareToken(id, token)) {
       return new Response('Lien invalide ou expiré', { status: 403 });
     }
 
