@@ -13,11 +13,15 @@ import { PRO_PLANS, planSavings } from '@/lib/pricing/plans';
 export function Pricing({
   personalization: _personalization,
   locale,
+  isLoggedIn = false,
 }: {
   personalization: LandingPersonalization;
   locale: string;
+  isLoggedIn?: boolean;
 }) {
   const isFr = locale === 'fr';
+  // Connecté : direct vers la page de paiement. Sinon : inscription (+ lien « déjà inscrit »).
+  const proHref = isLoggedIn ? `/${locale}/upgrade` : `/${locale}/register`;
   const freeCurrency = 'FCFA';
   // Prix affiché : mensuel le plus bas (formule 1 an), en FCFA, comme ce qui est débité.
   const yearly = PRO_PLANS[PRO_PLANS.length - 1]!;
@@ -80,16 +84,16 @@ export function Pricing({
               <li>✓ {isFr ? '2 appareils inclus (Mobile + PC)' : '2 devices included (Mobile + PC)'}</li>
               <li>✓ {isFr ? 'Zéro prélèvement forcé (contrôle total)' : 'No forced renewal (full control)'}</li>
             </ul>
-            <Link href={`/${locale}/register` as Route} className="mt-6 block">
+            <Link href={proHref as Route} className="mt-6 block">
               <Button fullWidth>{isFr ? 'Passer Pro' : 'Go Pro'}</Button>
             </Link>
           </div>
         </div>
 
         {/* Formules Pro : même présentation que la page « Passer Pro » (affichage seul) */}
-        <div id="pro-formules" className="mt-12">
+        <div id="pro-formules" className="surface mt-12 p-5 sm:p-8">
           <h3 className="text-center text-xl font-bold text-ink">
-            {isFr ? 'Choisissez la durée qui vous convient' : 'Choose the period that suits you'}
+            {isFr ? 'Choisissez votre formule' : 'Choose your plan'}
           </h3>
           <p className="mt-1 text-center text-sm text-slate-600">
             {isFr
@@ -99,12 +103,22 @@ export function Pricing({
           <div className="mt-6">
             <ProPlanPicker locale={locale} />
           </div>
-          <div className="mt-6 flex justify-center">
-            <Link href={`/${locale}/register` as Route}>
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <Link href={proHref as Route}>
               <Button size="lg" className="min-w-[240px]">
-                {isFr ? 'Créer mon compte et passer Pro' : 'Create my account and go Pro'}
+                {isLoggedIn
+                  ? isFr ? 'Passer Pro maintenant' : 'Go Pro now'
+                  : isFr ? 'Créer mon compte et passer Pro' : 'Create my account and go Pro'}
               </Button>
             </Link>
+            {!isLoggedIn && (
+              <Link
+                href={`/${locale}/login?next=${encodeURIComponent(`/${locale}/upgrade`)}` as Route}
+                className="text-xs font-medium text-sage-700 underline underline-offset-2"
+              >
+                {isFr ? 'Vous avez déjà un compte ? Connectez-vous pour payer' : 'Already have an account? Log in to pay'}
+              </Link>
+            )}
           </div>
         </div>
 

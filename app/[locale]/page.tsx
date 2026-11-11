@@ -50,5 +50,6 @@ export default async function Page({
   const c = await cookies();
   const personalization = getPersonalizationServer({ headers: h, cookies: c });
 
-  return <LandingPage personalization={personalization} locale={locale} />;
+  // Visiteur déjà connecté (affichage forcé de la vitrine) : les boutons Pro mènent au paiement.
+  return <LandingPage personalization={personalization} locale={locale} isLoggedIn={Boolean(current)} />;
 }

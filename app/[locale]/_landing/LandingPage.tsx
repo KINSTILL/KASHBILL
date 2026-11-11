@@ -21,9 +21,11 @@ import type { LandingPersonalization } from '@/lib/landing/types';
 export function LandingPage({
   personalization,
   locale,
+  isLoggedIn = false,
 }: {
   personalization: LandingPersonalization;
   locale: string;
+  isLoggedIn?: boolean;
 }) {
   useEffect(() => {
     if (!personalization.isReturning) {
@@ -44,7 +46,7 @@ export function LandingPage({
         <Features />
         <CaseStudies locale={locale} />
         <DemoSection personalization={personalization} locale={locale} />
-        <Pricing personalization={personalization} locale={locale} />
+        <Pricing personalization={personalization} locale={locale} isLoggedIn={isLoggedIn} />
         <MiniFAQ locale={locale} />
         <FinalCTA personalization={personalization} locale={locale} />
       </main>

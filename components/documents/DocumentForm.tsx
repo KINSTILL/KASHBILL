@@ -202,8 +202,6 @@ export function DocumentForm({
     vatRate: state.vatRate,
     depositPercentage: state.depositPercentage,
   });
-  const vatAmount = totals.vatAmount ?? 0;
-  const depositAmount = totals.depositAmount ?? 0;
   const total = totals.total;
 
   const addLine = () =>

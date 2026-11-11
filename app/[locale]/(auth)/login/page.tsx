@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
@@ -29,6 +29,7 @@ export default function LoginPage() {
   const tCommon = useTranslations('common');
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const locale = (params?.locale as string) || 'fr';
   const { refresh } = useCurrentUser();
 
@@ -116,7 +117,11 @@ export default function LoginPage() {
 
         await refresh();
         const isAdminUser = data.user?.role === 'ADMIN' || data.user?.role === 'SUPPORT';
-        const targetRoute = isAdminUser ? `/${locale}/admin` : `/${locale}/dashboard`;
+        // Destination demandée (ex. page de paiement) : uniquement un chemin interne de la même langue.
+        const next = searchParams.get('next');
+        const safeNext =
+          next && next.startsWith(`/${locale}/`) && !next.startsWith('//') ? next : null;
+        const targetRoute = isAdminUser ? `/${locale}/admin` : (safeNext ?? `/${locale}/dashboard`);
         router.push(targetRoute as Route);
         router.refresh();
       } catch {

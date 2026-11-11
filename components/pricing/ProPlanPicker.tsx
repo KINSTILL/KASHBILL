@@ -118,7 +118,9 @@ export function ProPlanPicker({
                 'relative flex flex-col gap-2 rounded-card border p-4 text-left transition',
                 isSelected
                   ? 'border-sage-500 bg-sage-50 shadow-card ring-1 ring-sage-500/40'
-                  : 'border-slate-200 bg-white hover:border-sage-300 hover:shadow-card-hover'
+                  : best
+                    ? 'border-emerald-300 bg-white hover:border-emerald-500 hover:shadow-card-hover'
+                    : 'border-slate-200 bg-white hover:border-sage-300 hover:shadow-card-hover'
               )}
             >
               {best && (

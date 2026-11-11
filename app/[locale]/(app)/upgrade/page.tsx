@@ -160,9 +160,17 @@ export default function UpgradePage() {
         <PaymentBadges />
       </div>
 
-      <div className="mb-5">
+      <section className="mb-5 space-y-3">
+        <div>
+          <h2 className="text-lg font-bold text-ink">{locale === 'fr' ? 'Formules Pro' : 'Pro plans'}</h2>
+          <p className="text-xs text-slate-500">
+            {locale === 'fr'
+              ? 'Plus la durée est longue, moins Pro coûte par mois.'
+              : 'The longer the period, the less Pro costs per month.'}
+          </p>
+        </div>
         <ProPlanPicker locale={locale} selected={selectedPlan} onSelect={setSelectedPlan} />
-      </div>
+      </section>
 
       <div className="space-y-2">
         <Button
@@ -182,12 +190,21 @@ export default function UpgradePage() {
         </p>
       </div>
 
-      {/* Parrainage : mis en avant juste après le paiement principal */}
+      {/* Parrainage : même style de carte que les formules, placé après le paiement */}
+      <section className="mt-10 space-y-3">
+        <div>
+          <h2 className="text-lg font-bold text-ink">{locale === 'fr' ? 'Parrainage' : 'Referral'}</h2>
+          <p className="text-xs text-slate-500">
+            {locale === 'fr'
+              ? 'Invitez un ami et gagnez des jours Pro offerts.'
+              : 'Invite a friend and earn free Pro days.'}
+          </p>
+        </div>
       <Link
         href={'/referrals' as Route}
-        className="group mt-4 flex items-center gap-3 rounded-2xl border border-sage-300 bg-gradient-to-r from-sage-50 to-emerald-50 p-4 shadow-sm transition hover:border-sage-500 hover:shadow-md active:scale-[0.99]"
+        className="group flex items-center gap-3 rounded-card border border-slate-200 bg-white p-4 shadow-card transition hover:border-sage-300 hover:shadow-card-hover active:scale-[0.99]"
       >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sage-500 text-white shadow-xs">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
           <Gift className="h-5 w-5" />
         </span>
         <span className="min-w-0 flex-1">
@@ -202,9 +219,10 @@ export default function UpgradePage() {
         </span>
         <ChevronRight className="h-5 w-5 shrink-0 text-sage-700 transition group-hover:translate-x-0.5" />
       </Link>
+      </section>
 
       {user?.proUntil && new Date(user.proUntil) > new Date() && (
-        <div className="space-y-3 pt-4 border-t">
+        <div className="mt-10 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">{tAddons('title')}</h2>
             <span className="text-[11px] text-slate-500">
