@@ -242,19 +242,74 @@ export function ShareSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           <h2 className="text-lg font-bold text-slate-900">{t('modal.title')}</h2>
 
-          {/* Tones */}
+          {/* Coordonnées du destinataire en haut de la boîte pour rester visibles quand le clavier mobile s'ouvre */}
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-700">
+                {t('modal.clientPhone')}
+              </label>
+              <input
+                type="tel"
+                inputMode="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                onFocus={(e) => {
+                  const el = e.currentTarget;
+                  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+                }}
+                placeholder={t('modal.clientPhonePlaceholder')}
+                className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-[16px] sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs font-semibold text-slate-700">
+                {t('modal.clientEmail')}
+              </label>
+              <input
+                type="email"
+                inputMode="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onFocus={(e) => {
+                  const el = e.currentTarget;
+                  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+                }}
+                placeholder={t('modal.clientEmailPlaceholder')}
+                className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-[16px] sm:text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Tones & Tu/Vous sur une zone compacte */}
           <div>
-            <p className="mb-2 text-sm font-medium text-slate-700">{t('modal.tone.label')}</p>
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold text-slate-700">{t('modal.tone.label')}</p>
+              <div className="inline-flex rounded-lg border border-slate-300 p-0.5 text-xs">
+                {(['tu', 'vous'] as const).map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => applyToneDistance(prefs.lastTone, d)}
+                    className={`rounded px-2.5 py-0.5 font-medium transition ${
+                      prefs.lastDistance === d ? 'bg-sage-500 text-white' : 'text-slate-600'
+                    }`}
+                  >
+                    {t(`modal.distance.${d}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="grid grid-cols-3 gap-2">
               {(['transparency', 'pro', 'casual'] as const).map((tone) => (
                 <button
                   key={tone}
                   type="button"
                   onClick={() => applyToneDistance(tone, prefs.lastTone === tone ? prefs.lastDistance : prefs.lastDistance)}
-                  className={`rounded-lg border p-2 text-sm font-medium transition ${
+                  className={`rounded-lg border p-2 text-xs sm:text-sm font-medium transition ${
                     prefs.lastTone === tone
                       ? 'border-sage-500 bg-sage-100 text-sage-900'
                       : 'border-slate-300 bg-white'
@@ -266,30 +321,11 @@ export function ShareSheet({
             </div>
           </div>
 
-          {/* Tu/Vous */}
-          <div>
-            <p className="mb-2 text-sm font-medium text-slate-700">{t('modal.distance.label')}</p>
-            <div className="inline-flex rounded-lg border border-slate-300 p-0.5 text-sm">
-              {(['tu', 'vous'] as const).map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => applyToneDistance(prefs.lastTone, d)}
-                  className={`rounded px-3 py-1 transition ${
-                    prefs.lastDistance === d ? 'bg-sage-500 text-white' : ''
-                  }`}
-                >
-                  {t(`modal.distance.${d}`)}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Message éditable */}
           <div>
             <div className="mb-1 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-slate-700">
+                <label className="text-xs font-semibold text-slate-700">
                   {t('modal.message.label')}
                 </label>
                 {isCustom && (
@@ -311,41 +347,15 @@ export function ShareSheet({
             <textarea
               value={message}
               onChange={(e) => handleEdit(e.target.value)}
+              onFocus={(e) => {
+                const el = e.currentTarget;
+                setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+              }}
               maxLength={1500}
-              rows={4}
-              className="thumb-zone w-full rounded-lg border border-slate-300 bg-slate-50 p-3 text-[16px] sm:text-sm"
+              rows={3}
+              className="thumb-zone w-full rounded-lg border border-slate-300 bg-slate-50 p-2.5 text-[16px] sm:text-sm"
             />
             <p className="mt-1 text-xs text-slate-500">{t('modal.message.hint')}</p>
-          </div>
-
-          {/* Téléphone WhatsApp du client */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
-              {t('modal.clientPhone')}
-            </label>
-            <input
-              type="tel"
-              inputMode="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder={t('modal.clientPhonePlaceholder')}
-              className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-[16px] sm:text-sm"
-            />
-          </div>
-
-          {/* Email du client */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
-              {t('modal.clientEmail')}
-            </label>
-            <input
-              type="email"
-              inputMode="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={t('modal.clientEmailPlaceholder')}
-              className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-[16px] sm:text-sm"
-            />
           </div>
 
           {/* Actions */}
