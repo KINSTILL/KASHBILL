@@ -11,6 +11,8 @@ import { MiniFAQ } from '@/components/faq/MiniFAQ';
 import { PaymentBadges } from '@/components/ui/PaymentBadges';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
+import { ProPlanPicker } from '@/components/pricing/ProPlanPicker';
+import { DEFAULT_PRO_PLAN_ID, getProPlan, PRO_PLANS, type ProPlanId } from '@/lib/pricing/plans';
 import { ChevronRight, Gift } from 'lucide-react';
 
 export default function UpgradePage() {
@@ -23,6 +25,8 @@ export default function UpgradePage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ proUntil: string | null; role: string } | null>(null);
   const [pollCount, setPollCount] = useState(0);
+  const [selectedPlan, setSelectedPlan] = useState<ProPlanId>(DEFAULT_PRO_PLAN_ID);
+  const chosenPlan = getProPlan(selectedPlan) ?? PRO_PLANS[0];
 
   const isConsumer = user?.accountType === 'CONSUMER';
 
@@ -72,7 +76,7 @@ export default function UpgradePage() {
       const res = await fetch('/api/payments/initialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ method: 'auto' }),
+        body: JSON.stringify({ method: 'auto', plan: selectedPlan }),
       });
       if (!res.ok) {
         toast.show("Erreur lors de l'initialisation du paiement", 'error');
@@ -92,7 +96,11 @@ export default function UpgradePage() {
     <div className="mx-auto max-w-2xl">
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-semibold tracking-tight text-ink">Passer Pro</h1>
-        <p className="mt-1 text-sm text-slate-500">2 000 FCFA / 30 jours</p>
+        <p className="mt-1 text-sm text-slate-500">
+          {locale === 'fr'
+            ? 'Choisissez la durée qui vous convient. Plus long = moins cher par mois.'
+            : 'Choose the period that suits you. Longer = cheaper per month.'}
+        </p>
       </div>
 
       {user?.role === 'ADMIN' && (
@@ -152,6 +160,10 @@ export default function UpgradePage() {
         <PaymentBadges />
       </div>
 
+      <div className="mb-5">
+        <ProPlanPicker locale={locale} selected={selectedPlan} onSelect={setSelectedPlan} />
+      </div>
+
       <div className="space-y-2">
         <Button
           fullWidth
@@ -159,7 +171,9 @@ export default function UpgradePage() {
           onClick={startPayment}
           isLoading={loading}
         >
-          {locale === 'fr' ? 'Passer Pro — 2 000 FCFA' : 'Upgrade to Pro — 2,000 FCFA'}
+          {locale === 'fr'
+            ? `Passer Pro — ${chosenPlan.priceXaf.toLocaleString('fr-FR')} FCFA`
+            : `Upgrade to Pro — ${chosenPlan.priceXaf.toLocaleString('en-US')} FCFA`}
         </Button>
         <p className="text-center text-[11px] text-slate-400 pt-1">
           🔒 {locale === 'fr'
@@ -239,7 +253,7 @@ function MiniFAQWrapper() {
           id: 'faq-renewal',
           question: 'Puis-je annuler ? Y a-t-il un prélèvement automatique forcé ?',
           answer:
-            'Non, aucun prélèvement automatique forcé. Vous payez 2 000 FCFA pour 30 jours d’accès Pro sans engagement. À la fin de la période, vous décidez vous-même si vous souhaitez renouveler.',
+            'Non, aucun prélèvement automatique forcé. Vous payez la formule choisie (1 mois : 2 000 FCFA, 3 mois : 5 000 FCFA, 1 an : 18 000 FCFA) pour un accès Pro sans engagement. À la fin de la période, vous décidez vous-même si vous souhaitez renouveler.',
         },
         {
           id: 'faq-data',
@@ -259,7 +273,7 @@ function MiniFAQWrapper() {
           id: 'faq-renewal',
           question: 'Can I cancel? Is there forced automatic renewal?',
           answer:
-            'No forced automatic recurring billing. You pay 2,000 FCFA for 30 days of Pro access with zero commitment. You decide when and if you wish to renew.',
+            'No forced automatic recurring billing. You pay the plan you choose (1 month: 2,000 FCFA, 3 months: 5,000 FCFA, 1 year: 18,000 FCFA) for Pro access with zero commitment. You decide when and if you wish to renew.',
         },
         {
           id: 'faq-data',

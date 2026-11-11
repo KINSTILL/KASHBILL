@@ -4,6 +4,7 @@ import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { verifyNotchPaySignature } from '@/lib/payments/notchpay';
 import { getClientIp, getUserAgent, writeAudit } from '@/lib/api/server';
 import { PRO_DURATION_DAYS } from '@/lib/constants';
+import { proDaysForAmount } from '@/lib/pricing/plans';
 
 /**
  * Webhook Notch Pay.
@@ -118,7 +119,9 @@ export async function POST(req: NextRequest): Promise<Response> {
           subscription.user.proUntil && subscription.user.proUntil > now
             ? subscription.user.proUntil
             : now;
-        newPro = new Date(currentPro.getTime() + PRO_DURATION_DAYS * 24 * 60 * 60 * 1000);
+        // Durée selon la formule payée (1, 3 ou 12 mois) ; 30 jours par défaut.
+        const days = proDaysForAmount(subscription.amountXaf) ?? PRO_DURATION_DAYS;
+        newPro = new Date(currentPro.getTime() + days * 24 * 60 * 60 * 1000);
 
         await prisma.$transaction(async (tx) => {
           await tx.subscription.update({

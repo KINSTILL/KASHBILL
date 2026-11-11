@@ -4,13 +4,14 @@ import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { initNotchPayPayment } from '@/lib/payments/notchpay';
-import { PRO_PRICE_FCFA } from '@/lib/constants';
 import { env } from '@/lib/env';
 import { isPro } from '@/lib/auth/plan';
+import { DEFAULT_PRO_PLAN_ID, getProPlan, PRO_PLANS } from '@/lib/pricing/plans';
 
 const schema = z.object({
   method: z.enum(['mobile_money', 'card', 'auto']).optional().default('auto'),
   operatorCode: z.string().nullable().optional().default(null),
+  plan: z.enum(PRO_PLANS.map((p) => p.id) as [string, ...string[]]).optional().default(DEFAULT_PRO_PLAN_ID),
 });
 
 function resolveNotchChannels(
@@ -47,6 +48,7 @@ export async function POST(req: NextRequest): Promise<Response> {
 
       const body = await req2.json().catch(() => ({}));
       const data = schema.parse(body);
+      const plan = getProPlan(data.plan) ?? getProPlan(DEFAULT_PRO_PLAN_ID)!;
 
       // Créer la Subscription en PENDING (id utilisé comme référence Notch Pay)
       // Ligne en attente : endsAt = startsAt = maintenant, donc non active.
@@ -57,7 +59,7 @@ export async function POST(req: NextRequest): Promise<Response> {
           source: 'NOTCH_PAY',
           startsAt: now,
           endsAt: now,
-          amountXaf: PRO_PRICE_FCFA,
+          amountXaf: plan.priceXaf,
           providerRef: null, // rempli plus tard par le webhook
           consumerWithdrawalWaiver:
             user.accountType === 'CONSUMER' && Boolean(user.consumerWaiverAcceptedAt),
@@ -71,10 +73,10 @@ export async function POST(req: NextRequest): Promise<Response> {
       const reference = `MCB-${subscription.id.slice(-12).toUpperCase()}`;
 
       const result = await initNotchPayPayment({
-        amountXaf: PRO_PRICE_FCFA,
+        amountXaf: plan.priceXaf,
         currency: 'XAF',
         reference,
-        description: `MyCashBill Pro — 30 jours`,
+        description: `MyCashBill Pro — ${plan.days} jours`,
         customerPhone: user.phone,
         customerName: user.name ?? user.businessName ?? 'Utilisateur',
         callbackUrl: `${env.APP_URL}/fr/upgrade?ref=${reference}`,
@@ -108,7 +110,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         actorId: user.id,
         targetId: user.id,
         action: 'payment_init_success',
-        meta: { reference, providerRef: result.providerRef, amountXaf: PRO_PRICE_FCFA },
+        meta: { reference, providerRef: result.providerRef, amountXaf: plan.priceXaf, plan: plan.id },
         ip,
         userAgent,
       });
@@ -116,7 +118,8 @@ export async function POST(req: NextRequest): Promise<Response> {
       return jsonOk({
         reference,
         authorizationUrl: result.authorizationUrl,
-        amountXaf: PRO_PRICE_FCFA,
+        amountXaf: plan.priceXaf,
+        plan: plan.id,
       });
     });
   } catch (err) {
