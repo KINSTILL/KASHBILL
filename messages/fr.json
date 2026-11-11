@@ -538,6 +538,8 @@
         "download": "Télécharger le PDF",
         "cancel": "Annuler"
       },
+      "clientPhone": "Téléphone WhatsApp du client (facultatif)",
+      "clientPhonePlaceholder": "Ex : 699 12 34 56 (ou laisser vide pour choisir dans WhatsApp)",
       "clientEmail": "Email du client (facultatif)",
       "clientEmailPlaceholder": "client@exemple.com",
       "premiumOnly": "Fonctionnalité Pro. Passez Pro pour envoyer par email, Bluetooth ou AirDrop.",

@@ -9,7 +9,6 @@ import { haptic } from '@/lib/device/haptics';
 import {
   loadSharePrefs,
   saveSharePrefs,
-  saveCustomMessage,
   clearCustomMessage,
   getShareGroup,
   type ShareTone,
@@ -61,20 +60,26 @@ export function ShareSheet({
   const [prefs, setPrefs] = useState(loadSharePrefs());
   const [emailSheetOpen, setEmailSheetOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const [phone, setPhone] = useState(clientPhone ?? '');
   const [email, setEmail] = useState(clientEmail ?? '');
   const [isCustom, setIsCustom] = useState(false);
   const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
     if (open) {
+      setPhone(clientPhone ?? '');
       setEmail(clientEmail ?? '');
     }
-  }, [open, clientEmail]);
+  }, [open, clientPhone, clientEmail]);
 
   useEffect(() => {
     if (typeof navigator !== 'undefined' && typeof navigator.canShare === 'function') {
       try {
-        setCanShare(navigator.canShare({ files: [new File([pdfBlob], 'x.pdf', { type: 'application/pdf' })] }));
+        setCanShare(
+          navigator.canShare({
+            files: [new File([pdfBlob], 'x.pdf', { type: 'application/pdf' })],
+          })
+        );
       } catch {
         setCanShare(false);
       }
@@ -85,22 +90,30 @@ export function ShareSheet({
     if (!open) return;
     const loaded = loadSharePrefs();
     setPrefs(loaded);
-    const custom = loaded.customMessages[group];
-    if (custom) {
-      setMessage(custom);
-      setIsCustom(true);
-    } else {
-      setMessage(resolveShareMessage(tRoot, group, loaded.lastTone, loaded.lastDistance, effectiveLocale));
-      setIsCustom(false);
-    }
-  }, [open, group, effectiveLocale, tRoot]);
+    setMessage(
+      resolveShareMessage(
+        tRoot,
+        group,
+        loaded.lastTone,
+        loaded.lastDistance,
+        effectiveLocale,
+        undefined,
+        docType
+      )
+    );
+    setIsCustom(false);
+  }, [open, group, docType, effectiveLocale, tRoot]);
 
   const applyToneDistance = (tone: ShareTone, distance: ShareDistance) => {
     haptic('light');
-    setPrefs({ ...prefs, lastTone: tone, lastDistance: distance });
-    if (!isCustom) {
-      setMessage(resolveShareMessage(tRoot, group, tone, distance, effectiveLocale));
-    }
+    const nextPrefs = { ...prefs, lastTone: tone, lastDistance: distance };
+    setPrefs(nextPrefs);
+    saveSharePrefs(nextPrefs);
+    clearCustomMessage(group);
+    setIsCustom(false);
+    setMessage(
+      resolveShareMessage(tRoot, group, tone, distance, effectiveLocale, undefined, docType)
+    );
   };
 
   const handleEdit = (value: string) => {
@@ -111,16 +124,21 @@ export function ShareSheet({
   const handleReset = () => {
     clearCustomMessage(group);
     setIsCustom(false);
-    setMessage(resolveShareMessage(tRoot, group, prefs.lastTone, prefs.lastDistance, effectiveLocale));
+    setMessage(
+      resolveShareMessage(
+        tRoot,
+        group,
+        prefs.lastTone,
+        prefs.lastDistance,
+        effectiveLocale,
+        undefined,
+        docType
+      )
+    );
   };
 
   const finalize = () => {
-    const nextPrefs = { ...prefs };
-    if (isCustom) {
-      saveCustomMessage(group, message);
-    } else {
-      saveSharePrefs(nextPrefs);
-    }
+    saveSharePrefs(prefs);
   };
 
   const markDocumentSent = async () => {
@@ -134,9 +152,8 @@ export function ShareSheet({
   };
 
   const handleWhatsApp = async () => {
-    if (!clientPhone) return;
     finalize();
-    const url = buildWhatsAppUrl(clientPhone, message);
+    const url = buildWhatsAppUrl(phone, message);
     window.open(url, '_blank');
     await markDocumentSent();
     onSent();
@@ -188,138 +205,162 @@ export function ShareSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold text-slate-900">{t('modal.title')}</h2>
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-slate-900">{t('modal.title')}</h2>
 
-        {/* Tones */}
-        <div>
-          <p className="mb-2 text-sm font-medium text-slate-700">{t('modal.tone.label')}</p>
-          <div className="grid grid-cols-3 gap-2">
-            {(['transparency', 'pro', 'casual'] as const).map((tone) => (
-              <button
-                key={tone}
-                onClick={() => applyToneDistance(tone, prefs.lastDistance)}
-                className={`rounded-lg border p-2 text-sm font-medium ${
-                  prefs.lastTone === tone
-                    ? 'border-sage-500 bg-sage-100 text-sage-900'
-                    : 'border-slate-300 bg-white'
-                }`}
-              >
-                {t(`modal.tone.${tone}`)}
-              </button>
-            ))}
+          {/* Tones */}
+          <div>
+            <p className="mb-2 text-sm font-medium text-slate-700">{t('modal.tone.label')}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {(['transparency', 'pro', 'casual'] as const).map((tone) => (
+                <button
+                  key={tone}
+                  type="button"
+                  onClick={() => applyToneDistance(tone, prefs.lastTone === tone ? prefs.lastDistance : prefs.lastDistance)}
+                  className={`rounded-lg border p-2 text-sm font-medium transition ${
+                    prefs.lastTone === tone
+                      ? 'border-sage-500 bg-sage-100 text-sage-900'
+                      : 'border-slate-300 bg-white'
+                  }`}
+                >
+                  {t(`modal.tone.${tone}`)}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Tu/Vous (masqué en EN) */}
-        {locale === 'fr' && (
+          {/* Tu/Vous */}
           <div>
             <p className="mb-2 text-sm font-medium text-slate-700">{t('modal.distance.label')}</p>
             <div className="inline-flex rounded-lg border border-slate-300 p-0.5 text-sm">
               {(['tu', 'vous'] as const).map((d) => (
                 <button
                   key={d}
+                  type="button"
                   onClick={() => applyToneDistance(prefs.lastTone, d)}
-                  className={`px-3 py-1 rounded ${prefs.lastDistance === d ? 'bg-sage-500 text-white' : ''}`}
+                  className={`rounded px-3 py-1 transition ${
+                    prefs.lastDistance === d ? 'bg-sage-500 text-white' : ''
+                  }`}
                 >
                   {t(`modal.distance.${d}`)}
                 </button>
               ))}
             </div>
           </div>
-        )}
 
-        {/* Message éditable */}
-        <div>
-          <div className="mb-1 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-slate-700">{t('modal.message.label')}</label>
+          {/* Message éditable */}
+          <div>
+            <div className="mb-1 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-slate-700">
+                  {t('modal.message.label')}
+                </label>
+                {isCustom && (
+                  <span className="rounded bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700">
+                    {t('modal.message.customBadge')}
+                  </span>
+                )}
+              </div>
               {isCustom && (
-                <span className="rounded bg-slate-200 px-1.5 py-0.5 text-xs text-slate-700">
-                  {t('modal.message.customBadge')}
-                </span>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="text-xs text-sage-700 underline"
+                >
+                  {t('modal.message.resetButton')}
+                </button>
               )}
             </div>
-            {isCustom && (
-              <button onClick={handleReset} className="text-xs text-sage-700 underline">
-                {t('modal.message.resetButton')}
-              </button>
-            )}
+            <textarea
+              value={message}
+              onChange={(e) => handleEdit(e.target.value)}
+              maxLength={1500}
+              rows={4}
+              className="thumb-zone w-full rounded-lg border border-slate-300 bg-slate-50 p-3 text-[16px] sm:text-sm"
+            />
+            <p className="mt-1 text-xs text-slate-500">{t('modal.message.hint')}</p>
           </div>
-          <textarea
-            value={message}
-            onChange={(e) => handleEdit(e.target.value)}
-            maxLength={1500}
-            rows={5}
-            className="thumb-zone w-full rounded-lg border border-slate-300 bg-slate-50 p-3 text-[16px] sm:text-sm"
-          />
-          <p className="mt-1 text-xs text-slate-500">{t('modal.message.hint')}</p>
-        </div>
 
-        {/* Email du client */}
-        <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
-            {t('modal.clientEmail')}
-          </label>
-          <input
-            type="email"
-            inputMode="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t('modal.clientEmailPlaceholder')}
-            className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-[16px] sm:text-sm"
-          />
-        </div>
+          {/* Téléphone WhatsApp du client */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              {t('modal.clientPhone')}
+            </label>
+            <input
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder={t('modal.clientPhonePlaceholder')}
+              className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-[16px] sm:text-sm"
+            />
+          </div>
 
-        {/* Actions */}
-        <div className="space-y-2 pt-2">
-          <Button fullWidth variant="whatsapp" size="lg" onClick={handleWhatsApp} disabled={!clientPhone}>
-            {t('modal.actions.whatsapp')}
-          </Button>
-          <Button fullWidth variant="secondary" onClick={handleEmail}>
-            {t('modal.actions.email')}
-          </Button>
-          {canShare && (
-            <Button
-              fullWidth
-              variant="secondary"
-              className="relative"
-              disabled={!userIsPro}
-              onClick={() => {
-                if (!userIsPro) {
-                  toast.show(t('modal.premiumOnly'), 'info');
-                  return;
-                }
-                handleNativeShare();
-              }}
-            >
-              {t('modal.actions.share')}
-              {!userIsPro && <ProBadge />}
+          {/* Email du client */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              {t('modal.clientEmail')}
+            </label>
+            <input
+              type="email"
+              inputMode="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t('modal.clientEmailPlaceholder')}
+              className="thumb-zone w-full rounded-lg border border-slate-300 bg-white p-2.5 text-[16px] sm:text-sm"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="space-y-2 pt-2">
+            <Button fullWidth variant="whatsapp" size="lg" onClick={handleWhatsApp}>
+              {t('modal.actions.whatsapp')}
             </Button>
-          )}
-          <Button fullWidth variant="ghost" onClick={handleDownload}>
-            {t('modal.actions.download')}
-          </Button>
+            <Button fullWidth variant="secondary" onClick={handleEmail}>
+              {t('modal.actions.email')}
+            </Button>
+            {canShare && (
+              <Button
+                fullWidth
+                variant="secondary"
+                className="relative"
+                disabled={!userIsPro}
+                onClick={() => {
+                  if (!userIsPro) {
+                    toast.show(t('modal.premiumOnly'), 'info');
+                    return;
+                  }
+                  handleNativeShare();
+                }}
+              >
+                {t('modal.actions.share')}
+                {!userIsPro && <ProBadge />}
+              </Button>
+            )}
+            <Button fullWidth variant="ghost" onClick={handleDownload}>
+              {t('modal.actions.download')}
+            </Button>
+          </div>
         </div>
-      </div>
-    </Sheet>
+      </Sheet>
 
-    {documentId && (
-      <EmailSendSheet
-        open={emailSheetOpen}
-        onOpenChange={(v) => {
-          setEmailSheetOpen(v);
-          if (!v) {
-            markDocumentSent().then(() => onSent()).catch(() => {});
-            onOpenChange(false);
-          }
-        }}
-        documentId={documentId}
-        defaultEmail={email || clientEmail || null}
-        defaultLocale={effectiveLocale}
-      />
-    )}
-  </>
+      {documentId && (
+        <EmailSendSheet
+          open={emailSheetOpen}
+          onOpenChange={(v) => {
+            setEmailSheetOpen(v);
+            if (!v) {
+              markDocumentSent()
+                .then(() => onSent())
+                .catch(() => {});
+              onOpenChange(false);
+            }
+          }}
+          documentId={documentId}
+          defaultEmail={email || clientEmail || null}
+          defaultLocale={effectiveLocale}
+        />
+      )}
+    </>
   );
 }
-

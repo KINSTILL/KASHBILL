@@ -5,6 +5,7 @@ import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth } from '@/lib/api/server';
 import { createDocument } from '@/lib/documents/create';
 import { isPro } from '@/lib/auth/plan';
+import { buildWhatsAppUrl } from '@/lib/share/whatsapp';
 
 const schema = z.object({
   documentId: z.string().min(1),
@@ -72,10 +73,12 @@ export async function POST(req: NextRequest): Promise<Response> {
             continue;
           }
           let waUrl: string | null = null;
-          if (data.channel === 'WHATSAPP_LINKS' && c.phone) {
-            const digits = c.phone.replace(/\D/g, '').replace(/^0+/, '');
-            const intl = digits.startsWith('237') ? digits : `237${digits}`;
-            waUrl = `https://wa.me/${intl}?text=${encodeURIComponent(`Bonjour ${c.name}, voici votre document ${r.number}`)}`;
+          if (data.channel === 'WHATSAPP_LINKS') {
+            const msg =
+              src.locale === 'EN'
+                ? `Hello ${c.name}, please find your document ${r.number}.`
+                : `Bonjour ${c.name}, voici votre document ${r.number}.`;
+            waUrl = buildWhatsAppUrl(c.phone ?? '', msg);
           }
           await prisma.bulkJobItem.create({
             data: { jobId: job.id, clientId: c.id, documentId: r.documentId, waUrl, status: 'SUCCESS' },
