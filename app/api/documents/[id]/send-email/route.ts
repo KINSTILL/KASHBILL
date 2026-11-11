@@ -16,6 +16,8 @@ const schema = z.object({
   to: z.string().email(),
   customMessage: z.string().max(1000).optional().nullable(),
   locale: z.enum(['fr', 'en']).default('fr'),
+  // PDF généré côté client (comme pour WhatsApp) : plus besoin d'un fichier stocké sur le serveur
+  pdfBase64: z.string().min(10).max(7_000_000).optional().nullable(),
 });
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -45,13 +47,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         include: { client: true, verification: true },
       });
       if (!doc) return jsonError('NOT_FOUND', 'Document introuvable', 404);
-      if (!doc.pdfPath) return jsonError('INTERNAL', 'PDF non disponible.', 500);
-
       let pdfBuffer: Buffer;
-      try {
-        pdfBuffer = await readFile(path.join(process.cwd(), doc.pdfPath));
-      } catch {
-        return jsonError('INTERNAL', 'PDF introuvable. Régénérez le document.', 500);
+      if (data.pdfBase64) {
+        pdfBuffer = Buffer.from(data.pdfBase64.replace(/^data:application\/pdf;base64,/, ''), 'base64');
+        if (pdfBuffer.length < 100 || pdfBuffer.subarray(0, 4).toString() !== '%PDF') {
+          return jsonError('VALIDATION_ERROR', 'Fichier PDF invalide.', 400);
+        }
+      } else if (doc.pdfPath) {
+        try {
+          pdfBuffer = await readFile(path.join(process.cwd(), doc.pdfPath));
+        } catch {
+          return jsonError('INTERNAL', 'PDF introuvable. Régénérez le document.', 500);
+        }
+      } else {
+        return jsonError('VALIDATION_ERROR', 'PDF manquant.', 400);
       }
 
       const config = DOC_TYPE_CONFIG[doc.type];

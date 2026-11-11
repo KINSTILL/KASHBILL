@@ -59,7 +59,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         description: `MyCashBill Add-on ${data.type} — 30 jours`,
         customerPhone: user.phone,
         customerName: user.name ?? user.businessName ?? 'Utilisateur',
-        callbackUrl: `${env.APP_URL}/fr/upgrade?addon=${subscription.id}`,
+        callbackUrl: `${env.APP_URL}/fr/upgrade/merci?addon=${subscription.id}`,
         channels: resolveNotchChannels(data.method, data.operatorCode),
       });
 

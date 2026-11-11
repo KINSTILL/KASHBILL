@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 import { renderPdfToBlob } from '@/lib/pdf/render';
 import type { PdfDocument, PdfFormat } from '@/lib/pdf/types';
-import { ShareSheet } from '@/components/share/ShareSheet';
 import { RecurringSheet } from './RecurringSheet';
 import { BulkSheet } from './BulkSheet';
 import { PdfViewer } from './PdfViewer';
@@ -26,7 +26,8 @@ export function DocumentPreview({
   const [blob, setBlob] = useState<Blob | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [shareOpen, setShareOpen] = useState(false);
+  const locale = useLocale();
+  const router = useRouter();
   const [recurringOpen, setRecurringOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [previewPro, setPreviewPro] = useState(false);
@@ -130,7 +131,7 @@ export function DocumentPreview({
           disabled={!blob}
           onClick={() => {
             haptic('medium');
-            setShareOpen(true);
+            router.push(`/${locale}/documents/${pdfDoc.id}/envoyer`);
           }}
         >
           {t('send')}
@@ -163,21 +164,6 @@ export function DocumentPreview({
           </Button>
         </div>
       </div>
-      {blob && (
-        <ShareSheet
-          open={shareOpen}
-          onOpenChange={setShareOpen}
-          docType={pdfDoc.type}
-          clientName={pdfDoc.client?.name ?? ''}
-          clientPhone={pdfDoc.client?.phone ?? null}
-          clientEmail={pdfDoc.client?.email ?? null}
-          pdfBlob={blob}
-          documentNumber={pdfDoc.number}
-          documentId={pdfDoc.id}
-          docLocale={pdfDoc.locale}
-          onSent={() => {}}
-        />
-      )}
       <RecurringSheet
         open={recurringOpen}
         onOpenChange={setRecurringOpen}

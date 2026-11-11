@@ -4,6 +4,28 @@ import { jsonOk, handleApiError } from '@/lib/api-helpers';
 import { requireAdmin } from '@/lib/api/server';
 import { getCached, setCached } from '@/lib/admin/stats-cache';
 
+/**
+ * Chiffre d'affaires réel : seules les subscriptions Notch Pay dont le paiement
+ * a été confirmé par le webhook (audit `payment_completed`) sont comptées.
+ * Les tentatives initialisées puis abandonnées ou échouées sont exclues.
+ */
+async function confirmedNotchPayRevenue(): Promise<{ _sum: { amountXaf: number | null } }> {
+  const completed = await prisma.auditLog.findMany({
+    where: { action: 'payment_completed' },
+    select: { meta: true },
+  });
+  const refs = completed
+    .map((l) => (l.meta as { providerRef?: unknown } | null)?.providerRef)
+    .filter((r): r is string => typeof r === 'string' && r.length > 0);
+  if (refs.length === 0) return { _sum: { amountXaf: 0 } };
+
+  const agg = await prisma.subscription.aggregate({
+    _sum: { amountXaf: true },
+    where: { source: 'NOTCH_PAY', providerRef: { in: refs } },
+  });
+  return { _sum: { amountXaf: agg._sum.amountXaf ?? 0 } };
+}
+
 export async function GET(req: NextRequest): Promise<Response> {
   try {
     return await requireAdmin(req, 'view_stats', async () => {
@@ -43,7 +65,7 @@ export async function GET(req: NextRequest): Promise<Response> {
         prisma.document.count({ where: { createdAt: { gte: todayStart } } }),
         prisma.document.count({ where: { createdAt: { gte: weekStart } } }),
         prisma.document.count({ where: { watermarked: false, createdAt: { gte: weekStart } } }),
-        prisma.subscription.aggregate({ _sum: { amountXaf: true }, where: { source: 'NOTCH_PAY' } }),
+        confirmedNotchPayRevenue(),
         prisma.subscription.count({
           where: {
             endsAt: { gt: now },

@@ -922,7 +922,7 @@ async function seedFAQ() {
       order: 3,
       locale: 'FR',
       question: 'Comment payer par Mobile Money ?',
-      answer: 'Sur la page Passer Pro, choisissez votre opérateur (MTN Mobile Money ou Orange Money) et saisissez votre numéro de téléphone. Un message USSD s\'affiche sur votre mobile pour valider le paiement sécurisé de 2 000 FCFA pour un mois d\'accès. MyCashBill délègue le traitement aux passerelles de paiement bancaires agréées et ne conserve aucun code PIN. Voir nos CGU.',
+      answer: 'Le paiement de votre abonnement Pro passe exclusivement par Notch Pay, notre passerelle de paiement agréée. Sur la page Passer Pro, choisissez votre opérateur (MTN Mobile Money ou Orange Money) et saisissez votre numéro de téléphone. Un message USSD s\'affiche sur votre mobile pour valider le paiement sécurisé de 2 000 FCFA pour un mois d\'accès. MyCashBill ne conserve aucun code PIN ni donnée de paiement. Voir nos CGU.',
       isPublished: true,
     },
     {
@@ -930,7 +930,7 @@ async function seedFAQ() {
       order: 3,
       locale: 'EN',
       question: 'How do I pay using Mobile Money?',
-      answer: 'On the Upgrade page, choose your mobile provider (MTN MoMo or Orange Money) and type in your phone number. A secure USSD prompt appears on your phone to confirm the 2,000 FCFA monthly payment. MyCashBill routes transactions through licensed gateways and never stores PIN codes. See our Terms of Service.',
+      answer: 'Payments for your Pro subscription are processed exclusively by Notch Pay, our licensed payment gateway. On the Upgrade page, choose your mobile provider (MTN MoMo or Orange Money) and type in your phone number. A secure USSD prompt appears on your phone to confirm the 2,000 FCFA monthly payment. MyCashBill never stores PIN codes or payment data. See our Terms of Service.',
       isPublished: true,
     },
     {

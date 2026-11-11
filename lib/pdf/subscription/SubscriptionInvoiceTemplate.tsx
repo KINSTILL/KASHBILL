@@ -110,6 +110,8 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
     publicToken,
     qrCode,
     isTestMode,
+    itemTitle,
+    itemDescription,
   } = input;
   const isFr = user.locale === 'FR';
   // Abonnement offert par MyCashBill (aucun paiement) : mentions adaptées.
@@ -243,9 +245,11 @@ export function SubscriptionInvoiceDocument({ input }: { input: SubscriptionInvo
           </View>
           <View style={styles.row}>
             <View style={styles.colDesc}>
-              <Text style={styles.td}>MyCashBill Pro</Text>
+              <Text style={styles.td}>{itemTitle ?? 'MyCashBill Pro'}</Text>
               <Text style={{ fontSize: 8, color: SLATE, marginTop: 2 }}>
-                {isGift
+                {itemDescription
+                  ? itemDescription
+                  : isGift
                   ? (isFr ? 'Abonnement offert par MyCashBill — toutes fonctionnalités' : 'Subscription offered by MyCashBill — all features')
                   : (isFr ? 'Abonnement mensuel — toutes fonctionnalités' : 'Monthly subscription — all features')}
               </Text>

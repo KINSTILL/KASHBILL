@@ -145,23 +145,32 @@ export async function POST(req: NextRequest): Promise<Response> {
         const startsAt = new Date();
         const endsAt = new Date(startsAt.getTime() + 30 * 86_400_000);
 
-        await prisma.$transaction([
-          prisma.userAddOn.create({
-            data: {
-              userId: subscription.userId,
-              type,
-              startsAt,
-              endsAt,
-              amountXaf: subscription.amountXaf!,
-              subscriptionId: subscription.id,
-            },
-          }),
-          // La ligne d'abonnement n'est active qu'après confirmation du paiement
-          prisma.subscription.update({
-            where: { id: subscription.id },
-            data: { startsAt, endsAt },
-          }),
-        ]);
+        // Garde-fou : un retry du webhook (timeout Notch Pay, crash avant l'audit)
+        // ne doit jamais créer un second add-on pour la même subscription.
+        const addOnExists = await prisma.userAddOn.findFirst({
+          where: { subscriptionId: subscription.id },
+          select: { id: true },
+        });
+
+        if (!addOnExists) {
+          await prisma.$transaction([
+            prisma.userAddOn.create({
+              data: {
+                userId: subscription.userId,
+                type,
+                startsAt,
+                endsAt,
+                amountXaf: subscription.amountXaf!,
+                subscriptionId: subscription.id,
+              },
+            }),
+            // La ligne d'abonnement n'est active qu'après confirmation du paiement
+            prisma.subscription.update({
+              where: { id: subscription.id },
+              data: { startsAt, endsAt },
+            }),
+          ]);
+        }
       }
 
       await writeAudit({

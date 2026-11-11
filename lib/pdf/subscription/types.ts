@@ -16,4 +16,7 @@ export type SubscriptionInvoicePdfInput = {
   isTestMode?: boolean;
   publicToken?: string;
   qrCode?: string;
+  /** Libellé de la ligne (add-on) ; par défaut « MyCashBill Pro ». */
+  itemTitle?: string;
+  itemDescription?: string;
 };

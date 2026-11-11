@@ -130,3 +130,98 @@ describe('POST /api/webhooks/notchpay', () => {
   });
 });
 
+describe('POST /api/webhooks/notchpay — add-ons', () => {
+  function signedRequest(body: string): NextRequest {
+    const sig = createHmac('sha256', env.NOTCHPAY_WEBHOOK_HASH).update(body).digest('hex');
+    return new NextRequest('http://localhost/api/webhooks/notchpay', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-notchpay-signature': sig },
+      body,
+    });
+  }
+
+  async function createAddOnSubscription(userId: string, providerRef: string, amountXaf: number) {
+    // Ligne en attente, comme créée par /api/addons/initialize (startsAt = endsAt = maintenant)
+    const now = new Date();
+    return prisma.subscription.create({
+      data: {
+        userId,
+        source: 'NOTCH_PAY',
+        startsAt: now,
+        endsAt: now,
+        amountXaf,
+        providerRef,
+      },
+    });
+  }
+
+  it('crée un UserAddOn EXTRA_DEVICE actif (30 jours) à la confirmation du paiement', async () => {
+    const { userId } = await registerAndGetUserId('699444444');
+    const sub = await createAddOnSubscription(userId, 'ADDON_REF_1', 500);
+
+    const body = JSON.stringify({
+      event: 'payment.complete',
+      data: { reference: 'ADDON_REF_1', status: 'complete', amount: 500 },
+    });
+    const res = await webhookRoute(signedRequest(body));
+    expect(res.status).toBe(200);
+
+    const addons = await prisma.userAddOn.findMany({ where: { userId } });
+    expect(addons).toHaveLength(1);
+    expect(addons[0]!.type).toBe('EXTRA_DEVICE');
+    expect(addons[0]!.subscriptionId).toBe(sub.id);
+    expect(addons[0]!.endsAt.getTime()).toBeGreaterThan(Date.now() + 29 * 24 * 60 * 60 * 1000);
+
+    // La subscription devient active
+    const updated = await prisma.subscription.findUnique({ where: { id: sub.id } });
+    expect(updated!.endsAt.getTime()).toBeGreaterThan(Date.now() + 29 * 24 * 60 * 60 * 1000);
+  });
+
+  it('ne modifie pas proUntil lors d\'un achat d\'add-on', async () => {
+    const { userId } = await registerAndGetUserId('699555555');
+    const before = await prisma.user.findUnique({ where: { id: userId } });
+    await createAddOnSubscription(userId, 'ADDON_REF_2', 3000);
+
+    const body = JSON.stringify({
+      event: 'payment.complete',
+      data: { reference: 'ADDON_REF_2', status: 'complete', amount: 3000 },
+    });
+    await webhookRoute(signedRequest(body));
+
+    const after = await prisma.user.findUnique({ where: { id: userId } });
+    expect(after!.proUntil!.getTime()).toBe(before!.proUntil!.getTime());
+    const types = (await prisma.userAddOn.findMany({ where: { userId } })).map((a) => a.type);
+    expect(types).toEqual(['WHITE_LABEL']);
+  });
+
+  it('est idempotent : un webhook rejoué ne crée pas de second add-on', async () => {
+    const { userId } = await registerAndGetUserId('699666666');
+    await createAddOnSubscription(userId, 'ADDON_REF_3', 1000);
+
+    const body = JSON.stringify({
+      event: 'payment.complete',
+      data: { reference: 'ADDON_REF_3', status: 'complete', amount: 1000 },
+    });
+    await webhookRoute(signedRequest(body));
+    await new Promise((r) => setTimeout(r, 100));
+    await webhookRoute(signedRequest(body));
+
+    const addons = await prisma.userAddOn.findMany({ where: { userId } });
+    expect(addons).toHaveLength(1);
+    expect(addons[0]!.type).toBe('CUSTOM_WHATSAPP');
+  });
+
+  it('n\'active aucun add-on sur un échec de paiement', async () => {
+    const { userId } = await registerAndGetUserId('699777777');
+    await createAddOnSubscription(userId, 'ADDON_REF_4', 500);
+
+    const body = JSON.stringify({
+      event: 'payment.failed',
+      data: { reference: 'ADDON_REF_4', status: 'failed' },
+    });
+    await webhookRoute(signedRequest(body));
+
+    expect(await prisma.userAddOn.count({ where: { userId } })).toBe(0);
+  });
+});
+

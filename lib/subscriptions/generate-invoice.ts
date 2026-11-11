@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db';
 import { getPlatformCompany } from '@/lib/platform/company';
 import { generateSubscriptionInvoiceNumber } from './invoice-number';
 import { renderSubscriptionInvoicePdf } from '@/lib/pdf/subscription/render';
+import { invoiceItemFor } from './invoice-item';
 
 export type GenerateInvoiceResult =
   | { ok: true; invoiceId: string; number: string; pdfPath: string }
@@ -66,6 +67,9 @@ export async function generateSubscriptionInvoice(
     return { ok: false, reason: 'DB_ERROR' };
   }
 
+  // Add-on : la ligne de facture doit désigner l'add-on, pas l'abonnement Pro
+  const item = invoiceItemFor(amount, user.locale === 'FR');
+
   try {
     const pdfPath = await renderSubscriptionInvoicePdf({
       invoiceId,
@@ -79,6 +83,7 @@ export async function generateSubscriptionInvoice(
       vatAmount,
       total,
       paidAt,
+      ...(item ? { itemTitle: item.title, itemDescription: item.description } : {}),
     });
     await prisma.subscriptionInvoice.update({
       where: { id: invoiceId },
