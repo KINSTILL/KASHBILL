@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Logo } from '@/components/layout/Logo';
-import { PaymentBadges } from '@/components/ui/PaymentBadges';
 import type { Route } from 'next';
 import { useTranslations } from 'next-intl';
 import type { LandingPersonalization } from '@/lib/landing/types';
@@ -103,7 +102,6 @@ export function LandingFooter({
 
         {/* Bottom Bar */}
         <div className="mt-12 border-t border-slate-100 pt-6 space-y-4 text-center text-xs text-slate-500">
-          <PaymentBadges size="sm" />
           <p>© {year} MyCashBill. {t('rights')}</p>
         </div>
       </div>
