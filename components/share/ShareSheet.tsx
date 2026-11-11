@@ -163,6 +163,9 @@ export function ShareSheet({
   const handleEmail = async () => {
     finalize();
     if (documentId && userIsPro) {
+      // On ferme cette feuille avant d'ouvrir celle de l'email : deux tiroirs empilés
+      // provoquaient un écran vide. Le marquage « envoyé » se fait dans EmailSendSheet, après succès.
+      onOpenChange(false);
       setEmailSheetOpen(true);
       return;
     }
@@ -347,18 +350,12 @@ export function ShareSheet({
       {documentId && (
         <EmailSendSheet
           open={emailSheetOpen}
-          onOpenChange={(v) => {
-            setEmailSheetOpen(v);
-            if (!v) {
-              markDocumentSent()
-                .then(() => onSent())
-                .catch(() => {});
-              onOpenChange(false);
-            }
-          }}
+          onOpenChange={setEmailSheetOpen}
           documentId={documentId}
           defaultEmail={email || clientEmail || null}
           defaultLocale={effectiveLocale}
+          defaultMessage={message}
+          onSent={onSent}
         />
       )}
     </>

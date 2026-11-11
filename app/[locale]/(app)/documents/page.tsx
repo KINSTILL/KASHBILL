@@ -99,12 +99,11 @@ export default async function DocumentsPage({
               const total = (doc.payload as { total?: number } | null)?.total ?? 0;
               const typeCfg = DOC_TYPE_CONFIG[doc.type];
               const isSent = Boolean(doc.sentViaWhatsAppAt);
-              const isDraftDoc = !doc.sentViaWhatsAppAt && !doc.sentViaEmailAt;
 
               return (
                 <div key={doc.id} className="relative">
                 <Link
-                  href={(isDraftDoc ? `/${locale}/documents/${doc.id}/edit` : `/${locale}/documents/${doc.id}`) as Route}
+                  href={`/${locale}/documents/${doc.id}` as Route}
                   className="block rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs transition-all active:scale-[0.98] active:bg-slate-50 focus:outline-none"
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -186,7 +185,7 @@ export default async function DocumentsPage({
                       <tr key={doc.id} className="group">
                         <td className="font-mono text-xs font-semibold text-slate-700">
                           <Link
-                            href={(!doc.sentViaWhatsAppAt && !doc.sentViaEmailAt ? `/${locale}/documents/${doc.id}/edit` : `/${locale}/documents/${doc.id}`) as Route}
+                            href={`/${locale}/documents/${doc.id}` as Route}
                             className="hover:text-emerald-700"
                           >
                             {doc.number}

@@ -837,35 +837,38 @@ export function DocumentForm({
         </p>
       )}
 
-      <Button
-        type="button"
-        fullWidth
-        size="lg"
-        onClick={(e) => {
-          e.preventDefault();
-          handleSubmit();
-        }}
-        isLoading={submitting}
-      >
-        {t('generate')}
-      </Button>
+      {/* Bouton principal sur tablette/desktop. Sur téléphone, c'est la barre collante ci-dessous. */}
+      <div className="hidden md:block">
+        <Button
+          type="button"
+          fullWidth
+          size="lg"
+          onClick={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          isLoading={submitting}
+        >
+          {t('generate')}
+        </Button>
+      </div>
       </div>
 
-      {/* Barre d'action collante sur téléphone (ergonomie mobile au-dessus de la barre de navigation) */}
-      <div className="fixed inset-x-3 bottom-[64px] z-30 md:hidden pointer-events-none">
-        <div className="pointer-events-auto flex items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-white/95 p-3 shadow-xl shadow-slate-950/15 backdrop-blur-xl ring-1 ring-black/5">
-          <div className="min-w-0">
+      {/* Barre d'action collante sur téléphone, posée au-dessus de la barre de navigation (safe-area incluse) */}
+      <div className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] z-30 md:hidden pointer-events-none">
+        <div className="pointer-events-auto mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-slate-200/90 bg-white/95 p-2.5 pl-4 shadow-xl shadow-slate-950/15 backdrop-blur-xl ring-1 ring-black/5">
+          <div className="min-w-0 flex-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block truncate">
               {hidePriceInput ? t('totalItemsDelivered') : isReceipt ? t('totalReceived') : t('total')}
             </span>
-            <span className="money text-base font-extrabold text-slate-950 truncate block">
+            <span className="money text-lg font-extrabold text-slate-950 truncate block">
               {hidePriceInput ? totalQuantity : formatFCFA(total)}
             </span>
           </div>
           <Button
             type="button"
-            size="md"
-            className="shrink-0 font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-700/20"
+            size="lg"
+            className="min-h-12 shrink-0 px-5 font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-700/20"
             onClick={(e) => {
               e.preventDefault();
               handleSubmit();

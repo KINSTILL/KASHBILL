@@ -14,22 +14,31 @@ export function EmailSendSheet({
   documentId,
   defaultEmail,
   defaultLocale,
+  defaultMessage,
+  onSent,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   documentId: string;
   defaultEmail: string | null;
   defaultLocale: 'fr' | 'en';
+  defaultMessage?: string;
+  /** Appelé uniquement après un envoi réussi. */
+  onSent?: () => void;
 }) {
   const t = useTranslations('documents.email');
   const toast = useToast();
   const [email, setEmail] = useState(defaultEmail ?? '');
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(defaultMessage ?? '');
   const [locale, setLocale] = useState<'fr' | 'en'>(defaultLocale);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSend = async () => {
+  const canSend = email.trim().length > 0 && !loading;
+
+  const handleSend = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!canSend) return;
     setLoading(true);
     setError(null);
     haptic('medium');
@@ -37,7 +46,7 @@ export function EmailSendSheet({
       const res = await fetch(`/api/documents/${documentId}/send-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ to: email, customMessage: message.trim() || null, locale }),
+        body: JSON.stringify({ to: email.trim(), customMessage: message.trim() || null, locale }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -46,6 +55,7 @@ export function EmailSendSheet({
         return;
       }
       toast.show(t('sendSuccess'), 'success');
+      onSent?.();
       onOpenChange(false);
     } catch {
       setError(t('sendError'));
@@ -56,56 +66,77 @@ export function EmailSendSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <div className="space-y-4">
-        <h2 className="text-lg font-bold">{t('title')}</h2>
-        <p className="text-sm text-slate-600">{t('subtitle')}</p>
+      <form onSubmit={handleSend} className="space-y-5">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900">{t('title')}</h2>
+          <p className="mt-1 text-sm text-slate-600">{t('subtitle')}</p>
+        </div>
+
         <Input
           type="email"
           inputMode="email"
+          autoComplete="email"
+          enterKeyHint="send"
           label={t('emailLabel')}
           placeholder={t('emailPlaceholder')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="h-12"
         />
+
         <div>
-          <p className="mb-1 text-sm font-medium text-slate-700">{t('localeLabel')}</p>
-          <div className="inline-flex rounded-lg border border-slate-300 p-0.5 text-sm">
+          <p className="mb-1.5 text-[13px] font-medium text-slate-700">{t('localeLabel')}</p>
+          <div className="grid grid-cols-2 gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
             {(['fr', 'en'] as const).map((l) => (
               <button
                 key={l}
                 type="button"
+                aria-pressed={locale === l}
                 onClick={() => setLocale(l)}
-                className={`rounded px-3 py-1 ${locale === l ? 'bg-sage-500 text-white' : ''}`}
+                className={`min-h-11 rounded-lg text-sm font-semibold transition ${
+                  locale === l ? 'bg-sage-500 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+                }`}
               >
                 {l.toUpperCase()}
               </button>
             ))}
           </div>
         </div>
+
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label htmlFor="email-message" className="mb-1.5 block text-[13px] font-medium text-slate-700">
             {t('messageLabel')}
           </label>
           <textarea
+            id="email-message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             maxLength={1000}
             rows={4}
             placeholder={t('messagePlaceholder')}
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm"
+            className="w-full rounded-xl border border-slate-200 bg-white p-3 text-[16px] sm:text-sm text-ink focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
           />
         </div>
-        {error && <p className="text-sm text-error">{error}</p>}
-        <Button
-          fullWidth
-          size="lg"
-          onClick={handleSend}
-          isLoading={loading}
-          disabled={!email || loading}
-        >
-          {t('send')}
-        </Button>
-      </div>
+
+        {error && (
+          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+
+        <div className="sticky bottom-0 -mx-5 bg-white/95 px-5 pb-1 pt-2 backdrop-blur">
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            className="min-h-12"
+            isLoading={loading}
+            disabled={!canSend}
+          >
+            {t('send')}
+          </Button>
+        </div>
+      </form>
     </Sheet>
   );
 }
