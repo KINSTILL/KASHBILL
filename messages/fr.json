@@ -703,7 +703,7 @@
     "whatsapp": "Envois WhatsApp",
     "emails": "Emails envoyés",
     "clients": "Clients enregistrés",
-    "upgrade": "Passer Pro — 2 000 FCFA/30 jours"
+    "upgrade": "Passer Pro"
   },
   "proPreview": {
     "viewPro": "💎 Voir cette facture en version Pro",
@@ -714,7 +714,7 @@
     "benefit2": "✅ Votre logo en en-tête",
     "benefit3": "✅ Envoi illimité WhatsApp + email",
     "showPreview": "Voir ma facture en Pro",
-    "upgradeNow": "Passer Pro — 2 000 FCFA"
+    "upgradeNow": "Passer Pro"
   },
   "unsupportedCountry": {
     "title": "Bienvenue sur MyCashBill",
@@ -750,7 +750,7 @@
     "whiteLabel": "White-label",
     "whiteLabelDesc": "Retire toute mention MyCashBill de vos PDF",
     "whiteLabelTooltip": "Supprime la mention discrète « Généré sur MyCashBill » en bas de vos PDF et débloque la personnalisation des couleurs de votre marque sur vos factures A4.",
-    "activate": "Activer +{price} FCFA/mois"
+    "activate": "Activer"
   },
   "blog": {
     "title": "Blog MyCashBill",

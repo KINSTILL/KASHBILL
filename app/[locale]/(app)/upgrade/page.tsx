@@ -12,7 +12,7 @@ import { PaymentBadges } from '@/components/ui/PaymentBadges';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 import { ProPlanPicker } from '@/components/pricing/ProPlanPicker';
-import { DEFAULT_PRO_PLAN_ID, getProPlan, PRO_PLANS, type ProPlanId } from '@/lib/pricing/plans';
+import { DEFAULT_PRO_PLAN_ID, type ProPlanId } from '@/lib/pricing/plans';
 import { ADDON_PRICES } from '@/lib/addons/queries';
 import { ChevronRight, Gift } from 'lucide-react';
 import { InfoTip } from '@/components/ui/InfoTip';
@@ -28,7 +28,6 @@ export default function UpgradePage() {
   const [status, setStatus] = useState<{ proUntil: string | null; role: string } | null>(null);
   const [pollCount, setPollCount] = useState(0);
   const [selectedPlan, setSelectedPlan] = useState<ProPlanId>(DEFAULT_PRO_PLAN_ID);
-  const chosenPlan = getProPlan(selectedPlan) ?? PRO_PLANS[0];
 
   const isConsumer = user?.accountType === 'CONSUMER';
 
@@ -179,9 +178,7 @@ export default function UpgradePage() {
           onClick={startPayment}
           isLoading={loading}
         >
-          {locale === 'fr'
-            ? `Passer Pro — ${chosenPlan.priceXaf.toLocaleString('fr-FR')} FCFA`
-            : `Upgrade to Pro — ${chosenPlan.priceXaf.toLocaleString('en-US')} FCFA`}
+          {locale === 'fr' ? 'Passer Pro' : 'Upgrade to Pro'}
         </Button>
         <p className="text-center text-[11px] text-slate-400 pt-1">
           🔒 {locale === 'fr'
@@ -399,9 +396,7 @@ function AddOnCard({
           onClick={startAddonPayment}
           isLoading={loading}
         >
-          {locale === 'fr'
-            ? `Activer — +${price.toLocaleString('fr-FR')} FCFA`
-            : `Activate — +${price.toLocaleString('en-US')} FCFA`}
+          {locale === 'fr' ? 'Activer' : 'Activate'}
         </Button>
       </div>
     </Card>

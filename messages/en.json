@@ -703,7 +703,7 @@
     "whatsapp": "WhatsApp sends",
     "emails": "Emails sent",
     "clients": "Clients saved",
-    "upgrade": "Upgrade to Pro — 2,000 FCFA/30 days"
+    "upgrade": "Upgrade to Pro"
   },
   "proPreview": {
     "viewPro": "💎 See this invoice in Pro",
@@ -714,7 +714,7 @@
     "benefit2": "✅ Your logo in the header",
     "benefit3": "✅ Unlimited WhatsApp + email",
     "showPreview": "See my invoice in Pro",
-    "upgradeNow": "Upgrade to Pro — 2,000 FCFA"
+    "upgradeNow": "Upgrade to Pro"
   },
   "unsupportedCountry": {
     "title": "Welcome to MyCashBill",
@@ -750,7 +750,7 @@
     "whiteLabel": "White label",
     "whiteLabelDesc": "Removes all MyCashBill mentions from your PDFs",
     "whiteLabelTooltip": "Removes the discreet 'Generated with MyCashBill' footer from your PDFs and unlocks custom brand colors on your A4 invoices.",
-    "activate": "Activate +{price} FCFA/month"
+    "activate": "Activate"
   },
   "blog": {
     "title": "MyCashBill Blog",
