@@ -110,7 +110,7 @@ export default function NewClientPage() {
               name="name"
               type="text"
               required
-              placeholder="Ex: Entreprise Alpha ou Paul Biya"
+              placeholder="Ex : Entreprise Alpha ou Jean Dupont"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="mt-1"

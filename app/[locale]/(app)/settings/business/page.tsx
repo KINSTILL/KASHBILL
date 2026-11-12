@@ -50,6 +50,8 @@ export default function BusinessSettingsPage() {
   const [headerText, setHeaderText] = useState('');
   const [footerText, setFooterText] = useState('');
   const [cgvText, setCgvText] = useState('');
+  // Précision des montants sur les documents : 0, 1 ou 2 décimales (désactivé par défaut).
+  const [decimalPlaces, setDecimalPlaces] = useState<0 | 1 | 2>(0);
 
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
@@ -77,6 +79,7 @@ export default function BusinessSettingsPage() {
       setShowStampOnTicket(user.showStampOnTicket ?? false);
       setBrandPrimary(user.brandPrimaryColor || DEFAULT_BRAND.primary);
       setBrandAccent(user.brandAccentColor || DEFAULT_BRAND.accent);
+      setDecimalPlaces(user.decimalPlaces === 1 || user.decimalPlaces === 2 ? user.decimalPlaces : 0);
     }
   }, [user]);
 
@@ -116,6 +119,7 @@ export default function BusinessSettingsPage() {
           stampUrl,
           showStampOnTicket,
           ...brandFields,
+          decimalPlaces,
         }),
       });
 
@@ -338,6 +342,39 @@ export default function BusinessSettingsPage() {
               Revenir à la palette MyCashBill
             </button>
           )}
+        </Card>
+
+        {/* Précision des montants (décimales) */}
+        <Card className="p-4 sm:p-6 space-y-3">
+          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-100">
+              <FileText className="h-4 w-4" />
+            </span>
+            <h2 className="text-sm font-bold text-slate-900">
+              {fr ? 'Décimales sur les documents' : 'Decimals on documents'}
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500">
+            {fr
+              ? 'Par défaut, les montants sont arrondis au franc entier (usage courant en zone FCFA). Vous pouvez afficher 1 ou 2 décimales sur tous vos documents.'
+              : 'By default, amounts are rounded to the whole franc (common practice in the CFA zone). You can show 1 or 2 decimals on all your documents.'}
+          </p>
+          <div className="inline-flex rounded-lg border border-slate-300 p-0.5 text-sm">
+            {([0, 1, 2] as const).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setDecimalPlaces(d)}
+                className={`min-h-11 px-3 rounded sm:min-h-0 ${decimalPlaces === d ? 'bg-emerald-600 text-white' : 'text-slate-700'}`}
+              >
+                {d === 0 ? (fr ? 'Aucune' : 'None') : `${d}`}
+              </button>
+            ))}
+          </div>
+          <p className="font-mono text-xs text-slate-600">
+            {fr ? 'Exemple :' : 'Example:'}{' '}
+            {decimalPlaces === 0 ? '12\u202F345 FCFA' : decimalPlaces === 1 ? '12\u202F345,0 FCFA' : '12\u202F345,00 FCFA'}
+          </p>
         </Card>
 
         {/* Legal mentions */}

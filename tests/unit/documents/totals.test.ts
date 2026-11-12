@@ -55,4 +55,22 @@ describe('computeTotals (TVA, acompte, net à payer)', () => {
     expect(p.vatAmount).toBe(1299);
     expect(p.total).toBe(8049);
   });
+  it('decimals = 0 (defaut) arrondit la TVA au franc', () => {
+    // HT 100 000 ; TVA 19,25 % = 19 250 ; arrondi entier
+    const t = computeTotals({ subtotal: 100000, deliveryFee: null, vatRate: 19.25, depositPercentage: null, decimals: 0 });
+    expect(t.vatAmount).toBe(19250);
+    expect(t.total).toBe(119250);
+  });
+
+  it('decimals = 2 preserve les centimes', () => {
+    // 10 000 HT ; TVA 19,25 % = 1 925 exact ; base non entiere : 1 000 * 19,25 % = 192,50
+    const t = computeTotals({ subtotal: 1000, deliveryFee: null, vatRate: 19.25, depositPercentage: null, decimals: 2 });
+    expect(t.vatAmount).toBe(192.5);
+    expect(t.total).toBe(1192.5);
+    // comparison : avec 0 decimale le meme calcul donne 193 et 1193
+    const t0 = computeTotals({ subtotal: 1000, deliveryFee: null, vatRate: 19.25, depositPercentage: null, decimals: 0 });
+    expect(t0.vatAmount).toBe(193);
+    expect(t0.total).toBe(1193);
+  });
+
 });

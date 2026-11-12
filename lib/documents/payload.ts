@@ -60,44 +60,60 @@ export type ComputedPayload = {
  *
  * - Base HT de la TVA = sous-total des articles + frais de livraison (le transport est
  *   une prestation accessoire soumise à la TVA).
- * - TVA = base HT × taux, arrondie au franc.
+ * - TVA = base HT × taux, arrondie au rang de précision choisi (0, 1 ou 2 décimales).
  * - Acompte = pourcentage du TTC (base HT + TVA).
  * - Net à payer = TTC − acompte.
+ *
+ * `decimals` = 0 par défaut (arrondi au franc, conformité XAF) ; 1 ou 2 pour préserver
+ * des décimales. L'arrondi est appliqué de façon cohérente côté serveur et formulaire.
  */
+export function roundTo(amount: number, decimals: number): number {
+  const digits = decimals === 1 || decimals === 2 ? decimals : 0;
+  const factor = 10 ** digits;
+  return Math.round(amount * factor) / factor;
+}
+
 export function computeTotals(input: {
   subtotal: number;
   deliveryFee: number | null;
   vatRate: number | null;
   depositPercentage: number | null;
+  decimals?: number;
 }): { htBase: number; vatAmount: number | null; ttc: number; depositAmount: number | null; total: number } {
-  const htBase = input.subtotal + (input.deliveryFee ?? 0);
-  const vatAmount = input.vatRate !== null ? Math.round(htBase * (input.vatRate / 100)) : null;
-  const ttc = htBase + (vatAmount ?? 0);
+  const decimals = input.decimals ?? 0;
+  const htBase = roundTo(input.subtotal + (input.deliveryFee ?? 0), decimals);
+  const vatAmount = input.vatRate !== null ? roundTo(htBase * (input.vatRate / 100), decimals) : null;
+  const ttc = roundTo(htBase + (vatAmount ?? 0), decimals);
   const depositAmount =
-    input.depositPercentage !== null ? Math.round(ttc * (input.depositPercentage / 100)) : null;
-  const total = ttc - (depositAmount ?? 0);
+    input.depositPercentage !== null ? roundTo(ttc * (input.depositPercentage / 100), decimals) : null;
+  const total = roundTo(ttc - (depositAmount ?? 0), decimals);
   return { htBase, vatAmount, ttc, depositAmount, total };
 }
 
 /**
  * Calcule côté serveur. Ne jamais faire confiance au client pour les totaux.
+ * `decimals` : précision d'arrondi (0 par défaut).
  */
-export function computePayload(input: DocumentPayloadInput): ComputedPayload {
+export function computePayload(input: DocumentPayloadInput, decimals = 0): ComputedPayload {
   const lines = input.lines.map((l) => ({
     description: l.description,
     quantity: l.quantity,
     unitPrice: l.unitPrice,
-    total: Math.round(l.quantity * l.unitPrice),
+    total: roundTo(l.quantity * l.unitPrice, decimals),
     photoUrl: l.photoUrl ?? null,
   }));
 
-  const subtotal = lines.reduce((acc, l) => acc + l.total, 0);
+  const subtotal = roundTo(
+    lines.reduce((acc, l) => acc + l.total, 0),
+    decimals
+  );
   const deliveryFee = input.deliveryFee ?? null;
   const { vatAmount, depositAmount, total } = computeTotals({
     subtotal,
     deliveryFee,
     vatRate: input.vatRate,
     depositPercentage: input.depositPercentage,
+    decimals,
   });
 
   return {

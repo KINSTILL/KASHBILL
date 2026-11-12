@@ -71,6 +71,8 @@ export function TicketDocument({
   const isEn = doc.locale === 'EN';
   const hidePrices = doc.type === 'BORDEREAU' && doc.payload.total === 0;
   const brand = resolveBrand(doc.company);
+  const decimals: 0 | 1 | 2 =
+    doc.decimalPlaces === 1 || doc.decimalPlaces === 2 ? doc.decimalPlaces : 0;
 
   const clientLabel =
     doc.type === 'BORDEREAU'
@@ -105,7 +107,7 @@ export function TicketDocument({
             locale={doc.locale}
           />
         )}
-        <DocumentMeta doc={doc} compact />
+        <DocumentMeta doc={doc} compact decimals={decimals} />
         <ItemsTable
           lines={doc.payload.lines}
           compact
@@ -114,6 +116,7 @@ export function TicketDocument({
           hidePrices={hidePrices}
           locale={doc.locale}
           primaryColor={brand.primary}
+          decimals={decimals}
         />
         <Totals
           payload={doc.payload}
@@ -124,6 +127,7 @@ export function TicketDocument({
           locale={doc.locale}
           primaryColor={brand.primary}
           accentColor={brand.accent}
+          decimals={decimals}
         />
         {doc.company.showStampOnTicket && doc.company.stampUrl && (
           <View style={{ alignItems: 'center', marginTop: 8 }}>

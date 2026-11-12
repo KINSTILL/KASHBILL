@@ -63,6 +63,7 @@ export default async function LocaleLayout({
         whiteLabel: await isWhiteLabelActive(current.user.id),
         brandPrimaryColor: current.user.brandPrimaryColor,
         brandAccentColor: current.user.brandAccentColor,
+        decimalPlaces: current.user.decimalPlaces,
         createdAt: current.user.createdAt.toISOString(),
       }
     : null;

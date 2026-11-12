@@ -24,7 +24,7 @@ export type CreateDocumentResult =
   | { ok: false; reason: 'MISSING_COMPANY_FIELDS'; missingFields: string[]; message: string };
 
 export async function createDocument(input: CreateDocumentInput): Promise<CreateDocumentResult> {
-  const computed = computePayload(input.payload);
+  const computed = computePayload(input.payload, input.user.decimalPlaces);
   const year = new Date().getFullYear();
 
   // Vérifie les champs entreprise requis

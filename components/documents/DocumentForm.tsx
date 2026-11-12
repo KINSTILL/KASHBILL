@@ -23,7 +23,7 @@ import { getOperatorsForCountry, isSupportedPaymentCountry } from '@/lib/countri
 import { getCurrencyForCountry } from '@/lib/countries/currency';
 import type { DocType } from '@prisma/client';
 import type { PdfFormat } from '@/lib/pdf/types';
-import { computeTotals, type ComputedPayload } from '@/lib/documents/payload';
+import { computeTotals, roundTo, type ComputedPayload } from '@/lib/documents/payload';
 import type { UserSuggestions } from '@/lib/documents/suggestions';
 
 type Line = { description: string; quantity: number; unitPrice: number };
@@ -193,14 +193,22 @@ export function DocumentForm({
     });
   }, [user, state.type]);
 
+  // Précision d'affichage choisie par l'utilisateur (0, 1 ou 2 décimales).
+  const decimals: 0 | 1 | 2 =
+    user?.decimalPlaces === 1 || user?.decimalPlaces === 2 ? user.decimalPlaces : 0;
+
   // Même arrondi par ligne et même formule que le serveur (lib/documents/payload.ts).
-  const subtotal = state.lines.reduce((a, l) => a + Math.round(l.quantity * l.unitPrice), 0);
+  const subtotal = state.lines.reduce(
+    (a, l) => a + roundTo(l.quantity * l.unitPrice, decimals),
+    0
+  );
   const totalQuantity = state.lines.reduce((a, l) => a + (Number(l.quantity) || 0), 0);
   const totals = computeTotals({
     subtotal,
     deliveryFee: state.deliveryFee ?? null,
     vatRate: state.vatRate,
     depositPercentage: state.depositPercentage,
+    decimals,
   });
   const total = totals.total;
 
@@ -606,7 +614,8 @@ export function DocumentForm({
               {!hidePriceInput && (
                 <Input
                   name={`unitPrice-${i}`}
-                  inputMode="numeric"
+                  inputMode={decimals > 0 ? 'decimal' : 'numeric'}
+                  step={decimals > 0 ? (decimals === 1 ? 0.1 : 0.01) : 1}
                   label={t(`typeContext.${state.type}.priceLabel`)}
                   placeholder={t('unitPrice')}
                   value={line.unitPrice || ''}
@@ -618,7 +627,7 @@ export function DocumentForm({
               {!hidePriceInput ? (
                 <span>
                   {t('lineTotal')} :{' '}
-                  <strong className="money">{formatFCFA(line.quantity * line.unitPrice)}</strong>
+                  <strong className="money">{formatFCFA(line.quantity * line.unitPrice, decimals)}</strong>
                 </span>
               ) : (
                 <span className="text-xs text-slate-500">
@@ -890,7 +899,7 @@ export function DocumentForm({
               <p className="text-[13px] font-semibold uppercase tracking-[0.06em] text-white/80">
                 {isReceipt ? t('totalReceived') : t('total')}
               </p>
-              <p className="money-lg text-[26px] text-white">{formatFCFA(total)}</p>
+              <p className="money-lg text-[26px] text-white">{formatFCFA(total, decimals)}</p>
             </div>
           )}
         </Card>

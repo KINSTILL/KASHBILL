@@ -45,6 +45,7 @@ export type SessionUser = {
   whiteLabel?: boolean;
   brandPrimaryColor?: string | null;
   brandAccentColor?: string | null;
+  decimalPlaces?: number;
   createdAt?: string;
 } | null;
 

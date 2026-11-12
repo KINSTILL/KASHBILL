@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { Locale } from '@prisma/client';
 import type { PdfLine } from '../types';
-import { formatCurrency } from './format';
+import { formatCurrency, type DecimalPlaces } from './format';
 import { DEFAULT_BRAND, PDF_TOKENS } from '../brand';
 
 type Props = {
@@ -12,6 +12,7 @@ type Props = {
   hidePrices?: boolean;
   locale?: Locale;
   primaryColor?: string;
+  decimals?: DecimalPlaces;
 };
 
 export function ItemsTable({
@@ -21,6 +22,7 @@ export function ItemsTable({
   hidePrices = false,
   locale = 'FR',
   primaryColor = DEFAULT_BRAND.primary,
+  decimals = 0,
 }: Props) {
   const isEn = locale === 'EN';
 
@@ -84,8 +86,8 @@ export function ItemsTable({
           <Text style={styles.colQty}>{line.quantity}</Text>
           {!hidePrices ? (
             <>
-              <Text style={styles.colPrice}>{formatCurrency(line.unitPrice, currency, locale)}</Text>
-              <Text style={styles.colTotal}>{formatCurrency(line.total, currency, locale)}</Text>
+              <Text style={styles.colPrice}>{formatCurrency(line.unitPrice, currency, locale, decimals)}</Text>
+              <Text style={styles.colTotal}>{formatCurrency(line.total, currency, locale, decimals)}</Text>
             </>
           ) : null}
         </View>

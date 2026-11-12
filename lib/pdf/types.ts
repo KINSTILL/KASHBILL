@@ -85,6 +85,8 @@ export type PdfDocument = {
   referralCode: string | null;
   cgvText?: string | null;
   whiteLabel?: boolean;
+  /** Précision des montants sur le document : 0, 1 ou 2 décimales (défaut 0). */
+  decimalPlaces?: number;
 };
 
 export type PdfRenderOptions = {

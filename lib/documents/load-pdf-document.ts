@@ -101,6 +101,7 @@ export async function loadPdfDocument(
     referralCode: doc.user.referralCode,
     cgvText: doc.user.cgvText,
     whiteLabel,
+    decimalPlaces: doc.user.decimalPlaces,
   };
 
   // Logo, signature et cachet : uniquement si l'abonnement Pro est actif

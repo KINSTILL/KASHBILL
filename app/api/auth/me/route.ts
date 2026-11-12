@@ -30,6 +30,8 @@ const updateProfileSchema = z.object({
   // Couleurs de marque : white label uniquement (vérifié dans PATCH)
   brandPrimaryColor: z.string().regex(HEX_COLOR).optional().nullable(),
   brandAccentColor: z.string().regex(HEX_COLOR).optional().nullable(),
+  // Précision des montants sur les documents : 0, 1 ou 2 décimales
+  decimalPlaces: z.union([z.literal(0), z.literal(1), z.literal(2)]).optional(),
 });
 
 export async function GET(req: NextRequest): Promise<Response> {
@@ -65,6 +67,7 @@ export async function GET(req: NextRequest): Promise<Response> {
           whiteLabel,
           brandPrimaryColor: user.brandPrimaryColor,
           brandAccentColor: user.brandAccentColor,
+          decimalPlaces: user.decimalPlaces,
           createdAt: user.createdAt,
         },
         deviceId,
@@ -196,6 +199,7 @@ export async function PATCH(req: NextRequest): Promise<Response> {
           whiteLabel: await isWhiteLabelActive(user.id),
           brandPrimaryColor: updated.brandPrimaryColor,
           brandAccentColor: updated.brandAccentColor,
+          decimalPlaces: updated.decimalPlaces,
           createdAt: updated.createdAt,
         },
       });

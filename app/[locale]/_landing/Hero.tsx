@@ -200,7 +200,7 @@ export function Hero({
                         Kmer Chic Boutique
                       </span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Facture FA-2026-0042 · Estelle Ndongo</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Facture FA-2026-0042 · Solange Ndongo</p>
                   </div>
                   <span className="font-mono text-xs font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg shrink-0 border border-emerald-200/60">
                     77 500 FCFA
@@ -270,7 +270,7 @@ export function Hero({
                     <p className="text-slate-400 font-medium uppercase text-[10px] tracking-wider">
                       {isFr ? 'Facturé à :' : 'Billed to:'}
                     </p>
-                    <p className="font-bold text-slate-900 text-xs sm:text-sm mt-0.5">Mme Estelle Ndongo</p>
+                    <p className="font-bold text-slate-900 text-xs sm:text-sm mt-0.5">Mme Solange Ndongo</p>
                     <p className="text-[11px] text-slate-400">Bonanjo, Douala</p>
                   </div>
                   <div className="text-right">

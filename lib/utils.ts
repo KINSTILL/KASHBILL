@@ -6,16 +6,18 @@ export function cn(...inputs: ClassValue[]): string {
 }
 
 /**
- * Formate un montant en FCFA sans décimales, avec espace insécable U+202F.
+ * Formate un montant en FCFA, avec espace insécable U+202F.
+ * Par défaut (0 décimal) : arrondi au franc. `decimals` = 1 ou 2 pour préserver des centimes.
  * Exemple : formatFCFA(1234567) === "1 234 567 FCFA"
  */
-export function formatFCFA(amount: number): string {
+export function formatFCFA(amount: number, decimals: 0 | 1 | 2 = 0): string {
+  const digits = decimals === 1 || decimals === 2 ? decimals : 0;
   const formatter = new Intl.NumberFormat('fr-CM', {
     style: 'decimal',
-    maximumFractionDigits: 0,
-    minimumFractionDigits: 0,
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
   });
-  const formatted = formatter.format(Math.round(amount));
+  const formatted = formatter.format(digits === 0 ? Math.round(amount) : amount);
   const withNbsp = formatted.replace(/\s/g, '\u202F');
   return `${withNbsp}\u202FFCFA`;
 }

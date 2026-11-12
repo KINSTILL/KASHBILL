@@ -98,6 +98,8 @@ export function A4Document({
   const isEn = doc.locale === 'EN';
   const hidePrices = doc.type === 'BORDEREAU' && doc.payload.total === 0;
   const brand = resolveBrand(doc.company);
+  const decimals: 0 | 1 | 2 =
+    doc.decimalPlaces === 1 || doc.decimalPlaces === 2 ? doc.decimalPlaces : 0;
 
   const clientBlockLabel =
     doc.type === 'BORDEREAU'
@@ -138,7 +140,7 @@ export function A4Document({
             locale={doc.locale}
           />
         )}
-        <DocumentMeta doc={doc} compact={false} />
+        <DocumentMeta doc={doc} compact={false} decimals={decimals} />
 
         <ItemsTable
           lines={doc.payload.lines}
@@ -148,6 +150,7 @@ export function A4Document({
           hidePrices={hidePrices}
           locale={doc.locale}
           primaryColor={brand.primary}
+          decimals={decimals}
         />
         <Totals
           payload={doc.payload}
@@ -158,6 +161,7 @@ export function A4Document({
           locale={doc.locale}
           primaryColor={brand.primary}
           accentColor={brand.accent}
+          decimals={decimals}
         />
         {doc.payload.notes && (
           <Text style={styles.notes}>

@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { PdfDocument } from '../types';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
-import { formatDateShort, formatCurrency } from './format';
+import { formatDateShort, formatCurrency, type DecimalPlaces } from './format';
 import { PDF_TOKENS } from '../brand';
 
 const PAYMENT_LABELS: Record<string, { fr: string; en: string }> = {
@@ -11,7 +11,15 @@ const PAYMENT_LABELS: Record<string, { fr: string; en: string }> = {
   CHECK: { fr: 'Chèque', en: 'Check' },
 };
 
-export function DocumentMeta({ doc, compact }: { doc: PdfDocument; compact: boolean }) {
+export function DocumentMeta({
+  doc,
+  compact,
+  decimals = 0,
+}: {
+  doc: PdfDocument;
+  compact: boolean;
+  decimals?: DecimalPlaces;
+}) {
   const config = DOC_TYPE_CONFIG[doc.type];
   const isFr = doc.locale === 'FR';
 
@@ -112,7 +120,7 @@ export function DocumentMeta({ doc, compact }: { doc: PdfDocument; compact: bool
             {isFr ? 'Équivalent :' : 'Equivalent:'}
           </Text>
           <Text style={styles.value}>
-            ≈ {formatCurrency(doc.payload.equivalentAmount, doc.payload.equivalentCurrency, doc.locale)}
+            ≈ {formatCurrency(doc.payload.equivalentAmount, doc.payload.equivalentCurrency, doc.locale, decimals)}
             {doc.payload.exchangeRate
               ? ` (${isFr ? 'taux' : 'rate'} : ${doc.payload.exchangeRate})`
               : ''}

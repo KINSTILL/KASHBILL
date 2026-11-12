@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { Locale } from '@prisma/client';
 import type { PdfPayload } from '../types';
-import { formatCurrency } from './format';
+import { formatCurrency, type DecimalPlaces } from './format';
 import { DEFAULT_BRAND, PDF_TOKENS } from '../brand';
 
 export function Totals({
@@ -13,6 +13,7 @@ export function Totals({
   locale = 'FR',
   primaryColor = DEFAULT_BRAND.primary,
   accentColor = DEFAULT_BRAND.accent,
+  decimals = 0,
 }: {
   payload: PdfPayload;
   compact: boolean;
@@ -22,6 +23,7 @@ export function Totals({
   locale?: Locale;
   primaryColor?: string;
   accentColor?: string;
+  decimals?: DecimalPlaces;
 }) {
   const isEn = locale === 'EN';
 
@@ -69,12 +71,12 @@ export function Totals({
       <View style={styles.lines}>
         <View style={styles.line}>
           <Text style={styles.label}>{isEn ? 'Subtotal' : 'Sous-total'}</Text>
-          <Text style={styles.value}>{formatCurrency(payload.subtotal, currency, locale)}</Text>
+          <Text style={styles.value}>{formatCurrency(payload.subtotal, currency, locale, decimals)}</Text>
         </View>
         {payload.deliveryFee !== null && payload.deliveryFee > 0 && (
           <View style={styles.line}>
             <Text style={styles.label}>{isEn ? 'Delivery' : 'Livraison'}</Text>
-            <Text style={styles.value}>{formatCurrency(payload.deliveryFee, currency, locale)}</Text>
+            <Text style={styles.value}>{formatCurrency(payload.deliveryFee, currency, locale, decimals)}</Text>
           </View>
         )}
         {showVat && payload.vatAmount !== null && payload.vatRate !== null ? (
@@ -82,26 +84,26 @@ export function Totals({
             <View style={styles.line}>
               <Text style={styles.label}>{isEn ? 'Total excl. VAT' : 'Total HT'}</Text>
               <Text style={styles.value}>
-                {formatCurrency(payload.subtotal + (payload.deliveryFee ?? 0), currency, locale)}
+                {formatCurrency(payload.subtotal + (payload.deliveryFee ?? 0), currency, locale, decimals)}
               </Text>
             </View>
             <View style={styles.line}>
               <Text style={styles.label}>
                 {isEn ? 'VAT' : 'TVA'} ({payload.vatRate}%)
               </Text>
-              <Text style={styles.value}>{formatCurrency(payload.vatAmount, currency, locale)}</Text>
+              <Text style={styles.value}>{formatCurrency(payload.vatAmount, currency, locale, decimals)}</Text>
             </View>
           </>
         ) : null}
         {payload.depositAmount !== null && payload.depositAmount > 0 && (
           <View style={styles.line}>
             <Text style={styles.label}>{isEn ? 'Deposit' : 'Acompte'}</Text>
-            <Text style={styles.value}>−{formatCurrency(payload.depositAmount, currency, locale)}</Text>
+            <Text style={styles.value}>−{formatCurrency(payload.depositAmount, currency, locale, decimals)}</Text>
           </View>
         )}
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>{isEn ? 'NET DUE' : 'NET À PAYER'}</Text>
-          <Text style={styles.totalValue}>{formatCurrency(payload.total, currency, locale)}</Text>
+          <Text style={styles.totalValue}>{formatCurrency(payload.total, currency, locale, decimals)}</Text>
         </View>
       </View>
     </View>
