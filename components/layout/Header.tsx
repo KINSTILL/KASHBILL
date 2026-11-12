@@ -83,9 +83,10 @@ export function Header() {
                 onClick={handleLogout}
                 aria-label={t('logout')}
                 title={t('logout')}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95 sm:hidden"
+                className="flex h-9 min-w-9 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95 sm:hidden"
               >
                 <LogOut className="h-4 w-4" />
+                <span>{t('logout')}</span>
               </button>
               <Button
                 size="sm"
@@ -104,9 +105,10 @@ export function Header() {
                 href={`/${locale}/login` as Route}
                 aria-label={t('login')}
                 title={t('login')}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 active:scale-95 sm:hidden"
+                className="flex h-9 min-w-9 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 active:scale-95 sm:hidden"
               >
                 <LogIn className="h-4 w-4" />
+                <span>{t('login')}</span>
               </Link>
               <Link href={`/${locale}/login` as Route} className="hidden sm:inline-flex">
                 <Button size="sm" variant="ghost" className="h-8 px-2.5 text-xs">

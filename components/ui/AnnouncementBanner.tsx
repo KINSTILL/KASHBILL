@@ -70,6 +70,7 @@ export function AnnouncementBanner({
               type="button"
               onClick={handleClose}
               title={isEn ? 'Hide announcement' : 'Masquer cette annonce'}
+              aria-label={isEn ? 'Hide announcement' : 'Masquer cette annonce'}
               className="rounded-full p-1 text-slate-400 hover:bg-black/5 hover:text-slate-600 transition-colors cursor-pointer"
             >
               <span className="text-base font-bold leading-none">✕</span>

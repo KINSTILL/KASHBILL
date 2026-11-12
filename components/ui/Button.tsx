@@ -41,7 +41,7 @@ export function Button({
       disabled={disabled || effectiveLoading}
       className={cn(
         'transition-smooth focus-ring ripple rounded-btn',
-        'inline-flex items-center justify-center gap-2 font-semibold tracking-[-0.01em]',
+        'inline-flex items-center justify-center gap-2 font-semibold tracking-[-0.01em] cursor-pointer',
         'disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:active:scale-100',
         'active:scale-[0.98]',
         {
@@ -57,7 +57,7 @@ export function Button({
             variant === 'whatsapp',
         },
         {
-          'h-9 px-3 text-sm': size === 'sm',
+          'min-h-11 h-9 px-3 text-sm sm:min-h-0': size === 'sm',
           'thumb-zone h-10 px-4 text-sm rounded-lg font-medium': size === 'md',
           'thumb-zone-lg h-11 px-5 text-sm rounded-xl font-semibold': size === 'lg',
         },

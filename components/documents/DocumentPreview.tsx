@@ -76,7 +76,7 @@ export function DocumentPreview({
               type="button"
               onClick={() => setFormat(f)}
               aria-pressed={format === f}
-              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+              className={`min-h-11 rounded-md px-3 py-1.5 text-xs font-semibold transition sm:min-h-0 ${
                 format === f ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/70'
               }`}
             >

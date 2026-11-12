@@ -5,6 +5,18 @@
 .thumb-zone { min-height: 48px; }
 .thumb-zone-lg { min-height: 54px; }
 
+/* Affordance : tout élément cliquable affiche la main au survol (PC) */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[role="radio"]:not(:disabled),
+[role="checkbox"]:not(:disabled),
+[role="option"]:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
 /* Bottom sheet backdrop */
 .sheet-backdrop { background: rgba(15, 23, 42, 0.5); }
 
@@ -118,6 +130,14 @@ h1, h2, h3 {
   color: #475569;
   transition: all 150ms ease;
   cursor: pointer;
+  /* Cible tactile 44px sur téléphone */
+  min-height: 2.75rem;
+}
+
+@media (min-width: 640px) {
+  .chat-pill {
+    min-height: 2.25rem;
+  }
 }
 
 .chat-pill:hover {

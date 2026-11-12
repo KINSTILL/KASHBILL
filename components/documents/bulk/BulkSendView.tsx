@@ -228,10 +228,10 @@ export function BulkSendView({
             {fr ? 'Destinataires' : 'Recipients'} · {selected.length}/{MAX}
           </p>
           <div className="flex gap-3 text-xs font-semibold">
-            <button type="button" className="text-emerald-700 hover:text-emerald-900" onClick={() => setSelected(withPhone.slice(0, MAX).map((c) => c.id))}>
+            <button type="button" className="inline-flex min-h-11 items-center rounded-md px-2 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-900 sm:min-h-0 sm:px-1" onClick={() => setSelected(withPhone.slice(0, MAX).map((c) => c.id))}>
               {fr ? 'Tout' : 'All'}
             </button>
-            <button type="button" className="text-slate-500 hover:text-slate-800" onClick={() => setSelected([])}>
+            <button type="button" className="inline-flex min-h-11 items-center rounded-md px-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 sm:min-h-0 sm:px-1" onClick={() => setSelected([])}>
               {fr ? 'Aucun' : 'None'}
             </button>
           </div>

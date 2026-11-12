@@ -44,6 +44,7 @@ export function ExportPeriodSelector() {
             key={p}
             type="button"
             onClick={() => setPreset(p)}
+            aria-pressed={preset === p}
             className={`chat-pill ${preset === p ? 'chat-pill-active' : ''}`}
           >
             {t(p)}

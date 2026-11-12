@@ -216,9 +216,11 @@ export default async function DocumentsPage({
                           <div className="flex items-center justify-end gap-1">
                             <Link
                               href={`/${locale}/documents/${doc.id}` as Route}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900"
+                              aria-label={`Voir le document ${doc.number}`}
+                              className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800"
                             >
-                              <ChevronRight className="h-4 w-4" />
+                              Voir
+                              <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
                             </Link>
                             {!doc.sentViaWhatsAppAt && !doc.sentViaEmailAt && (
                               <DeleteDocumentButton documentId={doc.id} documentNumber={doc.number} />

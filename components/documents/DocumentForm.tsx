@@ -441,7 +441,7 @@ export function DocumentForm({
                 key={l}
                 type="button"
                 onClick={() => setState((s) => ({ ...s, documentLocale: l }))}
-                className={`px-3 py-1 rounded ${state.documentLocale === l ? 'bg-sage-500 text-white' : ''}`}
+                className={`min-h-11 px-3 py-1 rounded sm:min-h-0 ${state.documentLocale === l ? 'bg-sage-500 text-white' : ''}`}
               >
                 {l}
               </button>
@@ -465,7 +465,7 @@ export function DocumentForm({
               key={m}
               type="button"
               onClick={() => setState((s) => ({ ...s, clientMode: m }))}
-              className={`px-3 py-1 rounded ${state.clientMode === m ? 'bg-sage-500 text-white' : ''}`}
+              className={`min-h-11 px-3 py-1 rounded sm:min-h-0 ${state.clientMode === m ? 'bg-sage-500 text-white' : ''}`}
             >
               {m === 'existing' ? t('clientModeExisting') : t('clientModeNew')}
             </button>
@@ -575,7 +575,7 @@ export function DocumentForm({
                 key={preset}
                 type="button"
                 onClick={() => applyQuickPreset(preset)}
-                className="rounded-full border border-sage-200 bg-sage-50/70 px-2.5 py-1 text-xs font-medium text-sage-800 transition-colors hover:border-sage-400 hover:bg-sage-100"
+                className="min-h-11 rounded-full border border-sage-200 bg-sage-50/70 px-3 py-1 text-xs font-medium text-sage-800 transition-colors hover:border-sage-400 hover:bg-sage-100 sm:min-h-0 sm:px-2.5"
               >
                 + {preset}
               </button>
@@ -774,7 +774,7 @@ export function DocumentForm({
                           haptic('light');
                           setState((s) => ({ ...s, paymentReference: reason }));
                         }}
-                        className="max-w-full truncate rounded-full border border-sage-200 bg-sage-50/70 px-2.5 py-1 text-xs font-medium text-sage-800 transition-colors hover:border-sage-400 hover:bg-sage-100"
+                        className="min-h-11 max-w-full truncate rounded-full border border-sage-200 bg-sage-50/70 px-3 py-1 text-xs font-medium text-sage-800 transition-colors hover:border-sage-400 hover:bg-sage-100 sm:min-h-0 sm:px-2.5"
                       >
                         {reason}
                       </button>
@@ -864,7 +864,7 @@ export function DocumentForm({
               key={f}
               type="button"
               onClick={() => setState((s) => ({ ...s, format: f }))}
-              className={`rounded-lg px-4 py-2.5 text-center font-semibold transition sm:px-3 sm:py-1.5 ${
+              className={`min-h-11 rounded-lg px-4 py-2.5 text-center font-semibold transition sm:min-h-0 sm:px-3 sm:py-1.5 ${
                 state.format === f
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 sm:border-0 sm:bg-transparent'

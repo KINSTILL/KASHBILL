@@ -88,6 +88,7 @@ export function InstallPrompt() {
                 onClick={dismiss}
                 className="text-slate-400 hover:text-slate-600 p-0.5 rounded text-xs transition-colors cursor-pointer"
                 title={t('buttonLater')}
+                aria-label={t('buttonLater')}
               >
                 ✕
               </button>

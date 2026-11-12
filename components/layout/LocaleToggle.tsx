@@ -36,7 +36,7 @@ export function LocaleToggle({ className }: { className?: string }) {
         onClick={() => switchTo('fr')}
         aria-pressed={locale === 'fr'}
         className={
-          'rounded-md px-2.5 py-1 transition-colors ' +
+          'min-h-11 min-w-10 rounded-md px-2.5 py-1 transition-colors sm:min-h-0 sm:min-w-0 ' +
           (locale === 'fr'
             ? 'bg-sage-600 text-white'
             : 'text-slate-500 hover:text-slate-900')
@@ -49,7 +49,7 @@ export function LocaleToggle({ className }: { className?: string }) {
         onClick={() => switchTo('en')}
         aria-pressed={locale === 'en'}
         className={
-          'rounded-md px-2.5 py-1 transition-colors ' +
+          'min-h-11 min-w-10 rounded-md px-2.5 py-1 transition-colors sm:min-h-0 sm:min-w-0 ' +
           (locale === 'en'
             ? 'bg-sage-600 text-white'
             : 'text-slate-500 hover:text-slate-900')

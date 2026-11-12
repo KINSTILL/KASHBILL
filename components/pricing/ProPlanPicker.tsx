@@ -90,7 +90,7 @@ export function ProPlanPicker({
                 aria-pressed={active}
                 onClick={() => chooseCurrency(c.code)}
                 className={cn(
-                  'inline-flex min-h-10 min-w-12 items-center justify-center gap-1 rounded-full border px-3 text-sm font-semibold transition',
+                  'inline-flex min-h-11 min-w-12 items-center justify-center gap-1 rounded-full border px-3 text-sm font-semibold transition',
                   active
                     ? 'border-sage-500 bg-sage-500 text-white shadow-xs'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-sage-300 hover:text-slate-900'

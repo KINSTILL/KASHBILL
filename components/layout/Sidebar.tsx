@@ -29,43 +29,41 @@ export function Sidebar() {
         {items.map((item) => {
           const active = pathname === item.href;
           return (
-            <Link key={item.href} href={item.href as Route} className="block">
-              <button
-                type="button"
-                className={cn(
-                  'w-full text-left rounded-lg px-3 py-2 text-sm',
-                  active ? 'bg-sage-100 text-sage-900 font-medium' : 'text-slate-700 hover:bg-slate-50'
-                )}
-              >
-                {item.label}
-              </button>
+            <Link
+              key={item.href}
+              href={item.href as Route}
+              aria-current={active ? 'page' : undefined}
+              className={cn(
+                'block rounded-lg border-l-2 px-3 py-2 text-sm transition-colors',
+                active
+                  ? 'border-sage-600 bg-sage-100 font-semibold text-sage-900'
+                  : 'border-transparent text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+              )}
+            >
+              {item.label}
             </Link>
           );
         })}
 
         {isAdmin && (
           <div className="pt-3 mt-3 border-t border-slate-200">
-            <Link href={`/${locale}/admin` as Route} className="block">
-              <button
-                type="button"
-                className="w-full text-left rounded-lg px-3 py-2 text-xs font-semibold bg-sage-50 text-sage-900 border border-sage-200 hover:bg-sage-100 flex items-center justify-between cursor-pointer"
-              >
-                <span>🛡️ Console Admin</span>
-                <span>→</span>
-              </button>
+            <Link
+              href={`/${locale}/admin` as Route}
+              className="flex items-center justify-between rounded-lg border border-sage-200 bg-sage-50 px-3 py-2 text-xs font-semibold text-sage-900 transition-colors hover:bg-sage-100"
+            >
+              <span>🛡️ Console Admin</span>
+              <span aria-hidden="true">→</span>
             </Link>
           </div>
         )}
 
         <div className="pt-3 mt-3 border-t border-slate-200 space-y-2">
-          <Link href={`/${locale}?landing=1` as Route} className="block">
-            <button
-              type="button"
-              className="w-full text-left rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-emerald-700 flex items-center justify-between cursor-pointer"
-            >
-              <span>🌐 Site vitrine</span>
-              <span>↗</span>
-            </button>
+          <Link
+            href={`/${locale}?landing=1` as Route}
+            className="flex items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-emerald-700"
+          >
+            <span>🌐 Site vitrine</span>
+            <span aria-hidden="true">↗</span>
           </Link>
           <InstallButton variant="sidebar" />
         </div>

@@ -38,7 +38,6 @@ export const RATE_LIMIT_DEVICE_APPROVAL_PER_USER = { limit: 10, windowMs: 60 * 6
 export const FREE_CLIENTS_LIMIT = 2;
 export const FREE_DOCS_PER_MONTH = 10;
 export const FREE_WHATSAPP_PER_MONTH = 5;
-export const FREE_EMAILS_PER_MONTH = 1;
 export const FREE_HISTORY_DAYS = 7;
 export const FREE_LOGO_GRACE_DAYS = 7; // logo seul, 7 jours après l'inscription
 export const FREE_LOGO_GRACE_DOCS = 5;

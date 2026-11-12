@@ -5,7 +5,6 @@ import {
   FREE_CLIENTS_LIMIT,
   FREE_DOCS_PER_MONTH,
   FREE_WHATSAPP_PER_MONTH,
-  FREE_EMAILS_PER_MONTH,
 } from '@/lib/constants';
 
 export type QuotaStatus = {
@@ -49,22 +48,6 @@ export async function checkWhatsAppQuota(user: User): Promise<QuotaStatus> {
   };
 }
 
-export async function checkEmailQuota(user: User): Promise<QuotaStatus> {
-  if (isPro(user)) return { used: 0, limit: null, remaining: null, reached: false };
-  const used = await prisma.document.count({
-    where: {
-      userId: user.id,
-      sentViaEmailAt: { not: null, gte: startOfMonth() },
-    },
-  });
-  return {
-    used,
-    limit: FREE_EMAILS_PER_MONTH,
-    remaining: Math.max(0, FREE_EMAILS_PER_MONTH - used),
-    reached: used >= FREE_EMAILS_PER_MONTH,
-  };
-}
-
 export async function checkClientQuota(user: User): Promise<QuotaStatus> {
   if (isPro(user)) return { used: 0, limit: null, remaining: null, reached: false };
   const used = await prisma.client.count({ where: { userId: user.id } });
@@ -83,12 +66,19 @@ export async function getFullQuotaStatus(user: User): Promise<{
   emails: QuotaStatus;
   clients: QuotaStatus;
 }> {
-  const [docs, whatsapp, emails, clients] = await Promise.all([
+  const [docs, whatsapp, clients] = await Promise.all([
     checkDocQuota(user),
     checkWhatsAppQuota(user),
-    checkEmailQuota(user),
     checkClientQuota(user),
   ]);
-  return { isPro: isPro(user), docs, whatsapp, emails, clients };
+  // `emails` n'a plus de quota (envoi email de documents retiré) : conservé pour compat
+  // de la signature consommée par components/layout/QuotaBadge.tsx:14.
+  return {
+    isPro: isPro(user),
+    docs,
+    whatsapp,
+    emails: { used: 0, limit: 0, remaining: 0, reached: false },
+    clients,
+  };
 }
 

@@ -80,6 +80,7 @@ export function ProGiftBanner({
             type="button"
             onClick={handleDismiss}
             title={t('dismiss')}
+            aria-label={t('dismiss')}
             className="rounded-full p-1 text-slate-400 hover:bg-black/5 hover:text-slate-600 transition-colors cursor-pointer"
           >
             <span className="text-base font-bold leading-none">✕</span>

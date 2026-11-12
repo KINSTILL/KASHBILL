@@ -92,14 +92,14 @@ export function GrantProSheet({
             <button
               type="button"
               onClick={() => setMode('single')}
-              className={`px-3 py-1 rounded ${mode === 'single' ? 'bg-sage-500 text-white' : ''}`}
+              className={`min-h-11 px-3 py-1 rounded sm:min-h-0 ${mode === 'single' ? 'bg-sage-500 text-white' : ''}`}
             >
               Un utilisateur
             </button>
             <button
               type="button"
               onClick={() => setMode('bulk')}
-              className={`px-3 py-1 rounded ${mode === 'bulk' ? 'bg-sage-500 text-white' : ''}`}
+              className={`min-h-11 px-3 py-1 rounded sm:min-h-0 ${mode === 'bulk' ? 'bg-sage-500 text-white' : ''}`}
             >
               Plusieurs
             </button>
@@ -144,7 +144,7 @@ export function GrantProSheet({
                     key={d}
                     type="button"
                     onClick={() => setDays(d)}
-                    className={`rounded px-2 py-1 text-xs ${days === d ? 'bg-sage-500 text-white' : 'bg-slate-100'}`}
+                    className={`min-h-11 rounded px-2 py-1 text-xs sm:min-h-0 ${days === d ? 'bg-sage-500 text-white' : 'bg-slate-100'}`}
                   >
                     {d}j
                   </button>

@@ -33,7 +33,7 @@ export function DocumentTypeSelector({ value, onChange }: Props) {
             }}
             aria-pressed={isActive}
             className={cn(
-              'transition-smooth group flex items-center gap-3 rounded-card border p-3 text-left',
+              'transition-smooth group flex min-h-11 items-center gap-3 rounded-card border p-3 text-left',
               isActive
                 ? 'border-sage-500 bg-sage-50 shadow-card ring-1 ring-sage-500/40'
                 : 'border-slate-200 bg-white hover:border-sage-300 hover:shadow-card-hover'
