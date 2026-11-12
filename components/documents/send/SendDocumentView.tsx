@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { CheckCircle2, Download, MessageCircle } from 'lucide-react';
+import { CheckCircle2, Download, MessageCircle, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { InfoTip } from '@/components/ui/InfoTip';
 import { downloadBlob } from '@/lib/pdf/render';
 import { useOnlineStatus } from '@/lib/device/network';
 import type { PdfDocument } from '@/lib/pdf/types';
 
 type Method = 'whatsapp' | 'download';
+type Channel = 'shared' | 'personal';
 
 const METHODS: { id: Method; icon: typeof MessageCircle; fr: string; en: string }[] = [
   { id: 'whatsapp', icon: MessageCircle, fr: 'WhatsApp', en: 'WhatsApp' },
@@ -26,6 +28,7 @@ export function SendDocumentView({
   docLabel,
   defaultPhone,
   clientName,
+  personalWhatsApp,
 }: {
   documentId: string;
   pdfDoc: PdfDocument;
@@ -33,10 +36,13 @@ export function SendDocumentView({
   docLabel: string;
   defaultPhone: string;
   clientName: string | null;
+  personalWhatsApp: { hasAddOn: boolean; connected: boolean };
 }) {
   const fr = locale === 'fr';
   const online = useOnlineStatus();
   const [method, setMethod] = useState<Method>('whatsapp');
+  const [channel, setChannel] = useState<Channel>('shared');
+  const personalAvailable = personalWhatsApp.hasAddOn && personalWhatsApp.connected;
   const [phone, setPhone] = useState(defaultPhone);
   const [message, setMessage] = useState(
     fr
@@ -96,7 +102,7 @@ export function SendDocumentView({
       const res = await fetch(`/api/documents/${documentId}/send-whatsapp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ phone: phone.trim(), message, filename: fileName, locale }),
+        body: JSON.stringify({ phone: phone.trim(), message, filename: fileName, locale, mode: channel }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -200,6 +206,87 @@ export function SendDocumentView({
       <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
         {method === 'whatsapp' && (
           <>
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[13px] font-medium text-slate-700">
+                  {fr ? 'Depuis quel numéro envoyer ?' : 'Send from which number?'}
+                </span>
+                <InfoTip
+                  id="tip-personal-channel"
+                  label={fr ? 'Pourquoi mon numéro ?' : 'Why my number?'}
+                >
+                  <p>
+                    {fr
+                      ? 'Envoyer depuis votre propre numéro : votre client reçoit le PDF brut, dans votre fil de discussion habituel, sans aucune mention MyCashBill. Un vrai raccourci.'
+                      : 'Send from your own number: your client receives the raw PDF in your usual chat, with zero MyCashBill mention. A real shortcut.'}
+                  </p>
+                  <p>
+                    {fr
+                      ? 'Pour activer cette option, souscrivez l’extension « Mon numéro WhatsApp » (500 FCFA) puis connectez votre numéro.'
+                      : 'To enable this option, subscribe to the “My WhatsApp number” add-on (500 FCFA) then connect your number.'}
+                  </p>
+                </InfoTip>
+              </div>
+              <div role="radiogroup" aria-label={fr ? 'Numéro d’envoi' : 'Sending number'} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={channel === 'shared'}
+                  onClick={() => {
+                    setChannel('shared');
+                    setError(null);
+                  }}
+                  className={`flex flex-col items-start gap-1 rounded-xl border-2 p-3 text-left transition ${
+                    channel === 'shared' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <span className="text-sm font-semibold text-ink">{fr ? 'MyCashBill' : 'MyCashBill'}</span>
+                  <span className="text-[11px] text-slate-500">
+                    {fr ? 'Envoi via MyCashBill (toujours disponible)' : 'Send via MyCashBill (always available)'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={channel === 'personal'}
+                  aria-disabled={!personalAvailable}
+                  onClick={() => {
+                    if (!personalAvailable) return;
+                    setChannel('personal');
+                    setError(null);
+                  }}
+                  className={`flex flex-col items-start gap-1 rounded-xl border-2 p-3 text-left transition ${
+                    !personalAvailable
+                      ? 'cursor-not-allowed border-slate-200 bg-slate-50 opacity-70'
+                      : channel === 'personal'
+                        ? 'border-emerald-500 bg-emerald-50'
+                        : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5 text-sm font-semibold text-ink">
+                    <Smartphone className="h-4 w-4" />
+                    {fr ? 'Mon numéro' : 'My number'}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    {personalAvailable
+                      ? fr
+                        ? 'Envoi depuis votre numéro WhatsApp'
+                        : 'Send from your WhatsApp number'
+                      : fr
+                        ? 'Extension non activée — 500 FCFA'
+                        : 'Add-on not active — 500 FCFA'}
+                  </span>
+                </button>
+              </div>
+              {!personalAvailable && (
+                <Link
+                  href={`/${locale}/upgrade` as Route}
+                  className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-700 hover:text-emerald-900"
+                >
+                  {fr ? 'Activer « Mon numéro WhatsApp » (500 FCFA)' : 'Activate “My WhatsApp number” (500 FCFA)'} →
+                </Link>
+              )}
+            </div>
             <Input
               id="send-phone"
               type="tel"

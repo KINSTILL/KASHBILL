@@ -13,6 +13,7 @@ import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 import { ProPlanPicker } from '@/components/pricing/ProPlanPicker';
 import { DEFAULT_PRO_PLAN_ID, getProPlan, PRO_PLANS, type ProPlanId } from '@/lib/pricing/plans';
+import { ADDON_PRICES } from '@/lib/addons/queries';
 import { ChevronRight, Gift } from 'lucide-react';
 import { InfoTip } from '@/components/ui/InfoTip';
 
@@ -232,7 +233,7 @@ export default function UpgradePage() {
           </div>
           <AddOnCard
             type="EXTRA_DEVICE"
-            price={500}
+            price={ADDON_PRICES.EXTRA_DEVICE}
             title={tAddons('extraDevice')}
             desc={tAddons('extraDeviceDesc')}
             tooltip={tAddons('extraDeviceTooltip')}
@@ -240,7 +241,7 @@ export default function UpgradePage() {
           />
           <AddOnCard
             type="CUSTOM_WHATSAPP"
-            price={1000}
+            price={ADDON_PRICES.CUSTOM_WHATSAPP}
             title={tAddons('customWhatsapp')}
             desc={tAddons('customWhatsappDesc')}
             tooltip={tAddons('customWhatsappTooltip')}
@@ -248,7 +249,7 @@ export default function UpgradePage() {
           />
           <AddOnCard
             type="WHITE_LABEL"
-            price={3000}
+            price={ADDON_PRICES.WHITE_LABEL}
             title={tAddons('whiteLabel')}
             desc={tAddons('whiteLabelDesc')}
             tooltip={tAddons('whiteLabelTooltip')}

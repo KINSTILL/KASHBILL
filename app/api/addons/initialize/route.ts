@@ -47,6 +47,7 @@ export async function POST(req: NextRequest): Promise<Response> {
           startsAt: now,
           endsAt: now,
           amountXaf: price,
+          addOnType: data.type,
         },
       });
 
@@ -89,3 +90,4 @@ export async function POST(req: NextRequest): Promise<Response> {
     return handleApiError(err);
   }
 }
+

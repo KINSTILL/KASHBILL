@@ -305,6 +305,7 @@ model Subscription {
   endsAt                     DateTime
   providerRef                String?
   amountXaf                  Int?
+  addOnType                  AddOnType?
   createdAt                  DateTime             @default(now())
   consumerWithdrawalWaiver   Boolean              @default(false)
   consumerWithdrawalWaivedAt DateTime?

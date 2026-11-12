@@ -2,10 +2,22 @@ import { prisma } from '@/lib/db';
 import type { AddOnType, User } from '@prisma/client';
 
 export const ADDON_PRICES = {
-  EXTRA_DEVICE: 500,
-  CUSTOM_WHATSAPP: 1000,
+  EXTRA_DEVICE: 300,
+  CUSTOM_WHATSAPP: 500,
   WHITE_LABEL: 3000,
 } as const;
+
+/**
+ * Mapping historique montant → type d'add-on (anciens prix : 500 / 1000 / 3000).
+ * Sert UNIQUEMENT de repli pour les subscriptions créées avant l'ajout de
+ * `Subscription.addOnType`. Les nouveaux achats portent le type explicitement.
+ */
+export function resolveAddOnTypeFromAmount(amountXaf: number | null | undefined): AddOnType | null {
+  if (amountXaf === 3000) return 'WHITE_LABEL';
+  if (amountXaf === 1000) return 'CUSTOM_WHATSAPP';
+  if (amountXaf === 500) return 'EXTRA_DEVICE';
+  return null;
+}
 
 export async function hasActiveAddOn(userId: string, type: AddOnType): Promise<boolean> {
   const addon = await prisma.userAddOn.findFirst({
@@ -38,3 +50,4 @@ export async function isWhiteLabelActive(userId: string): Promise<boolean> {
 export async function isCustomWhatsAppActive(userId: string): Promise<boolean> {
   return hasActiveAddOn(userId, 'CUSTOM_WHATSAPP');
 }
+

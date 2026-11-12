@@ -11,6 +11,7 @@ const bodySchema = z.object({
   message: z.string().max(2000).optional().default(''),
   filename: z.string().min(1).max(120).optional(),
   locale: z.enum(['fr', 'en']).optional(),
+  mode: z.enum(['shared', 'personal']).optional(),
 });
 
 export async function POST(
@@ -49,6 +50,7 @@ export async function POST(
         pdf: rendered.buffer,
         fileName: parsed.filename ?? `${doc.number}.pdf`,
         isEn,
+        mode: parsed.mode,
       });
 
       if (!result.ok) {

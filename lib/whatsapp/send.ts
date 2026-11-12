@@ -17,6 +17,13 @@ export type WhatsAppSendInput = {
   pdf: Buffer;
   fileName: string;
   isEn: boolean;
+  /**
+   * Canal demandé par l'utilisateur.
+   * - 'shared'   : instance MyCashBill partagée (toujours disponible).
+   * - 'personal' : instance dédiée de l'utilisateur (exige l'add-on actif + connecté, sans repli).
+   * - absent     : comportement historique (add-on actif → personnel, sinon partagé).
+   */
+  mode?: 'shared' | 'personal';
 };
 
 export type WhatsAppSendResult =
@@ -168,8 +175,11 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
   const cleanBase64 = input.pdf.toString('base64');
   const fileName = input.fileName.endsWith('.pdf') ? input.fileName : `${input.fileName}.pdf`;
 
-  // Mode B : numéro personnel, add-on actif. Aucun repli possible.
-  if (await isCustomWhatsAppActive(input.user.id)) {
+  // Mode B : numéro personnel. Exige l'add-on actif et l'instance connectée. Aucun repli possible.
+  // - mode 'shared' force le Mode A (l'utilisateur a explicitement choisi MyCashBill).
+  // - mode 'personal' ou absent (comportement historique) : on tente le Mode B si l'add-on est actif.
+  const wantsPersonal = input.mode !== 'shared';
+  if (wantsPersonal && (await isCustomWhatsAppActive(input.user.id))) {
     const name = personalInstanceName(input.user.id);
     const instances = await fetchEvolutionInstances(evolutionUrl, evolutionKey);
     const connected = instances.some((i) => i.name === name && i.status === 'open');

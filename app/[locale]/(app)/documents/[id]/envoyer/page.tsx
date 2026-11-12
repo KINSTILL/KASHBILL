@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { loadPdfDocument } from '@/lib/documents/load-pdf-document';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import { SendDocumentView } from '@/components/documents/send/SendDocumentView';
+import { getPersonalStatus } from '@/lib/whatsapp/personal';
 
 export default async function SendDocumentPage({
   params,
@@ -21,6 +22,12 @@ export default async function SendDocumentPage({
 
   const config = DOC_TYPE_CONFIG[doc.type];
 
+  const personal = await getPersonalStatus(current.user.id);
+  const personalWhatsApp = {
+    hasAddOn: personal.hasAddOn,
+    connected: personal.status === 'CONNECTED',
+  };
+
   return (
     <SendDocumentView
       documentId={doc.id}
@@ -29,6 +36,7 @@ export default async function SendDocumentPage({
       docLabel={locale === 'en' ? config.labelEn : config.label}
       defaultPhone={doc.client?.phone ?? ''}
       clientName={doc.client?.name ?? null}
+      personalWhatsApp={personalWhatsApp}
     />
   );
 }

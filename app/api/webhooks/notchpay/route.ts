@@ -5,6 +5,7 @@ import { verifyNotchPaySignature } from '@/lib/payments/notchpay';
 import { getClientIp, getUserAgent, writeAudit } from '@/lib/api/server';
 import { PRO_DURATION_DAYS } from '@/lib/constants';
 import { proDaysForAmount } from '@/lib/pricing/plans';
+import { resolveAddOnTypeFromAmount } from '@/lib/addons/queries';
 
 /**
  * Webhook Notch Pay.
@@ -109,9 +110,9 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     if (eventType === 'payment.complete' && status === 'complete') {
       const now = new Date();
-      const isAddon = Boolean(
-        subscription && subscription.amountXaf && [500, 1000, 3000].includes(subscription.amountXaf)
-      );
+      const addOnType =
+        subscription.addOnType ?? resolveAddOnTypeFromAmount(subscription.amountXaf ?? null);
+      const isAddon = Boolean(addOnType);
 
       let newPro: Date | null = null;
       if (!isAddon) {
@@ -135,13 +136,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         });
       }
 
-      if (subscription && [500, 1000, 3000].includes(subscription.amountXaf ?? 0)) {
-        const type =
-          subscription.amountXaf === 3000
-            ? 'WHITE_LABEL'
-            : subscription.amountXaf === 1000
-              ? 'CUSTOM_WHATSAPP'
-              : 'EXTRA_DEVICE';
+      if (addOnType) {
         const startsAt = new Date();
         const endsAt = new Date(startsAt.getTime() + 30 * 86_400_000);
 
@@ -157,7 +152,7 @@ export async function POST(req: NextRequest): Promise<Response> {
             prisma.userAddOn.create({
               data: {
                 userId: subscription.userId,
-                type,
+                type: addOnType,
                 startsAt,
                 endsAt,
                 amountXaf: subscription.amountXaf!,
