@@ -2,15 +2,30 @@
 import { View, Text, Image, StyleSheet } from '@react-pdf/renderer';
 import type { PdfDocument } from '../types';
 import { PaymentBadges } from './PaymentBadges';
+import { PDF_TOKENS } from '../brand';
 
 export function Footer({ doc, compact }: { doc: PdfDocument; compact: boolean }) {
   const styles = StyleSheet.create({
-    block: { marginTop: compact ? 10 : 20, borderTopWidth: 0.5, borderColor: '#CBD5E1', paddingTop: 6 },
+    block: { marginTop: compact ? 10 : 20, borderTopWidth: 0.5, borderColor: PDF_TOKENS.neutral.hairline, paddingTop: compact ? 6 : 8 },
     payment: { marginBottom: 4 },
-    label: { fontSize: compact ? 6 : 8, color: '#64748B' },
-    small: { fontSize: compact ? 5 : 7, color: '#94A3B8', marginTop: 2 },
-    qr: { width: compact ? 40 : 60, height: compact ? 40 : 60, marginTop: 4 },
-    cgv: { fontSize: compact ? 5 : 7, color: '#64748B', marginTop: 4 },
+    label: {
+      fontSize: compact ? 6 : 8,
+      color: PDF_TOKENS.neutral.muted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.3,
+    },
+    qrWrap: {
+      marginTop: 4,
+      padding: 4,
+      alignSelf: 'flex-start',
+      backgroundColor: PDF_TOKENS.neutral.surface,
+      borderRadius: PDF_TOKENS.radius.md,
+      borderWidth: 0.5,
+      borderColor: PDF_TOKENS.neutral.line,
+    },
+    qr: { width: compact ? 40 : 60, height: compact ? 40 : 60 },
+    cgv: { fontSize: compact ? 5 : 7, color: PDF_TOKENS.neutral.muted, marginTop: 4 },
+    small: { fontSize: compact ? 5 : 7, color: PDF_TOKENS.neutral.faint, marginTop: 2 },
   });
 
   return (
@@ -28,7 +43,9 @@ export function Footer({ doc, compact }: { doc: PdfDocument; compact: boolean })
       {doc.qrCodeDataUrl && (
         <>
           <Text style={styles.label}>{doc.locale === 'EN' ? 'Verify authenticity:' : "Vérifier l'authenticité :"}</Text>
+          <View style={styles.qrWrap}>
           <Image src={doc.qrCodeDataUrl} style={styles.qr} />
+          </View>
         </>
       )}
       {(doc.cgvText ?? doc.company.cgvText) && <Text style={styles.cgv}>{doc.cgvText ?? doc.company.cgvText}</Text>}
@@ -42,3 +59,4 @@ export function Footer({ doc, compact }: { doc: PdfDocument; compact: boolean })
     </View>
   );
 }
+

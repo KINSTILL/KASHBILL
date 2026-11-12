@@ -8,7 +8,7 @@ import { ItemsTable } from '../shared/ItemsTable';
 import { Totals } from '../shared/Totals';
 import { Footer } from '../shared/Footer';
 import { formatDateShort } from '../shared/format';
-import { resolveBrand } from '../brand';
+import { resolveBrand, PDF_TOKENS } from '../brand';
 
 const styles = StyleSheet.create({
   page: {
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     backgroundColor: '#FFFFFF',
   },
-  header: { borderBottomWidth: 1, borderColor: '#0F172A', paddingBottom: 4, marginBottom: 6 },
+  header: { borderBottomWidth: 1, borderColor: PDF_TOKENS.neutral.ink, paddingBottom: 4, marginBottom: 6 },
   docTitle: { fontSize: 13, fontWeight: 'bold', textAlign: 'center', marginBottom: 2 },
   docNumber: { fontSize: 8, textAlign: 'center', color: '#64748B', marginBottom: 4 },
   watermarkBanner: {

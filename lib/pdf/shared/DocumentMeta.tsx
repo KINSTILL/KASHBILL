@@ -2,6 +2,7 @@ import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { PdfDocument } from '../types';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import { formatDateShort, formatCurrency } from './format';
+import { PDF_TOKENS } from '../brand';
 
 const PAYMENT_LABELS: Record<string, { fr: string; en: string }> = {
   CASH: { fr: 'Espèces', en: 'Cash' },
@@ -16,14 +17,29 @@ export function DocumentMeta({ doc, compact }: { doc: PdfDocument; compact: bool
 
   const styles = StyleSheet.create({
     block: { marginBottom: compact ? 8 : 16 },
-    row: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 2 },
-    label: { fontSize: compact ? 7 : 9, color: '#64748B' },
-    value: { fontSize: compact ? 7 : 9, color: '#0F172A', fontWeight: 'bold' },
-    warn: {
+    row: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 2, alignItems: 'baseline' },
+    label: {
       fontSize: compact ? 7 : 9,
-      color: '#B5613D',
-      fontStyle: 'italic',
-      marginTop: 4,
+      color: PDF_TOKENS.neutral.muted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.3,
+    },
+    value: { fontSize: compact ? 7 : 9, color: PDF_TOKENS.neutral.ink, fontWeight: 'bold' },
+    // Badge-pilule (inspiration marketing) pour la mention non-contractuelle
+    warnPill: {
+      alignSelf: 'flex-start',
+      marginTop: 6,
+      paddingVertical: compact ? 2 : 3,
+      paddingHorizontal: compact ? 5 : 7,
+      borderRadius: PDF_TOKENS.radius.pill,
+      backgroundColor: '#FEF3C7',
+      borderWidth: 0.5,
+      borderColor: '#FCD34D',
+    },
+    warn: {
+      fontSize: compact ? 6 : 8,
+      color: '#92400E',
+      fontWeight: 'bold',
     },
   });
 
@@ -81,11 +97,13 @@ export function DocumentMeta({ doc, compact }: { doc: PdfDocument; compact: bool
       ) : null}
 
       {config.showNonContractual ? (
-        <Text style={styles.warn}>
-          {isFr
-            ? 'Document sans valeur comptable ou fiscale — Facture Proforma'
-            : 'Document without accounting or fiscal value — Proforma Invoice'}
-        </Text>
+        <View style={styles.warnPill}>
+          <Text style={styles.warn}>
+            {isFr
+              ? 'Document sans valeur comptable ou fiscale — Facture Proforma'
+              : 'Document without accounting or fiscal value — Proforma Invoice'}
+          </Text>
+        </View>
       ) : null}
 
       {doc.payload.equivalentAmount && doc.payload.equivalentCurrency ? (

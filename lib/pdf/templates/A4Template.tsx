@@ -8,7 +8,7 @@ import { ItemsTable } from '../shared/ItemsTable';
 import { Totals } from '../shared/Totals';
 import { Footer } from '../shared/Footer';
 import { formatDateShort } from '../shared/format';
-import { resolveBrand } from '../brand';
+import { resolveBrand, PDF_TOKENS } from '../brand';
 
 const styles = StyleSheet.create({
   page: {
@@ -18,7 +18,17 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     backgroundColor: '#FFFFFF',
   },
-  docTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 8, marginBottom: 2 },
+  titleRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 8, marginBottom: 2 },
+  docTitle: { fontSize: 22, fontWeight: 'bold' },
+  typePill: {
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: PDF_TOKENS.radius.pill,
+    borderWidth: 0.75,
+    alignSelf: 'flex-start',
+    marginTop: 3,
+  },
+  typePillText: { fontSize: 8, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.5 },
   docNumber: { fontSize: 10, color: '#64748B', marginBottom: 20 },
   notes: { marginTop: 12, fontSize: 9, color: '#475569', fontStyle: 'italic' },
   signatureBlock: {
@@ -106,9 +116,16 @@ export function A4Document({
     <Document>
       <Page size="A4" style={styles.page}>
         <CompanyHeader company={doc.company} compact={false} locale={doc.locale} />
-        <Text style={[styles.docTitle, { color: brand.primary }]}>
-          {isEn ? config.labelEn : config.label}
-        </Text>
+        <View style={styles.titleRow}>
+          <Text style={[styles.docTitle, { color: brand.primary }]}>
+            {isEn ? config.labelEn : config.label}
+          </Text>
+          <View style={[styles.typePill, { borderColor: brand.primary }]}>
+            <Text style={[styles.typePillText, { color: brand.primary }]}>
+              {isEn ? config.labelEn : config.label}
+            </Text>
+          </View>
+        </View>
         <Text style={styles.docNumber}>
           N° {doc.number} · {formatDateShort(doc.createdAt, doc.locale)}
         </Text>
