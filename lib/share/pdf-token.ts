@@ -44,3 +44,13 @@ export function buildDocumentShareUrl(
   const base = origin.replace(/\/+$/, '');
   return `${base}/api/public/documents/${encodeURIComponent(documentId)}/pdf?t=${token}`;
 }
+
+/** Construit l'URL publique de téléchargement du XML pour un document donné (même jeton). */
+export function buildDocumentXmlShareUrl(
+  origin: string,
+  documentId: string,
+  token: string = signDocumentShareToken(documentId)
+): string {
+  const base = origin.replace(/\/+$/, '');
+  return `${base}/api/public/documents/${encodeURIComponent(documentId)}/xml?t=${token}`;
+}

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   buildDocumentShareUrl,
+  buildDocumentXmlShareUrl,
   signDocumentShareToken,
   verifyDocumentShareToken,
 } from '@/lib/share/pdf-token';
@@ -64,5 +65,26 @@ describe('buildDocumentShareUrl', () => {
   it('accepte un jeton fourni explicitement', () => {
     const url = buildDocumentShareUrl('http://localhost:3000', 'doc_1', 'deadbeef');
     expect(url).toBe('http://localhost:3000/api/public/documents/doc_1/pdf?t=deadbeef');
+  });
+});
+
+describe('buildDocumentXmlShareUrl', () => {
+  it("construit l'URL publique de téléchargement du XML", () => {
+    const url = buildDocumentXmlShareUrl('https://app.example.com', 'doc_1');
+    expect(url).toBe(
+      `https://app.example.com/api/public/documents/doc_1/xml?t=${signDocumentShareToken('doc_1')}`
+    );
+  });
+
+  it('utilise le même jeton que le PDF', () => {
+    const pdfUrl = buildDocumentShareUrl('https://app.example.com', 'doc_1');
+    const xmlUrl = buildDocumentXmlShareUrl('https://app.example.com', 'doc_1');
+    expect(new URL(pdfUrl).searchParams.get('t')).toBe(new URL(xmlUrl).searchParams.get('t'));
+  });
+
+  it('supprime le slash final de l’origine', () => {
+    const url = buildDocumentXmlShareUrl('https://app.example.com/', 'doc_1');
+    expect(url.startsWith('https://app.example.com/api/')).toBe(true);
+    expect(url).not.toContain('//api');
   });
 });

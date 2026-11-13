@@ -7,11 +7,12 @@ import { env } from '@/lib/env';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { encryptBuffer } from '@/lib/uploads/crypto';
-import { buildDocumentShareUrl, signDocumentShareToken } from '@/lib/share/pdf-token';
+import { buildDocumentShareUrl, buildDocumentXmlShareUrl, signDocumentShareToken } from '@/lib/share/pdf-token';
 import { renderDocumentPdf } from '@/lib/pdf/render-document';
 
 // Aucune donnée client : le PDF est généré par le serveur.
-const bodySchema = z.object({}).passthrough();
+// includeXml : renvoie aussi le lien de téléchargement du XML (même jeton).
+const bodySchema = z.object({ includeXml: z.boolean().optional() }).passthrough();
 
 const SHARED_PDF_DIR = path.join(
   process.env.UPLOADS_DIR ?? path.join(process.cwd(), 'uploads'),
@@ -48,7 +49,7 @@ export async function POST(
         );
       }
 
-      bodySchema.parse(await req2.json());
+      const parsedBody = bodySchema.parse(await req2.json());
       // PDF généré par le serveur à partir du document enregistré
       const rendered = await renderDocumentPdf(doc.id, user.id);
       if (!rendered) return jsonError('NOT_FOUND', 'Document introuvable', 404);
@@ -83,8 +84,9 @@ export async function POST(
       const token = signDocumentShareToken(doc.id);
       const origin = req2.nextUrl.origin || env.APP_URL.replace(/\/+$/, '');
       const downloadUrl = buildDocumentShareUrl(origin, doc.id, token);
+      const xmlUrl = parsedBody.includeXml ? buildDocumentXmlShareUrl(origin, doc.id, token) : undefined;
 
-      return jsonOk({ downloadUrl });
+      return jsonOk({ downloadUrl, xmlUrl });
     });
   } catch (err) {
     return handleApiError(err);
