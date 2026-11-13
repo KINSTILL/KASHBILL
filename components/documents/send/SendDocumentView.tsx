@@ -19,7 +19,7 @@ const METHODS: { id: Method; icon: typeof MessageCircle; fr: string; en: string 
   { id: 'download', icon: Download, fr: 'Télécharger', en: 'Download' },
 ];
 
-type Done = { method: Method; recipient: string | null };
+type Done = { method: Method; recipient: string | null; xmlSent?: boolean };
 
 export function SendDocumentView({
   documentId,
@@ -118,7 +118,7 @@ export function SendDocumentView({
         );
         return;
       }
-      setDone({ method, recipient: phone.trim() });
+      setDone({ method, recipient: phone.trim(), xmlSent: data?.xmlSent === true });
     } catch {
       setError(fr ? 'Connexion interrompue. Réessayez.' : 'Connection lost. Please try again.');
     } finally {
@@ -142,6 +142,13 @@ export function SendDocumentView({
           <p className="text-sm text-slate-600">{detail}</p>
           <p className="font-mono text-xs text-slate-500">{pdfDoc.number}</p>
         </div>
+        {done.method === 'whatsapp' && includeXml && done.xmlSent === false && (
+          <p role="alert" className="w-full rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            {fr
+              ? "Le PDF a bien été envoyé, mais le fichier XML n'a pas pu être joint. Vous pouvez le télécharger depuis le document."
+              : 'The PDF was sent, but the XML file could not be attached. You can download it from the document.'}
+          </p>
+        )}
         <div className="flex w-full flex-col gap-2 pt-2 sm:flex-row">
           <Link href={`/${locale}/documents/${documentId}` as Route} className="flex-1">
             <Button fullWidth variant="secondary">{fr ? 'Retour au document' : 'Back to document'}</Button>
