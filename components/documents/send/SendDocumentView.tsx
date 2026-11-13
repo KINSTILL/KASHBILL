@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { CheckCircle2, Download, Link2, MessageCircle, Smartphone } from 'lucide-react';
+import { CheckCircle2, ChevronDown, Download, Link2, MessageCircle, Search, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { InfoTip } from '@/components/ui/InfoTip';
 import { downloadBlob } from '@/lib/pdf/render';
 import { useOnlineStatus } from '@/lib/device/network';
+import { COUNTRIES, DEFAULT_COUNTRY, findCountryByPhone, type DialCountry } from '@/lib/countries/dial-codes';
 import type { PdfDocument } from '@/lib/pdf/types';
 
 type Method = 'whatsapp' | 'download' | 'link';
@@ -50,7 +50,27 @@ export function SendDocumentView({
   const [method, setMethod] = useState<Method>('whatsapp');
   const [channel, setChannel] = useState<Channel>('shared');
   const personalAvailable = personalWhatsApp.hasAddOn && personalWhatsApp.connected;
-  const [phone, setPhone] = useState(defaultPhone);
+
+  // Pays du destinataire : déduit du numéro du client (« +XX… »), sinon Cameroun.
+  // Le numéro national est saisi sans l'indicatif ; l'indicatif est ajouté à l'envoi.
+  const initialCountry = useMemo<DialCountry>(() => {
+    if (defaultPhone.trim().startsWith('+') || defaultPhone.trim().startsWith('00')) {
+      return findCountryByPhone(defaultPhone);
+    }
+    return DEFAULT_COUNTRY;
+  }, [defaultPhone]);
+
+  const [country, setCountry] = useState<DialCountry>(initialCountry);
+  const [phone, setPhone] = useState(() => {
+    const raw = defaultPhone.trim();
+    if (raw.startsWith('+') || raw.startsWith('00')) {
+      const country0 = findCountryByPhone(raw);
+      const digits = raw.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
+      const cc = country0.dialCode.replace(/\D/g, '');
+      return digits.startsWith(cc) ? digits.slice(cc.length) : digits;
+    }
+    return raw;
+  });
   const [message, setMessage] = useState(
     fr
       ? `Bonjour${clientName ? ` ${clientName}` : ''}, veuillez trouver ci-joint ${docLabel.toLowerCase()} ${pdfDoc.number}. Merci pour votre confiance.`
@@ -137,12 +157,18 @@ export function SendDocumentView({
       return;
     }
 
+    // Le numéro national saisi est accompagné du pays choisi : l'indicatif est ajouté côté serveur.
+    // Si l'utilisateur a tapé un indicatif explicite (`+…`), il fait foi.
+    const fullNumber = phone.trim().startsWith('+') || phone.trim().startsWith('00')
+      ? phone.trim()
+      : `${country.dialCode}${phone.replace(/\D/g, '').replace(/^0+/, '')}`;
+
     setBusy(true);
     try {
       const res = await fetch(`/api/documents/${documentId}/send-whatsapp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ phone: phone.trim(), message, filename: fileName, locale, mode: channel, includeXml }),
+        body: JSON.stringify({ phone: fullNumber, message, filename: fileName, locale, mode: channel, includeXml, countryCode: country.code }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -165,7 +191,7 @@ export function SendDocumentView({
         );
         return;
       }
-      setDone({ method, recipient: phone.trim(), xmlSent: data?.xmlSent === true });
+      setDone({ method, recipient: `+${country.dialCode.replace(/\D/g, '')} ${phone.trim()}`, xmlSent: data?.xmlSent === true });
     } catch {
       setError(fr ? 'Connexion interrompue. Réessayez.' : 'Connection lost. Please try again.');
     } finally {
@@ -361,15 +387,19 @@ export function SendDocumentView({
                 </Link>
               )}
             </div>
-            <Input
-              id="send-phone"
-              type="tel"
-              inputMode="tel"
+            <CountryPhoneField
+              fr={fr}
               label={fr ? 'Numéro WhatsApp du client' : 'Client WhatsApp number'}
-              placeholder="6 99 12 34 56"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="h-12"
+              country={country}
+              onCountryChange={(c) => {
+                setCountry(c);
+                setError(null);
+              }}
+              phone={phone}
+              onPhoneChange={(v) => {
+                setPhone(v);
+                setError(null);
+              }}
             />
             <div>
               <label htmlFor="send-message" className="mb-1.5 block text-[13px] font-medium text-slate-700">
@@ -457,6 +487,151 @@ export function SendDocumentView({
           {submitLabel}
         </Button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Champ numéro avec choix de l'indicatif pays.
+ * Reprend exactement le style du champ numéro de l'écran d'envoi (label, h-12, rounded-xl,
+ * focus emerald) : aucune rupture visuelle avec les autres champs.
+ */
+function CountryPhoneField({
+  fr,
+  label,
+  country,
+  onCountryChange,
+  phone,
+  onPhoneChange,
+}: {
+  fr: boolean;
+  label: string;
+  country: DialCountry;
+  onCountryChange: (c: DialCountry) => void;
+  phone: string;
+  onPhoneChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const filtered = COUNTRIES.filter((c) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      c.nameFr.toLowerCase().includes(q) ||
+      c.nameEn.toLowerCase().includes(q) ||
+      c.dialCode.includes(q) ||
+      c.code.toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <div className="relative" ref={boxRef}>
+      <label htmlFor="send-phone" className="mb-1.5 block text-[13px] font-medium text-slate-700">
+        {label}
+      </label>
+      <div className="flex rounded-xl border border-slate-200 bg-white focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          aria-label={fr ? 'Choisir l’indicatif du pays' : 'Select country code'}
+          className="inline-flex h-12 select-none items-center gap-1.5 rounded-l-xl border-r border-slate-200 bg-slate-50/60 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 focus:outline-none"
+        >
+          <span className="text-lg leading-none" aria-hidden="true">
+            {country.flag}
+          </span>
+          <span className="font-mono text-xs font-bold text-slate-800">{country.dialCode}</span>
+          <ChevronDown
+            className={`h-3.5 w-3.5 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+            aria-hidden="true"
+          />
+        </button>
+        <input
+          id="send-phone"
+          name="phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel-national"
+          placeholder={fr ? '6 99 12 34 56' : '6 99 12 34 56'}
+          value={phone}
+          onChange={(e) => onPhoneChange(e.target.value)}
+          className="h-12 w-full rounded-r-xl bg-transparent px-3 text-[16px] text-ink placeholder:text-slate-400 focus:outline-none sm:text-sm"
+        />
+      </div>
+      {open && (
+        <div
+          role="listbox"
+          className="absolute left-0 top-full z-50 mt-1.5 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-black/5"
+        >
+          <div className="relative mb-1.5 px-1 pt-1">
+            <Search className="pointer-events-none absolute left-3.5 top-3 h-4 w-4 text-slate-400" aria-hidden="true" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={fr ? 'Rechercher un pays ou indicatif…' : 'Search country or code…'}
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-3 text-xs text-slate-800 placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            />
+          </div>
+          <div className="max-h-60 overflow-y-auto overscroll-contain divide-y divide-slate-50">
+            {filtered.length === 0 ? (
+              <div className="py-4 text-center text-xs text-slate-400">
+                {fr ? 'Aucun pays trouvé' : 'No country found'}
+              </div>
+            ) : (
+              filtered.map((c) => {
+                const selected = c.code === country.code;
+                return (
+                  <button
+                    key={c.code}
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    onClick={() => {
+                      onCountryChange(c);
+                      setOpen(false);
+                      setSearch('');
+                    }}
+                    className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition-colors ${
+                      selected ? 'bg-emerald-50 font-semibold text-emerald-900' : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5 truncate">
+                      <span className="text-base leading-none" aria-hidden="true">
+                        {c.flag}
+                      </span>
+                      <span className="truncate">{fr ? c.nameFr : c.nameEn}</span>
+                    </span>
+                    <span className="flex shrink-0 items-center gap-2">
+                      <span className="font-mono text-[11px] font-bold text-slate-500">{c.dialCode}</span>
+                      {selected && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />}
+                    </span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,8 @@
-export function buildWhatsAppUrl(rawPhone: string, message: string): string {
+/**
+ * Construit un lien wa.me. Si le numéro porte un indicatif explicite (`+…`, `00…`), il fait foi.
+ * Sinon, `dialCode` (ex. `+237`) est ajouté au numéro national. Aucun pays n'est imposé.
+ */
+export function buildWhatsAppUrl(rawPhone: string, message: string, dialCode = '+237'): string {
   const trimmed = rawPhone.trim();
   const encodedText = encodeURIComponent(message);
 
@@ -6,8 +10,10 @@ export function buildWhatsAppUrl(rawPhone: string, message: string): string {
     return `https://wa.me/?text=${encodedText}`;
   }
 
+  const cc = dialCode.replace(/\D/g, '');
+
   if (trimmed.startsWith('+') || trimmed.startsWith('00')) {
-    const intlDigits = trimmed.replace(/^\+|^00/, '').replace(/\D/g, '');
+    const intlDigits = trimmed.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
     if (!intlDigits) {
       return `https://wa.me/?text=${encodedText}`;
     }
@@ -19,8 +25,13 @@ export function buildWhatsAppUrl(rawPhone: string, message: string): string {
     return `https://wa.me/?text=${encodedText}`;
   }
 
+  // Numéro déjà préfixé par l'indicatif choisi → conservé.
   const withIndicatif =
-    digits.startsWith('237') || digits.length > 9 ? digits : `237${digits}`;
+    cc && digits.startsWith(cc) && digits.length > cc.length + 4
+      ? digits
+      : cc
+        ? `${cc}${digits}`
+        : digits;
   return `https://wa.me/${withIndicatif}?text=${encodedText}`;
 }
 

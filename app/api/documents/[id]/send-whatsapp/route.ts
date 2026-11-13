@@ -15,6 +15,8 @@ const bodySchema = z.object({
   locale: z.enum(['fr', 'en']).optional(),
   mode: z.enum(['shared', 'personal']).optional(),
   includeXml: z.boolean().optional(),
+  /** Code pays ISO-2 du destinataire, choisi par l'utilisateur (ex. FR, CI, CM). */
+  countryCode: z.string().length(2).optional(),
 });
 
 export async function POST(
@@ -59,6 +61,7 @@ export async function POST(
         fileName: parsed.filename ?? `${doc.number}.pdf`,
         isEn,
         mode: parsed.mode,
+        countryCode: parsed.countryCode,
         xml,
       });
 

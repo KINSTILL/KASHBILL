@@ -1,4 +1,5 @@
 import { isCustomWhatsAppActive } from '@/lib/addons/queries';
+import { getCountryByCode } from '@/lib/countries/dial-codes';
 
 /**
  * Envoi d'un document par WhatsApp. Un seul chemin pour l'envoi simple et l'envoi en masse.
@@ -24,6 +25,12 @@ export type WhatsAppSendInput = {
    * - absent     : comportement historique (add-on actif → personnel, sinon partagé).
    */
   mode?: 'shared' | 'personal';
+  /**
+   * Code pays ISO-2 du destinataire (ex. `FR`, `CI`, `CM`), choisi par l'utilisateur.
+   * Sert à résoudre l'indicatif : n'importe quel pays peut être ciblé.
+   * Absent → `phone` doit déjà contenir l'indicatif, sinon Cameroun par défaut.
+   */
+  countryCode?: string;
   /** Fichier XML à envoyer juste après le PDF (facultatif). Son échec ne fait pas échouer l'envoi. */
   xml?: { content: string; fileName: string };
 };
@@ -43,46 +50,62 @@ export type WhatsAppSendResult =
       details?: string;
     };
 
+/** Vrai si le numéro contient déjà un indicatif international explicite (+ ou 00). */
+export function hasInternationalPrefix(rawPhone: string): boolean {
+  return /^\s*(\+|00)/.test(rawPhone ?? '');
+}
+
 /**
  * Normalise un numéro vers le format attendu par WhatsApp/Evolution :
  * chiffres uniquement, avec indicatif pays, sans `+`, sans `00` et sans `0` initial.
  *
- * - `+237 6 99…`, `00237 6 99…`, `237 6 99…` → `237699…`
- * - `06 99 12 34 56` ou `0 6 99…` (numéro national avec 0) → `237699…`
- * - `6 99 12 34 56` (numéro national sans 0) → `237699123456`
- * - `+237 06 99…` (0 parasite après l'indicatif) → `237699…`
- * - Numéro très long (déjà international) → conservé tel quel.
+ * Le pays est celui choisi par l'utilisateur (`dialCode`, ex. `+237`, `+33`, `+225`) :
+ * n'importe quel pays fonctionne, aucun indicatif n'est imposé.
  *
- * `defaultCountryCode` par défaut = 237 (Cameroun).
+ * - `+33 6 12 34 56`, `0033 6 12 34 56` → `336123456`
+ * - `06 12 34 56` avec `+33` → `336123456`
+ * - `6 12 34 56` avec `+33` → `336123456`
+ * - `+237 06 99…` (0 parasite après l'indicatif) → `237699…`
+ * - Numéro déjà préfixé par l'indicatif choisi → conservé tel quel.
+ *
+ * @param rawPhone   Numéro saisi (peut contenir +, 00, espaces, tirets, parenthèses)
+ * @param dialCode   Indicatif du pays choisi, ex. `+237` (défaut `+237` pour compatibilité)
  */
-export function normalizeWhatsAppNumber(rawPhone: string, defaultCountryCode = '237'): string {
+export function normalizeWhatsAppNumber(rawPhone: string, dialCode = '+237'): string {
   if (!rawPhone) return '';
   const trimmed = rawPhone.trim();
   if (!trimmed) return '';
 
-  const hadInternationalPrefix = /^\+|^00/.test(trimmed);
-  // On retire d'abord le préfixe international (`+` ou `00`) avant d'extraire les chiffres.
+  // Indicatif normalisé en chiffres (ex. `+33` → `33`).
+  const cc = dialCode.replace(/\D/g, '');
+  const hasExplicitPrefix = /^\+|^00/.test(trimmed);
+  // On retire le préfixe international (`+` ou `00`) avant d'extraire les chiffres.
   let digits = trimmed.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
   if (!digits) return '';
 
-  // Préfixe international explicite (+ ou 00).
-  if (hadInternationalPrefix) {
+  // Préfixe international explicite : l'indicatif saisi fait foi.
+  if (hasExplicitPrefix) {
     // `0` parasite juste après l'indicatif : +237 06… → 2376…
-    const doubled = `${defaultCountryCode}0`;
-    if (digits.startsWith(doubled)) digits = `${defaultCountryCode}${digits.slice(doubled.length)}`;
+    const doubled = `${cc}0`;
+    if (cc && digits.startsWith(doubled)) digits = `${cc}${digits.slice(doubled.length)}`;
     return digits.length >= 6 ? digits : '';
   }
 
-  // Déjà préfixé par l'indicatif pays (ex. 2376XXXXXXXXX).
-  if (digits.startsWith(defaultCountryCode) && digits.length > defaultCountryCode.length + 6) {
+  // Pas d'indicatif choisi : on renvoie le numéro nettoyé (compatibilité).
+  if (!cc) {
+    const national = digits.replace(/^0+/, '');
+    return national || '';
+  }
+
+  // Déjà préfixé par l'indicatif choisi (ex. 2376XXXXXXXXX quand le pays est CM).
+  if (digits.startsWith(cc) && digits.length > cc.length + 4) {
     return digits;
   }
 
-  // Numéro national : on retire les 0 de tête puis on ajoute l'indicatif.
+  // Numéro national : on retire les 0 de tête puis on ajoute l'indicatif choisi.
   const national = digits.replace(/^0+/, '');
   if (!national) return '';
-  if (national.length > 10) return national;
-  return `${defaultCountryCode}${national}`;
+  return `${cc}${national}`;
 }
 
 /** Message encadré (Mode A) : identité de l'émetteur et clause d'outil technique. */
@@ -207,7 +230,9 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
   const configuredInstance = process.env.EVOLUTION_INSTANCE_NAME?.trim();
   if (!evolutionUrl || !evolutionKey) return { ok: false, reason: 'NOT_CONFIGURED' };
 
-  const number = normalizeWhatsAppNumber(input.phone);
+  // Indicatif résolu depuis le pays choisi par l'utilisateur (n'importe quel pays).
+  const dialCode = input.countryCode ? getCountryByCode(input.countryCode).dialCode : undefined;
+  const number = normalizeWhatsAppNumber(input.phone, dialCode);
   if (!number) return { ok: false, reason: 'INVALID_NUMBER' };
 
   const cleanBase64 = input.pdf.toString('base64');

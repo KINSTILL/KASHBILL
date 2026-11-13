@@ -29,6 +29,22 @@ describe('buildWhatsAppUrl', () => {
     );
   });
 
+  it('respecte un indicatif étranger fourni', () => {
+    expect(buildWhatsAppUrl('6 12 34 56 78', msg, '+33')).toBe(
+      `https://wa.me/33612345678?text=${encodeURIComponent(msg)}`
+    );
+    expect(buildWhatsAppUrl('6 12 34 56 78', msg, '+33')).not.toContain('237');
+  });
+
+  it('privilégie l’indicatif explicite du numéro', () => {
+    expect(buildWhatsAppUrl('+33612345678', msg, '+237')).toBe(
+      `https://wa.me/33612345678?text=${encodeURIComponent(msg)}`
+    );
+    expect(buildWhatsAppUrl('0033612345678', msg, '+237')).toBe(
+      `https://wa.me/33612345678?text=${encodeURIComponent(msg)}`
+    );
+  });
+
   it('URL-encode les caractères spéciaux du message', () => {
     const special = 'Bonjour ! Comment ça va ? 😊 #test';
     const url = buildWhatsAppUrl('699123456', special);

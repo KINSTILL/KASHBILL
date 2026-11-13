@@ -110,6 +110,7 @@ export async function POST(req: NextRequest): Promise<Response> {
             pdf: rendered.buffer,
             fileName: `${created.number}.pdf`,
             isEn,
+            // Le numéro enregistré du client porte normalement son indicatif : on ne force pas le pays.
             xml,
           });
 
