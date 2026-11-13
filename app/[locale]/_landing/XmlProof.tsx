@@ -47,22 +47,22 @@ export function XmlProof({ locale = 'fr' }: { locale?: string }) {
           </p>
         </div>
 
-        <div className="mt-8 grid items-center gap-4 md:grid-cols-[1fr_auto_1fr]">
-          <div className="rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4">
+        <div className="mt-8 grid items-center gap-4 max-md:items-stretch md:grid-cols-[1fr_auto_1fr]">
+          <div className="w-full min-w-0 rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4">
             <div className="mb-2 flex items-center gap-2 text-xs font-bold text-slate-700">
               <FileText className="h-4 w-4 text-emerald-600" />
               {isFr ? 'Pour vos clients : le PDF' : 'For your clients: the PDF'}
             </div>
-            <div className="space-y-1.5 rounded-xl border border-slate-200 bg-white p-3 text-[11px] text-slate-600">
-              <div className="flex justify-between font-semibold text-slate-900">
-                <span>Kmer Chic Boutique</span>
-                <span>FA-2026-0042</span>
+            <div className="w-full min-w-0 space-y-1.5 rounded-xl border border-slate-200 bg-white p-3 text-[11px] text-slate-600">
+              <div className="flex justify-between gap-2 font-semibold text-slate-900">
+                <span className="min-w-0 truncate">Kmer Chic Boutique</span>
+                <span className="shrink-0">FA-2026-0042</span>
               </div>
               <div className="h-px bg-slate-100" />
-              <div className="flex justify-between"><span>Robe Soie &amp; Wax</span><span className="font-mono">45 000</span></div>
-              <div className="flex justify-between"><span>Sac cuir</span><span className="font-mono">30 000</span></div>
-              <div className="flex justify-between rounded-md bg-emerald-600 px-2 py-1 font-bold text-white">
-                <span>Total</span><span className="font-mono">77 500 FCFA</span>
+              <div className="flex justify-between gap-2"><span className="min-w-0 truncate">Robe Soie &amp; Wax</span><span className="shrink-0 font-mono">45 000</span></div>
+              <div className="flex justify-between gap-2"><span className="min-w-0 truncate">Sac cuir</span><span className="shrink-0 font-mono">30 000</span></div>
+              <div className="flex justify-between gap-2 rounded-md bg-emerald-600 px-2 py-1 font-bold text-white">
+                <span>Total</span><span className="shrink-0 font-mono">77 500 FCFA</span>
               </div>
             </div>
           </div>
@@ -73,12 +73,12 @@ export function XmlProof({ locale = 'fr' }: { locale?: string }) {
             </span>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/90 bg-slate-950 p-4">
+          <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-950 p-4">
             <div className="mb-2 flex items-center gap-2 text-xs font-bold text-slate-100">
               <FileCode2 className="h-4 w-4 text-emerald-400" />
               {isFr ? 'Pour vos logiciels : le XML' : 'For your software: the XML'}
             </div>
-            <pre className="overflow-x-auto rounded-xl bg-slate-900 p-3 text-[10.5px] leading-relaxed text-emerald-200">
+            <pre className="w-full min-w-0 max-w-full overflow-x-auto rounded-xl bg-slate-900 p-3 text-[10px] leading-relaxed text-emerald-200 md:text-[10.5px]">
               <code>{XML_SAMPLE}</code>
             </pre>
           </div>
