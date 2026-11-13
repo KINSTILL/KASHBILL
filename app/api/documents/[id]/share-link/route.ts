@@ -1,12 +1,9 @@
 import type { NextRequest } from 'next/server';
-import { mkdir, writeFile } from 'node:fs/promises';
-import path from 'node:path';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { env } from '@/lib/env';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
-import { encryptBuffer } from '@/lib/uploads/crypto';
 import { buildDocumentShareUrl, buildDocumentXmlShareUrl, signDocumentShareToken } from '@/lib/share/pdf-token';
 import { renderDocumentPdf } from '@/lib/pdf/render-document';
 
@@ -14,13 +11,11 @@ import { renderDocumentPdf } from '@/lib/pdf/render-document';
 // includeXml : renvoie aussi le lien de téléchargement du XML (même jeton).
 const bodySchema = z.object({ includeXml: z.boolean().optional() }).passthrough();
 
-const SHARED_PDF_DIR = path.join(
-  process.env.UPLOADS_DIR ?? path.join(process.cwd(), 'uploads'),
-  'shared-pdfs'
-);
-
 // Aucun export hors handlers : Next.js rejette les autres exports dans un route.ts.
 // La signature du jeton vit dans @/lib/share/pdf-token.
+//
+// Le PDF n'est plus écrit sur le disque : la route publique le régénère à la volée.
+// On rend quand même le PDF ici pour valider qu'il est générable avant de renvoyer le lien.
 
 export async function POST(
   req: NextRequest,
@@ -50,15 +45,9 @@ export async function POST(
       }
 
       const parsedBody = bodySchema.parse(await req2.json());
-      // PDF généré par le serveur à partir du document enregistré
+      // Vérifie que le PDF est générable avant de promettre un lien valable.
       const rendered = await renderDocumentPdf(doc.id, user.id);
       if (!rendered) return jsonError('NOT_FOUND', 'Document introuvable', 404);
-      const pdfBuffer = rendered.buffer;
-
-      await mkdir(SHARED_PDF_DIR, { recursive: true });
-      const encrypted = encryptBuffer(pdfBuffer);
-      const filePath = path.join(SHARED_PDF_DIR, `${doc.id}.pdf.enc`);
-      await writeFile(filePath, encrypted);
 
       if (!doc.sentViaWhatsAppAt) {
         await prisma.document.update({

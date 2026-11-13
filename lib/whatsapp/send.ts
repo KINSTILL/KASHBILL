@@ -39,16 +39,50 @@ export type WhatsAppSendResult =
         | 'NO_INSTANCE_FOUND'
         | 'GATEWAY_ERROR';
       gatewayStatus?: number;
+      /** Motif technique court renvoyé par Evolution (aide au diagnostic). */
+      details?: string;
     };
 
-export function normalizeWhatsAppNumber(rawPhone: string): string {
+/**
+ * Normalise un numéro vers le format attendu par WhatsApp/Evolution :
+ * chiffres uniquement, avec indicatif pays, sans `+`, sans `00` et sans `0` initial.
+ *
+ * - `+237 6 99…`, `00237 6 99…`, `237 6 99…` → `237699…`
+ * - `06 99 12 34 56` ou `0 6 99…` (numéro national avec 0) → `237699…`
+ * - `6 99 12 34 56` (numéro national sans 0) → `237699123456`
+ * - `+237 06 99…` (0 parasite après l'indicatif) → `237699…`
+ * - Numéro très long (déjà international) → conservé tel quel.
+ *
+ * `defaultCountryCode` par défaut = 237 (Cameroun).
+ */
+export function normalizeWhatsAppNumber(rawPhone: string, defaultCountryCode = '237'): string {
+  if (!rawPhone) return '';
   const trimmed = rawPhone.trim();
-  if (trimmed.startsWith('+') || trimmed.startsWith('00')) {
-    return trimmed.replace(/^\+|^00/, '').replace(/\D/g, '');
-  }
-  const digits = trimmed.replace(/\D/g, '').replace(/^0+/, '');
+  if (!trimmed) return '';
+
+  const hadInternationalPrefix = /^\+|^00/.test(trimmed);
+  // On retire d'abord le préfixe international (`+` ou `00`) avant d'extraire les chiffres.
+  let digits = trimmed.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
   if (!digits) return '';
-  return digits.startsWith('237') || digits.length > 9 ? digits : `237${digits}`;
+
+  // Préfixe international explicite (+ ou 00).
+  if (hadInternationalPrefix) {
+    // `0` parasite juste après l'indicatif : +237 06… → 2376…
+    const doubled = `${defaultCountryCode}0`;
+    if (digits.startsWith(doubled)) digits = `${defaultCountryCode}${digits.slice(doubled.length)}`;
+    return digits.length >= 6 ? digits : '';
+  }
+
+  // Déjà préfixé par l'indicatif pays (ex. 2376XXXXXXXXX).
+  if (digits.startsWith(defaultCountryCode) && digits.length > defaultCountryCode.length + 6) {
+    return digits;
+  }
+
+  // Numéro national : on retire les 0 de tête puis on ajoute l'indicatif.
+  const national = digits.replace(/^0+/, '');
+  if (!national) return '';
+  if (national.length > 10) return national;
+  return `${defaultCountryCode}${national}`;
 }
 
 /** Message encadré (Mode A) : identité de l'émetteur et clause d'outil technique. */
@@ -200,7 +234,7 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
     });
     if (!res.ok) {
       console.warn('[EVOLUTION API] envoi personnel en échec:', res.status, res.details?.slice(0, 300));
-      return { ok: false, reason: 'GATEWAY_ERROR', gatewayStatus: res.status };
+      return { ok: false, reason: 'GATEWAY_ERROR', gatewayStatus: res.status, details: res.details?.slice(0, 300) };
     }
     return { ok: true, mode: 'custom', xmlSent: await sendXmlAfter(input, { evolutionUrl, evolutionKey, instanceName: name, number }) };
   }
@@ -229,7 +263,7 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
   }
   if (!res.ok) {
     console.warn('[EVOLUTION API] envoi partagé en échec:', res.status, res.details?.slice(0, 300));
-    return { ok: false, reason: 'GATEWAY_ERROR', gatewayStatus: res.status };
+    return { ok: false, reason: 'GATEWAY_ERROR', gatewayStatus: res.status, details: res.details?.slice(0, 300) };
   }
   const usedFinal = usedInstance;
   return {

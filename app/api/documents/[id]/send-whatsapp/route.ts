@@ -64,7 +64,17 @@ export async function POST(
 
       if (!result.ok) {
         if (result.reason === 'INVALID_NUMBER') {
-          return jsonError('VALIDATION_ERROR', 'Numéro WhatsApp invalide', 400);
+          return jsonError('VALIDATION_ERROR', 'Numéro WhatsApp invalide. Vérifiez l’indicatif et le numéro.', 400);
+        }
+        if (result.reason === 'GATEWAY_ERROR') {
+          // 404/400 renvoyés par Evolution = numéro inexistant sur WhatsApp ou mal formé.
+          const noWhatsApp = result.gatewayStatus === 400 || result.gatewayStatus === 404;
+          return jsonOk({
+            sentDirect: false,
+            reason: result.reason,
+            gatewayStatus: result.gatewayStatus,
+            code: noWhatsApp ? 'NO_WHATSAPP' : 'GATEWAY_ERROR',
+          });
         }
         if (result.reason === 'PERSONAL_NOT_CONNECTED') {
           return jsonError(

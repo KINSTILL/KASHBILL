@@ -150,6 +150,14 @@ export function SendDocumentView({
         return;
       }
       if (!data?.sentDirect) {
+        if (data?.code === 'NO_WHATSAPP') {
+          setError(
+            fr
+              ? "Ce numéro ne semble pas avoir WhatsApp, ou il est mal formé. Vérifiez le numéro (avec l’indicatif, ex. +237) et réessayez."
+              : 'This number does not appear to have WhatsApp, or it is malformed. Check the number (with country code, e.g. +237) and try again.'
+          );
+          return;
+        }
         setError(
           fr
             ? "L'envoi WhatsApp n'a pas abouti. Réessayez ou téléchargez le PDF."
