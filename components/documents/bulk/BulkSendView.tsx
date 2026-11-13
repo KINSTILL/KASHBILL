@@ -12,7 +12,7 @@ import { isPro } from '@/lib/auth/plan';
 
 type ClientItem = { id: string; name: string; phone: string | null };
 type Result = { clientId: string; clientName: string; status: 'SENT' | 'FAILED'; number?: string; error?: string };
-type Summary = { total: number; success: number; fail: number; aborted: string | null; results: Result[] };
+type Summary = { total: number; success: number; fail: number; aborted: string | null; xmlFail?: number; results: Result[] };
 
 const MAX = 30;
 
@@ -54,6 +54,7 @@ export function BulkSendView({
   const [selected, setSelected] = useState<string[]>([]);
   const [personal, setPersonal] = useState(false);
   const [message, setMessage] = useState('');
+  const [includeXml, setIncludeXml] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -93,7 +94,7 @@ export function BulkSendView({
       const res = await fetch('/api/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ documentId, clientIds: selected, message: message.trim() }),
+        body: JSON.stringify({ documentId, clientIds: selected, message: message.trim(), includeXml }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -129,6 +130,13 @@ export function BulkSendView({
           {summary.aborted && (
             <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
               {errorLabel(summary.aborted, fr)}
+            </p>
+          )}
+          {includeXml && (summary.xmlFail ?? 0) > 0 && (
+            <p role="alert" className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              {fr
+                ? `Le PDF a été envoyé, mais le fichier XML n'a pas pu être joint pour ${summary.xmlFail} destinataire(s).`
+                : `The PDF was sent, but the XML file could not be attached for ${summary.xmlFail} recipient(s).`}
             </p>
           )}
         </div>
@@ -296,6 +304,24 @@ export function BulkSendView({
           placeholder={fr ? 'Ajoutez un mot pour vos clients…' : 'Add a note for your clients…'}
           className="w-full rounded-xl border border-slate-200 bg-white p-3 text-[16px] sm:text-sm text-ink focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
         />
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={includeXml}
+            onChange={(e) => setIncludeXml(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+          />
+          <span>
+            <span className="block font-semibold text-slate-900">
+              {fr ? 'Joindre aussi le fichier XML' : 'Also attach the XML file'}
+            </span>
+            <span className="block text-xs text-slate-500">
+              {fr
+                ? 'Envoyé juste après chaque PDF, lisible par les logiciels de comptabilité.'
+                : 'Sent right after each PDF, readable by accounting software.'}
+            </span>
+          </span>
+        </label>
       </div>
 
       {error && (

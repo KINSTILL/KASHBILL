@@ -7,6 +7,8 @@ import { createDocument } from '@/lib/documents/create';
 import { isPro } from '@/lib/auth/plan';
 import { renderDocumentPdf } from '@/lib/pdf/render-document';
 import { sendDocumentViaWhatsApp } from '@/lib/whatsapp/send';
+import { loadPdfDocument } from '@/lib/documents/load-pdf-document';
+import { buildDocumentXml } from '@/lib/einvoice/ubl';
 
 // Envoi en masse : WhatsApp uniquement, depuis l'instance MyCashBill (ou le numéro personnel
 // si l'add-on est actif). Le destinataire est choisi explicitement par l'utilisateur.
@@ -17,6 +19,7 @@ const schema = z.object({
   documentId: z.string().min(1),
   clientIds: z.array(z.string().min(1)).min(1).max(MAX_RECIPIENTS),
   message: z.string().max(1000).optional().default(''),
+  includeXml: z.boolean().optional(),
 });
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -67,6 +70,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       }> = [];
       let success = 0;
       let fail = 0;
+      let xmlFail = 0;
       let aborted: string | null = null;
 
       for (let i = 0; i < withPhone.length; i++) {
@@ -92,6 +96,13 @@ export async function POST(req: NextRequest): Promise<Response> {
             : `${greeting}voici votre document ${created.number}.`;
           const message = data.message.trim() ? `${body}\n\n${data.message.trim()}` : body;
 
+          // XML facultatif : généré à partir du document créé pour ce destinataire.
+          let xml: { content: string; fileName: string } | undefined;
+          if (data.includeXml) {
+            const loaded = await loadPdfDocument(created.documentId, user.id);
+            if (loaded) xml = { content: buildDocumentXml(loaded.pdfDoc), fileName: `${created.number}.xml` };
+          }
+
           const sent = await sendDocumentViaWhatsApp({
             user,
             phone: c.phone!,
@@ -99,6 +110,7 @@ export async function POST(req: NextRequest): Promise<Response> {
             pdf: rendered.buffer,
             fileName: `${created.number}.pdf`,
             isEn,
+            xml,
           });
 
           if (!sent.ok) {
@@ -108,6 +120,8 @@ export async function POST(req: NextRequest): Promise<Response> {
             }
             throw new Error(sent.reason);
           }
+
+          if (sent.xmlSent === false) xmlFail++;
 
           await prisma.bulkJobItem.create({
             data: { jobId: job.id, clientId: c.id, documentId: created.documentId, status: 'SUCCESS' },
@@ -143,6 +157,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         success,
         fail,
         aborted,
+        xmlFail,
         results,
       });
     });
