@@ -883,6 +883,22 @@ async function seedFAQ() {
       answer: 'A delivery slip documents the physical handover of merchandise to your client, serving as an acknowledgment of receipt. You can generate it instantly from an existing order or invoice. MyCashBill provides technical document generation without certifying logistics execution. See our Terms of Service.',
       isPublished: true,
     },
+    {
+      category: 'documents',
+      order: 9,
+      locale: 'FR',
+      question: 'À quoi sert le fichier XML joint à mes documents ?',
+      answer: 'Chaque document MyCashBill peut être téléchargé en PDF (pour votre client) et en fichier XML structuré au format UBL (pour vos logiciels). Le XML contient les mêmes informations que le PDF : numéro, date, parties, lignes, TVA et totaux. Les logiciels de comptabilité ou de gestion capables de lire ce format peuvent l’importer sans ressaisie. Vous pouvez aussi l’envoyer par WhatsApp juste après le PDF. MyCashBill reste un outil technique : le XML n’a pas valeur de certification fiscale et la conformité de vos documents relève de votre responsabilité. Voir nos CGU.',
+      isPublished: true,
+    },
+    {
+      category: 'documents',
+      order: 9,
+      locale: 'EN',
+      question: 'What is the XML file attached to my documents for?',
+      answer: 'Every MyCashBill document can be downloaded as a PDF (for your client) and as a structured XML file in UBL format (for your software). The XML holds the same information as the PDF: number, date, parties, lines, VAT and totals. Accounting or management software able to read this format can import it without re-typing. You can also send it over WhatsApp right after the PDF. MyCashBill remains a technical tool: the XML is not a tax certification and compliance of your documents is your responsibility. See our Terms of Service.',
+      isPublished: true,
+    },
 
     // ── BILLING (8) ──
     {

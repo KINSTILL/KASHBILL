@@ -50,6 +50,7 @@ export function SendDocumentView({
       : `Hello${clientName ? ` ${clientName}` : ''}, please find attached ${docLabel.toLowerCase()} ${pdfDoc.number}. Thank you for your trust.`
   );
   const [busy, setBusy] = useState(false);
+  const [includeXml, setIncludeXml] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<Done | null>(null);
 
@@ -102,7 +103,7 @@ export function SendDocumentView({
       const res = await fetch(`/api/documents/${documentId}/send-whatsapp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ phone: phone.trim(), message, filename: fileName, locale, mode: channel }),
+        body: JSON.stringify({ phone: phone.trim(), message, filename: fileName, locale, mode: channel, includeXml }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -310,6 +311,24 @@ export function SendDocumentView({
                 className="w-full rounded-xl border border-slate-200 bg-white p-3 text-[16px] sm:text-sm text-ink focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
               />
             </div>
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={includeXml}
+                onChange={(e) => setIncludeXml(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <span>
+                <span className="block font-semibold text-slate-900">
+                  {fr ? 'Joindre aussi le fichier XML' : 'Also attach the XML file'}
+                </span>
+                <span className="block text-xs text-slate-500">
+                  {fr
+                    ? 'Envoyé juste après le PDF, lisible par les logiciels de comptabilité.'
+                    : 'Sent right after the PDF, readable by accounting software.'}
+                </span>
+              </span>
+            </label>
           </>
         )}
 

@@ -24,10 +24,12 @@ export type WhatsAppSendInput = {
    * - absent     : comportement historique (add-on actif → personnel, sinon partagé).
    */
   mode?: 'shared' | 'personal';
+  /** Fichier XML à envoyer juste après le PDF (facultatif). Son échec ne fait pas échouer l'envoi. */
+  xml?: { content: string; fileName: string };
 };
 
 export type WhatsAppSendResult =
-  | { ok: true; mode: 'custom' | 'shared' }
+  | { ok: true; mode: 'custom' | 'shared'; xmlSent?: boolean }
   | {
       ok: false;
       reason:
@@ -124,8 +126,10 @@ async function sendMedia(params: {
   caption: string;
   cleanBase64: string;
   fileName: string;
+  mimetype?: string;
 }): Promise<{ ok: boolean; status: number; details?: string }> {
   const { evolutionUrl, evolutionKey, instanceName, number, caption, cleanBase64, fileName } = params;
+  const mimetype = params.mimetype ?? 'application/pdf';
   const endpoint = `${evolutionUrl}/message/sendMedia/${encodeURIComponent(instanceName)}`;
 
   // Format Evolution API v2
@@ -135,7 +139,7 @@ async function sendMedia(params: {
     body: JSON.stringify({
       number,
       mediatype: 'document',
-      mimetype: 'application/pdf',
+      mimetype,
       caption,
       media: cleanBase64,
       fileName,
@@ -198,7 +202,7 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
       console.warn('[EVOLUTION API] envoi personnel en échec:', res.status, res.details?.slice(0, 300));
       return { ok: false, reason: 'GATEWAY_ERROR', gatewayStatus: res.status };
     }
-    return { ok: true, mode: 'custom' };
+    return { ok: true, mode: 'custom', xmlSent: await sendXmlAfter(input, { evolutionUrl, evolutionKey, instanceName: name, number }) };
   }
 
   // Mode A : instance MyCashBill partagée
@@ -214,10 +218,12 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
   const target = await resolveSharedInstance(evolutionUrl, evolutionKey, configuredInstance);
   if (!target) return { ok: false, reason: 'NO_INSTANCE_FOUND' };
 
+  let usedInstance = target;
   let res = await sendMedia({ evolutionUrl, evolutionKey, instanceName: target, number, caption, cleanBase64, fileName });
   if (!res.ok && res.status === 404 && configuredInstance) {
     const auto = await resolveSharedInstance(evolutionUrl, evolutionKey, undefined);
     if (auto && auto !== configuredInstance) {
+      usedInstance = auto;
       res = await sendMedia({ evolutionUrl, evolutionKey, instanceName: auto, number, caption, cleanBase64, fileName });
     }
   }
@@ -225,5 +231,30 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
     console.warn('[EVOLUTION API] envoi partagé en échec:', res.status, res.details?.slice(0, 300));
     return { ok: false, reason: 'GATEWAY_ERROR', gatewayStatus: res.status };
   }
-  return { ok: true, mode: 'shared' };
+  const usedFinal = usedInstance;
+  return {
+    ok: true,
+    mode: 'shared',
+    xmlSent: await sendXmlAfter(input, { evolutionUrl, evolutionKey, instanceName: usedFinal, number }),
+  };
+}
+
+/** Envoie le fichier XML (si demandé) sur la même instance et vers le même numéro. */
+async function sendXmlAfter(
+  input: WhatsAppSendInput,
+  ctx: { evolutionUrl: string; evolutionKey: string; instanceName: string; number: string }
+): Promise<boolean | undefined> {
+  if (!input.xml) return undefined;
+  try {
+    const r = await sendMedia({
+      ...ctx,
+      caption: '',
+      cleanBase64: Buffer.from(input.xml.content, 'utf-8').toString('base64'),
+      fileName: input.xml.fileName.endsWith('.xml') ? input.xml.fileName : `${input.xml.fileName}.xml`,
+      mimetype: 'application/xml',
+    });
+    return r.ok;
+  } catch {
+    return false;
+  }
 }

@@ -819,7 +819,9 @@
       "q4": "How does the free plan work and when should I go Pro?",
       "a4": "The free plan requires no credit card and lets you create up to 10 invoices per month. As your business grows, you can upgrade to Pro (2,000 FCFA for 30 days, paid securely via Notch Pay by Mobile Money or card) to remove watermarks and get unlimited documents.",
       "q5": "Can I send invoices directly via WhatsApp?",
-      "a5": "Absolutely. One tap opens a ready-to-send WhatsApp message with your invoice link and PDF attached."
+      "a5": "Absolutely. One tap opens a ready-to-send WhatsApp message with your invoice link and PDF attached.",
+      "q6": "What is the XML file provided with every document for?",
+      "a6": "Every document comes as a PDF for your client and as a structured XML file (UBL format) for your software. Accounting software able to read it can import it without re-typing. You can also send it over WhatsApp right after the PDF."
     },
     "finalCta": {
       "title": "Ready to invoice like a pro?",

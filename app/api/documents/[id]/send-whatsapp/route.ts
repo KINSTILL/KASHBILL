@@ -5,6 +5,8 @@ import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { renderDocumentPdf } from '@/lib/pdf/render-document';
 import { sendDocumentViaWhatsApp } from '@/lib/whatsapp/send';
+import { loadPdfDocument } from '@/lib/documents/load-pdf-document';
+import { buildDocumentXml } from '@/lib/einvoice/ubl';
 
 const bodySchema = z.object({
   phone: z.string().min(1),
@@ -12,6 +14,7 @@ const bodySchema = z.object({
   filename: z.string().min(1).max(120).optional(),
   locale: z.enum(['fr', 'en']).optional(),
   mode: z.enum(['shared', 'personal']).optional(),
+  includeXml: z.boolean().optional(),
 });
 
 export async function POST(
@@ -43,6 +46,11 @@ export async function POST(
       if (!rendered) return jsonError('NOT_FOUND', 'Document introuvable', 404);
 
       const isEn = parsed.locale ? parsed.locale === 'en' : doc.locale === 'EN';
+      let xml: { content: string; fileName: string } | undefined;
+      if (parsed.includeXml) {
+        const loaded = await loadPdfDocument(doc.id, user.id);
+        if (loaded) xml = { content: buildDocumentXml(loaded.pdfDoc), fileName: `${doc.number}.xml` };
+      }
       const result = await sendDocumentViaWhatsApp({
         user,
         phone: parsed.phone,
@@ -51,6 +59,7 @@ export async function POST(
         fileName: parsed.filename ?? `${doc.number}.pdf`,
         isEn,
         mode: parsed.mode,
+        xml,
       });
 
       if (!result.ok) {
@@ -84,7 +93,7 @@ export async function POST(
         userAgent,
       });
 
-      return jsonOk({ sentDirect: true, mode: result.mode });
+      return jsonOk({ sentDirect: true, mode: result.mode, xmlSent: result.xmlSent });
     });
   } catch (err) {
     return handleApiError(err);

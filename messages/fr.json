@@ -819,7 +819,9 @@
       "q4": "Comment fonctionne le plan gratuit et quand passer à Pro ?",
       "a4": "Le plan gratuit sans carte bancaire vous permet de créer jusqu'à 10 documents par mois. Dès que votre activité grandit, vous pouvez débloquer le statut Pro (2 000 FCFA pour 30 jours via la passerelle sécurisée Notch Pay, par Mobile Money ou carte bancaire) pour retirer le filigrane et profiter de volumes illimités.",
       "q5": "Puis-je envoyer mes factures sur WhatsApp ?",
-      "a5": "Absolument. Un bouton direct prépare un message professionnel et génère le lien de la facture avec PDF téléchargeable à envoyer en un clic."
+      "a5": "Absolument. Un bouton direct prépare un message professionnel et génère le lien de la facture avec PDF téléchargeable à envoyer en un clic.",
+      "q6": "À quoi sert le fichier XML fourni avec chaque document ?",
+      "a6": "Chaque document est disponible en PDF pour votre client et en fichier XML structuré (format UBL) pour vos logiciels. Les logiciels de comptabilité capables de le lire peuvent l'importer sans ressaisie. Vous pouvez aussi l'envoyer par WhatsApp juste après le PDF."
     },
     "finalCta": {
       "title": "Prêt à facturer comme un pro ?",
