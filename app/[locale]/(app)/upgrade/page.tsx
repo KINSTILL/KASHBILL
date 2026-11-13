@@ -137,6 +137,7 @@ export default function UpgradePage() {
           <li>✓ {t('featureUnlimitedClients')}</li>
           <li>✓ {t('featureUnlimitedHistory')}</li>
           <li>✓ {t('feature2Devices')}</li>
+          <li>✓ {locale === 'fr' ? 'PDF + fichier XML lisible par vos logiciels' : 'PDF + XML file readable by your software'}</li>
         </ul>
       </Card>
 

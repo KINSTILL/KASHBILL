@@ -112,6 +112,13 @@ export function DocumentPreview({
             👥 {t('sendBulk')}
           </Button>
         </div>
+        <a
+          href={`/api/documents/${pdfDoc.id}/xml`}
+          download={`${pdfDoc.number}.xml`}
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-800"
+        >
+          🗂️ {locale === 'fr' ? 'Télécharger le fichier XML (lisible par logiciels)' : 'Download the XML file (machine-readable)'}
+        </a>
       </div>
     </div>
   );

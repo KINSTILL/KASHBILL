@@ -5,6 +5,7 @@ import { LanguageSuggestion } from './LanguageSuggestion';
 import { ScrollProgress } from './ScrollProgress';
 import { Hero } from './Hero';
 import { SocialProofStrip } from './SocialProofStrip';
+import { XmlProof } from './XmlProof';
 import { ProblemSection } from './ProblemSection';
 import { HowItWorks } from './HowItWorks';
 import { Features } from './Features';
@@ -41,6 +42,7 @@ export function LandingPage({
       <main>
         <Hero personalization={personalization} locale={locale} />
         <SocialProofStrip locale={locale} />
+        <XmlProof locale={locale} />
         <ProblemSection />
         <HowItWorks />
         <Features />

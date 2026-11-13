@@ -82,6 +82,7 @@ export function Pricing({
               <li className="text-emerald-700 font-medium">✓ {isFr ? 'Suppression du filigrane' : 'No watermark'}</li>
               <li>✓ {isFr ? 'Votre propre logo + signature' : 'Your custom logo + signature'}</li>
               <li>✓ {isFr ? '2 appareils inclus (Mobile + PC)' : '2 devices included (Mobile + PC)'}</li>
+              <li>✓ {isFr ? 'PDF + fichier XML lisible par vos logiciels' : 'PDF + XML file readable by your software'}</li>
               <li>✓ {isFr ? 'Zéro prélèvement forcé (contrôle total)' : 'No forced renewal (full control)'}</li>
             </ul>
             <Link href={proHref as Route} className="mt-6 block">
