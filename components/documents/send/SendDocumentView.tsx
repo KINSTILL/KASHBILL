@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { CheckCircle2, Download, MessageCircle, Smartphone } from 'lucide-react';
+import { CheckCircle2, Download, Link2, MessageCircle, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { InfoTip } from '@/components/ui/InfoTip';
@@ -11,15 +11,22 @@ import { downloadBlob } from '@/lib/pdf/render';
 import { useOnlineStatus } from '@/lib/device/network';
 import type { PdfDocument } from '@/lib/pdf/types';
 
-type Method = 'whatsapp' | 'download';
+type Method = 'whatsapp' | 'download' | 'link';
 type Channel = 'shared' | 'personal';
 
 const METHODS: { id: Method; icon: typeof MessageCircle; fr: string; en: string }[] = [
   { id: 'whatsapp', icon: MessageCircle, fr: 'WhatsApp', en: 'WhatsApp' },
   { id: 'download', icon: Download, fr: 'Télécharger', en: 'Download' },
+  { id: 'link', icon: Link2, fr: 'Lien', en: 'Link' },
 ];
 
-type Done = { method: Method; recipient: string | null; xmlSent?: boolean };
+type Done = {
+  method: Method;
+  recipient: string | null;
+  xmlSent?: boolean;
+  downloadUrl?: string;
+  xmlUrl?: string;
+};
 
 export function SendDocumentView({
   documentId,
@@ -88,6 +95,38 @@ export function SendDocumentView({
       return;
     }
 
+    // Lien de téléchargement : le serveur prépare le PDF et renvoie une URL publique signée.
+    if (method === 'link') {
+      if (!online) {
+        setError(fr ? 'Connexion requise pour créer le lien. Réessayez une fois connecté.' : 'Connection required to create the link. Try again once online.');
+        return;
+      }
+      setBusy(true);
+      try {
+        const res = await fetch(`/api/documents/${documentId}/share-link`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
+          body: JSON.stringify({ includeXml }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setError(data?.error?.message ?? (fr ? 'Création du lien impossible.' : 'Could not create the link.'));
+          return;
+        }
+        if (!data?.downloadUrl) {
+          setError(fr ? 'Création du lien impossible.' : 'Could not create the link.');
+          return;
+        }
+        await markSent();
+        setDone({ method: 'link', recipient: null, downloadUrl: data.downloadUrl, xmlUrl: data?.xmlUrl });
+      } catch {
+        setError(fr ? 'Connexion interrompue. Réessayez.' : 'Connection lost. Please try again.');
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+
     // WhatsApp : envoi réseau obligatoire
     if (!online) {
       setError(fr ? 'Connexion requise pour envoyer. Le document reste prêt dans votre brouillon.' : 'Connection required to send.');
@@ -127,11 +166,20 @@ export function SendDocumentView({
   };
 
   if (done) {
-    const title = done.method === 'download' ? (fr ? 'Document téléchargé' : 'Document downloaded') : fr ? 'Document envoyé' : 'Document sent';
+    const title =
+      done.method === 'download'
+        ? fr ? 'Document téléchargé' : 'Document downloaded'
+        : done.method === 'link'
+          ? fr ? 'Lien prêt' : 'Link ready'
+          : fr ? 'Document envoyé' : 'Document sent';
     const detail =
       done.method === 'download'
         ? fr ? 'Le PDF est enregistré sur votre appareil.' : 'The PDF is saved on your device.'
-        : fr ? `Envoyé à ${done.recipient} sur WhatsApp.` : `Sent to ${done.recipient} on WhatsApp.`;
+        : done.method === 'link'
+          ? fr
+            ? 'Partagez ce lien : il permet de télécharger le PDF.'
+            : 'Share this link: it lets the recipient download the PDF.'
+          : fr ? `Envoyé à ${done.recipient} sur WhatsApp.` : `Sent to ${done.recipient} on WhatsApp.`;
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-10 text-center">
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
@@ -149,6 +197,12 @@ export function SendDocumentView({
               : 'The PDF was sent, but the XML file could not be attached. You can download it from the document.'}
           </p>
         )}
+        {done.method === 'link' && done.downloadUrl && (
+          <div className="w-full space-y-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-left">
+            <LinkRow label="PDF" url={done.downloadUrl} fr={fr} />
+            {done.xmlUrl && <LinkRow label="XML" url={done.xmlUrl} fr={fr} />}
+          </div>
+        )}
         <div className="flex w-full flex-col gap-2 pt-2 sm:flex-row">
           <Link href={`/${locale}/documents/${documentId}` as Route} className="flex-1">
             <Button fullWidth variant="secondary">{fr ? 'Retour au document' : 'Back to document'}</Button>
@@ -162,7 +216,11 @@ export function SendDocumentView({
   }
 
   const submitLabel =
-    method === 'whatsapp' ? (fr ? 'Envoyer par WhatsApp' : 'Send via WhatsApp') : fr ? 'Télécharger le PDF' : 'Download PDF';
+    method === 'whatsapp'
+      ? fr ? 'Envoyer par WhatsApp' : 'Send via WhatsApp'
+      : method === 'download'
+        ? fr ? 'Télécharger le PDF' : 'Download PDF'
+        : fr ? 'Créer le lien de téléchargement' : 'Create download link';
 
   return (
     <div className="mx-auto max-w-md space-y-5">
@@ -187,7 +245,7 @@ export function SendDocumentView({
         </div>
       )}
 
-      <div role="radiogroup" aria-label={fr ? 'Méthode d’envoi' : 'Send method'} className="grid grid-cols-2 gap-3">
+      <div role="radiogroup" aria-label={fr ? 'Méthode d’envoi' : 'Send method'} className="grid grid-cols-3 gap-2 sm:gap-3">
         {METHODS.map(({ id, icon: Icon, fr: lf, en: le }) => {
           const selected = method === id;
           return (
@@ -347,6 +405,34 @@ export function SendDocumentView({
           </p>
         )}
 
+        {method === 'link' && (
+          <>
+            <p className="text-sm text-slate-600">
+              {fr
+                ? 'Un lien de téléchargement est créé. Vous pouvez l’envoyer par SMS, e-mail ou dans n’importe quelle conversation.'
+                : 'A download link is created. You can send it by SMS, email or in any chat.'}
+            </p>
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={includeXml}
+                onChange={(e) => setIncludeXml(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <span>
+                <span className="block font-semibold text-slate-900">
+                  {fr ? 'Créer aussi le lien du fichier XML' : 'Also create the XML file link'}
+                </span>
+                <span className="block text-xs text-slate-500">
+                  {fr
+                    ? 'Un second lien, lisible par les logiciels de comptabilité.'
+                    : 'A second link, readable by accounting software.'}
+                </span>
+              </span>
+            </label>
+          </>
+        )}
+
         {error && (
           <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
         )}
@@ -357,12 +443,37 @@ export function SendDocumentView({
           size="lg"
           className="min-h-12"
           onClick={submit}
-          disabled={busy || (method === 'whatsapp' && !online)}
+          disabled={busy || ((method === 'whatsapp' || method === 'link') && !online)}
           isLoading={busy}
         >
           {submitLabel}
         </Button>
       </div>
+    </div>
+  );
+}
+
+/** Affiche une URL de partage avec un bouton « Copier » aligné sur le style des boutons existants. */
+function LinkRow({ label, url, fr }: { label: string; url: string; fr: boolean }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs font-semibold text-slate-700">{label}</p>
+      <p className="break-all rounded-lg border border-slate-200 bg-white px-2.5 py-2 font-mono text-[11px] text-slate-600">
+        {url}
+      </p>
+      <Button type="button" variant="outline" size="sm" fullWidth onClick={copy}>
+        {copied ? (fr ? 'Copié' : 'Copied') : fr ? 'Copier le lien' : 'Copy link'}
+      </Button>
     </div>
   );
 }
