@@ -226,7 +226,7 @@ export default function BusinessSettingsPage() {
           </div>
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-950 truncate">
-              {fr ? 'Paramètres & Identité de mon Entreprise' : 'Company Settings & Branding'}
+              {fr ? 'Paramètres et Identité de mon Entreprise' : 'Company Settings and Branding'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5 line-clamp-1">
               {fr
@@ -284,15 +284,10 @@ export default function BusinessSettingsPage() {
               </span>
             </div>
 
-            {profileCompletion.hasOhadaMandatory ? (
+            {profileCompletion.hasOhadaMandatory && (
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-2.5 py-0.5 text-[11px] font-bold text-emerald-300">
                 <CheckCircle2 className="h-3 w-3" />
                 {fr ? 'Conforme OHADA' : 'OHADA Compliant'}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 border border-amber-400/30 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300">
-                <AlertCircle className="h-3 w-3" />
-                {fr ? 'NIF / RCCM requis' : 'Tax ID / RCCM needed'}
               </span>
             )}
           </div>
@@ -438,7 +433,7 @@ export default function BusinessSettingsPage() {
           }`}
         >
           <Building2 className="h-4 w-4 shrink-0" />
-          <span className="truncate">{fr ? 'Fiscalité & Légal' : 'Legal & Tax'}</span>
+          <span className="truncate">{fr ? 'Fiscalité et Légal' : 'Legal and Tax'}</span>
         </button>
 
         <button
@@ -451,7 +446,7 @@ export default function BusinessSettingsPage() {
           }`}
         >
           <FileText className="h-4 w-4 shrink-0" />
-          <span className="truncate">{fr ? 'En-tête & CGV' : 'Header & Terms'}</span>
+          <span className="truncate">{fr ? 'En-tête et CGV' : 'Header and Terms'}</span>
         </button>
       </div>
 
@@ -468,7 +463,7 @@ export default function BusinessSettingsPage() {
                   </span>
                   <div>
                     <h2 className="text-sm sm:text-base font-bold text-slate-900">
-                      {fr ? 'Logo, Signature & Cachet officiel' : 'Logo, Signature & Official Stamp'}
+                      {fr ? 'Logo, Signature et Cachet officiel' : 'Logo, Signature and Official Stamp'}
                     </h2>
                     <p className="text-xs text-slate-500">
                       {fr
@@ -734,7 +729,7 @@ export default function BusinessSettingsPage() {
                   </span>
                   <div>
                     <h2 className="text-sm sm:text-base font-bold text-slate-900">
-                      {fr ? 'Coordonnées & Fiscalité OHADA' : 'Legal & OHADA Tax Details'}
+                      {fr ? 'Coordonnées et Fiscalité OHADA' : 'Legal and OHADA Tax Details'}
                     </h2>
                     <p className="text-xs text-slate-500">
                       {fr
@@ -895,7 +890,7 @@ export default function BusinessSettingsPage() {
                   </span>
                   <div>
                     <h2 className="text-sm sm:text-base font-bold text-slate-900">
-                      {fr ? 'En-têtes, Pieds de page & CGV' : 'Headers, Footers & Terms'}
+                      {fr ? 'En-têtes, Pieds de page et CGV' : 'Headers, Footers and Terms'}
                     </h2>
                     <p className="text-xs text-slate-500">
                       {fr
