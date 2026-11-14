@@ -523,18 +523,32 @@ export function SendDocumentView({
                       ? fr
                         ? 'Envoi depuis votre numéro WhatsApp'
                         : 'Send from your WhatsApp number'
-                      : fr
-                        ? 'Inclus en formule Pro (connectez votre compte)'
-                        : 'Included in Pro (connect your account)'}
+                      : personalWhatsApp.hasAddOn
+                        ? fr
+                          ? 'Numéro non connecté (scannez le QR code)'
+                          : 'Number not connected (scan QR code)'
+                        : fr
+                          ? 'Inclus en formule Pro (connectez votre compte)'
+                          : 'Included in Pro (connect your account)'}
                   </span>
                 </button>
               </div>
               {!personalAvailable && (
                 <Link
-                  href={`/${locale}/upgrade` as Route}
+                  href={
+                    personalWhatsApp.hasAddOn
+                      ? (`/${locale}/settings/whatsapp` as Route)
+                      : (`/${locale}/upgrade` as Route)
+                  }
                   className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-700 hover:text-emerald-900"
                 >
-                  {fr ? 'Passer Pro pour envoyer avec mon propre numéro' : 'Upgrade to Pro to send from your own number'} →
+                  {personalWhatsApp.hasAddOn
+                    ? fr
+                      ? 'Connecter mon numéro WhatsApp maintenant'
+                      : 'Connect my WhatsApp number now'
+                    : fr
+                      ? 'Passer Pro pour envoyer avec mon propre numéro'
+                      : 'Upgrade to Pro to send from your own number'} →
                 </Link>
               )}
             </div>

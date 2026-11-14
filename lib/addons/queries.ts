@@ -53,6 +53,7 @@ export async function isCustomWhatsAppActive(userId: string): Promise<boolean> {
     select: { id: true, proUntil: true, role: true },
   });
   if (!user) return false;
+  if (user.role === 'ADMIN' || user.role === 'SUPPORT') return true;
   const { isPro } = await import('@/lib/auth/plan');
   if (isPro(user)) return true;
   return hasActiveAddOn(userId, 'CUSTOM_WHATSAPP');
