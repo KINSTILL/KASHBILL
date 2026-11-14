@@ -61,7 +61,7 @@ function normalize(rawPhone: string, dialCode = '+237'): string {
   const bounds = cc ? BOUNDS[cc] : undefined;
   if (!bounds || national.length > bounds.max) national = national.replace(/^0+/, '');
   if (!national) return '';
-  if (bounds && (national.length < bounds.min || national.length > bounds.max)) return '';
+  if (bounds && national.length < bounds.min) return '';
   const full = `${cc}${national}`;
   if (full.length < 6 || full.length > 15) return '';
   return full;

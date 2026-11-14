@@ -4,9 +4,11 @@ import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { renderDocumentPdf } from '@/lib/pdf/render-document';
-import { sendDocumentViaWhatsApp } from '@/lib/whatsapp/send';
+import { sendDocumentViaWhatsApp, buildWhatsAppFallbackUrl, normalizeWhatsAppNumber } from '@/lib/whatsapp/send';
 import { loadPdfDocument } from '@/lib/documents/load-pdf-document';
 import { buildDocumentXml } from '@/lib/einvoice/ubl';
+import { signDocumentShareToken, buildDocumentShareUrl, buildDocumentXmlShareUrl } from '@/lib/share/pdf-token';
+import { getCountryByCode } from '@/lib/countries/dial-codes';
 
 const bodySchema = z.object({
   phone: z.string().min(1),
@@ -66,19 +68,6 @@ export async function POST(
       });
 
       if (!result.ok) {
-        if (result.reason === 'INVALID_NUMBER') {
-          return jsonError('VALIDATION_ERROR', 'Numéro WhatsApp invalide. Vérifiez l’indicatif et le numéro.', 400);
-        }
-        if (result.reason === 'GATEWAY_ERROR') {
-          // 404/400 renvoyés par Evolution = numéro inexistant sur WhatsApp ou mal formé.
-          const noWhatsApp = result.gatewayStatus === 400 || result.gatewayStatus === 404;
-          return jsonOk({
-            sentDirect: false,
-            reason: result.reason,
-            gatewayStatus: result.gatewayStatus,
-            code: noWhatsApp ? 'NO_WHATSAPP' : 'GATEWAY_ERROR',
-          });
-        }
         if (result.reason === 'PERSONAL_NOT_CONNECTED') {
           return jsonError(
             'WHATSAPP_NOT_CONNECTED',
@@ -86,7 +75,53 @@ export async function POST(
             409
           );
         }
-        return jsonOk({ sentDirect: false, reason: result.reason, gatewayStatus: result.gatewayStatus });
+
+        // Si l'envoi direct par le serveur échoue (ex. nouveau numéro pas encore synchronisé
+        // par Baileys/Evolution, passerelle temporairement inaccessible, etc.), on prépare
+        // un lien de secours signé pour ouvrir immédiatement WhatsApp sans bloquer l'utilisateur.
+        const origin = req.nextUrl?.origin || process.env.APP_URL || 'https://mycashbill.app';
+        const token = signDocumentShareToken(doc.id);
+        const downloadUrl = buildDocumentShareUrl(origin, doc.id, token);
+        const xmlUrl = parsed.includeXml ? buildDocumentXmlShareUrl(origin, doc.id, token) : undefined;
+
+        const dialCode = parsed.countryCode ? getCountryByCode(parsed.countryCode).dialCode : undefined;
+        const normalizedNumber = normalizeWhatsAppNumber(parsed.phone, dialCode) || parsed.phone.replace(/\D/g, '');
+
+        const fallbackUrl = buildWhatsAppFallbackUrl({
+          phone: normalizedNumber,
+          message: parsed.message,
+          downloadUrl,
+          xmlUrl,
+          docNumber: doc.number,
+          isEn,
+        });
+
+        if (!doc.sentViaWhatsAppAt) {
+          await prisma.document.update({ where: { id: doc.id }, data: { sentViaWhatsAppAt: new Date() } });
+        }
+        try {
+          const { tryActivateReferral } = await import('@/lib/referral/activate');
+          await tryActivateReferral(user.id, ip, deviceId);
+        } catch {}
+
+        await writeAudit({
+          actorId: user.id,
+          targetId: doc.id,
+          action: 'document_sent_whatsapp',
+          meta: { mode: 'FALLBACK_URL', reason: result.reason, gatewayStatus: result.gatewayStatus },
+          ip,
+          userAgent,
+        });
+
+        return jsonOk({
+          sentDirect: false,
+          fallbackUrl,
+          downloadUrl,
+          xmlUrl,
+          normalizedPhone: normalizedNumber,
+          reason: result.reason,
+          gatewayStatus: result.gatewayStatus,
+        });
       }
 
       if (!doc.sentViaWhatsAppAt) {

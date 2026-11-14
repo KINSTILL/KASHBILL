@@ -322,7 +322,8 @@ Si vous voyez une erreur, appuyez sur **Modifier**. Vous pouvez corriger un docu
 1. Appuyez sur **Envoyer**.
 2. Dans le champ **Téléphone WhatsApp du client**, saisissez son numéro. Vous pouvez aussi laisser ce champ vide et choisir le contact directement dans WhatsApp.
 3. Un **message type** est proposé. Vous pouvez le modifier librement. Il est mémorisé pour la prochaine fois. Le bouton **Réinitialiser au modèle** rétablit le message d'origine.
-4. Appuyez sur **Envoyer sur WhatsApp**. WhatsApp s'ouvre avec le message et le document prêt à partir.
+4. **Joindre le fichier XML (optionnel) :** cochez la case **« Joindre aussi le fichier XML (facturation électronique) »** si vous souhaitez transmettre à votre client ou son comptable le format numérique universel.
+5. Appuyez sur **Envoyer sur WhatsApp**. WhatsApp s'ouvre avec le message et les pièces prêtes à partir.
 
 > **Limite gratuite :** l'offre gratuite permet **5 envois WhatsApp par mois**.
 
@@ -333,6 +334,10 @@ L'envoi par email est réservé à l'offre **Pro**. Saisissez l'adresse email de
 ### Télécharger le PDF
 
 Appuyez sur **Télécharger le PDF** pour enregistrer le document sur votre téléphone ou votre ordinateur. C'est utile pour l'imprimer, ou pour l'envoyer par un autre moyen.
+
+### Télécharger le fichier XML (facture électronique)
+
+À côté du bouton PDF, vous pouvez appuyer sur **Télécharger le XML**. Ce fichier au format standard international **UBL 2.1** contient toutes les données de votre facture de façon informatique. Votre comptable ou votre client peut ainsi l'importer directement dans son logiciel comptable sans ressaisie.
 
 ### Partager autrement
 
@@ -604,6 +609,7 @@ Vérifiez votre numéro et votre PIN. Après plusieurs essais échoués, attende
 | **NIU / NIF** | Numéro d'identification fiscale de votre entreprise ou de votre client. |
 | **RCCM** | Numéro d'immatriculation au registre du commerce. |
 | **Filigrane** | Mention affichée sur les documents de l'offre gratuite. |
+| **Fichier XML** | Fichier de facturation électronique (norme universelle UBL 2.1) importable directement par les logiciels comptables. |
 | **Quota** | Nombre maximal d'opérations autorisées dans le mois, en offre gratuite. |
 | **Filleul** | Personne que vous avez parrainée. |
 | **Pro** | Offre payante qui débloque toutes les fonctions. |

@@ -26,6 +26,7 @@ type Done = {
   xmlSent?: boolean;
   downloadUrl?: string;
   xmlUrl?: string;
+  fallbackUrl?: string;
 };
 
 /**
@@ -71,7 +72,7 @@ function previewNumber(raw: string, dialCode: string): string {
   const bounds = COUNTRIES.find((c) => c.dialCode.replace(/\D/g, '') === finalCc);
   if (!bounds || national.length > bounds.maxDigits) national = national.replace(/^0+/, '');
   if (!national) return '';
-  if (bounds && (national.length < bounds.minDigits || national.length > bounds.maxDigits)) return '';
+  if (bounds && national.length < bounds.minDigits) return '';
   const full = `${finalCc}${national}`;
   if (full.length < 6 || full.length > 15) return '';
   return full;
@@ -113,26 +114,50 @@ export function SendDocumentView({
   const [channel, setChannel] = useState<Channel>('shared');
   const personalAvailable = personalWhatsApp.hasAddOn && personalWhatsApp.connected;
 
-  // Pays du destinataire : déduit du numéro du client (« +XX… »), sinon Cameroun.
+  // Pays du destinataire : déduit du numéro du client (« +XX… », « 00XX… » ou préfixe direct), sinon Cameroun.
   // Le numéro national est saisi sans l'indicatif ; l'indicatif est ajouté à l'envoi.
   const initialCountry = useMemo<DialCountry>(() => {
-    if (defaultPhone.trim().startsWith('+') || defaultPhone.trim().startsWith('00')) {
-      return findCountryByPhone(defaultPhone);
+    const raw = defaultPhone.trim();
+    if (raw.startsWith('+') || raw.startsWith('00')) {
+      return findCountryByPhone(raw);
     }
+    const digits = raw.replace(/\D/g, '');
+    const matched = COUNTRIES.find(
+      (c) => digits.startsWith(c.dialCode.replace(/\D/g, '')) && digits.length > c.dialCode.length + 5
+    );
+    if (matched) return matched;
     return DEFAULT_COUNTRY;
   }, [defaultPhone]);
 
   const [country, setCountry] = useState<DialCountry>(initialCountry);
   const [phone, setPhone] = useState(() => {
     const raw = defaultPhone.trim();
-    if (raw.startsWith('+') || raw.startsWith('00')) {
-      const country0 = findCountryByPhone(raw);
-      const digits = raw.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
-      const cc = country0.dialCode.replace(/\D/g, '');
-      return digits.startsWith(cc) ? digits.slice(cc.length) : digits;
+    const digits = raw.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
+    const cc = initialCountry.dialCode.replace(/\D/g, '');
+    if (digits.startsWith(cc) && digits.length > cc.length + 5) {
+      return digits.slice(cc.length);
     }
-    return raw;
+    return raw.replace(/^\+/, '').replace(/^00/, '');
   });
+
+  const handlePhoneChange = (val: string) => {
+    const trimmed = val.trim();
+    if (trimmed.startsWith('+') || trimmed.startsWith('00')) {
+      const detected = findCountryByPhone(trimmed);
+      setCountry(detected);
+      const cc = detected.dialCode.replace(/\D/g, '');
+      const digits = trimmed.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
+      if (digits.startsWith(cc)) {
+        setPhone(digits.slice(cc.length));
+      } else {
+        setPhone(digits);
+      }
+      setError(null);
+      return;
+    }
+    setPhone(val);
+    setError(null);
+  };
   const [message, setMessage] = useState(
     fr
       ? `Bonjour${clientName ? ` ${clientName}` : ''}, veuillez trouver ci-joint ${docLabel.toLowerCase()} ${pdfDoc.number}. Merci pour votre confiance.`
@@ -237,23 +262,35 @@ export function SendDocumentView({
         setError(data?.error?.message ?? (fr ? 'Envoi impossible.' : 'Sending failed.'));
         return;
       }
-      if (!data?.sentDirect) {
-        if (data?.code === 'NO_WHATSAPP') {
-          setError(
-            fr
-              ? "Ce numéro ne semble pas avoir WhatsApp, ou il est mal formé. Vérifiez le numéro (avec l’indicatif, ex. +237) et réessayez."
-              : 'This number does not appear to have WhatsApp, or it is malformed. Check the number (with country code, e.g. +237) and try again.'
-          );
-          return;
-        }
-        setError(
-          fr
-            ? "L'envoi WhatsApp n'a pas abouti. Réessayez ou téléchargez le PDF."
-            : 'WhatsApp sending did not complete. Try again or download the PDF.'
-        );
+      if (data?.sentDirect) {
+        setDone({
+          method,
+          recipient: phonePreview || `+${country.dialCode.replace(/\D/g, '')} ${phone.trim()}`,
+          xmlSent: data?.xmlSent === true,
+        });
         return;
       }
-      setDone({ method, recipient: phonePreview || `+${country.dialCode.replace(/\D/g, '')} ${phone.trim()}`, xmlSent: data?.xmlSent === true });
+      if (data?.fallbackUrl) {
+        // Envoi direct via WhatsApp (wa.me) : ouvre WhatsApp immédiatement
+        if (typeof window !== 'undefined') {
+          window.open(data.fallbackUrl, '_blank');
+        }
+        setDone({
+          method,
+          recipient: phonePreview || `+${country.dialCode.replace(/\D/g, '')} ${phone.trim()}`,
+          xmlSent: false,
+          fallbackUrl: data.fallbackUrl,
+          downloadUrl: data.downloadUrl,
+          xmlUrl: data.xmlUrl,
+        });
+        return;
+      }
+      setError(
+        fr
+          ? "L'envoi WhatsApp n'a pas abouti. Réessayez ou téléchargez le PDF."
+          : 'WhatsApp sending did not complete. Try again or download the PDF.'
+      );
+      return;
     } catch {
       setError(fr ? 'Connexion interrompue. Réessayez.' : 'Connection lost. Please try again.');
     } finally {
@@ -267,7 +304,9 @@ export function SendDocumentView({
         ? fr ? 'Document téléchargé' : 'Document downloaded'
         : done.method === 'link'
           ? fr ? 'Lien prêt' : 'Link ready'
-          : fr ? 'Document envoyé' : 'Document sent';
+          : done.fallbackUrl
+            ? fr ? 'Prêt dans WhatsApp' : 'Ready in WhatsApp'
+            : fr ? 'Document envoyé' : 'Document sent';
     const detail =
       done.method === 'download'
         ? fr ? 'Le PDF est enregistré sur votre appareil.' : 'The PDF is saved on your device.'
@@ -275,7 +314,11 @@ export function SendDocumentView({
           ? fr
             ? 'Partagez ce lien : il permet de télécharger le PDF.'
             : 'Share this link: it lets the recipient download the PDF.'
-          : fr ? `Envoyé à ${done.recipient} sur WhatsApp.` : `Sent to ${done.recipient} on WhatsApp.`;
+          : done.fallbackUrl
+            ? fr
+              ? `WhatsApp s'ouvre pour envoyer à ${done.recipient}. Si la fenêtre ne s'est pas ouverte, cliquez sur le bouton ci-dessous.`
+              : `WhatsApp is opening to send to ${done.recipient}. If the window did not open, click the button below.`
+            : fr ? `Envoyé à ${done.recipient} sur WhatsApp.` : `Sent to ${done.recipient} on WhatsApp.`;
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-10 text-center">
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
@@ -286,7 +329,41 @@ export function SendDocumentView({
           <p className="text-sm text-slate-600">{detail}</p>
           <p className="font-mono text-xs text-slate-500">{pdfDoc.number}</p>
         </div>
-        {done.method === 'whatsapp' && includeXml && done.xmlSent === false && (
+        {done.method === 'whatsapp' && done.fallbackUrl && (
+          <div className="w-full space-y-3">
+            <Button
+              type="button"
+              fullWidth
+              size="lg"
+              className="min-h-12 bg-[#25D366] hover:bg-[#20ba5a] text-white border-0 shadow-sm font-semibold"
+              onClick={() => window.open(done.fallbackUrl, '_blank')}
+            >
+              <MessageCircle className="h-5 w-5 mr-2" />
+              {fr ? 'Ouvrir dans WhatsApp' : 'Open in WhatsApp'}
+            </Button>
+            {done.downloadUrl && (
+              <div className="w-full space-y-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-left">
+                <LinkRow
+                  label={
+                    fr
+                      ? `Lien de téléchargement de la ${docLabel.toLowerCase()}`
+                      : `Download link for the ${docLabel.toLowerCase()}`
+                  }
+                  url={done.downloadUrl}
+                  fr={fr}
+                />
+                {done.xmlUrl && (
+                  <LinkRow
+                    label={fr ? 'Lien de téléchargement du fichier XML' : 'Download link for the XML file'}
+                    url={done.xmlUrl}
+                    fr={fr}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        {done.method === 'whatsapp' && includeXml && done.xmlSent === false && !done.fallbackUrl && (
           <p role="alert" className="w-full rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
             {fr
               ? "Le PDF a bien été envoyé, mais le fichier XML n'a pas pu être joint. Vous pouvez le télécharger depuis le document."
@@ -472,10 +549,7 @@ export function SendDocumentView({
                 setError(null);
               }}
               phone={phone}
-              onPhoneChange={(v) => {
-                setPhone(v);
-                setError(null);
-              }}
+              onPhoneChange={handlePhoneChange}
             />
             {phone.trim().length > 0 && (
               <p

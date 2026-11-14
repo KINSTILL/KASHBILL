@@ -161,16 +161,39 @@ export function normalizeWhatsAppNumber(rawPhone: string, dialCode = '+237'): st
   }
   if (!national) return '';
 
-  // 3) Validation de la longueur nationale quand l'indicatif est connu.
-  if (bounds && (national.length < bounds.min || national.length > bounds.max)) {
+  // 3) Validation souple : on rejette uniquement si le numéro est manifestement trop court
+  //    pour l'indicatif (numéro tronqué). On ne rejette pas sur un léger excédent de chiffres
+  //    pour ne jamais bloquer un numéro valide atypique.
+  if (bounds && national.length < bounds.min) {
     return '';
   }
 
   const full = `${cc}${national}`;
-  // Plausibilité générale E.164 (max 15 chiffres au total).
+  // Plausibilité générale E.164 (6 à 15 chiffres au total).
   if (full.length < 6 || full.length > 15) return '';
 
   return full;
+}
+
+/** Construit une URL wa.me de secours avec message et lien sécurisé de téléchargement. */
+export function buildWhatsAppFallbackUrl(params: {
+  phone: string;
+  message?: string;
+  downloadUrl: string;
+  xmlUrl?: string;
+  docNumber?: string;
+  isEn?: boolean;
+}): string {
+  const { phone, message, downloadUrl, xmlUrl, isEn } = params;
+  const trimmed = message?.trim() || '';
+
+  const linkSection = isEn
+    ? `\n\n📄 Download document: ${downloadUrl}${xmlUrl ? `\n📂 Accounting XML file: ${xmlUrl}` : ''}`
+    : `\n\n📄 Télécharger le document : ${downloadUrl}${xmlUrl ? `\n📂 Fichier XML comptable : ${xmlUrl}` : ''}`;
+
+  const fullText = trimmed ? `${trimmed}${linkSection}` : linkSection.trim();
+  const digitsOnly = phone.replace(/\D/g, '');
+  return `https://wa.me/${digitsOnly}?text=${encodeURIComponent(fullText)}`;
 }
 
 /** Message encadré (Mode A) : identité de l'émetteur et clause d'outil technique. */
