@@ -136,7 +136,7 @@ export function Hero({
             <div className="mt-3.5 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-1.5 text-xs text-slate-600">
               <span className="inline-flex items-center gap-1.5 font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                <span>{isFr ? '10 docs offerts/mois' : '10 free docs/mo'}</span>
+                <span>{isFr ? '5 docs offerts/mois' : '5 free docs/mo'}</span>
               </span>
               <span className="inline-flex items-center gap-1.5 font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />

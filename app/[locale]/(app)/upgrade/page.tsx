@@ -238,14 +238,6 @@ export default function UpgradePage() {
             locale={locale}
           />
           <AddOnCard
-            type="CUSTOM_WHATSAPP"
-            price={ADDON_PRICES.CUSTOM_WHATSAPP}
-            title={tAddons('customWhatsapp')}
-            desc={tAddons('customWhatsappDesc')}
-            tooltip={tAddons('customWhatsappTooltip')}
-            locale={locale}
-          />
-          <AddOnCard
             type="WHITE_LABEL"
             price={ADDON_PRICES.WHITE_LABEL}
             title={tAddons('whiteLabel')}

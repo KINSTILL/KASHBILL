@@ -263,6 +263,23 @@ async function resolveSharedInstance(
   return openInst?.name ?? instances[0]?.name ?? null;
 }
 
+export async function restartEvolutionInstance(
+  evolutionUrl: string,
+  evolutionKey: string,
+  instanceName: string
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${evolutionUrl}/instance/restart/${encodeURIComponent(instanceName)}`, {
+      method: 'POST',
+      headers: { apikey: evolutionKey },
+      cache: 'no-store',
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 async function sendMedia(params: {
   evolutionUrl: string;
   evolutionKey: string;
@@ -272,8 +289,9 @@ async function sendMedia(params: {
   cleanBase64: string;
   fileName: string;
   mimetype?: string;
+  retryOnFailure?: boolean;
 }): Promise<{ ok: boolean; status: number; details?: string }> {
-  const { evolutionUrl, evolutionKey, instanceName, number, caption, cleanBase64, fileName } = params;
+  const { evolutionUrl, evolutionKey, instanceName, number, caption, cleanBase64, fileName, retryOnFailure = true } = params;
   const mimetype = params.mimetype ?? 'application/pdf';
   const endpoint = `${evolutionUrl}/message/sendMedia/${encodeURIComponent(instanceName)}`;
 
@@ -305,6 +323,32 @@ async function sendMedia(params: {
   });
   if (v1Res.ok) return { ok: true, status: v1Res.status };
   const v1ErrText = await v1Res.text().catch(() => '');
+
+  // 3. Auto-rafraîchissement automatique d'Evolution API :
+  // Si erreur réseau / socket / cache Baileys ou réponse d'inexistence suspecte,
+  // on redémarre l'instance en arrière-plan, on attend 1.5s et on retente une fois l'envoi.
+  if (retryOnFailure) {
+    const errText = v2ErrText || v1ErrText;
+    const shouldRefresh =
+      v2Res.status >= 500 ||
+      v1Res.status >= 500 ||
+      errText.includes('exists') ||
+      errText.includes('Connection Closed') ||
+      errText.includes('QRcode') ||
+      errText.includes('Session');
+
+    if (shouldRefresh) {
+      console.warn(`[EVOLUTION API] Tentative d'auto-rafraîchissement de l'instance ${instanceName}...`);
+      await restartEvolutionInstance(evolutionUrl, evolutionKey, instanceName);
+      // Attente brève que le socket de l'instance se réinitialise
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      return sendMedia({
+        ...params,
+        retryOnFailure: false,
+      });
+    }
+  }
 
   return { ok: false, status: v2Res.status || v1Res.status, details: v2ErrText || v1ErrText };
 }

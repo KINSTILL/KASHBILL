@@ -87,10 +87,23 @@ export async function POST(
             503
           );
         }
+        const detailStr = result.details || '';
+        const isNotOnWhatsApp = detailStr.includes('exists') && detailStr.includes('false');
+
+        if (isNotOnWhatsApp) {
+          const formattedTarget = parsed.phone.trim().startsWith('+') ? parsed.phone.trim() : `+${parsed.phone.trim()}`;
+          return jsonError(
+            'GATEWAY_ERROR',
+            `Le numéro ${formattedTarget} ne possède pas de compte WhatsApp actif. Vérifiez le numéro de votre client ou téléchargez le PDF pour lui transmettre par un autre canal.`,
+            400,
+            { gatewayStatus: result.gatewayStatus, notOnWhatsApp: true }
+          );
+        }
+
         const detailMsg = result.details ? ` (${result.details.slice(0, 150)})` : '';
         return jsonError(
           'GATEWAY_ERROR',
-          `L'envoi direct du document a échoué via la passerelle WhatsApp${detailMsg}. Vérifiez que le numéro possède bien un compte WhatsApp.`,
+          `L'envoi direct du document a échoué via la passerelle WhatsApp${detailMsg}. Vérifiez le numéro de votre client ou téléchargez le PDF pour lui transmettre par un autre canal.`,
           502,
           { gatewayStatus: result.gatewayStatus, details: result.details }
         );

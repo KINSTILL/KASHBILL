@@ -501,7 +501,7 @@ export function DemoSection({
               </div>
               <p className="text-[11px] text-slate-500">
                 {isFr
-                  ? '✓ Plan gratuit à 10 factures/mois · ✓ Sans carte requise · ✓ Paiements sécurisés via Notch Pay'
+                  ? '✓ Plan gratuit à 5 factures/mois · ✓ Sans carte requise · ✓ Paiements sécurisés via Notch Pay'
                   : '✓ Free plan with 10 invoices/month · ✓ No card required · ✓ Secure payments via Notch Pay'}
               </p>
             </div>

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { CheckCircle2, ChevronDown, Download, Link2, MessageCircle, Search, Smartphone } from 'lucide-react';
+import { CheckCircle2, ChevronDown, Download, Link2, MessageCircle, Search, Share2, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { InfoTip } from '@/components/ui/InfoTip';
 import { downloadBlob } from '@/lib/pdf/render';
@@ -468,13 +468,13 @@ export function SendDocumentView({
                 >
                   <p>
                     {fr
-                      ? 'Envoyer depuis votre propre numéro : votre client reçoit le PDF brut, dans votre fil de discussion habituel, sans aucune mention MyCashBill. Un vrai raccourci.'
-                      : 'Send from your own number: your client receives the raw PDF in your usual chat, with zero MyCashBill mention. A real shortcut.'}
+                      ? 'Envoyer depuis votre propre numéro : votre client reçoit le PDF brut, dans votre fil de discussion habituel, sans aucune mention MyCashBill. Inclus automatiquement avec le statut Pro.'
+                      : 'Send from your own number: your client receives the raw PDF in your usual chat, with zero MyCashBill mention. Included automatically with Pro.'}
                   </p>
                   <p>
                     {fr
-                      ? 'Pour activer cette option, souscrivez l’extension « Mon numéro WhatsApp » (500 FCFA) puis connectez votre numéro.'
-                      : 'To enable this option, subscribe to the “My WhatsApp number” add-on (500 FCFA) then connect your number.'}
+                      ? 'Pour activer cette option, passez Pro puis connectez votre numéro dans Paramètres › WhatsApp.'
+                      : 'To enable this option, upgrade to Pro and connect your number in Settings › WhatsApp.'}
                   </p>
                 </InfoTip>
               </div>
@@ -524,8 +524,8 @@ export function SendDocumentView({
                         ? 'Envoi depuis votre numéro WhatsApp'
                         : 'Send from your WhatsApp number'
                       : fr
-                        ? 'Extension non activée — 500 FCFA'
-                        : 'Add-on not active — 500 FCFA'}
+                        ? 'Inclus en formule Pro (connectez votre compte)'
+                        : 'Included in Pro (connect your account)'}
                   </span>
                 </button>
               </div>
@@ -534,7 +534,7 @@ export function SendDocumentView({
                   href={`/${locale}/upgrade` as Route}
                   className="inline-flex items-center gap-1 text-[12px] font-semibold text-emerald-700 hover:text-emerald-900"
                 >
-                  {fr ? 'Activer « Mon numéro WhatsApp » (500 FCFA)' : 'Activate “My WhatsApp number” (500 FCFA)'} →
+                  {fr ? 'Passer Pro pour envoyer avec mon propre numéro' : 'Upgrade to Pro to send from your own number'} →
                 </Link>
               )}
             </div>
@@ -599,11 +599,52 @@ export function SendDocumentView({
         )}
 
         {method === 'download' && (
-          <p className="text-sm text-slate-600">
-            {fr
-              ? 'Le PDF est enregistré sur votre appareil. Vous pourrez ensuite le transmettre comme vous le souhaitez.'
-              : 'The PDF is saved on your device. You can then share it however you like.'}
-          </p>
+          <div className="space-y-3">
+            <p className="text-sm text-slate-600">
+              {fr
+                ? 'Téléchargez le fichier PDF sur votre appareil ou partagez-le directement (WhatsApp, e-mail, Bluetooth...) comme dans Acrobat Reader.'
+                : 'Download the PDF file to your device or share it directly (WhatsApp, email, Bluetooth...) Acrobat Reader style.'}
+            </p>
+            <Button
+              type="button"
+              fullWidth
+              size="lg"
+              variant="outline"
+              className="min-h-12 border-emerald-300 text-emerald-800 hover:bg-emerald-50 font-semibold"
+              onClick={async () => {
+                setError(null);
+                setBusy(true);
+                try {
+                  const blob = await fetchPdf();
+                  const file = new File([blob], fileName, { type: 'application/pdf' });
+                  if (typeof navigator !== 'undefined' && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                      files: [file],
+                      title: `${docLabel} ${pdfDoc.number}`,
+                      text: message,
+                    });
+                    await markSent();
+                  } else {
+                    // Repli automatique si le navigateur ne supporte pas le partage direct de fichiers
+                    downloadBlob(blob, fileName);
+                    await markSent();
+                  }
+                  setDone({ method: 'download', recipient: null });
+                } catch (e: any) {
+                  if (e?.name !== 'AbortError') {
+                    setError(fr ? 'Partage impossible. Téléchargez le PDF directement.' : 'Sharing failed. Please download the PDF directly.');
+                  }
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              disabled={busy}
+              isLoading={busy}
+            >
+              <Share2 className="h-5 w-5 mr-2" />
+              {fr ? 'Partager le fichier PDF' : 'Share PDF file'}
+            </Button>
+          </div>
         )}
 
         {method === 'link' && (
@@ -635,7 +676,26 @@ export function SendDocumentView({
         )}
 
         {error && (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+          <div role="alert" className="space-y-2 rounded-xl bg-red-50 p-3 text-sm text-red-800 border border-red-100">
+            <p>{error}</p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="bg-white border-red-200 text-red-700 hover:bg-red-50"
+                onClick={async () => {
+                  try {
+                    downloadBlob(await fetchPdf(), fileName);
+                    await markSent();
+                  } catch {}
+                }}
+              >
+                <Download className="h-4 w-4 mr-1.5" />
+                {fr ? 'Télécharger le PDF' : 'Download PDF'}
+              </Button>
+            </div>
+          </div>
         )}
 
         <Button

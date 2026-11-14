@@ -47,7 +47,7 @@ export function Pricing({
               <span className="text-sm text-slate-500">{freeCurrency}</span>
             </p>
             <ul className="mt-4 space-y-1.5 text-sm text-slate-600">
-              <li>✓ {isFr ? '10 documents / mois' : '10 documents / month'}</li>
+              <li>✓ {isFr ? '5 documents / mois' : '5 documents / month'}</li>
               <li>✓ {isFr ? '5 envois WhatsApp & 1 email / mois' : '5 WhatsApp sends & 1 email / month'}</li>
               <li>✓ {isFr ? '2 clients enregistrés' : '2 saved clients'}</li>
               <li>✓ {isFr ? '1 seul appareil' : '1 device only'}</li>

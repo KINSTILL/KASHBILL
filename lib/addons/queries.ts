@@ -48,6 +48,13 @@ export async function isWhiteLabelActive(userId: string): Promise<boolean> {
 }
 
 export async function isCustomWhatsAppActive(userId: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, proUntil: true, role: true },
+  });
+  if (!user) return false;
+  const { isPro } = await import('@/lib/auth/plan');
+  if (isPro(user)) return true;
   return hasActiveAddOn(userId, 'CUSTOM_WHATSAPP');
 }
 
