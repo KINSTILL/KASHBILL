@@ -4,11 +4,9 @@ import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { renderDocumentPdf } from '@/lib/pdf/render-document';
-import { sendDocumentViaWhatsApp, buildWhatsAppFallbackUrl, normalizeWhatsAppNumber } from '@/lib/whatsapp/send';
+import { sendDocumentViaWhatsApp } from '@/lib/whatsapp/send';
 import { loadPdfDocument } from '@/lib/documents/load-pdf-document';
 import { buildDocumentXml } from '@/lib/einvoice/ubl';
-import { signDocumentShareToken, buildDocumentShareUrl, buildDocumentXmlShareUrl } from '@/lib/share/pdf-token';
-import { getCountryByCode } from '@/lib/countries/dial-codes';
 
 const bodySchema = z.object({
   phone: z.string().min(1),
@@ -75,53 +73,27 @@ export async function POST(
             409
           );
         }
-
-        // Si l'envoi direct par le serveur échoue (ex. nouveau numéro pas encore synchronisé
-        // par Baileys/Evolution, passerelle temporairement inaccessible, etc.), on prépare
-        // un lien de secours signé pour ouvrir immédiatement WhatsApp sans bloquer l'utilisateur.
-        const origin = req.nextUrl?.origin || process.env.APP_URL || 'https://mycashbill.app';
-        const token = signDocumentShareToken(doc.id);
-        const downloadUrl = buildDocumentShareUrl(origin, doc.id, token);
-        const xmlUrl = parsed.includeXml ? buildDocumentXmlShareUrl(origin, doc.id, token) : undefined;
-
-        const dialCode = parsed.countryCode ? getCountryByCode(parsed.countryCode).dialCode : undefined;
-        const normalizedNumber = normalizeWhatsAppNumber(parsed.phone, dialCode) || parsed.phone.replace(/\D/g, '');
-
-        const fallbackUrl = buildWhatsAppFallbackUrl({
-          phone: normalizedNumber,
-          message: parsed.message,
-          downloadUrl,
-          xmlUrl,
-          docNumber: doc.number,
-          isEn,
-        });
-
-        if (!doc.sentViaWhatsAppAt) {
-          await prisma.document.update({ where: { id: doc.id }, data: { sentViaWhatsAppAt: new Date() } });
+        if (result.reason === 'INVALID_NUMBER') {
+          return jsonError(
+            'VALIDATION_ERROR',
+            "Numéro WhatsApp invalide. Vérifiez l'indicatif pays et les chiffres saisis.",
+            400
+          );
         }
-        try {
-          const { tryActivateReferral } = await import('@/lib/referral/activate');
-          await tryActivateReferral(user.id, ip, deviceId);
-        } catch {}
-
-        await writeAudit({
-          actorId: user.id,
-          targetId: doc.id,
-          action: 'document_sent_whatsapp',
-          meta: { mode: 'FALLBACK_URL', reason: result.reason, gatewayStatus: result.gatewayStatus },
-          ip,
-          userAgent,
-        });
-
-        return jsonOk({
-          sentDirect: false,
-          fallbackUrl,
-          downloadUrl,
-          xmlUrl,
-          normalizedPhone: normalizedNumber,
-          reason: result.reason,
-          gatewayStatus: result.gatewayStatus,
-        });
+        if (result.reason === 'NO_INSTANCE_FOUND' || result.reason === 'NOT_CONFIGURED') {
+          return jsonError(
+            'GATEWAY_ERROR',
+            "Le service d'envoi WhatsApp de MyCashBill n'est pas configuré ou l'instance est introuvable.",
+            503
+          );
+        }
+        const detailMsg = result.details ? ` (${result.details.slice(0, 150)})` : '';
+        return jsonError(
+          'GATEWAY_ERROR',
+          `L'envoi direct du document a échoué via la passerelle WhatsApp${detailMsg}. Vérifiez que le numéro possède bien un compte WhatsApp.`,
+          502,
+          { gatewayStatus: result.gatewayStatus, details: result.details }
+        );
       }
 
       if (!doc.sentViaWhatsAppAt) {
