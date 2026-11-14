@@ -37,7 +37,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         }
         return jsonError('INTERNAL', "Impossible de générer le code de connexion. Réessayez.", 502);
       }
-      return jsonOk({ qrBase64: result.qrBase64, status: result.status });
+      return jsonOk({ qrBase64: result.qrBase64, pairingCode: result.pairingCode, status: result.status });
     });
   } catch (err) {
     return handleApiError(err);

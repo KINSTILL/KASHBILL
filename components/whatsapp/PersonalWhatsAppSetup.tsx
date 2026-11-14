@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { CheckCircle2, QrCode, Smartphone } from 'lucide-react';
+import { CheckCircle2, QrCode, Smartphone, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { InfoTip } from '@/components/ui/InfoTip';
@@ -22,6 +22,9 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
   const [phone, setPhone] = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [showQrAlternate, setShowQrAlternate] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const polls = useRef(0);
@@ -44,21 +47,24 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Suivi de la connexion pendant que le QR est affiché
+  // Suivi de la connexion pendant que le code ou le QR est affiché
   useEffect(() => {
-    if (!qr) return;
+    if (!qr && !pairingCode) return;
     polls.current = 0;
     const id = setInterval(async () => {
       polls.current += 1;
       const data = await refresh();
       if (data?.status === 'CONNECTED' || polls.current >= MAX_POLLS) {
         clearInterval(id);
-        if (data?.status === 'CONNECTED') setQr(null);
+        if (data?.status === 'CONNECTED') {
+          setQr(null);
+          setPairingCode(null);
+        }
       }
     }, POLL_MS);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qr]);
+  }, [qr, pairingCode]);
 
   const generate = async () => {
     setError(null);
@@ -82,11 +88,16 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
         setError(data?.error?.message ?? (fr ? 'Impossible de générer le code.' : 'Could not generate the code.'));
         return;
       }
-      if (!data.qrBase64) {
+      if (!data.qrBase64 && !data.pairingCode) {
         setError(fr ? 'Le code de connexion n’a pas été reçu. Réessayez dans un instant.' : 'No connection code received. Try again shortly.');
         return;
       }
-      setQr(data.qrBase64.startsWith('data:') ? data.qrBase64 : `data:image/png;base64,${data.qrBase64}`);
+      if (data.pairingCode) {
+        setPairingCode(data.pairingCode);
+      }
+      if (data.qrBase64) {
+        setQr(data.qrBase64.startsWith('data:') ? data.qrBase64 : `data:image/png;base64,${data.qrBase64}`);
+      }
       await refresh();
     } catch {
       setError(fr ? 'Connexion interrompue. Réessayez.' : 'Connection lost. Try again.');
@@ -195,11 +206,86 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
           {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
           <Button type="button" fullWidth size="lg" className="min-h-12" onClick={generate} disabled={busy || !online} isLoading={busy}>
-            <QrCode className="mr-2 h-4 w-4" />
-            {fr ? 'Générer le code de connexion' : 'Generate connection code'}
+            <Smartphone className="mr-2 h-4 w-4" />
+            {fr ? 'Connecter mon WhatsApp' : 'Connect my WhatsApp'}
           </Button>
 
-          {qr && (
+          {/* PRIORITÉ 1 (Sur téléphone) : Code d'association 8 caractères */}
+          {pairingCode && (
+            <div className="space-y-3.5 border-t border-slate-100 pt-4 text-center">
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
+                <p className="text-xs font-semibold text-emerald-900 mb-1">
+                  {fr ? 'Votre code d’association WhatsApp :' : 'Your WhatsApp pairing code:'}
+                </p>
+                <div className="flex items-center justify-center gap-2 my-2">
+                  <span className="font-mono text-2xl font-extrabold tracking-widest text-emerald-800 bg-white px-3 py-1.5 rounded-lg border border-emerald-300 shadow-xs">
+                    {pairingCode}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(pairingCode);
+                        setCopiedCode(true);
+                        setTimeout(() => setCopiedCode(false), 2000);
+                      } catch {}
+                    }}
+                    className="p-2 rounded-lg border border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50 transition active:scale-95"
+                    title={fr ? 'Copier le code' : 'Copy code'}
+                  >
+                    {copiedCode ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
+                  </button>
+                </div>
+                <p className="text-[11px] text-emerald-700 font-medium">
+                  {copiedCode
+                    ? (fr ? '✓ Code copié dans le presse-papiers !' : '✓ Code copied to clipboard!')
+                    : (fr ? 'Touchez pour copier le code' : 'Tap to copy code')}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-left">
+                <p className="text-xs font-bold text-slate-800 mb-1.5">
+                  📱 {fr ? 'Comment lier depuis ce même téléphone :' : 'How to link on this same phone:'}
+                </p>
+                <ol className="space-y-1 text-xs text-slate-600">
+                  <li>1. {fr ? 'Ouvrez votre WhatsApp sur ce téléphone.' : 'Open WhatsApp on this phone.'}</li>
+                  <li>2. {fr ? 'Allez dans Réglages / Menu › Appareils connectés.' : 'Go to Settings / Menu › Linked devices.'}</li>
+                  <li>3. {fr ? 'Touchez « Connecter un appareil » puis « Lier avec un numéro de téléphone ».' : 'Tap « Link a device » then « Link with phone number instead ».'}</li>
+                  <li>4. {fr ? 'Collez ce code à 8 chiffres : la liaison est immédiate !' : 'Paste this 8-character code: pairing is instant!'}</li>
+                </ol>
+              </div>
+
+              {/* Option QR Code en repli pour ceux sur ordinateur */}
+              {qr && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowQrAlternate((v) => !v)}
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-800 underline"
+                  >
+                    {showQrAlternate
+                      ? (fr ? 'Masquer le code QR' : 'Hide QR code')
+                      : (fr ? 'Vous êtes sur PC ? Afficher le code QR à scanner' : 'On PC? Show QR code to scan')}
+                  </button>
+
+                  {showQrAlternate && (
+                    <div className="mt-3 space-y-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={qr} alt={fr ? 'Code QR WhatsApp' : 'WhatsApp QR code'} className="mx-auto h-52 w-52 rounded-xl border border-slate-200 bg-white p-2" />
+                      <p className="text-[11px] text-slate-500">{fr ? 'Scannez avec l’appareil photo WhatsApp' : 'Scan with WhatsApp camera'}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <p className="text-xs font-medium text-emerald-700 animate-pulse pt-1">
+                ⏳ {fr ? 'En attente de la validation dans WhatsApp…' : 'Waiting for WhatsApp confirmation…'}
+              </p>
+            </div>
+          )}
+
+          {/* CAS OU LE SERVEUR N'A RENVOYÉ QUE LE QR CODE */}
+          {!pairingCode && qr && (
             <div className="space-y-3 border-t border-slate-100 pt-4 text-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={qr} alt={fr ? 'Code QR WhatsApp' : 'WhatsApp QR code'} className="mx-auto h-56 w-56 rounded-xl border border-slate-200 bg-white p-2" />

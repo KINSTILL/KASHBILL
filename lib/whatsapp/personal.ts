@@ -36,7 +36,7 @@ export async function getPersonalStatus(userId: string): Promise<{ status: Perso
 export async function startPersonalConnection(
   userId: string,
   rawPhone: string
-): Promise<{ ok: true; qrBase64: string | null; status: PersonalStatus } | { ok: false; reason: 'NOT_CONFIGURED' | 'INVALID_NUMBER' | 'GATEWAY_ERROR' }> {
+): Promise<{ ok: true; qrBase64: string | null; pairingCode: string | null; status: PersonalStatus } | { ok: false; reason: 'NOT_CONFIGURED' | 'INVALID_NUMBER' | 'GATEWAY_ERROR' }> {
   const cfg = evolution();
   if (!cfg) return { ok: false, reason: 'NOT_CONFIGURED' };
 
@@ -58,14 +58,21 @@ export async function startPersonalConnection(
       body: JSON.stringify({ instanceName: name, integration: 'WHATSAPP-BAILEYS', qrcode: true, number }),
     });
   } else {
-    res = await fetch(`${cfg.url}/instance/connect/${encodeURIComponent(name)}`, { method: 'GET', headers, cache: 'no-store' });
+    res = await fetch(`${cfg.url}/instance/connect/${encodeURIComponent(name)}?number=${encodeURIComponent(number)}`, {
+      method: 'GET',
+      headers,
+      cache: 'no-store',
+    });
   }
   if (!res.ok) return { ok: false, reason: 'GATEWAY_ERROR' };
 
   const data = (await res.json().catch(() => ({}))) as {
     base64?: string;
-    qrcode?: { base64?: string };
+    qrcode?: { base64?: string; pairingCode?: string; code?: string };
+    pairingCode?: string;
+    code?: string;
   };
   const qrBase64 = data.qrcode?.base64 ?? data.base64 ?? null;
-  return { ok: true, qrBase64, status: 'PENDING' };
+  const pairingCode = data.pairingCode ?? data.code ?? data.qrcode?.pairingCode ?? data.qrcode?.code ?? null;
+  return { ok: true, qrBase64, pairingCode, status: 'PENDING' };
 }
