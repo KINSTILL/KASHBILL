@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { CheckCircle2, FileText, Loader2 } from 'lucide-react';
+import { CheckCircle2, FileText, Loader2, XCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 type Status = {
@@ -12,25 +12,32 @@ type Status = {
   invoiceNumber: string | null;
 };
 
-const MAX_POLLS = 30; // ~60 s : le webhook de Notch Pay arrive en général en quelques secondes
+const MAX_POLLS = 25; // ~50 s
 
 function addOnName(type: Status['addOnType'], fr: boolean): string {
   if (type === 'EXTRA_DEVICE') return fr ? 'Appareil supplémentaire' : 'Extra device';
   if (type === 'CUSTOM_WHATSAPP') return fr ? 'WhatsApp personnalisé' : 'Custom WhatsApp';
   if (type === 'WHITE_LABEL') return fr ? 'Marque blanche' : 'White label';
-  return fr ? 'Add-on' : 'Add-on';
+  return fr ? 'Extension' : 'Add-on';
 }
 
 export function AddOnThanks({ locale, subscriptionId }: { locale: string; subscriptionId: string | null }) {
   const fr = locale !== 'en';
   const [status, setStatus] = useState<Status | null>(null);
   const [timedOut, setTimedOut] = useState(false);
+  const [urlStatus, setUrlStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    // Le retour du paiement ne doit pas rester dans l'historique : on retire l'identifiant de l'URL.
-    window.history.replaceState(null, '', window.location.pathname);
+    // Vérifier les paramètres renvoyés par Notch Pay avant d'épurer l'URL
+    if (typeof window !== 'undefined') {
+      const sp = new URLSearchParams(window.location.search);
+      const s = (sp.get('status') || '').toLowerCase().trim();
+      if (s) setUrlStatus(s);
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+
     if (!subscriptionId) {
-      setTimedOut(true); // pas d'identifiant : on affiche le message neutre
+      setTimedOut(true);
       return;
     }
 
@@ -58,7 +65,55 @@ export function AddOnThanks({ locale, subscriptionId }: { locale: string; subscr
     };
   }, [subscriptionId]);
 
+  const isCanceled = urlStatus === 'canceled' || urlStatus === 'cancelled';
+  const isFailed = urlStatus === 'failed' || urlStatus === 'declined' || urlStatus === 'expired';
   const ready = status?.ready === true;
+
+  if (isCanceled) {
+    return (
+      <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-12 text-center">
+        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-600 ring-1 ring-slate-200">
+          <XCircle className="h-9 w-9" />
+        </span>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            {fr ? 'Paiement interrompu' : 'Payment cancelled'}
+          </h1>
+          <p className="text-sm text-slate-600">
+            {fr
+              ? 'Vous avez annulé la procédure de paiement de votre extension. Aucun montant n’a été débité de votre compte.'
+              : 'You cancelled the add-on payment process. No funds were debited from your account.'}
+          </p>
+        </div>
+        <Link href={`/${locale}/upgrade` as Route}>
+          <Button variant="primary">{fr ? 'Retour aux extensions' : 'Back to add-ons'}</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  if (isFailed) {
+    return (
+      <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-12 text-center">
+        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">
+          <XCircle className="h-9 w-9" />
+        </span>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            {fr ? 'Échec du paiement' : 'Payment failed'}
+          </h1>
+          <p className="text-sm text-slate-600">
+            {fr
+              ? 'La transaction n’a pas abouti (délai dépassé ou refus de l’opérateur). Aucun montant n’a été prélevé.'
+              : 'The transaction could not be processed. No funds were debited from your account.'}
+          </p>
+        </div>
+        <Link href={`/${locale}/upgrade` as Route}>
+          <Button variant="primary">{fr ? 'Réessayer le paiement' : 'Retry payment'}</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-10 text-center">
@@ -73,8 +128,8 @@ export function AddOnThanks({ locale, subscriptionId }: { locale: string; subscr
             </h1>
             <p className="text-sm text-slate-600">
               {fr
-                ? `Votre add-on « ${addOnName(status?.addOnType ?? null, true)} » est activé.`
-                : `Your « ${addOnName(status?.addOnType ?? null, false)} » add-on is active.`}
+                ? `Votre extension « ${addOnName(status?.addOnType ?? null, true)} » est activée avec succès.`
+                : `Your « ${addOnName(status?.addOnType ?? null, false)} » add-on is now active.`}
             </p>
           </div>
           <div className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xs">
@@ -90,35 +145,35 @@ export function AddOnThanks({ locale, subscriptionId }: { locale: string; subscr
               {status?.invoiceNumber ? ` · ${status.invoiceNumber}` : ''}
             </p>
           </div>
+          <Link href={`/${locale}/dashboard` as Route}>
+            <Button variant="primary">{fr ? 'Accéder à mon espace' : 'Go to workspace'}</Button>
+          </Link>
         </>
       ) : timedOut ? (
         <>
-          <h1 className="text-xl font-bold text-slate-900">{fr ? 'Paiement reçu' : 'Payment received'}</h1>
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">
+            <Clock className="h-7 w-7" />
+          </span>
+          <h1 className="text-xl font-bold text-slate-900">
+            {fr ? 'En attente de confirmation de l’opérateur' : 'Waiting for operator confirmation'}
+          </h1>
           <p className="text-sm text-slate-600">
             {fr
-              ? 'Votre add-on est en cours d’activation. Votre facture apparaîtra dans Abonnements › Factures dans quelques instants.'
-              : 'Your add-on is being activated. Your invoice will appear under Subscriptions › Invoices shortly.'}
+              ? 'Le paiement n’a pas encore été notifié par votre opérateur. Si vous avez validé le débit sur votre téléphone, votre extension s’activera automatiquement dès réception. Si vous aviez abandonné le paiement, aucun montant n’a été prélevé.'
+              : 'Payment confirmation has not yet been received from your operator. If you approved the charge on your phone, your add-on will activate automatically as soon as it arrives. If you aborted, no funds were debited.'}
           </p>
+          <Link href={`/${locale}/upgrade` as Route}>
+            <Button variant="outline">{fr ? 'Retour aux extensions' : 'Back to add-ons'}</Button>
+          </Link>
         </>
       ) : (
         <>
           <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
           <p className="text-sm text-slate-600">
-            {fr ? 'Nous confirmons votre paiement…' : 'Confirming your payment…'}
+            {fr ? 'Confirmation de votre paiement en cours…' : 'Confirming your payment…'}
           </p>
         </>
       )}
-
-      <div className="flex w-full flex-col gap-2 pt-2 sm:flex-row">
-        <Link href={`/${locale}/subscriptions` as Route} className="flex-1">
-          <Button fullWidth variant="secondary">
-            {fr ? 'Voir mes factures' : 'View my invoices'}
-          </Button>
-        </Link>
-        <Link href={`/${locale}/dashboard` as Route} className="flex-1">
-          <Button fullWidth>{fr ? 'Retour au tableau de bord' : 'Back to dashboard'}</Button>
-        </Link>
-      </div>
     </div>
   );
 }

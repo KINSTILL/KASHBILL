@@ -12,6 +12,7 @@ const schema = z.object({
   type: z.enum(['EXTRA_DEVICE', 'CUSTOM_WHATSAPP', 'WHITE_LABEL']),
   method: z.enum(['mobile_money', 'card', 'auto']).optional().default('auto'),
   operatorCode: z.string().nullable().optional().default(null),
+  locale: z.enum(['fr', 'en']).optional().default('fr'),
 });
 
 function resolveNotchChannels(method: string, operatorCode: string | null): string[] | undefined {
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         customerPhone: user.phone,
         customerName: user.name ?? user.businessName ?? 'Utilisateur',
         // Numéro personnel : la page de configuration du numéro suit le paiement
-        callbackUrl: `${env.APP_URL}/fr/${data.type === 'CUSTOM_WHATSAPP' ? 'upgrade/whatsapp' : 'upgrade/merci'}?addon=${subscription.id}`,
+        callbackUrl: `${env.APP_URL}/${data.locale}/${data.type === 'CUSTOM_WHATSAPP' ? 'upgrade/whatsapp' : 'upgrade/merci'}?addon=${subscription.id}`,
         channels: resolveNotchChannels(data.method, data.operatorCode),
       });
 

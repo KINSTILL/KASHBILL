@@ -12,6 +12,7 @@ const schema = z.object({
   method: z.enum(['mobile_money', 'card', 'auto']).optional().default('auto'),
   operatorCode: z.string().nullable().optional().default(null),
   plan: z.enum(PRO_PLANS.map((p) => p.id) as [string, ...string[]]).optional().default(DEFAULT_PRO_PLAN_ID),
+  locale: z.enum(['fr', 'en']).optional().default('fr'),
 });
 
 function resolveNotchChannels(
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         description: `MyCashBill Pro — ${plan.days} jours`,
         customerPhone: user.phone,
         customerName: user.name ?? user.businessName ?? 'Utilisateur',
-        callbackUrl: `${env.APP_URL}/fr/upgrade?ref=${reference}`,
+        callbackUrl: `${env.APP_URL}/${data.locale}/upgrade?ref=${reference}`,
         channels: resolveNotchChannels(data.method, data.operatorCode),
       });
 
