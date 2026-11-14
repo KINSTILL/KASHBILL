@@ -12,25 +12,19 @@ import { resolveBrand, PDF_TOKENS } from '../brand';
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    paddingHorizontal: 36,
+    paddingVertical: 36,
     fontSize: 10,
     fontFamily: 'Helvetica',
     color: '#0F172A',
     backgroundColor: '#FFFFFF',
   },
-  titleRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 8, marginBottom: 2 },
-  docTitle: { fontSize: 22, fontWeight: 'bold' },
-  typePill: {
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: PDF_TOKENS.radius.pill,
-    borderWidth: 0.75,
-    alignSelf: 'flex-start',
-    marginTop: 3,
-  },
-  typePillText: { fontSize: 8, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 0.5 },
-  docNumber: { fontSize: 10, color: '#64748B', marginBottom: 20 },
-  notes: { marginTop: 12, fontSize: 9, color: '#475569', fontStyle: 'italic' },
+  titleRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 6, marginBottom: 16 },
+  docTitle: { fontSize: 26, fontWeight: 'bold', letterSpacing: 0.5 },
+  metaRight: { alignItems: 'flex-end' },
+  docNumber: { fontSize: 11.5, fontWeight: 'bold', color: PDF_TOKENS.neutral.ink },
+  docDate: { fontSize: 9.5, color: PDF_TOKENS.neutral.muted, marginTop: 2 },
+  notes: { marginTop: 14, fontSize: 9.5, color: '#475569', fontStyle: 'italic' },
   signatureBlock: {
     marginTop: 30,
     borderTopWidth: 0.5,
@@ -71,7 +65,7 @@ const styles = StyleSheet.create({
     fontSize: 44,
     fontWeight: 'bold',
     color: '#94A3B8',
-    opacity: 0.28,
+    opacity: 0.14,
     transform: 'rotate(-30deg)',
     letterSpacing: 3,
   },
@@ -110,9 +104,11 @@ export function A4Document({
       ? isEn
         ? 'Received from'
         : 'Reçu de'
-      : isEn
-      ? 'Billed to'
-      : 'Facturé à';
+      : doc.type === 'FACTURE'
+      ? isEn
+        ? 'Billed to'
+        : 'Facturé à'
+      : 'Client';
 
   return (
     <Document>
@@ -122,15 +118,11 @@ export function A4Document({
           <Text style={[styles.docTitle, { color: brand.primary }]}>
             {isEn ? config.labelEn : config.label}
           </Text>
-          <View style={[styles.typePill, { borderColor: brand.primary }]}>
-            <Text style={[styles.typePillText, { color: brand.primary }]}>
-              {isEn ? config.labelEn : config.label}
-            </Text>
+          <View style={styles.metaRight}>
+            <Text style={styles.docNumber}>N° {doc.number}</Text>
+            <Text style={styles.docDate}>{formatDateShort(doc.createdAt, doc.locale)}</Text>
           </View>
         </View>
-        <Text style={styles.docNumber}>
-          N° {doc.number} · {formatDateShort(doc.createdAt, doc.locale)}
-        </Text>
 
         {doc.client && (
           <ClientBlock
@@ -138,6 +130,7 @@ export function A4Document({
             compact={false}
             label={clientBlockLabel}
             locale={doc.locale}
+            primaryColor={brand.primary}
           />
         )}
         <DocumentMeta doc={doc} compact={false} decimals={decimals} />

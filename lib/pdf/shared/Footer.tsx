@@ -24,22 +24,27 @@ export function Footer({ doc, compact }: { doc: PdfDocument; compact: boolean })
       borderColor: PDF_TOKENS.neutral.line,
     },
     qr: { width: compact ? 40 : 60, height: compact ? 40 : 60 },
-    cgv: { fontSize: compact ? 5 : 7, color: PDF_TOKENS.neutral.muted, marginTop: 4 },
-    small: { fontSize: compact ? 5 : 7, color: PDF_TOKENS.neutral.faint, marginTop: 2 },
+    cgv: { fontSize: compact ? 6 : 7.5, color: PDF_TOKENS.neutral.muted, marginTop: 4 },
+    small: { fontSize: compact ? 6 : 7.5, color: PDF_TOKENS.neutral.faint, marginTop: 2 },
   });
+
+  const hidePrices = doc.type === 'BORDEREAU' && doc.payload.total === 0;
+  const showPayment = Boolean(doc.payload.paymentMethod) && !hidePrices;
 
   return (
     <View style={styles.block}>
-      <View style={styles.payment}>
-        <Text style={styles.label}>{doc.locale === 'EN' ? 'Accepted payment:' : 'Paiement accepté :'}</Text>
-        <PaymentBadges
-          compact={compact}
-          method={(doc.payload.paymentMethod ?? null) as 'CASH' | 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CHECK' | null}
-          operatorName={doc.payload.paymentOperator ?? null}
-          operatorFreeText={doc.payload.paymentOperatorFreeText ?? null}
-          locale={doc.locale}
-        />
-      </View>
+      {showPayment && (
+        <View style={styles.payment}>
+          <Text style={styles.label}>{doc.locale === 'EN' ? 'Accepted payment:' : 'Paiement accepté :'}</Text>
+          <PaymentBadges
+            compact={compact}
+            method={(doc.payload.paymentMethod ?? null) as 'CASH' | 'MOBILE_MONEY' | 'BANK_TRANSFER' | 'CHECK' | null}
+            operatorName={doc.payload.paymentOperator ?? null}
+            operatorFreeText={doc.payload.paymentOperatorFreeText ?? null}
+            locale={doc.locale}
+          />
+        </View>
+      )}
       {doc.qrCodeDataUrl && (
         <>
           <Text style={styles.label}>{doc.locale === 'EN' ? 'Verify authenticity:' : "Vérifier l'authenticité :"}</Text>

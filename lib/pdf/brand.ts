@@ -45,6 +45,22 @@ export const PDF_TOKENS = {
   statusOk: { bg: '#ECFDF5', text: '#065F46', border: '#A7F3D0' },
 } as const;
 
+/**
+ * Couleur de texte lisible (encre foncée ou blanc) sur un fond donné.
+ * Évite le texte blanc illisible quand l'entreprise choisit une couleur de marque claire.
+ */
+export function readableOn(hex: string): string {
+  const m = /^#?([0-9A-Fa-f]{6})$/.exec(hex);
+  if (!m) return '#FFFFFF';
+  const n = parseInt(m[1]!, 16);
+  const lin = (c: number) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  const lum = 0.2126 * lin((n >> 16) & 0xff) + 0.7152 * lin((n >> 8) & 0xff) + 0.0722 * lin(n & 0xff);
+  return lum > 0.179 ? PDF_TOKENS.neutral.ink : '#FFFFFF';
+}
+
 /** Mélange une couleur hexadécimale avec du blanc (0 = couleur, 1 = blanc). */
 export function tint(hex: string, amount: number): string {
   const m = /^#?([0-9A-Fa-f]{6})$/.exec(hex);

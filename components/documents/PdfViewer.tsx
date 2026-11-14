@@ -16,6 +16,7 @@ export function PdfViewer({
 }) {
   const t = useTranslations('documents.preview');
   const [url, setUrl] = useState<string | null>(null);
+  const [showNativePdf, setShowNativePdf] = useState(false);
   const urlRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -40,51 +41,45 @@ export function PdfViewer({
     typeof navigator !== 'undefined' &&
     /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
 
-  if (isMobile) {
-    return (
-      <div className="flex flex-wrap items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 rounded-xl border border-slate-200/80 bg-slate-50/80 p-2.5">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => downloadBlob(blob, filename)}
+        >
+          ⬇️ Télécharger PDF
+        </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => window.open(url, '_blank')}
         >
-          📄 {t('openPdf')}
+          📄 {isMobile ? t('openPdf') : t('openInNewTab')}
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => downloadBlob(blob, filename)}
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowNativePdf((v) => !v)}
+          >
+            {showNativePdf ? 'Masquer lecteur PDF' : 'Lecteur PDF intégré'}
+          </Button>
+        )}
+      </div>
+      {!isMobile && showNativePdf && (
+        <div
+          className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+          style={{ height }}
         >
-          ⬇️ Télécharger PDF
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-end gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => downloadBlob(blob, filename)}
-        >
-          ⬇️ Télécharger PDF
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => window.open(url, '_blank')}>
-          {t('openInNewTab')}
-        </Button>
-      </div>
-      <div
-        className="overflow-hidden rounded-lg border border-slate-200 bg-white"
-        style={{ height }}
-      >
-        <iframe
-          src={`${url}#toolbar=1&navpanes=0`}
-          title={filename}
-          className="h-full w-full"
-        />
-      </div>
+          <iframe
+            src={`${url}#toolbar=1&navpanes=0`}
+            title={filename}
+            className="h-full w-full"
+          />
+        </div>
+      )}
     </div>
   );
 }

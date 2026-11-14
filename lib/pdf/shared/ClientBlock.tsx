@@ -1,28 +1,33 @@
 import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { Locale } from '@prisma/client';
 import type { PdfClient } from '../types';
-import { PDF_TOKENS } from '../brand';
+import { DEFAULT_BRAND, PDF_TOKENS } from '../brand';
 
 export function ClientBlock({
   client,
   compact,
   label,
   locale = 'FR',
+  primaryColor = DEFAULT_BRAND.primary,
 }: {
   client: PdfClient;
   compact: boolean;
   label?: string;
   locale?: Locale;
+  primaryColor?: string;
 }) {
   const isEn = locale === 'EN';
   const styles = StyleSheet.create({
     block: {
       marginBottom: compact ? 8 : 16,
-      padding: compact ? 6 : 10,
+      paddingVertical: compact ? 6 : 10,
+      paddingHorizontal: compact ? 8 : 12,
       backgroundColor: PDF_TOKENS.neutral.surface,
       borderRadius: PDF_TOKENS.radius.lg,
       borderWidth: 0.5,
       borderColor: PDF_TOKENS.neutral.line,
+      borderLeftWidth: compact ? 2.5 : 3,
+      borderLeftColor: primaryColor,
     },
     label: {
       fontSize: compact ? 6 : 8,

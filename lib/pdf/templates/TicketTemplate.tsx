@@ -10,6 +10,38 @@ import { Footer } from '../shared/Footer';
 import { formatDateShort } from '../shared/format';
 import { resolveBrand, PDF_TOKENS } from '../brand';
 
+const TICKET_WIDTH = 226.77; // 80 mm
+
+/**
+ * Hauteur du ticket : react-pdf n'a pas de hauteur automatique, une hauteur fixe coupait le
+ * contenu long sur une 2e page. Estimation volontairement généreuse (un peu de blanc en bas
+ * vaut mieux qu'une page orpheline), bornée en bas pour les tickets très courts.
+ */
+function estimateTicketHeight(doc: PdfDocument, showStamp: boolean): number {
+  const wrapLines = (text: string | null | undefined, charsPerLine: number) =>
+    text ? Math.ceil(text.length / charsPerLine) : 0;
+  const c = doc.company;
+  const company =
+    100 +
+    wrapLines(c.businessName ?? c.legalName ?? '', 24) * 16 +
+    wrapLines(c.legalAddress, 44) * 11 +
+    wrapLines(c.legalForm, 44) * 11;
+  const client = doc.client
+    ? 55 + wrapLines(doc.client.name, 26) * 15 + wrapLines(doc.client.address, 44) * 11
+    : 0;
+  const items = doc.payload.lines.reduce(
+    (acc, l) => acc + Math.max(1, wrapLines(l.description, 40)) * 11 + 18,
+    0
+  );
+  const footer =
+    60 +
+    (doc.qrCodeDataUrl ? 80 : 0) +
+    wrapLines(doc.cgvText ?? c.cgvText, 60) * 8 +
+    (doc.whiteLabel ? 0 : 50);
+  const stamp = showStamp ? 90 : 0;
+  return Math.max(380, Math.ceil(company + 55 + client + 50 + 20 + items + 140 + footer + stamp + 40));
+}
+
 const styles = StyleSheet.create({
   page: {
     paddingHorizontal: 14,
@@ -44,7 +76,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#94A3B8',
-    opacity: 0.3,
+    opacity: 0.14,
     transform: 'rotate(-30deg)',
     letterSpacing: 2,
   },
@@ -89,7 +121,13 @@ export function TicketDocument({
 
   return (
     <Document>
-      <Page size={{ width: 226.77, height: 600 }} style={styles.page}>
+      <Page
+        size={{
+          width: TICKET_WIDTH,
+          height: estimateTicketHeight(doc, Boolean(doc.company.showStampOnTicket && doc.company.stampUrl)),
+        }}
+        style={styles.page}
+      >
         <View style={[styles.header, { borderColor: brand.primary }]}>
           <CompanyHeader company={doc.company} compact locale={doc.locale} />
         </View>
@@ -105,6 +143,7 @@ export function TicketDocument({
             compact
             label={clientLabel}
             locale={doc.locale}
+            primaryColor={brand.primary}
           />
         )}
         <DocumentMeta doc={doc} compact decimals={decimals} />

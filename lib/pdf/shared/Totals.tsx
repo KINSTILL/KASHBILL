@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from '@react-pdf/renderer';
 import type { Locale } from '@prisma/client';
 import type { PdfPayload } from '../types';
 import { formatCurrency, type DecimalPlaces } from './format';
-import { DEFAULT_BRAND, PDF_TOKENS } from '../brand';
+import { DEFAULT_BRAND, PDF_TOKENS, readableOn } from '../brand';
 
 export function Totals({
   payload,
@@ -26,37 +26,47 @@ export function Totals({
   decimals?: DecimalPlaces;
 }) {
   const isEn = locale === 'EN';
+  const onPrimary = readableOn(primaryColor);
 
   const styles = StyleSheet.create({
-    block: { marginTop: compact ? 8 : 12, alignItems: 'flex-end' },
-    lines: { width: compact ? 150 : 220 },
-    line: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
+    // Ticket : pleine largeur. A4 : bloc aligné à droite.
+    block: { marginTop: compact ? 8 : 14, alignItems: compact ? 'stretch' : 'flex-end' },
+    lines: { width: compact ? '100%' : 270 },
+    line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: compact ? 2 : 3 },
     label: { fontSize: compact ? 8 : 10, color: PDF_TOKENS.neutral.muted },
-    value: { fontSize: compact ? 8 : 10, color: PDF_TOKENS.neutral.ink, fontFamily: 'Courier' },
-    // Bloc total mis en valeur (inspiration marketing)
-    totalRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: 6,
-      paddingTop: compact ? 4 : 6,
-      paddingHorizontal: compact ? 6 : 8,
-      paddingBottom: compact ? 3 : 5,
-      borderTopWidth: 1.5,
-      borderColor: primaryColor,
-      backgroundColor: PDF_TOKENS.neutral.surface,
+    value: { fontSize: compact ? 8.5 : 10.5, color: PDF_TOKENS.neutral.ink },
+    // Encadré du total : libellé au-dessus, montant dessous aligné à droite (aucun risque de chevauchement).
+    totalBox: {
+      marginTop: compact ? 4 : 6,
+      paddingVertical: compact ? 5 : 8,
+      paddingHorizontal: compact ? 8 : 12,
+      backgroundColor: primaryColor,
+      borderBottomWidth: 3,
+      borderColor: accentColor,
       borderRadius: PDF_TOKENS.radius.md,
-      width: compact ? 150 : 220,
+      width: compact ? '100%' : 270,
     },
-    totalLabel: { fontSize: compact ? 9 : 11, fontWeight: 'bold', color: PDF_TOKENS.neutral.ink, letterSpacing: 0.3 },
-    totalValue: { fontSize: compact ? 14 : 18, fontWeight: 'bold', color: accentColor, fontFamily: 'Courier' },
+    totalLabel: {
+      fontSize: compact ? 7.5 : 9,
+      fontWeight: 'bold',
+      color: onPrimary,
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+    },
+    totalValue: {
+      marginTop: 2,
+      textAlign: 'right',
+      fontSize: compact ? 15 : 20,
+      fontWeight: 'bold',
+      color: onPrimary,
+    },
   });
 
   if (hidePrices) {
     const totalQty = payload.lines.reduce((acc, l) => acc + l.quantity, 0);
     return (
-      <View style={styles.block}>
-        <View style={styles.totalRow}>
+      <View style={styles.block} wrap={false}>
+        <View style={styles.totalBox}>
           <Text style={styles.totalLabel}>
             {isEn ? 'TOTAL ITEMS DELIVERED' : 'TOTAL COLIS / ARTICLES LIVRÉS'}
           </Text>
@@ -67,7 +77,7 @@ export function Totals({
   }
 
   return (
-    <View style={styles.block}>
+    <View style={styles.block} wrap={false}>
       <View style={styles.lines}>
         <View style={styles.line}>
           <Text style={styles.label}>{isEn ? 'Subtotal' : 'Sous-total'}</Text>
@@ -98,10 +108,10 @@ export function Totals({
         {payload.depositAmount !== null && payload.depositAmount > 0 && (
           <View style={styles.line}>
             <Text style={styles.label}>{isEn ? 'Deposit' : 'Acompte'}</Text>
-            <Text style={styles.value}>−{formatCurrency(payload.depositAmount, currency, locale, decimals)}</Text>
+            <Text style={styles.value}>- {formatCurrency(payload.depositAmount, currency, locale, decimals)}</Text>
           </View>
         )}
-        <View style={styles.totalRow}>
+        <View style={styles.totalBox}>
           <Text style={styles.totalLabel}>{isEn ? 'NET DUE' : 'NET À PAYER'}</Text>
           <Text style={styles.totalValue}>{formatCurrency(payload.total, currency, locale, decimals)}</Text>
         </View>

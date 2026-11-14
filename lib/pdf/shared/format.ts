@@ -34,6 +34,37 @@ export function formatCurrency(
   }
 }
 
+/** Symbole / code de la devise tel qu'affiché par formatCurrency (ex. « FCFA », « XAF », « € »). */
+export function currencyLabel(
+  currencyCode: string = 'XAF',
+  locale: 'FR' | 'EN' | string = 'FR'
+): string {
+  const loc = String(locale).toUpperCase() === 'EN' ? 'en-US' : 'fr-FR';
+  try {
+    const parts = new Intl.NumberFormat(loc, { style: 'currency', currency: currencyCode }).formatToParts(0);
+    return parts.find((p) => p.type === 'currency')?.value ?? currencyCode;
+  } catch {
+    return currencyCode;
+  }
+}
+
+/** Montant seul, sans devise (colonnes de tableau). Espaces insécables : jamais de retour à la ligne au milieu. */
+export function formatAmount(
+  amount: number,
+  locale: 'FR' | 'EN' | string = 'FR',
+  decimals: DecimalPlaces = 0
+): string {
+  const digits: DecimalPlaces = decimals === 1 || decimals === 2 ? decimals : 0;
+  const value = digits === 0 ? Math.round(amount) : amount;
+  const loc = String(locale).toUpperCase() === 'EN' ? 'en-US' : 'fr-FR';
+  return new Intl.NumberFormat(loc, {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
+  })
+    .format(value)
+    .replace(/\s/g, '\u00A0');
+}
+
 /** @deprecated Utiliser formatCurrency */
 export function formatXaf(
   amount: number,
