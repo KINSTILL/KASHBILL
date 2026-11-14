@@ -159,6 +159,12 @@ export function DocumentForm({
   const [submitting, setSubmitting] = useState(false);
   useWakeLock(!submitting);
   const toast = useToast();
+  const [validationErrors, setValidationErrors] = useState<{
+    lines?: Record<number, { description?: boolean; unitPrice?: boolean }>;
+    newClientName?: boolean;
+    validityDays?: boolean;
+    general?: string | null;
+  }>({});
   const [existingDraft, setExistingDraft] = useState<DraftState | null>(null);
   const draftId = useMemo(
     () => (editDocument ? `edit-${editDocument.id}` : initialDraftId ?? 'default-document-draft'),
@@ -242,6 +248,62 @@ export function DocumentForm({
   };
 
   const handleSubmit = async () => {
+    // 1. Validation dynamique et identification des cases manquantes
+    const lineErrors: Record<number, { description?: boolean; unitPrice?: boolean }> = {};
+    let hasLineError = false;
+
+    state.lines.forEach((l, idx) => {
+      const descEmpty = !l.description || l.description.trim() === '';
+      const priceRequired = !currentConfig.priceOptional || showPrices;
+      const priceEmpty = priceRequired && (isNaN(Number(l.unitPrice)) || Number(l.unitPrice) <= 0);
+
+      if (descEmpty || priceEmpty) {
+        lineErrors[idx] = {
+          description: descEmpty,
+          unitPrice: priceEmpty,
+        };
+        hasLineError = true;
+      }
+    });
+
+    const newClientEmpty = state.clientMode === 'new' && (!state.newClient.name || state.newClient.name.trim() === '');
+    const validityEmpty = currentConfig.showValidity && (state.validityDays === null || Number(state.validityDays) <= 0);
+
+    if (hasLineError || newClientEmpty || validityEmpty || state.lines.length === 0) {
+      setValidationErrors({
+        lines: lineErrors,
+        newClientName: newClientEmpty,
+        validityDays: validityEmpty,
+      });
+
+      const missingList: string[] = [];
+      if (hasLineError || state.lines.length === 0) {
+        missingList.push(isEn ? 'articles/lines with valid price' : 'articles avec désignation et prix');
+      }
+      if (newClientEmpty) {
+        missingList.push(isEn ? 'client name' : 'nom du client');
+      }
+      if (validityEmpty) {
+        missingList.push(isEn ? 'validity period' : 'durée de validité');
+      }
+
+      const warningTitle = isEn
+        ? `Incomplete data: please fill in ${missingList.join(', ')}.`
+        : `Données incomplètes : veuillez renseigner ${missingList.join(', ')}.`;
+
+      toast.show(warningTitle, 'error');
+
+      // Scroll vers la première case manquante
+      if (typeof document !== 'undefined') {
+        const firstErrorEl = document.querySelector('[data-has-error="true"]');
+        if (firstErrorEl) {
+          firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      return;
+    }
+
+    setValidationErrors({});
     setSubmitting(true);
     haptic('medium');
     try {
@@ -495,13 +557,25 @@ export function DocumentForm({
           </select>
         ) : (
           <div className="space-y-2">
-            <Input
-              placeholder={t('newClientName')}
-              value={state.newClient.name}
-              onChange={(e) =>
-                setState((s) => ({ ...s, newClient: { ...s.newClient, name: e.target.value } }))
-              }
-            />
+            <div data-has-error={validationErrors.newClientName ? 'true' : undefined}>
+              <Input
+                placeholder={t('newClientName')}
+                value={state.newClient.name}
+                error={
+                  validationErrors.newClientName
+                    ? isEn
+                      ? 'The client name is required'
+                      : 'Le nom du client est requis'
+                    : undefined
+                }
+                onChange={(e) => {
+                  setState((s) => ({ ...s, newClient: { ...s.newClient, name: e.target.value } }));
+                  if (validationErrors.newClientName) {
+                    setValidationErrors((v) => ({ ...v, newClientName: false }));
+                  }
+                }}
+              />
+            </div>
             <Input
               type="tel"
               inputMode="tel"
@@ -591,57 +665,96 @@ export function DocumentForm({
           </div>
         </div>
 
-        {state.lines.map((line, i) => (
-          <div key={i} className="mb-3 space-y-2 border-b pb-3 last:border-0">
-            <Input
-              name={`description-${i}`}
-              label={t(`typeContext.${state.type}.descLabel`)}
-              placeholder={t(`typeContext.${state.type}.descPlaceholder`)}
-              value={line.description}
-              onChange={(e) => updateLine(i, 'description', e.target.value)}
-            />
-            <div className={hideQtyInput || hidePriceInput ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-2 gap-2'}>
-              {!hideQtyInput && (
-                <Input
-                  name={`quantity-${i}`}
-                  inputMode="numeric"
-                  label={t(`typeContext.${state.type}.qtyLabel`)}
-                  placeholder={t('quantity')}
-                  value={line.quantity}
-                  onChange={(e) => updateLine(i, 'quantity', Number(e.target.value))}
-                />
-              )}
-              {!hidePriceInput && (
-                <Input
-                  name={`unitPrice-${i}`}
-                  inputMode={decimals > 0 ? 'decimal' : 'numeric'}
-                  step={decimals > 0 ? (decimals === 1 ? 0.1 : 0.01) : 1}
-                  label={t(`typeContext.${state.type}.priceLabel`)}
-                  placeholder={t('unitPrice')}
-                  value={line.unitPrice || ''}
-                  onChange={(e) => updateLine(i, 'unitPrice', Number(e.target.value))}
-                />
-              )}
+        {state.lines.map((line, i) => {
+          const lineErr = validationErrors.lines?.[i];
+          return (
+            <div
+              key={i}
+              data-has-error={lineErr?.description || lineErr?.unitPrice ? 'true' : undefined}
+              className={`mb-3 space-y-2 border-b pb-3 last:border-0 rounded-xl p-2 transition-all ${
+                lineErr?.description || lineErr?.unitPrice ? 'bg-red-50/70 border border-red-200' : ''
+              }`}
+            >
+              <Input
+                name={`description-${i}`}
+                label={t(`typeContext.${state.type}.descLabel`)}
+                placeholder={t(`typeContext.${state.type}.descPlaceholder`)}
+                value={line.description}
+                error={
+                  lineErr?.description
+                    ? isEn
+                      ? 'Item description is required'
+                      : 'La désignation de l’article est requise'
+                    : undefined
+                }
+                onChange={(e) => {
+                  updateLine(i, 'description', e.target.value);
+                  if (lineErr?.description) {
+                    setValidationErrors((v) => ({
+                      ...v,
+                      lines: { ...v.lines, [i]: { ...v.lines?.[i], description: false } },
+                    }));
+                  }
+                }}
+              />
+              <div className={hideQtyInput || hidePriceInput ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-2 gap-2'}>
+                {!hideQtyInput && (
+                  <Input
+                    name={`quantity-${i}`}
+                    inputMode="numeric"
+                    label={t(`typeContext.${state.type}.qtyLabel`)}
+                    placeholder={t('quantity')}
+                    value={line.quantity}
+                    onChange={(e) => updateLine(i, 'quantity', Number(e.target.value))}
+                  />
+                )}
+                {!hidePriceInput && (
+                  <Input
+                    name={`unitPrice-${i}`}
+                    inputMode={decimals > 0 ? 'decimal' : 'numeric'}
+                    step={decimals > 0 ? (decimals === 1 ? 0.1 : 0.01) : 1}
+                    label={t(`typeContext.${state.type}.priceLabel`)}
+                    placeholder={t('unitPrice')}
+                    value={line.unitPrice || ''}
+                    error={
+                      lineErr?.unitPrice
+                        ? isEn
+                          ? 'A valid price is required'
+                          : 'Un prix unitaire valide est requis'
+                        : undefined
+                    }
+                    onChange={(e) => {
+                      updateLine(i, 'unitPrice', Number(e.target.value));
+                      if (lineErr?.unitPrice) {
+                        setValidationErrors((v) => ({
+                          ...v,
+                          lines: { ...v.lines, [i]: { ...v.lines?.[i], unitPrice: false } },
+                        }));
+                      }
+                    }}
+                  />
+                )}
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                {!hidePriceInput ? (
+                  <span>
+                    {t('lineTotal')} :{' '}
+                    <strong className="money">{formatFCFA(line.quantity * line.unitPrice, decimals)}</strong>
+                  </span>
+                ) : (
+                  <span className="text-xs text-slate-500">
+                    {t(`typeContext.${state.type}.qtyLabel`)} : <strong>{line.quantity}</strong>
+                  </span>
+                )}
+                {state.lines.length > 1 && (
+                  <button type="button" onClick={() => removeLine(i)} className="text-xs text-error">
+                    {t('removeLine')}
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              {!hidePriceInput ? (
-                <span>
-                  {t('lineTotal')} :{' '}
-                  <strong className="money">{formatFCFA(line.quantity * line.unitPrice, decimals)}</strong>
-                </span>
-              ) : (
-                <span className="text-xs text-slate-500">
-                  {t(`typeContext.${state.type}.qtyLabel`)} : <strong>{line.quantity}</strong>
-                </span>
-              )}
-              {state.lines.length > 1 && (
-                <button type="button" onClick={() => removeLine(i)} className="text-xs text-error">
-                  {t('removeLine')}
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
         <Button type="button" variant="ghost" fullWidth onClick={addLine}>
           + {t(`typeContext.${state.type}.addLine`)}
         </Button>
@@ -658,12 +771,26 @@ export function DocumentForm({
             />
           )}
           {DOC_TYPE_CONFIG[state.type].showValidity && (
-            <Input
-              inputMode="numeric"
-              label={t('validityDays')}
-              value={state.validityDays ?? ''}
-              onChange={(e) => setState((s) => ({ ...s, validityDays: e.target.value ? Number(e.target.value) : null }))}
-            />
+            <div data-has-error={validationErrors.validityDays ? 'true' : undefined}>
+              <Input
+                inputMode="numeric"
+                label={t('validityDays')}
+                value={state.validityDays ?? ''}
+                error={
+                  validationErrors.validityDays
+                    ? isEn
+                      ? 'Validity period (in days) is required'
+                      : 'La durée de validité (en jours) est requise'
+                    : undefined
+                }
+                onChange={(e) => {
+                  setState((s) => ({ ...s, validityDays: e.target.value ? Number(e.target.value) : null }));
+                  if (validationErrors.validityDays) {
+                    setValidationErrors((v) => ({ ...v, validityDays: false }));
+                  }
+                }}
+              />
+            </div>
           )}
           {DOC_TYPE_CONFIG[state.type].showDeposit && (
             <Input

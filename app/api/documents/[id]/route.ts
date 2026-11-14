@@ -74,7 +74,13 @@ export async function PATCH(
       const body = await req2.json().catch(() => null);
       const parsed = createDocumentSchema.safeParse(body);
       if (!parsed.success) {
-        return jsonError('VALIDATION_ERROR', 'Données invalides', 422, parsed.error.flatten().fieldErrors);
+        const fieldErrors = parsed.error.flatten().fieldErrors;
+        const missingFields = Object.keys(fieldErrors);
+        const isEn = body?.locale === 'EN';
+        const msg = isEn
+          ? 'Incomplete data: please fill in the required fields to update the document.'
+          : 'Données incomplètes : veuillez renseigner les champs requis pour mettre à jour le document.';
+        return jsonError('VALIDATION_ERROR', msg, 422, { fieldErrors, missingFields });
       }
 
       const result = await updateDraftDocument({

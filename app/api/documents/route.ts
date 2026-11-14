@@ -43,7 +43,17 @@ export async function POST(req: NextRequest): Promise<Response> {
   try {
     return await requireAuth(req, async (req2, { user, ip, userAgent }) => {
       const body = await req2.json();
-      const data = createDocumentSchema.parse(body);
+      const parsed = createDocumentSchema.safeParse(body);
+      if (!parsed.success) {
+        const fieldErrors = parsed.error.flatten().fieldErrors;
+        const missingFields = Object.keys(fieldErrors);
+        const isEn = body?.locale === 'EN';
+        const msg = isEn
+          ? 'Incomplete data: please fill in the required fields to generate the document.'
+          : 'Données incomplètes : veuillez renseigner les champs requis pour générer le document.';
+        return jsonError('VALIDATION_ERROR', msg, 422, { fieldErrors, missingFields });
+      }
+      const data = parsed.data;
 
       const { checkDocQuota } = await import('@/lib/quota/check');
       const quota = await checkDocQuota(user);
