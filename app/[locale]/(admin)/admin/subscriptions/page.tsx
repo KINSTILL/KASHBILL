@@ -8,6 +8,8 @@ import { Card } from '@/components/ui/Card';
 import { SkeletonList } from '@/components/ui/Skeleton';
 import { GrantProSheet } from '@/components/admin/GrantProSheet';
 import { formatDate } from '@/lib/utils';
+import { Trash2 } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 
 type Sub = {
   id: string;
@@ -21,11 +23,34 @@ type Sub = {
 
 export default function AdminSubscriptionsPage() {
   const locale = useLocale();
+  const toast = useToast();
   const [items, setItems] = useState<Sub[] | null>(null);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('');
   const [grantOpen, setGrantOpen] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const [purging, setPurging] = useState(false);
+
+  const purgePhantomSubs = async () => {
+    if (!confirm('Purger tous les abonnements fantômes (périodes d\'essai et checkouts abandonnés) ? Seuls les abonnements Pro réels confirmés seront conservés.')) {
+      return;
+    }
+    setPurging(true);
+    try {
+      const res = await fetch('/api/admin/subscriptions', { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        toast.show(`${data.purged ?? 0} faux abonnement(s) purgé(s) de la base de données.`, 'success');
+        setRefresh((r) => r + 1);
+      } else {
+        toast.show(data.error?.message || 'Erreur lors de la purge', 'error');
+      }
+    } catch {
+      toast.show('Erreur réseau lors de la purge', 'error');
+    } finally {
+      setPurging(false);
+    }
+  };
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -39,9 +64,24 @@ export default function AdminSubscriptionsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Abonnements</h1>
-        <Button onClick={() => setGrantOpen(true)}>+ Offrir Pro</Button>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold">Abonnements</h1>
+          <p className="text-xs text-slate-500">Uniquement les abonnements Pro payants et confirmés</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={purgePhantomSubs}
+            isLoading={purging}
+            className="text-xs text-rose-600 border-rose-200 hover:bg-rose-50"
+          >
+            <Trash2 className="h-3.5 w-3.5 mr-1 text-rose-500 inline" />
+            Purger faux abonnements
+          </Button>
+          <Button onClick={() => setGrantOpen(true)}>+ Offrir Pro</Button>
+        </div>
       </div>
 
       <div className="flex gap-2">

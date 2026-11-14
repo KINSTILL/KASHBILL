@@ -33,18 +33,31 @@ export default function UpgradePage() {
   const search = useSearchParams();
   const { user, refresh } = useCurrentUser();
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<{ proUntil: string | null; role: string } | null>(null);
+  const [status, setStatus] = useState<{
+    proUntil: string | null;
+    role: string;
+    hasPaidPro?: boolean;
+    isInTrial?: boolean;
+  } | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<ProPlanId>(DEFAULT_PRO_PLAN_ID);
   const [feedback, setFeedback] = useState<PaymentFeedback | null>(null);
 
   const isConsumer = user?.accountType === 'CONSUMER';
+  const hasPaidPro = Boolean(
+    status?.hasPaidPro || user?.role === 'ADMIN' || user?.role === 'SUPPORT'
+  );
 
   useEffect(() => {
     fetch('/api/auth/me')
       .then((r) => r.json())
       .then((d) => {
         if (d?.user) {
-          setStatus({ proUntil: d.user.proUntil, role: d.user.role });
+          setStatus({
+            proUntil: d.user.proUntil,
+            role: d.user.role,
+            hasPaidPro: Boolean(d.user.hasPaidPro),
+            isInTrial: Boolean(d.user.isInTrial),
+          });
         }
       })
       .catch(() => {});
@@ -427,34 +440,53 @@ export default function UpgradePage() {
       </section>
 
       {/* Extensions (Add-ons) */}
-      {user?.proUntil && new Date(user.proUntil) > new Date() && (
-        <div className="mt-10 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">{tAddons('title')}</h2>
-            <span className="text-[11px] text-slate-500">
-              {fr
-                ? '💡 Survolez (PC) ou touchez ℹ️ (mobile) pour les détails'
-                : '💡 Hover (PC) or tap ℹ️ (mobile) for details'}
-            </span>
-          </div>
-          <AddOnCard
-            type="EXTRA_DEVICE"
-            price={ADDON_PRICES.EXTRA_DEVICE}
-            title={tAddons('extraDevice')}
-            desc={tAddons('extraDeviceDesc')}
-            tooltip={tAddons('extraDeviceTooltip')}
-            locale={locale}
-          />
-          <AddOnCard
-            type="WHITE_LABEL"
-            price={ADDON_PRICES.WHITE_LABEL}
-            title={tAddons('whiteLabel')}
-            desc={tAddons('whiteLabelDesc')}
-            tooltip={tAddons('whiteLabelTooltip')}
-            locale={locale}
-          />
+      <div className="mt-10 space-y-3" id="addons-section">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold">{tAddons('title')}</h2>
+          <span className="text-[11px] text-slate-500">
+            {fr
+              ? '💡 Survolez (PC) ou touchez ℹ️ (mobile) pour les détails'
+              : '💡 Hover (PC) or tap ℹ️ (mobile) for details'}
+          </span>
         </div>
-      )}
+
+        {!hasPaidPro && (
+          <div className="rounded-xl border border-amber-200/80 bg-amber-50/70 p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
+            <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-semibold">
+                {fr
+                  ? '🔒 Réservé aux abonnés Pro payants'
+                  : '🔒 Reserved for paid Pro subscribers'}
+              </p>
+              <p className="text-amber-800/90 leading-relaxed">
+                {fr
+                  ? "Les extensions (Appareil supplémentaire, Marque blanche) nécessitent un abonnement Pro actif. Les comptes gratuits ou en période d'essai doivent d'abord activer une formule Pro ci-dessus pour y souscrire."
+                  : 'Add-ons (Extra device, White label) require an active Pro subscription. Free accounts or accounts in trial must first activate a Pro plan above to subscribe.'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <AddOnCard
+          type="EXTRA_DEVICE"
+          price={ADDON_PRICES.EXTRA_DEVICE}
+          title={tAddons('extraDevice')}
+          desc={tAddons('extraDeviceDesc')}
+          tooltip={tAddons('extraDeviceTooltip')}
+          locale={locale}
+          locked={!hasPaidPro}
+        />
+        <AddOnCard
+          type="WHITE_LABEL"
+          price={ADDON_PRICES.WHITE_LABEL}
+          title={tAddons('whiteLabel')}
+          desc={tAddons('whiteLabelDesc')}
+          tooltip={tAddons('whiteLabelTooltip')}
+          locale={locale}
+          locked={!hasPaidPro}
+        />
+      </div>
 
       <MiniFAQWrapper />
     </div>
@@ -536,6 +568,7 @@ function AddOnCard({
   desc,
   tooltip,
   locale,
+  locked,
 }: {
   type: 'EXTRA_DEVICE' | 'CUSTOM_WHATSAPP' | 'WHITE_LABEL';
   price: number;
@@ -543,11 +576,22 @@ function AddOnCard({
   desc: string;
   tooltip: string;
   locale: string;
+  locked?: boolean;
 }) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
   const startAddonPayment = async () => {
+    if (locked) {
+      toast.show(
+        locale === 'fr'
+          ? "Veuillez d'abord activer un forfait Pro pour débloquer cette extension."
+          : 'Please activate a Pro plan first to unlock this add-on.',
+        'info'
+      );
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch('/api/addons/initialize', {
@@ -560,7 +604,8 @@ function AddOnCard({
         }),
       });
       if (!res.ok) {
-        toast.show("Erreur lors de l'initialisation de l'extension", 'error');
+        const errData = await res.json().catch(() => ({}));
+        toast.show(errData.error?.message || "Erreur lors de l'initialisation de l'extension", 'error');
         return;
       }
       const { authorizationUrl } = await res.json();
@@ -592,14 +637,26 @@ function AddOnCard({
       </div>
 
       <div className="pt-1">
-        <Button
-          size="lg"
-          fullWidth
-          onClick={startAddonPayment}
-          isLoading={loading}
-        >
-          {locale === 'fr' ? 'Activer' : 'Activate'}
-        </Button>
+        {locked ? (
+          <Button
+            size="lg"
+            fullWidth
+            variant="outline"
+            className="border-dashed border-amber-300 text-amber-900 bg-amber-50/50 hover:bg-amber-100/60"
+            onClick={startAddonPayment}
+          >
+            🔒 {locale === 'fr' ? 'Nécessite le forfait Pro' : 'Requires Pro plan'}
+          </Button>
+        ) : (
+          <Button
+            size="lg"
+            fullWidth
+            onClick={startAddonPayment}
+            isLoading={loading}
+          >
+            {locale === 'fr' ? 'Activer' : 'Activate'}
+          </Button>
+        )}
       </div>
     </Card>
   );

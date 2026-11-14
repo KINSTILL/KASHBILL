@@ -103,15 +103,6 @@ export async function POST(req: NextRequest): Promise<Response> {
         })),
       });
 
-      await tx.subscription.create({
-        data: {
-          userId: user.id,
-          source: 'TRIAL',
-          startsAt: now,
-          endsAt: trialEnd,
-        },
-      });
-
       if (referrerId) {
         // Récupérer l'IP + device du parrain (dernier device actif)
         const parrainDevice = await tx.device.findFirst({

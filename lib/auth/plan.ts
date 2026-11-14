@@ -29,6 +29,14 @@ export function isInTrial(user: Pick<User, 'proUntil' | 'createdAt'> | PlanUser)
   return proDate !== null && proDate !== undefined && proDate <= trialEnd;
 }
 
+/**
+ * Vérifie si l'utilisateur bénéficie d'un statut Pro payé (ou accordé par l'admin),
+ * excluant formellement la période d'essai gratuit.
+ */
+export function isPaidProUser(user: Pick<User, 'proUntil' | 'createdAt'> | PlanUser): boolean {
+  return isPro(user) && !isInTrial(user);
+}
+
 export function isWithinLogoGracePeriod(user: Pick<User, 'createdAt'> | { createdAt?: Date | string }): boolean {
   if (!user.createdAt) return false;
   const createdAtDate = typeof user.createdAt === 'string' ? new Date(user.createdAt) : user.createdAt;

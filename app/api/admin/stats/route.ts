@@ -36,6 +36,15 @@ export async function GET(req: NextRequest): Promise<Response> {
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
+      // Nettoyage préventif des abonnements fantômes (TRIAL et checkouts abandonnés)
+      await prisma.$executeRawUnsafe(`
+        DELETE FROM "Subscription"
+        WHERE "source" = 'TRIAL'
+           OR ("source" = 'NOTCH_PAY' AND "startsAt" = "endsAt" AND NOT EXISTS (
+             SELECT 1 FROM "SubscriptionInvoice" WHERE "SubscriptionInvoice"."subscriptionId" = "Subscription"."id"
+           ));
+      `).catch(() => {});
+
       const [
         totalUsers,
         activeUsers,
@@ -69,7 +78,12 @@ export async function GET(req: NextRequest): Promise<Response> {
         prisma.subscription.count({
           where: {
             endsAt: { gt: now },
-            source: { in: ['NOTCH_PAY', 'REFERRAL', 'TRIAL', 'ADMIN_GIFT'] },
+            addOnType: null,
+            source: { in: ['NOTCH_PAY', 'ADMIN_GIFT'] },
+            OR: [
+              { source: 'ADMIN_GIFT' },
+              { source: 'NOTCH_PAY', invoice: { isNot: null } },
+            ],
           },
         }),
         prisma.referral.count(),

@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { clearSessionCookie } from '@/lib/auth/session';
-import { isWhiteLabelActive } from '@/lib/addons/queries';
+import { isWhiteLabelActive, hasPaidProSubscription } from '@/lib/addons/queries';
+import { isInTrial } from '@/lib/auth/plan';
 import { canUseImage, type ImageKind } from '@/lib/branding/policy';
 import { prisma } from '@/lib/db';
 
@@ -37,7 +38,10 @@ const updateProfileSchema = z.object({
 export async function GET(req: NextRequest): Promise<Response> {
   try {
     return await requireAuth(req, async (_req, { user, deviceId }) => {
-      const whiteLabel = await isWhiteLabelActive(user.id);
+      const [whiteLabel, hasPaidPro] = await Promise.all([
+        isWhiteLabelActive(user.id),
+        hasPaidProSubscription(user.id),
+      ]);
       return jsonOk({
         user: {
           id: user.id,
@@ -50,6 +54,8 @@ export async function GET(req: NextRequest): Promise<Response> {
           role: user.role,
           mode: user.mode,
           proUntil: user.proUntil,
+          hasPaidPro,
+          isInTrial: isInTrial(user),
           referralCode: user.referralCode,
           country: user.country,
           legalName: user.legalName,

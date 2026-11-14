@@ -5,8 +5,7 @@ import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { initNotchPayPayment } from '@/lib/payments/notchpay';
 import { env } from '@/lib/env';
-import { isPro } from '@/lib/auth/plan';
-import { ADDON_PRICES } from '@/lib/addons/queries';
+import { ADDON_PRICES, hasPaidProSubscription } from '@/lib/addons/queries';
 
 const schema = z.object({
   type: z.enum(['EXTRA_DEVICE', 'CUSTOM_WHATSAPP', 'WHITE_LABEL']),
@@ -32,7 +31,14 @@ function resolveNotchChannels(method: string, operatorCode: string | null): stri
 export async function POST(req: NextRequest): Promise<Response> {
   try {
     return await requireAuth(req, async (req2, { user, ip, userAgent }) => {
-      if (!isPro(user)) return jsonError('FORBIDDEN', 'Add-ons réservés aux utilisateurs Pro', 403);
+      const eligible = await hasPaidProSubscription(user.id);
+      if (!eligible) {
+        return jsonError(
+          'FORBIDDEN',
+          "Les extensions nécessitent un abonnement Pro payant actif. Les comptes gratuits ou en période d'essai ne peuvent pas souscrire aux extensions.",
+          403
+        );
+      }
       const data = schema.parse(await req2.json());
       const price = ADDON_PRICES[data.type];
 
