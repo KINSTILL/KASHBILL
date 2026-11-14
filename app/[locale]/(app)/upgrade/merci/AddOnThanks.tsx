@@ -77,12 +77,12 @@ export function AddOnThanks({ locale, subscriptionId }: { locale: string; subscr
         </span>
         <div className="space-y-2">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            {fr ? 'Paiement interrompu' : 'Payment cancelled'}
+            {fr ? 'Vous êtes bien de retour sur MyCashBill (Kinstill)' : 'You are back on MyCashBill (Kinstill)'}
           </h1>
           <p className="text-sm text-slate-600">
             {fr
-              ? 'Vous avez annulé la procédure de paiement de votre extension. Aucun montant n’a été débité de votre compte.'
-              : 'You cancelled the add-on payment process. No funds were debited from your account.'}
+              ? 'Vous avez cliqué sur « Retour sur Kinstill ». La procédure de paiement de votre extension a été interrompue. Aucun montant n’a été débité de votre compte.'
+              : 'You clicked "Return to Kinstill". The payment process for your add-on was cancelled. No funds were debited from your account.'}
           </p>
         </div>
         <Link href={`/${locale}/upgrade` as Route}>

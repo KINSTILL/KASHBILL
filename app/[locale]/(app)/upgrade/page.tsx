@@ -14,7 +14,7 @@ import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 import { ProPlanPicker } from '@/components/pricing/ProPlanPicker';
 import { DEFAULT_PRO_PLAN_ID, type ProPlanId } from '@/lib/pricing/plans';
 import { ADDON_PRICES } from '@/lib/addons/queries';
-import { ChevronRight, Gift, CheckCircle2, AlertCircle, XCircle, Clock, Loader2 } from 'lucide-react';
+import { ChevronRight, Gift, CheckCircle2, AlertCircle, XCircle, Clock, Loader2, ShieldCheck } from 'lucide-react';
 import { InfoTip } from '@/components/ui/InfoTip';
 
 type PaymentFeedback =
@@ -42,10 +42,36 @@ export default function UpgradePage() {
   const [selectedPlan, setSelectedPlan] = useState<ProPlanId>(DEFAULT_PRO_PLAN_ID);
   const [feedback, setFeedback] = useState<PaymentFeedback | null>(null);
 
+  // Modale de redirection & réassurance Kinstill
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTargetName, setModalTargetName] = useState('');
+  const [modalReadyUrl, setModalReadyUrl] = useState<string | null>(null);
+  const [modalProgress, setModalProgress] = useState(0);
+
   const isConsumer = user?.accountType === 'CONSUMER';
   const hasPaidPro = Boolean(
     status?.hasPaidPro || user?.role === 'ADMIN' || user?.role === 'SUPPORT'
   );
+
+  // Timer de transition pour la modale (2,8 secondes)
+  useEffect(() => {
+    if (!modalOpen) return;
+    const startTime = Date.now();
+    const duration = 2800;
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const pct = Math.min(100, Math.round((elapsed / duration) * 100));
+      setModalProgress(pct);
+
+      if (elapsed >= duration && modalReadyUrl) {
+        clearInterval(interval);
+        window.location.href = modalReadyUrl;
+      }
+    }, 80);
+
+    return () => clearInterval(interval);
+  }, [modalOpen, modalReadyUrl]);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -140,8 +166,12 @@ export default function UpgradePage() {
   }, [rawRef, rawStatus, refresh]);
 
   const startPayment = async () => {
-    setLoading(true);
     setFeedback(null);
+    setModalTargetName(fr ? 'votre forfait Pro' : 'your Pro plan');
+    setModalReadyUrl(null);
+    setModalProgress(0);
+    setModalOpen(true);
+
     try {
       const res = await fetch('/api/payments/initialize', {
         method: 'POST',
@@ -154,12 +184,45 @@ export default function UpgradePage() {
       });
       if (!res.ok) {
         toast.show("Erreur lors de l'initialisation du paiement", 'error');
+        setModalOpen(false);
         return;
       }
       const { authorizationUrl } = await res.json();
-      window.location.href = authorizationUrl;
-    } finally {
-      setLoading(false);
+      setModalReadyUrl(authorizationUrl);
+    } catch {
+      toast.show("Erreur réseau lors de l'initialisation", 'error');
+      setModalOpen(false);
+    }
+  };
+
+  const startAddonPayment = async (type: 'EXTRA_DEVICE' | 'CUSTOM_WHATSAPP' | 'WHITE_LABEL', title: string) => {
+    setFeedback(null);
+    setModalTargetName(title);
+    setModalReadyUrl(null);
+    setModalProgress(0);
+    setModalOpen(true);
+
+    try {
+      const res = await fetch('/api/addons/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
+        body: JSON.stringify({
+          type,
+          method: 'auto',
+          locale: locale === 'en' ? 'en' : 'fr',
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        toast.show(errData.error?.message || "Erreur lors de l'initialisation de l'extension", 'error');
+        setModalOpen(false);
+        return;
+      }
+      const { authorizationUrl } = await res.json();
+      setModalReadyUrl(authorizationUrl);
+    } catch {
+      toast.show("Erreur réseau lors de l'initialisation", 'error');
+      setModalOpen(false);
     }
   };
 
@@ -188,12 +251,14 @@ export default function UpgradePage() {
             </span>
             <div className="space-y-1 flex-1">
               <h2 className="font-bold text-slate-900 text-sm sm:text-base">
-                {fr ? 'Paiement interrompu' : 'Payment cancelled'}
+                {fr
+                  ? 'Vous êtes bien de retour sur MyCashBill (Kinstill)'
+                  : 'You are back on MyCashBill (Kinstill)'}
               </h2>
               <p className="text-xs text-slate-600 leading-relaxed">
                 {fr
-                  ? 'Vous avez annulé la procédure de paiement. Aucun montant n’a été prélevé sur votre compte. Vos documents et votre compte restent intacts. Vous pouvez souscrire quand vous le souhaitez.'
-                  : 'You cancelled the payment process. No funds were debited from your account. Your documents and data remain available, and you can upgrade whenever you are ready.'}
+                  ? 'Vous avez cliqué sur « Retour sur Kinstill ». La procédure de paiement sur la passerelle a été interrompue et aucun montant n’a été débité de votre compte. Vos données restent intactes et vous pouvez reprendre quand vous le souhaitez.'
+                  : 'You clicked "Return to Kinstill". The payment process was interrupted and no funds were debited from your account. Your documents and data remain intact, and you can upgrade whenever you are ready.'}
               </p>
               <button
                 type="button"
@@ -292,16 +357,16 @@ export default function UpgradePage() {
             </span>
             <div className="space-y-1 flex-1 min-w-0">
               <h2 className="font-extrabold text-emerald-950 text-base sm:text-lg">
-                {fr ? '🎉 Félicitations ! Votre abonnement Pro est actif' : '🎉 Congratulations! Your Pro plan is active'}
+                {fr ? '🎉 Félicitations ! Votre abonnement Pro MyCashBill est actif' : '🎉 Congratulations! Your MyCashBill Pro plan is active'}
               </h2>
               <p className="text-xs text-emerald-800 leading-relaxed">
                 {fr
-                  ? `Votre paiement a été validé avec succès. Votre statut Pro est actif jusqu’au ${new Date(feedback.endsAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}.`
-                  : `Your payment was confirmed. Your Pro status is active until ${new Date(feedback.endsAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}.`}
+                  ? `Votre paiement sécurisé traité par Kinstill via Notch Pay a été validé avec succès. Votre statut Pro est actif jusqu’au ${new Date(feedback.endsAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+                  : `Your secure payment processed by Kinstill via Notch Pay was confirmed. Your Pro status is active until ${new Date(feedback.endsAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}.`}
               </p>
               {feedback.invoiceNumber && (
                 <p className="text-[11px] font-semibold text-emerald-700 pt-0.5">
-                  {fr ? `Facture officielle n° ${feedback.invoiceNumber} disponible dans vos abonnements.` : `Official invoice #${feedback.invoiceNumber} available under subscriptions.`}
+                  {fr ? `Facture officielle n° ${feedback.invoiceNumber} (émise par Kinstill) disponible dans vos abonnements.` : `Official invoice #${feedback.invoiceNumber} (issued by Kinstill) available under subscriptions.`}
                 </p>
               )}
               <div className="pt-3 flex items-center gap-2 flex-wrap">
@@ -401,10 +466,10 @@ export default function UpgradePage() {
         >
           {fr ? 'Passer Pro' : 'Upgrade to Pro'}
         </Button>
-        <p className="text-center text-[11px] text-slate-400 pt-1">
+        <p className="text-center text-[11px] text-slate-500 pt-1">
           🔒 {fr
-            ? 'Paiement traité et sécurisé par Notch Pay (l’option disponible dans votre pays s’affiche automatiquement)'
-            : 'Payment processed and secured by Notch Pay (available options for your country appear automatically)'}
+            ? 'Paiement sécurisé par Notch Pay • Bénéficiaire officiel : Kinstill (MyCashBill)'
+            : 'Payment secured by Notch Pay • Official merchant: Kinstill (MyCashBill)'}
         </p>
       </div>
 
@@ -476,6 +541,7 @@ export default function UpgradePage() {
           tooltip={tAddons('extraDeviceTooltip')}
           locale={locale}
           locked={!hasPaidPro}
+          onStartPayment={(type, title) => startAddonPayment(type, title)}
         />
         <AddOnCard
           type="WHITE_LABEL"
@@ -485,8 +551,84 @@ export default function UpgradePage() {
           tooltip={tAddons('whiteLabelTooltip')}
           locale={locale}
           locked={!hasPaidPro}
+          onStartPayment={(type, title) => startAddonPayment(type, title)}
         />
       </div>
+
+      {/* MODALE DE TRANSITION & RÉASSURANCE KINSTILL / NOTCH PAY */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/65 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 space-y-4 animate-in zoom-in-95 duration-150 text-center">
+            {/* Header badges */}
+            <div className="flex flex-col items-center gap-2">
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-xs">
+                <ShieldCheck className="h-7 w-7" />
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                <span>MyCashBill</span>
+                <span className="text-slate-400">•</span>
+                <span className="text-emerald-700 font-bold">Kinstill</span>
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-900">
+                {fr ? 'Redirection vers Notch Pay...' : 'Redirecting to Notch Pay...'}
+              </h3>
+              <p className="text-xs text-slate-500">
+                {fr ? `Préparation pour ${modalTargetName}` : `Preparing for ${modalTargetName}`}
+              </p>
+            </div>
+
+            {/* Note explicative brève et rassurante */}
+            <div className="rounded-xl border border-amber-200/90 bg-amber-50/70 p-3.5 text-left text-xs text-amber-950 space-y-1.5">
+              <p className="font-bold flex items-center gap-1.5 text-amber-900">
+                <span>ℹ️</span>
+                <span>{fr ? 'Bénéficiaire officiel : Kinstill' : 'Official merchant: Kinstill'}</span>
+              </p>
+              <p className="text-amber-900/90 leading-relaxed text-[11px] sm:text-xs">
+                {fr
+                  ? 'MyCashBill est édité par Kinstill. Sur la passerelle sécurisée Notch Pay et lors du retour (« Retour sur Kinstill »), le bénéficiaire affiché est donc légitimement Kinstill.'
+                  : 'MyCashBill is published by Kinstill. On the secure Notch Pay gateway and upon return ("Return to Kinstill"), the official merchant displayed is legitimately Kinstill.'}
+              </p>
+            </div>
+
+            {/* Barre de progression & Bouton d'accès */}
+            <div className="space-y-2 pt-1">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-150 ease-linear rounded-full"
+                  style={{ width: `${modalProgress}%` }}
+                />
+              </div>
+
+              {modalReadyUrl ? (
+                <Button
+                  size="md"
+                  fullWidth
+                  onClick={() => { window.location.href = modalReadyUrl; }}
+                  className="mt-1"
+                >
+                  {fr ? 'Accéder au paiement maintenant →' : 'Proceed to payment now →'}
+                </Button>
+              ) : (
+                <div className="flex items-center justify-center gap-2 text-xs text-slate-500 py-1.5">
+                  <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+                  <span>{fr ? 'Génération de la session sécurisée...' : 'Securing your session...'}</span>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="text-xs text-slate-400 hover:text-slate-600 underline block mx-auto pt-1"
+              >
+                {fr ? 'Annuler' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <MiniFAQWrapper />
     </div>
@@ -512,6 +654,12 @@ function MiniFAQWrapper() {
             'Non, aucun prélèvement automatique forcé. Vous payez la formule choisie (1 mois : 2 000 FCFA, 3 mois : 5 000 FCFA, 1 an : 18 000 FCFA) pour un accès Pro sans engagement. À la fin de la période, vous décidez vous-même si vous souhaitez renouveler.',
         },
         {
+          id: 'faq-kinstill',
+          question: 'Pourquoi le nom Kinstill apparaît-il sur Notch Pay ?',
+          answer:
+            'Kinstill est la maison mère éditrice de MyCashBill. C’est sous ce nom que notre compte marchand officiel est enregistré auprès de Notch Pay pour traiter vos paiements en toute sécurité.',
+        },
+        {
           id: 'faq-data',
           question: 'Que deviennent mes données si mon abonnement Pro expire ?',
           answer:
@@ -530,6 +678,12 @@ function MiniFAQWrapper() {
           question: 'Can I cancel? Is there forced automatic renewal?',
           answer:
             'No forced recurring auto-debit. You pay for the chosen duration (1 month: 2,000 XAF, 3 months: 5,000 XAF, 1 year: 18,000 XAF) with zero commitment. At the end, you decide whether to renew.',
+        },
+        {
+          id: 'faq-kinstill',
+          question: 'Why does the name Kinstill appear on Notch Pay?',
+          answer:
+            'Kinstill is the parent company publishing MyCashBill. Our official certified merchant account with Notch Pay is registered under this name to process your payments securely.',
         },
         {
           id: 'faq-data',
@@ -569,6 +723,7 @@ function AddOnCard({
   tooltip,
   locale,
   locked,
+  onStartPayment,
 }: {
   type: 'EXTRA_DEVICE' | 'CUSTOM_WHATSAPP' | 'WHITE_LABEL';
   price: number;
@@ -577,11 +732,11 @@ function AddOnCard({
   tooltip: string;
   locale: string;
   locked?: boolean;
+  onStartPayment?: (type: 'EXTRA_DEVICE' | 'CUSTOM_WHATSAPP' | 'WHITE_LABEL', title: string) => void;
 }) {
   const toast = useToast();
-  const [loading, setLoading] = useState(false);
 
-  const startAddonPayment = async () => {
+  const handleAction = () => {
     if (locked) {
       toast.show(
         locale === 'fr'
@@ -592,26 +747,8 @@ function AddOnCard({
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    setLoading(true);
-    try {
-      const res = await fetch('/api/addons/initialize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({
-          type,
-          method: 'auto',
-          locale: locale === 'en' ? 'en' : 'fr',
-        }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        toast.show(errData.error?.message || "Erreur lors de l'initialisation de l'extension", 'error');
-        return;
-      }
-      const { authorizationUrl } = await res.json();
-      window.location.href = authorizationUrl;
-    } finally {
-      setLoading(false);
+    if (onStartPayment) {
+      onStartPayment(type, title);
     }
   };
 
@@ -643,7 +780,7 @@ function AddOnCard({
             fullWidth
             variant="outline"
             className="border-dashed border-amber-300 text-amber-900 bg-amber-50/50 hover:bg-amber-100/60"
-            onClick={startAddonPayment}
+            onClick={handleAction}
           >
             🔒 {locale === 'fr' ? 'Nécessite le forfait Pro' : 'Requires Pro plan'}
           </Button>
@@ -651,8 +788,7 @@ function AddOnCard({
           <Button
             size="lg"
             fullWidth
-            onClick={startAddonPayment}
-            isLoading={loading}
+            onClick={handleAction}
           >
             {locale === 'fr' ? 'Activer' : 'Activate'}
           </Button>
