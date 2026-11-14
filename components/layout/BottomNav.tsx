@@ -49,7 +49,7 @@ export function BottomNav() {
     },
     {
       href: `/${locale}/settings`,
-      label: t('profile'),
+      label: t('settings'),
       icon: SettingsIcon,
       match: (p: string) => p.startsWith(`/${locale}/settings`),
     },

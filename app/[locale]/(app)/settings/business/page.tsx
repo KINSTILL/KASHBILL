@@ -203,8 +203,8 @@ export default function BusinessSettingsPage() {
       await refresh();
       setMessage({
         text: fr
-          ? 'Profil et identité de l’entreprise enregistrés avec succès !'
-          : 'Company profile and branding saved successfully!',
+          ? 'Paramètres et identité de l’entreprise enregistrés avec succès !'
+          : 'Company settings and branding saved successfully!',
       });
     } catch {
       setMessage({ text: commonT('error'), error: true });
@@ -226,7 +226,7 @@ export default function BusinessSettingsPage() {
           </div>
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-950 truncate">
-              {fr ? 'Profil & Identité de mon Entreprise' : 'Company Profile & Branding'}
+              {fr ? 'Paramètres & Identité de mon Entreprise' : 'Company Settings & Branding'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5 line-clamp-1">
               {fr
@@ -280,7 +280,7 @@ export default function BusinessSettingsPage() {
                 <ShieldCheck className="h-4 w-4" />
               </span>
               <span className="text-xs sm:text-sm font-bold tracking-wide text-slate-100">
-                {fr ? 'Complétude du profil de facturation' : 'Invoice Profile Completeness'}
+                {fr ? 'Complétude des paramètres de facturation' : 'Invoice Settings Completeness'}
               </span>
             </div>
 
@@ -1019,8 +1019,8 @@ export default function BusinessSettingsPage() {
                     ? 'Modifications non enregistrées'
                     : 'Unsaved modifications'
                   : fr
-                  ? 'Profil à jour'
-                  : 'Profile up to date'}
+                  ? 'Paramètres à jour'
+                  : 'Settings up to date'}
               </span>
             </div>
 

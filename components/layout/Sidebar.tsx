@@ -20,7 +20,7 @@ export function Sidebar() {
     { href: `/${locale}/documents`, label: t('history') },
     { href: `/${locale}/clients`, label: t('clients') },
     { href: `/${locale}/recurring`, label: t('recurring') },
-    { href: `/${locale}/settings`, label: t('profile') },
+    { href: `/${locale}/settings`, label: t('settings') },
   ];
 
   return (
