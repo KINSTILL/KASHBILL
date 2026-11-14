@@ -29,6 +29,8 @@ import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { isPro, isWithinLogoGracePeriod } from '@/lib/auth/plan';
 import { DEFAULT_BRAND } from '@/lib/pdf/brand';
 import { InfoTip } from '@/components/ui/InfoTip';
+import { VisualPresetsSelector } from '@/components/settings/VisualPresetsSelector';
+import { findPresetByColors } from '@/lib/branding/presets';
 
 type TabKey = 'branding' | 'legal' | 'invoicing';
 
@@ -405,6 +407,22 @@ export default function BusinessSettingsPage() {
               &laquo; {headerText} &raquo;
             </div>
           )}
+
+          {/* Simulation du style visuel (Ligne d'accent + Encadré Net à payer) */}
+          <div className="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span className="text-[11px] text-slate-500 font-medium">
+              {fr ? 'Aperçu du Net à payer :' : 'Net due preview:'}
+            </span>
+            <span
+              className="rounded-lg px-2.5 py-1 text-xs font-bold text-white shadow-2xs transition-colors"
+              style={{
+                backgroundColor: canUseWhiteLabel ? brandPrimary : DEFAULT_BRAND.primary,
+                borderBottom: `2px solid ${canUseWhiteLabel ? brandAccent : DEFAULT_BRAND.accent}`,
+              }}
+            >
+              {fr ? 'NET À PAYER : 150 000 FCFA' : 'NET DUE: 150,000 FCFA'}
+            </span>
+          </div>
         </div>
       </Card>
 
@@ -615,8 +633,8 @@ export default function BusinessSettingsPage() {
               </label>
             </Card>
 
-            {/* White Label : Couleurs personnalisées */}
-            <Card className="p-4 sm:p-6 space-y-4">
+            {/* White Label : Couleurs personnalisées & Presets */}
+            <Card className="p-4 sm:p-6 space-y-5">
               <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-50 text-teal-700 border border-teal-100">
@@ -624,36 +642,35 @@ export default function BusinessSettingsPage() {
                   </span>
                   <div>
                     <h2 className="text-sm font-bold text-slate-900">
-                      {fr ? 'Couleurs de la marque (White Label)' : 'Brand Colors (White Label)'}
+                      {fr ? 'Identité visuelle de vos documents (White Label)' : 'Document Visual Identity (White Label)'}
                     </h2>
                     <p className="text-xs text-slate-500">
                       {fr
-                        ? 'Appliquez vos couleurs d’entreprise sur tous les PDF'
-                        : 'Apply your custom brand colors on all PDF documents'}
+                        ? 'Sélectionnez un style de designer ou ajustez vos couleurs manuellement'
+                        : 'Choose a designer preset or tune your colors manually'}
                     </p>
                   </div>
                 </div>
                 {!canUseWhiteLabel && <ProBadge label="Add-on White label" />}
               </div>
 
-              {canUseWhiteLabel ? (
-                <p className="text-xs text-slate-600">
-                  {fr
-                    ? 'Ces couleurs remplacent la palette MyCashBill sur vos factures, devis et reçus.'
-                    : 'These colors replace the default MyCashBill theme on all your invoices, quotes, and receipts.'}
-                </p>
-              ) : (
-                <p className="text-xs text-slate-500">
-                  {fr
-                    ? 'Personnalisez vos documents aux couleurs exactes de votre charte graphique avec l’option White label.'
-                    : 'Customize your documents with your exact company branding using the White Label add-on.'}{' '}
-                  <Link href={'/upgrade' as Route} className="font-semibold text-emerald-600 underline">
-                    {fr ? 'Découvrir l’option' : 'Learn more'}
-                  </Link>
-                </p>
-              )}
+              {/* Sélecteur des 10 Presets White Label avec prévisualisation en direct */}
+              <VisualPresetsSelector
+                selectedPrimary={brandPrimary}
+                selectedAccent={brandAccent}
+                onSelect={(preset) => {
+                  setBrandPrimary(preset.primary);
+                  setBrandAccent(preset.accent);
+                }}
+                canUseWhiteLabel={canUseWhiteLabel}
+                locale={locale}
+              />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="pt-3 border-t border-slate-100 space-y-2">
+                <p className="text-xs font-bold text-slate-700">
+                  {fr ? 'Ajustement précis des codes couleurs :' : 'Precise hex color tuning:'}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="rounded-xl border border-slate-200 p-3 bg-white space-y-2">
                   <label htmlFor="brandPrimary" className="block text-xs font-bold text-slate-800">
                     {fr ? 'Couleur principale' : 'Primary color'}
@@ -697,6 +714,7 @@ export default function BusinessSettingsPage() {
                     </span>
                   </div>
                 </div>
+              </div>
               </div>
 
               {canUseWhiteLabel && (

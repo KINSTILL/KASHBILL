@@ -28,7 +28,10 @@ import { computeTotals, roundTo, type ComputedPayload } from '@/lib/documents/pa
 import type { UserSuggestions } from '@/lib/documents/suggestions';
 import { ScanModal } from './scan/ScanModal';
 import type { ScannedQuote } from '@/lib/validators/quote-scan';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Palette } from 'lucide-react';
+import { Sheet } from '@/components/ui/Sheet';
+import { VisualPresetsSelector } from '@/components/settings/VisualPresetsSelector';
+import type { VisualPreset } from '@/lib/branding/presets';
 
 type Line = { description: string; quantity: number; unitPrice: number };
 type DraftState = {
@@ -117,7 +120,7 @@ export function DocumentForm({
   const locale = useLocale();
   const isEn = locale === 'en';
   const router = useRouter();
-  const { user } = useCurrentUser();
+  const { user, refresh } = useCurrentUser();
 
   const [state, setState] = useState<DraftState>(editDocument ? buildEditState(editDocument) : {
     type: 'DEVIS',
@@ -162,6 +165,7 @@ export function DocumentForm({
   const [isScanModalOpen, setIsScanModalOpen] = useState<boolean>(false);
 
   const [submitting, setSubmitting] = useState(false);
+  const [showThemeSheet, setShowThemeSheet] = useState(false);
   useWakeLock(!submitting);
   const toast = useToast();
   const [validationErrors, setValidationErrors] = useState<{
@@ -265,6 +269,29 @@ export function DocumentForm({
         lines: [...s.lines, { description: presetText, quantity: 1, unitPrice: 0 }],
       };
     });
+  };
+
+  const handleThemeSelect = async (preset: VisualPreset) => {
+    haptic('medium');
+    try {
+      const res = await fetch('/api/auth/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brandPrimaryColor: preset.primary,
+          brandAccentColor: preset.accent,
+        }),
+      });
+      if (res.ok) {
+        await refresh();
+        toast.show(`Thème « ${preset.name} » appliqué à vos documents !`, 'success');
+        setShowThemeSheet(false);
+      } else {
+        toast.show('Erreur lors du changement de thème', 'error');
+      }
+    } catch {
+      toast.show('Erreur réseau lors du changement de thème', 'error');
+    }
   };
 
   const handleApplyScan = (scannedData: ScannedQuote, selectedType: DocType) => {
@@ -531,18 +558,34 @@ export function DocumentForm({
       )}
 
       <Card>
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <label className="text-sm font-medium">{t('type')}</label>
-          {!editDocument && (
-            <Link
-              href={`/${locale}/documents/scan` as Route}
-              onClick={() => haptic('light')}
-              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-500/20 active:scale-95 shadow-xs"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-              <span>⚡ Scan express</span>
-            </Link>
-          )}
+          <div className="flex items-center gap-1.5">
+            {user?.whiteLabel && (
+              <button
+                type="button"
+                onClick={() => {
+                  haptic('light');
+                  setShowThemeSheet(true);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-900 transition-all hover:bg-amber-100 active:scale-95 shadow-2xs"
+                title="Changer le style visuel White Label de vos documents"
+              >
+                <Palette className="h-3 w-3 text-amber-700" />
+                <span>🎨 Thème White Label</span>
+              </button>
+            )}
+            {!editDocument && (
+              <Link
+                href={`/${locale}/documents/scan` as Route}
+                onClick={() => haptic('light')}
+                className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-500/20 active:scale-95 shadow-xs"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
+                <span>⚡ Scan express</span>
+              </Link>
+            )}
+          </div>
         </div>
         {editDocument ? (
           // En édition le type est verrouillé : il fixe le préfixe de numérotation du document.
@@ -1142,6 +1185,25 @@ export function DocumentForm({
         currency={clientCurrency}
         onApplyToForm={handleApplyScan}
       />
+
+      {/* Tiroir de sélection des 10 thèmes visuels White Label */}
+      {user?.whiteLabel && (
+        <Sheet
+          open={showThemeSheet}
+          onOpenChange={setShowThemeSheet}
+          title={isEn ? 'White Label Visual Presets' : 'Modèles d’Identité Visuelle White Label'}
+        >
+          <div className="space-y-4 pt-1">
+            <VisualPresetsSelector
+              selectedPrimary={user.brandPrimaryColor || '#0F172A'}
+              selectedAccent={user.brandAccentColor || '#C98773'}
+              onSelect={handleThemeSelect}
+              canUseWhiteLabel={true}
+              locale={locale}
+            />
+          </div>
+        </Sheet>
+      )}
     </div>
   );
 }
