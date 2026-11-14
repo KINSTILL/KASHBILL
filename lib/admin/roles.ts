@@ -13,6 +13,7 @@ export type AdminAction =
   | 'unban_user'
   | 'suspend_user'
   | 'grant_pro'
+  | 'grant_addon'
   | 'modify_subscription'
   | 'view_stats'
   | 'view_fraud_queue'
@@ -52,6 +53,7 @@ const ADMIN_ACTIONS: AdminAction[] = [
   'unban_user',
   'suspend_user',
   'grant_pro',
+  'grant_addon',
   'modify_subscription',
   'view_stats',
   'view_fraud_queue',
@@ -94,6 +96,7 @@ export function requiresReauth(action: AdminAction): boolean {
     action === 'unban_user' ||
     action === 'suspend_user' ||
     action === 'grant_pro' ||
+    action === 'grant_addon' ||
     action === 'modify_subscription' ||
     action === 'confirm_fraud' ||
     action === 'dismiss_fraud' ||

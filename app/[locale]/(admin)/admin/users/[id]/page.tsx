@@ -79,10 +79,11 @@ export default function AdminUserDetailPage({
 
   // Modals & Action States
   const [activeModal, setActiveModal] = useState<
-    'ban' | 'suspend' | 'grant_pro' | 'reset_pin' | 'flag' | null
+    'ban' | 'suspend' | 'grant_pro' | 'grant_addon' | 'reset_pin' | 'flag' | null
   >(null);
   const [actionReason, setActionReason] = useState('');
   const [actionDays, setActionDays] = useState('30');
+  const [addonType, setAddonType] = useState<'EXTRA_DEVICE' | 'WHITE_LABEL' | 'CUSTOM_WHATSAPP'>('WHITE_LABEL');
   const [newPin, setNewPin] = useState('');
   const [flagSeverity, setFlagSeverity] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'>('MEDIUM');
   const [actionLoading, setActionLoading] = useState(false);
@@ -224,6 +225,15 @@ export default function AdminUserDetailPage({
             onClick={() => setActiveModal('grant_pro')}
           >
             Offrir Pro
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-emerald-300 text-emerald-800 hover:bg-emerald-50"
+            onClick={() => setActiveModal('grant_addon')}
+          >
+            Offrir Add-on
           </Button>
 
           <Button
@@ -539,6 +549,65 @@ export default function AdminUserDetailPage({
             }
           >
             Accorder Pro
+          </Button>
+        </div>
+      </Sheet>
+
+      {/* Offrir Add-on Sheet */}
+      <Sheet open={activeModal === 'grant_addon'} onOpenChange={(o) => !o && setActiveModal(null)}>
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-slate-900">Offrir une extension / Add-on</h2>
+          <p className="text-sm text-slate-600">
+            Activez un add-on spécifique pour cet utilisateur pendant une durée déterminée.
+          </p>
+          <div>
+            <label className="text-xs font-medium text-slate-700">Type d&apos;add-on</label>
+            <select
+              value={addonType}
+              onChange={(e) => setAddonType(e.target.value as any)}
+              className="thumb-zone w-full rounded-btn border border-slate-300 bg-white px-3 py-2 text-sm text-ink focus:border-emerald-500 focus:outline-none"
+            >
+              <option value="WHITE_LABEL">Marque blanche (Logo / PDF sans mention MyCashBill)</option>
+              <option value="EXTRA_DEVICE">Appareil supplémentaire (+1 session simultanée)</option>
+              <option value="CUSTOM_WHATSAPP">WhatsApp dédié (Numéro personnel)</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-700">Nombre de jours</label>
+            <Input
+              type="number"
+              value={actionDays}
+              onChange={(e) => setActionDays(e.target.value)}
+              min="1"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-700">Motif</label>
+            <Input
+              value={actionReason}
+              onChange={(e) => setActionReason(e.target.value)}
+              placeholder="Ex: Test client, offre spéciale, compensation..."
+            />
+          </div>
+          <Button
+            variant="primary"
+            fullWidth
+            isLoading={actionLoading}
+            disabled={actionReason.trim().length < 3}
+            onClick={() =>
+              handleAction(() =>
+                run(`/api/admin/users/${id}/grant-addon`, {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    type: addonType,
+                    days: parseInt(actionDays, 10),
+                    reason: actionReason.trim(),
+                  }),
+                })
+              )
+            }
+          >
+            Accorder l&apos;Add-on
           </Button>
         </div>
       </Sheet>
