@@ -24,7 +24,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     return await requireAuth(req, async (req2, { user }) => {
       const s = await getPersonalStatus(user.id);
       if (!s.hasAddOn) {
-        return jsonError('FORBIDDEN', "Activez l'extension « Mon numéro WhatsApp » pour connecter votre numéro.", 403);
+        return jsonError('FORBIDDEN', "Le statut Pro est requis pour connecter votre propre numéro WhatsApp.", 403);
       }
       const data = bodySchema.parse(await req2.json());
       const result = await startPersonalConnection(user.id, data.phone);

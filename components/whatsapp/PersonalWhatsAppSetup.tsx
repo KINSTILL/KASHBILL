@@ -113,14 +113,14 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
 
       {info && !info.hasAddOn && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          <p className="font-semibold">{fr ? 'Extension non active' : 'Add-on not active'}</p>
+          <p className="font-semibold">{fr ? 'Fonctionnalité Pro' : 'Pro Feature'}</p>
           <p className="mt-1 text-xs">
             {fr
-              ? 'Activez « Mon numéro WhatsApp » pour connecter votre numéro. Sans extension active, les envois partent de MyCashBill.'
-              : 'Activate « My WhatsApp number » to connect your number. Without it, sending goes through MyCashBill.'}
+              ? 'La connexion de votre propre numéro WhatsApp est incluse directement avec l’abonnement Pro. Passez Pro pour débloquer cette option.'
+              : 'Connecting your own WhatsApp number is directly included with the Pro subscription. Upgrade to Pro to unlock this feature.'}
           </p>
-          <Link href={`/${locale}/upgrade` as Route} className="mt-2 inline-block font-bold underline">
-            {fr ? 'Voir les extensions' : 'View add-ons'} →
+          <Link href={`/${locale}/upgrade` as Route} className="mt-2 inline-block font-bold text-emerald-800 underline">
+            {fr ? 'Passer Pro' : 'Upgrade to Pro'} →
           </Link>
         </div>
       )}

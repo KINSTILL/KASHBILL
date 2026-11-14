@@ -10,7 +10,7 @@ import { Logo } from './Logo';
 import { InstallButton } from '@/components/pwa/InstallButton';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { Button } from '@/components/ui/Button';
-import { ShieldCheck, LogOut, LogIn } from 'lucide-react';
+import { ShieldCheck, LogOut, LogIn, Crown } from 'lucide-react';
 import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
 
 export function Header() {
@@ -33,13 +33,25 @@ export function Header() {
           <Logo href={`/${locale}?landing=1`} size="sm" />
           <Link
             href={`/${locale}?landing=1` as Route}
-            className="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 transition hover:bg-emerald-100"
+            className="hidden sm:inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700 transition hover:bg-emerald-100"
           >
             Site ↗
           </Link>
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Badge Pro interactif / Quotas 1-clic : visible sur mobile ET desktop */}
+          {user && (
+            <Link
+              href={`/${locale}/upgrade` as Route}
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition shadow-xs active:scale-95 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-300 text-emerald-800 hover:bg-emerald-100"
+              title={user?.proUntil && new Date(user.proUntil) > new Date() ? 'Gérer mon abonnement Pro' : 'Passer Pro'}
+            >
+              <Crown className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+              <span>{user?.proUntil && new Date(user.proUntil) > new Date() ? 'PRO' : (locale === 'fr' ? 'Passer Pro' : 'Go Pro')}</span>
+            </Link>
+          )}
+
           {/* Outils Admin et badges secondaires : affichés uniquement sur tablette/desktop (sm+) pour épurer le téléphone */}
           {(user?.role === 'ADMIN' || user?.role === 'SUPPORT') && (
             <div className="hidden items-center gap-1.5 sm:flex">
@@ -75,28 +87,17 @@ export function Header() {
           {/* Bascule Langue 1-clic sur mobile, [FR|EN] sur desktop */}
           <LocaleSwitcher />
 
-          {/* Déconnexion : icône sobre sur mobile, bouton texte sur desktop */}
+          {/* Déconnexion : réservée à l'affichage desktop (sur mobile, accessible proprement dans l'onglet Paramètres) */}
           {user && (
-            <>
-              <button
-                type="button"
-                onClick={handleLogout}
-                aria-label={t('logout')}
-                title={t('logout')}
-                className="flex h-9 min-w-9 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95 sm:hidden"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>{t('logout')}</span>
-              </button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="hidden h-8 px-2.5 text-xs text-red-600 hover:bg-red-50 sm:inline-flex"
-                onClick={handleLogout}
-              >
-                {t('logout')}
-              </Button>
-            </>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="hidden h-8 px-2.5 text-xs text-red-600 hover:bg-red-50 sm:inline-flex"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-3.5 w-3.5 mr-1" />
+              <span>{t('logout')}</span>
+            </Button>
           )}
 
           {!user && (

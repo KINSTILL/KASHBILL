@@ -280,6 +280,29 @@ export async function restartEvolutionInstance(
   }
 }
 
+export async function sendSimpleTextMessage(params: {
+  evolutionUrl: string;
+  evolutionKey: string;
+  instanceName: string;
+  number: string;
+  text: string;
+}): Promise<boolean> {
+  const { evolutionUrl, evolutionKey, instanceName, number, text } = params;
+  try {
+    const res = await fetch(`${evolutionUrl}/message/sendText/${encodeURIComponent(instanceName)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: evolutionKey },
+      body: JSON.stringify({
+        number,
+        text,
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 async function sendMedia(params: {
   evolutionUrl: string;
   evolutionKey: string;
@@ -290,8 +313,9 @@ async function sendMedia(params: {
   fileName: string;
   mimetype?: string;
   retryOnFailure?: boolean;
+  introText?: string;
 }): Promise<{ ok: boolean; status: number; details?: string }> {
-  const { evolutionUrl, evolutionKey, instanceName, number, caption, cleanBase64, fileName, retryOnFailure = true } = params;
+  const { evolutionUrl, evolutionKey, instanceName, number, caption, cleanBase64, fileName, retryOnFailure = true, introText } = params;
   const mimetype = params.mimetype ?? 'application/pdf';
   const endpoint = `${evolutionUrl}/message/sendMedia/${encodeURIComponent(instanceName)}`;
 
@@ -324,23 +348,35 @@ async function sendMedia(params: {
   if (v1Res.ok) return { ok: true, status: v1Res.status };
   const v1ErrText = await v1Res.text().catch(() => '');
 
-  // 3. Auto-rafraîchissement automatique d'Evolution API :
-  // Si erreur réseau / socket / cache Baileys ou réponse d'inexistence suspecte,
-  // on redémarre l'instance en arrière-plan, on attend 1.5s et on retente une fois l'envoi.
+  // 3. Auto-rafraîchissement automatique d'Evolution API + Déblocage WhatsApp Business :
+  // Si rejet, on tente un message texte d'ouverture courtois pour ouvrir la session WhatsApp,
+  // puis on réessaie le document.
   if (retryOnFailure) {
     const errText = v2ErrText || v1ErrText;
     const shouldRefresh =
-      v2Res.status >= 500 ||
-      v1Res.status >= 500 ||
+      v2Res.status >= 400 ||
+      v1Res.status >= 400 ||
       errText.includes('exists') ||
       errText.includes('Connection Closed') ||
       errText.includes('QRcode') ||
       errText.includes('Session');
 
     if (shouldRefresh) {
-      console.warn(`[EVOLUTION API] Tentative d'auto-rafraîchissement de l'instance ${instanceName}...`);
+      console.warn(`[EVOLUTION API] Tentative d'auto-réchauffement / déblocage pour ${number} sur ${instanceName}...`);
+      
+      // Envoi du message texte courtois préalable pour synchroniser WhatsApp / Baileys
+      if (introText) {
+        await sendSimpleTextMessage({
+          evolutionUrl,
+          evolutionKey,
+          instanceName,
+          number,
+          text: introText,
+        });
+      }
+
       await restartEvolutionInstance(evolutionUrl, evolutionKey, instanceName);
-      // Attente brève que le socket de l'instance se réinitialise
+      // Attente brève que WhatsApp / Baileys enregistre la conversation
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       return sendMedia({
@@ -377,6 +413,10 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
     const connected = instances.some((i) => i.name === name && i.status === 'open');
     if (!connected) return { ok: false, reason: 'PERSONAL_NOT_CONNECTED' };
 
+    const introText = input.isEn
+      ? `Hello, please find your invoice attached.`
+      : `Bonjour, veuillez trouver ci-joint votre facture.`;
+
     const res = await sendMedia({
       evolutionUrl,
       evolutionKey,
@@ -385,6 +425,7 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
       caption: input.message || '',
       cleanBase64,
       fileName,
+      introText,
     });
     if (!res.ok) {
       console.warn('[EVOLUTION API] envoi personnel en échec:', res.status, res.details?.slice(0, 300));
@@ -403,16 +444,38 @@ export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise
     isEn: input.isEn,
   });
 
+  const sharedIntroText = input.isEn
+    ? `Hello, you have received a document from ${senderName || input.user.phone}.`
+    : `Bonjour, vous avez reçu un document de la part de ${senderName || input.user.phone}.`;
+
   const target = await resolveSharedInstance(evolutionUrl, evolutionKey, configuredInstance);
   if (!target) return { ok: false, reason: 'NO_INSTANCE_FOUND' };
 
   let usedInstance = target;
-  let res = await sendMedia({ evolutionUrl, evolutionKey, instanceName: target, number, caption, cleanBase64, fileName });
+  let res = await sendMedia({
+    evolutionUrl,
+    evolutionKey,
+    instanceName: target,
+    number,
+    caption,
+    cleanBase64,
+    fileName,
+    introText: sharedIntroText,
+  });
   if (!res.ok && res.status === 404 && configuredInstance) {
     const auto = await resolveSharedInstance(evolutionUrl, evolutionKey, undefined);
     if (auto && auto !== configuredInstance) {
       usedInstance = auto;
-      res = await sendMedia({ evolutionUrl, evolutionKey, instanceName: auto, number, caption, cleanBase64, fileName });
+      res = await sendMedia({
+        evolutionUrl,
+        evolutionKey,
+        instanceName: auto,
+        number,
+        caption,
+        cleanBase64,
+        fileName,
+        introText: sharedIntroText,
+      });
     }
   }
   if (!res.ok) {

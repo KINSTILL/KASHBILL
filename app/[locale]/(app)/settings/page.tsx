@@ -17,6 +17,7 @@ import {
   LogOut,
   Crown,
   Languages,
+  MessageCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
@@ -170,6 +171,33 @@ export default function SettingsPage() {
                 </div>
                 <div className="text-xs text-slate-500 truncate">
                   {t('settings.subscriptionsLinkHelp')}
+                </div>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+          </Link>
+
+          <Link
+            href={`/${locale}/settings/whatsapp` as Route}
+            className="flex items-center justify-between gap-3 p-3.5 sm:p-4 hover:bg-slate-50/80 transition active:bg-slate-100/60"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                <MessageCircle className="h-5 w-5 text-emerald-600" />
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-sm text-slate-900">
+                    {locale === 'en' ? 'My WhatsApp number' : 'Mon numéro WhatsApp'}
+                  </span>
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 text-[9px] font-bold text-emerald-700">
+                    PRO
+                  </span>
+                </div>
+                <div className="text-xs text-slate-500 truncate">
+                  {locale === 'en'
+                    ? 'Connect your personal number to send invoices'
+                    : 'Connectez votre propre compte WhatsApp pour envoyer vos factures'}
                 </div>
               </div>
             </div>
