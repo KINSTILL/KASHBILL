@@ -307,16 +307,16 @@ export function DocumentPaperPreview({
                   </p>
                   <div className="mt-1 flex items-baseline justify-between gap-2">
                     {hidePrices ? (
-                      <span className="ml-auto text-xs font-bold text-slate-900">
+                      <span className="ml-auto text-xs font-bold text-slate-900 tabular-nums whitespace-nowrap">
                         {line.quantity}
                       </span>
                     ) : (
                       <>
-                        <span className="text-[11px] text-slate-500 tabular-nums">
+                        <span className="text-[11px] text-slate-500 tabular-nums whitespace-nowrap">
                           {line.quantity} ×{' '}
                           {formatAmount(line.unitPrice, doc.locale, decimals)}
                         </span>
-                        <span className="text-xs font-bold text-slate-900 tabular-nums">
+                        <span className="text-xs font-bold text-slate-900 tabular-nums whitespace-nowrap shrink-0 pl-1">
                           {formatAmount(line.total, doc.locale, decimals)}
                         </span>
                       </>
@@ -327,71 +327,73 @@ export function DocumentPaperPreview({
             </div>
           </div>
         ) : (
-          <div className="mb-4">
-            {/* Sur écran très étroit (téléphone en mode A4), affichage hybride sans débordement */}
-            <div
-              className="grid grid-cols-12 items-center border-y bg-slate-100 px-2.5 py-2 text-[10px] sm:text-xs font-bold tracking-wider text-slate-500 uppercase"
-              style={{ borderColor: brand.primary }}
-            >
-              <span className={hidePrices ? 'col-span-9' : 'col-span-5 sm:col-span-6'}>
-                {isEn ? 'Description' : 'Désignation'}
-              </span>
-              <span
-                className={
-                  hidePrices
-                    ? 'col-span-3 text-right'
-                    : 'col-span-2 sm:col-span-1 text-center'
-                }
+          <div className="mb-4 overflow-x-auto">
+            {/* Tableau A4 avec largeur minimale garantie sur mobile pour éviter tout chevauchement de chiffres */}
+            <div className="min-w-[440px] sm:min-w-0">
+              <div
+                className="grid grid-cols-12 items-center border-y bg-slate-100 px-2.5 py-2 text-[10px] sm:text-xs font-bold tracking-wider text-slate-500 uppercase"
+                style={{ borderColor: brand.primary }}
               >
-                {isEn ? 'Qty' : 'Qté'}
-              </span>
-              {!hidePrices && (
-                <>
-                  <span className="col-span-2 sm:col-span-2 text-right">
-                    {isEn ? 'Unit' : 'P.U.'} ({unit})
-                  </span>
-                  <span className="col-span-3 sm:col-span-3 text-right">
-                    Total ({unit})
-                  </span>
-                </>
-              )}
-            </div>
-            <div className="divide-y divide-slate-200/80">
-              {doc.payload.lines.map((line, i) => (
-                <div
-                  key={i}
-                  className={`grid grid-cols-12 items-start gap-1 px-2.5 py-2 text-[11px] sm:text-xs ${
-                    i % 2 === 1 ? 'bg-slate-50/70' : ''
-                  }`}
+                <span className={hidePrices ? 'col-span-9' : 'col-span-5 sm:col-span-6'}>
+                  {isEn ? 'Description' : 'Désignation'}
+                </span>
+                <span
+                  className={
+                    hidePrices
+                      ? 'col-span-3 text-right'
+                      : 'col-span-2 sm:col-span-1 text-center'
+                  }
                 >
-                  <span
-                    className={`${
-                      hidePrices ? 'col-span-9' : 'col-span-5 sm:col-span-6'
-                    } pr-2 font-medium text-slate-900 break-words`}
+                  {isEn ? 'Qty' : 'Qté'}
+                </span>
+                {!hidePrices && (
+                  <>
+                    <span className="col-span-2 sm:col-span-2 text-right whitespace-nowrap">
+                      {isEn ? 'Unit' : 'P.U.'} ({unit})
+                    </span>
+                    <span className="col-span-3 sm:col-span-3 text-right whitespace-nowrap">
+                      Total ({unit})
+                    </span>
+                  </>
+                )}
+              </div>
+              <div className="divide-y divide-slate-200/80">
+                {doc.payload.lines.map((line, i) => (
+                  <div
+                    key={i}
+                    className={`grid grid-cols-12 items-start gap-1 px-2.5 py-2 text-[11px] sm:text-xs ${
+                      i % 2 === 1 ? 'bg-slate-50/70' : ''
+                    }`}
                   >
-                    {line.description}
-                  </span>
-                  <span
-                    className={`${
-                      hidePrices
-                        ? 'col-span-3 text-right font-bold text-slate-900'
-                        : 'col-span-2 sm:col-span-1 text-center text-slate-600'
-                    } tabular-nums`}
-                  >
-                    {line.quantity}
-                  </span>
-                  {!hidePrices && (
-                    <>
-                      <span className="col-span-2 sm:col-span-2 text-right text-slate-600 tabular-nums">
-                        {formatAmount(line.unitPrice, doc.locale, decimals)}
-                      </span>
-                      <span className="col-span-3 sm:col-span-3 text-right font-bold text-slate-900 tabular-nums">
-                        {formatAmount(line.total, doc.locale, decimals)}
-                      </span>
-                    </>
-                  )}
-                </div>
-              ))}
+                    <span
+                      className={`${
+                        hidePrices ? 'col-span-9' : 'col-span-5 sm:col-span-6'
+                      } pr-2 font-medium text-slate-900 break-words`}
+                    >
+                      {line.description}
+                    </span>
+                    <span
+                      className={`${
+                        hidePrices
+                          ? 'col-span-3 text-right font-bold text-slate-900'
+                          : 'col-span-2 sm:col-span-1 text-center text-slate-600'
+                      } tabular-nums whitespace-nowrap`}
+                    >
+                      {line.quantity}
+                    </span>
+                    {!hidePrices && (
+                      <>
+                        <span className="col-span-2 sm:col-span-2 text-right text-slate-600 tabular-nums whitespace-nowrap">
+                          {formatAmount(line.unitPrice, doc.locale, decimals)}
+                        </span>
+                        <span className="col-span-3 sm:col-span-3 text-right font-bold text-slate-900 tabular-nums whitespace-nowrap">
+                          {formatAmount(line.total, doc.locale, decimals)}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -400,10 +402,10 @@ export function DocumentPaperPreview({
         <div className={`mt-4 flex flex-col ${isTicket ? 'items-stretch' : 'items-end'}`}>
           <div className={isTicket ? 'w-full' : 'w-full sm:w-72'}>
             {!hidePrices && (
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between text-slate-600">
-                  <span>{isEn ? 'Subtotal' : 'Sous-total'}</span>
-                  <span className="font-medium text-slate-900 tabular-nums">
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between items-baseline gap-2 text-slate-600">
+                  <span className="min-w-0">{isEn ? 'Subtotal' : 'Sous-total'}</span>
+                  <span className="font-medium text-slate-900 tabular-nums shrink-0 whitespace-nowrap">
                     {formatCurrency(
                       doc.payload.subtotal,
                       doc.company.currency,
@@ -413,9 +415,9 @@ export function DocumentPaperPreview({
                   </span>
                 </div>
                 {doc.payload.deliveryFee !== null && doc.payload.deliveryFee > 0 && (
-                  <div className="flex justify-between text-slate-600">
-                    <span>{isEn ? 'Delivery' : 'Livraison'}</span>
-                    <span className="font-medium text-slate-900 tabular-nums">
+                  <div className="flex justify-between items-baseline gap-2 text-slate-600">
+                    <span className="min-w-0">{isEn ? 'Delivery' : 'Livraison'}</span>
+                    <span className="font-medium text-slate-900 tabular-nums shrink-0 whitespace-nowrap">
                       {formatCurrency(
                         doc.payload.deliveryFee,
                         doc.company.currency,
@@ -429,9 +431,9 @@ export function DocumentPaperPreview({
                 doc.payload.vatAmount !== null &&
                 doc.payload.vatRate !== null ? (
                   <>
-                    <div className="flex justify-between text-slate-600">
-                      <span>{isEn ? 'Total excl. VAT' : 'Total HT'}</span>
-                      <span className="font-medium text-slate-900 tabular-nums">
+                    <div className="flex justify-between items-baseline gap-2 text-slate-600">
+                      <span className="min-w-0">{isEn ? 'Total excl. VAT' : 'Total HT'}</span>
+                      <span className="font-medium text-slate-900 tabular-nums shrink-0 whitespace-nowrap">
                         {formatCurrency(
                           doc.payload.subtotal + (doc.payload.deliveryFee ?? 0),
                           doc.company.currency,
@@ -440,11 +442,11 @@ export function DocumentPaperPreview({
                         )}
                       </span>
                     </div>
-                    <div className="flex justify-between text-slate-600">
-                      <span>
+                    <div className="flex justify-between items-baseline gap-2 text-slate-600">
+                      <span className="min-w-0">
                         {isEn ? 'VAT' : 'TVA'} ({doc.payload.vatRate}%)
                       </span>
-                      <span className="font-medium text-slate-900 tabular-nums">
+                      <span className="font-medium text-slate-900 tabular-nums shrink-0 whitespace-nowrap">
                         {formatCurrency(
                           doc.payload.vatAmount,
                           doc.company.currency,
@@ -456,9 +458,9 @@ export function DocumentPaperPreview({
                   </>
                 ) : null}
                 {doc.payload.depositAmount !== null && doc.payload.depositAmount > 0 && (
-                  <div className="flex justify-between text-slate-600">
-                    <span>{isEn ? 'Deposit' : 'Acompte'}</span>
-                    <span className="font-medium text-slate-900 tabular-nums">
+                  <div className="flex justify-between items-baseline gap-2 text-slate-600">
+                    <span className="min-w-0">{isEn ? 'Deposit' : 'Acompte'}</span>
+                    <span className="font-medium text-slate-900 tabular-nums shrink-0 whitespace-nowrap">
                       -{' '}
                       {formatCurrency(
                         doc.payload.depositAmount,
@@ -474,7 +476,7 @@ export function DocumentPaperPreview({
 
             {/* Encadré Total mis en valeur */}
             <div
-              className="mt-2.5 rounded-lg px-3.5 py-2.5 shadow-xs"
+              className="mt-2.5 rounded-lg px-3.5 py-2.5 shadow-xs flex items-baseline justify-between gap-2"
               style={{
                 backgroundColor: brand.primary,
                 borderBottomWidth: 3,
@@ -482,7 +484,7 @@ export function DocumentPaperPreview({
                 color: onPrimary,
               }}
             >
-              <p className="text-[10px] font-bold tracking-wider uppercase opacity-90">
+              <p className="text-[10px] sm:text-xs font-bold tracking-wider uppercase opacity-90 min-w-0">
                 {hidePrices
                   ? isEn
                     ? 'TOTAL ITEMS DELIVERED'
@@ -492,7 +494,7 @@ export function DocumentPaperPreview({
                   : 'NET À PAYER'}
               </p>
               <p
-                className={`mt-0.5 text-right font-extrabold tabular-nums ${
+                className={`text-right font-extrabold tabular-nums shrink-0 whitespace-nowrap ${
                   isTicket ? 'text-lg' : 'text-xl sm:text-2xl'
                 }`}
               >

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { InfoTip } from '@/components/ui/InfoTip';
 import { useOnlineStatus } from '@/lib/device/network';
+import { WhatsAppRefreshButton } from '@/components/admin/WhatsAppRefreshButton';
 
 type Status = { status: 'NOT_CONFIGURED' | 'NOT_CREATED' | 'PENDING' | 'CONNECTED'; number: string | null; hasAddOn: boolean };
 
@@ -183,7 +184,12 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <WhatsAppRefreshButton
+              variant="pill"
+              showLabel={true}
+              onSuccess={refresh}
+            />
             <button
               type="button"
               onClick={handleDisconnect}

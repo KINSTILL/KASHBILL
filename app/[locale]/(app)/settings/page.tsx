@@ -18,12 +18,15 @@ import {
   Crown,
   Languages,
   MessageCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
 import { DeleteAccountSection } from '@/components/settings/DeleteAccountSection';
 import { ProfileAnnouncementBox } from '@/components/ui/AnnouncementBanner';
+import { AdminTestProToggle } from '@/components/admin/AdminTestProToggle';
+import { WhatsAppRefreshButton } from '@/components/admin/WhatsAppRefreshButton';
 
 export default function SettingsPage() {
   const t = useTranslations();
@@ -130,6 +133,65 @@ export default function SettingsPage() {
           </Link>
         </div>
       </div>
+
+      {/* Espace Administrateur & Pilotage Plateforme */}
+      {(user?.role === 'ADMIN' || user?.role === 'SUPPORT') && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.08em] text-amber-600">
+              👑 Console Administrateur
+            </h2>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+              {user.role}
+            </span>
+          </div>
+          <div className="divide-y divide-slate-100 rounded-2xl border border-amber-300/80 bg-gradient-to-br from-amber-50/40 via-white to-amber-50/20 shadow-xs overflow-hidden">
+            <Link
+              href={`/${locale}/admin` as Route}
+              className="flex items-center justify-between gap-3 p-3.5 sm:p-4 hover:bg-amber-100/40 transition active:bg-amber-100/60"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-900 border border-amber-300">
+                  <ShieldCheck className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <div className="font-semibold text-sm text-slate-900">
+                    Console d&apos;administration complète
+                  </div>
+                  <div className="text-xs text-slate-500 truncate">
+                    Utilisateurs, privilèges, abonnements, factures et métriques
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+            </Link>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 bg-white/70">
+              <div>
+                <div className="font-semibold text-sm text-slate-900">
+                  Mode Test de votre compte
+                </div>
+                <div className="text-xs text-slate-500">
+                  Basculez instantanément votre compte entre Pro et Gratuit pour vos tests
+                </div>
+              </div>
+              <AdminTestProToggle />
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 bg-white/70">
+              <div>
+                <div className="font-semibold text-sm text-slate-900">
+                  WhatsApp Evolution (Nouveaux numéros)
+                </div>
+                <div className="text-xs text-slate-500">
+                  Actualise le socket Baileys et synchronise les nouveaux numéros
+                </div>
+              </div>
+              <WhatsAppRefreshButton variant="pill" showLabel={true} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Section 1 : Mon Entreprise & Abonnement */}
       <div className="space-y-2">

@@ -5,6 +5,7 @@ import { adminFetch } from '@/lib/admin/client';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { WhatsAppRefreshButton } from '@/components/admin/WhatsAppRefreshButton';
 import type { PlatformAnnouncement } from '@/lib/announcements';
 
 type Stats = {
@@ -102,7 +103,32 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Tableau de bord</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Tableau de bord</h1>
+          <p className="text-xs text-slate-500">
+            Statistiques réelles des utilisateurs (comptes administrateurs et tests exclus)
+          </p>
+        </div>
+        <WhatsAppRefreshButton variant="button" showLabel={true} />
+      </div>
+
+      {/* Barre d'outils WhatsApp Evolution */}
+      <Card className="flex flex-wrap items-center justify-between gap-3 border-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50 p-4">
+        <div className="space-y-0.5">
+          <p className="text-sm font-bold text-emerald-950 flex items-center gap-1.5">
+            <span>💬 Instance WhatsApp Evolution</span>
+            <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-800">API</span>
+          </p>
+          <p className="text-xs text-emerald-800">
+            Relancez et synchronisez le socket Baileys d&apos;Evolution API pour accepter et débloquer immédiatement les nouveaux numéros.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <WhatsAppRefreshButton variant="button" showLabel={true} />
+        </div>
+      </Card>
+
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Card>
           <p className="text-xs text-slate-500">Utilisateurs</p>

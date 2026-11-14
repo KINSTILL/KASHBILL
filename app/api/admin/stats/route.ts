@@ -21,7 +21,11 @@ async function confirmedNotchPayRevenue(): Promise<{ _sum: { amountXaf: number |
 
   const agg = await prisma.subscription.aggregate({
     _sum: { amountXaf: true },
-    where: { source: 'NOTCH_PAY', providerRef: { in: refs } },
+    where: {
+      user: { role: 'USER' },
+      source: 'NOTCH_PAY',
+      providerRef: { in: refs },
+    },
   });
   return { _sum: { amountXaf: agg._sum.amountXaf ?? 0 } };
 }
@@ -45,6 +49,10 @@ export async function GET(req: NextRequest): Promise<Response> {
            ));
       `).catch(() => {});
 
+      // Filtres stricts : exclusion de l'Admin et du Support des statistiques métier et tests
+      const realUserFilter = { role: 'USER' as const };
+      const realDocFilter = { user: { role: 'USER' as const } };
+
       const [
         totalUsers,
         activeUsers,
@@ -64,19 +72,20 @@ export async function GET(req: NextRequest): Promise<Response> {
         confirmedFlags,
         blacklistEntries,
       ] = await Promise.all([
-        prisma.user.count(),
-        prisma.user.count({ where: { bannedAt: null, suspendedUntil: { lt: now } } }),
-        prisma.user.count({ where: { bannedAt: { not: null } } }),
-        prisma.user.count({ where: { suspendedUntil: { gt: now } } }),
-        prisma.user.count({ where: { createdAt: { gte: todayStart } } }),
-        prisma.user.count({ where: { createdAt: { gte: weekStart } } }),
-        prisma.document.count(),
-        prisma.document.count({ where: { createdAt: { gte: todayStart } } }),
-        prisma.document.count({ where: { createdAt: { gte: weekStart } } }),
-        prisma.document.count({ where: { watermarked: false, createdAt: { gte: weekStart } } }),
+        prisma.user.count({ where: realUserFilter }),
+        prisma.user.count({ where: { ...realUserFilter, bannedAt: null, suspendedUntil: { lt: now } } }),
+        prisma.user.count({ where: { ...realUserFilter, bannedAt: { not: null } } }),
+        prisma.user.count({ where: { ...realUserFilter, suspendedUntil: { gt: now } } }),
+        prisma.user.count({ where: { ...realUserFilter, createdAt: { gte: todayStart } } }),
+        prisma.user.count({ where: { ...realUserFilter, createdAt: { gte: weekStart } } }),
+        prisma.document.count({ where: realDocFilter }),
+        prisma.document.count({ where: { ...realDocFilter, createdAt: { gte: todayStart } } }),
+        prisma.document.count({ where: { ...realDocFilter, createdAt: { gte: weekStart } } }),
+        prisma.document.count({ where: { ...realDocFilter, watermarked: false, createdAt: { gte: weekStart } } }),
         confirmedNotchPayRevenue(),
         prisma.subscription.count({
           where: {
+            user: { role: 'USER' },
             endsAt: { gt: now },
             addOnType: null,
             source: { in: ['NOTCH_PAY', 'ADMIN_GIFT'] },
@@ -86,8 +95,8 @@ export async function GET(req: NextRequest): Promise<Response> {
             ],
           },
         }),
-        prisma.referral.count(),
-        prisma.referral.count({ where: { status: 'REWARDED' } }),
+        prisma.referral.count({ where: { filleul: { role: 'USER' } } }),
+        prisma.referral.count({ where: { status: 'REWARDED', filleul: { role: 'USER' } } }),
         prisma.fraudFlag.count({ where: { status: 'PENDING' } }),
         prisma.fraudFlag.count({ where: { status: 'CONFIRMED' } }),
         prisma.blacklistEntry.count(),

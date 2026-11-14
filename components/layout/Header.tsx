@@ -52,20 +52,22 @@ export function Header() {
             </Link>
           )}
 
-          {/* Outils Admin et badges secondaires : affichés uniquement sur tablette/desktop (sm+) pour épurer le téléphone */}
+          {/* Outils Admin : Accès rapide Admin console & Mode test */}
           {(user?.role === 'ADMIN' || user?.role === 'SUPPORT') && (
-            <div className="hidden items-center gap-1.5 sm:flex">
+            <div className="flex items-center gap-1.5">
               <Link href={`/${locale}/admin` as Route}>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-8 gap-1 border-emerald-300 bg-emerald-50 px-2 text-xs font-semibold text-emerald-900 shadow-xs hover:bg-emerald-100"
+                  className="h-8 gap-1 border-amber-300 bg-amber-50 px-2 text-xs font-semibold text-amber-900 shadow-xs hover:bg-amber-100"
                 >
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-700" />
+                  <ShieldCheck className="h-3.5 w-3.5 text-amber-700" />
                   <span>Admin</span>
                 </Button>
               </Link>
-              <AdminTestProToggle />
+              <div className="hidden sm:block">
+                <AdminTestProToggle />
+              </div>
             </div>
           )}
 
