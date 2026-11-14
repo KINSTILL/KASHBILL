@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { Route } from 'next';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/Button';
@@ -192,6 +193,21 @@ export function DocumentForm({
       })
       .catch(() => {});
   }, [draftId]);
+
+  // Récupération des données venant d'un « Scan express »
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = sessionStorage.getItem('kashbill_scanned_quote');
+      if (stored) {
+        sessionStorage.removeItem('kashbill_scanned_quote');
+        const parsed = JSON.parse(stored);
+        if (parsed?.scannedData && parsed?.type) {
+          handleApplyScan(parsed.scannedData, parsed.type);
+        }
+      }
+    } catch {}
+  }, []);
 
   const missingCompanyFields = useMemo(() => {
     if (!user) return [];
@@ -518,17 +534,14 @@ export function DocumentForm({
         <div className="mb-2 flex items-center justify-between">
           <label className="text-sm font-medium">{t('type')}</label>
           {!editDocument && (
-            <button
-              type="button"
-              onClick={() => {
-                haptic('light');
-                setIsScanModalOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-sage-500/40 bg-sage-500/10 px-2.5 py-1 text-xs font-semibold text-sage-800 transition-colors hover:bg-sage-500/20 dark:text-sage-300"
+            <Link
+              href={`/${locale}/documents/scan` as Route}
+              onClick={() => haptic('light')}
+              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-800 transition-all hover:bg-emerald-500/20 active:scale-95 shadow-xs"
             >
-              <Sparkles className="h-3.5 w-3.5 text-sage-600 dark:text-sage-400" />
-              <span>{isEn ? 'Scan document (AI)' : 'Scanner un document (IA)'}</span>
-            </button>
+              <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
+              <span>⚡ Scan express</span>
+            </Link>
           )}
         </div>
         {editDocument ? (

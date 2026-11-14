@@ -12,7 +12,7 @@ import { ExportPeriodSelector } from '@/components/documents/ExportPeriodSelecto
 import { DeleteDocumentButton } from '@/components/documents/DeleteDocumentButton';
 import { DOC_TYPE_CONFIG } from '@/lib/documents/doc-type-config';
 import { formatFCFA } from '@/lib/utils';
-import { Plus, FileText, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
+import { Plus, FileText, ChevronRight, CheckCircle2, Clock, Zap } from 'lucide-react';
 
 export default async function DocumentsPage({
   params,
@@ -55,12 +55,20 @@ export default async function DocumentsPage({
             {documents.length} {documents.length > 1 ? 'documents enregistrés' : 'document'}
           </p>
         </div>
-        <Link href={`/${locale}/documents/new` as Route} className="shrink-0">
-          <Button size="md" className="gap-1.5 font-bold shadow-md shadow-emerald-900/10">
-            <Plus className="h-4 w-4 stroke-[2.5]" />
-            <span>Nouveau</span>
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/${locale}/documents/scan` as Route} className="shrink-0">
+            <Button size="md" variant="outline" className="gap-1.5 font-bold border-emerald-300 bg-emerald-50/60 text-emerald-800 hover:bg-emerald-100/80">
+              <Zap className="h-4 w-4 fill-emerald-600 text-emerald-600" />
+              <span>Scan express</span>
+            </Button>
+          </Link>
+          <Link href={`/${locale}/documents/new` as Route} className="shrink-0">
+            <Button size="md" className="gap-1.5 font-bold shadow-md shadow-emerald-900/10">
+              <Plus className="h-4 w-4 stroke-[2.5]" />
+              <span>Nouveau</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <ExportPeriodSelector />
