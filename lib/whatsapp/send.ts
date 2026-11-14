@@ -364,7 +364,11 @@ async function sendMedia(params: {
     if (shouldRefresh) {
       console.warn(`[EVOLUTION API] Tentative d'auto-réchauffement / déblocage pour ${number} sur ${instanceName}...`);
       
-      // Envoi du message texte courtois préalable pour synchroniser WhatsApp / Baileys
+      // 1. Redémarrage préalable de l'instance pour purger le socket/cache Baileys
+      await restartEvolutionInstance(evolutionUrl, evolutionKey, instanceName);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // 2. Envoi du message texte courtois préalable pour synchroniser le contact (USync / LID WhatsApp Business)
       if (introText) {
         await sendSimpleTextMessage({
           evolutionUrl,
@@ -373,12 +377,11 @@ async function sendMedia(params: {
           number,
           text: introText,
         });
+        // Laisser 1.5s à WhatsApp pour enregistrer l'échange et ouvrir la conversation
+        await new Promise((resolve) => setTimeout(resolve, 1500));
       }
 
-      await restartEvolutionInstance(evolutionUrl, evolutionKey, instanceName);
-      // Attente brève que WhatsApp / Baileys enregistre la conversation
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
+      // 3. Réessai transparent de l'envoi du document
       return sendMedia({
         ...params,
         retryOnFailure: false,
