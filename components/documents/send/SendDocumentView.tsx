@@ -271,10 +271,8 @@ export function SendDocumentView({
         return;
       }
       if (data?.fallbackUrl) {
-        // Envoi direct via WhatsApp (wa.me) : ouvre WhatsApp immédiatement
-        if (typeof window !== 'undefined') {
-          window.open(data.fallbackUrl, '_blank');
-        }
+        // En cas d'indisponibilité du serveur, on prépare le lien de secours SANS forcer
+        // l'ouverture d'une fenêtre intempestive (l'utilisateur garde le contrôle).
         setDone({
           method,
           recipient: phonePreview || `+${country.dialCode.replace(/\D/g, '')} ${phone.trim()}`,
@@ -316,8 +314,8 @@ export function SendDocumentView({
             : 'Share this link: it lets the recipient download the PDF.'
           : done.fallbackUrl
             ? fr
-              ? `WhatsApp s'ouvre pour envoyer à ${done.recipient}. Si la fenêtre ne s'est pas ouverte, cliquez sur le bouton ci-dessous.`
-              : `WhatsApp is opening to send to ${done.recipient}. If the window did not open, click the button below.`
+              ? `L'envoi direct depuis le serveur n'a pas abouti. Cliquez ci-dessous pour transmettre le document à ${done.recipient} via votre WhatsApp.`
+              : `Direct server sending could not complete. Click below to share with ${done.recipient} via your WhatsApp.`
             : fr ? `Envoyé à ${done.recipient} sur WhatsApp.` : `Sent to ${done.recipient} on WhatsApp.`;
     return (
       <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-10 text-center">

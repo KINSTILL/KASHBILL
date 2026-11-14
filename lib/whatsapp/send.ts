@@ -256,11 +256,79 @@ async function resolveSharedInstance(
   evolutionKey: string,
   configuredInstance?: string
 ): Promise<string | null> {
-  if (configuredInstance) return configuredInstance;
   const instances = await fetchEvolutionInstances(evolutionUrl, evolutionKey);
-  if (instances.length === 0) return null;
+  if (instances.length === 0) return configuredInstance || null;
+
+  // 1. Si une instance est configurée et qu'elle est connectée ('open'), on la privilégie
+  if (configuredInstance) {
+    const matching = instances.find((i) => i.name === configuredInstance);
+    if (matching && matching.status === 'open') return matching.name;
+  }
+
+  // 2. Première instance actuellement connectée ('open')
   const openInst = instances.find((i) => i.status === 'open');
-  return openInst?.name ?? instances[0]?.name ?? null;
+  if (openInst) return openInst.name;
+
+  // 3. Repli vers l'instance configurée ou la première existante
+  return configuredInstance ?? instances[0]?.name ?? null;
+}
+
+/**
+ * Vérifie et initialise le contact dans Baileys/Evolution API (onWhatsApp).
+ * Cela permet à l'instance WhatsApp de négocier les clés Signal avant l'envoi de média,
+ * indispensable pour les NOUVEAUX numéros qui n'ont jamais été contactés.
+ */
+async function warmupWhatsAppContact(params: {
+  evolutionUrl: string;
+  evolutionKey: string;
+  instanceName: string;
+  number: string;
+}): Promise<{ ok: boolean; jid?: string }> {
+  try {
+    const endpoint = `${params.evolutionUrl}/chat/whatsappNumbers/${encodeURIComponent(params.instanceName)}`;
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: params.evolutionKey },
+      body: JSON.stringify({ numbers: [params.number] }),
+    });
+    if (!res.ok) return { ok: true };
+    const data = await res.json();
+    const item = Array.isArray(data) ? data[0] : (data?.response?.[0] ?? data);
+    if (item && (item.exists === true || item.jid)) {
+      return { ok: true, jid: typeof item.jid === 'string' ? item.jid : undefined };
+    }
+    if (item && item.exists === false) {
+      return { ok: false };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: true };
+  }
+}
+
+/** Envoie un message texte simple pour ouvrir la session Signal (Warmup Baileys). */
+async function sendSimpleText(params: {
+  evolutionUrl: string;
+  evolutionKey: string;
+  instanceName: string;
+  number: string;
+  text: string;
+}): Promise<boolean> {
+  try {
+    const endpoint = `${params.evolutionUrl}/message/sendText/${encodeURIComponent(params.instanceName)}`;
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: params.evolutionKey },
+      body: JSON.stringify({
+        number: params.number,
+        text: params.text,
+        options: { delay: 1000, presence: 'composing' },
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 async function sendMedia(params: {
@@ -277,39 +345,89 @@ async function sendMedia(params: {
   const mimetype = params.mimetype ?? 'application/pdf';
   const endpoint = `${evolutionUrl}/message/sendMedia/${encodeURIComponent(instanceName)}`;
 
-  // Format Evolution API v2
+  // 1. Warmup du contact pour les nouveaux numéros (évite l'échec de négociation Signal)
+  const contactInfo = await warmupWhatsAppContact({ evolutionUrl, evolutionKey, instanceName, number });
+  const targetNumber = contactInfo.jid ? contactInfo.jid.replace(/@s\.whatsapp\.net$/, '') : number;
+
+  // 2. Format Evolution API v2 (avec options delay & presence)
   const v2Res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', apikey: evolutionKey },
     body: JSON.stringify({
-      number,
+      number: targetNumber,
       mediatype: 'document',
       mimetype,
       caption,
       media: cleanBase64,
       fileName,
+      options: { delay: 1200, presence: 'composing' },
     }),
   });
   if (v2Res.ok) return { ok: true, status: v2Res.status };
 
   const v2ErrText = await v2Res.text().catch(() => '');
-  if (v2Res.status !== 400) {
-    return { ok: false, status: v2Res.status, details: v2ErrText };
-  }
 
-  // Format v1 en repli (mediaMessage)
+  // 3. Format v1 en repli (mediaMessage)
   const v1Res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', apikey: evolutionKey },
     body: JSON.stringify({
-      number,
-      options: { delay: 500, presence: 'composing' },
-      mediaMessage: { mediatype: 'document', fileName, caption, media: cleanBase64 },
+      number: targetNumber,
+      options: { delay: 1200, presence: 'composing' },
+      mediaMessage: { mediatype: 'document', fileName, caption, media: cleanBase64, mimetype },
     }),
   });
   if (v1Res.ok) return { ok: true, status: v1Res.status };
   const v1ErrText = await v1Res.text().catch(() => '');
-  return { ok: false, status: v1Res.status, details: v1ErrText || v2ErrText };
+
+  // 4. Si échec sur un NOUVEAU numéro : Handshake textuel puis renvoi média.
+  // Baileys a parfois besoin d'un message texte initial pour établir le tunnel chiffré avant un fichier binaire lourd.
+  if (caption) {
+    const textSent = await sendSimpleText({
+      evolutionUrl,
+      evolutionKey,
+      instanceName,
+      number: targetNumber,
+      text: caption,
+    });
+
+    if (textSent) {
+      await new Promise((r) => setTimeout(r, 600));
+
+      const retryRes = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: evolutionKey },
+        body: JSON.stringify({
+          number: targetNumber,
+          mediatype: 'document',
+          mimetype,
+          caption: '',
+          media: cleanBase64,
+          fileName,
+        }),
+      });
+      if (retryRes.ok) return { ok: true, status: retryRes.status };
+    }
+  }
+
+  // 5. Tentative avec format JID complet
+  if (!targetNumber.includes('@')) {
+    const jidRes = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: evolutionKey },
+      body: JSON.stringify({
+        number: `${targetNumber}@s.whatsapp.net`,
+        mediatype: 'document',
+        mimetype,
+        caption,
+        media: cleanBase64,
+        fileName,
+      }),
+    });
+    if (jidRes.ok) return { ok: true, status: jidRes.status };
+  }
+
+  return { ok: false, status: v2Res.status || v1Res.status, details: v1ErrText || v2ErrText };
 }
 
 export async function sendDocumentViaWhatsApp(input: WhatsAppSendInput): Promise<WhatsAppSendResult> {
