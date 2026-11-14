@@ -25,6 +25,9 @@ import type { DocType } from '@prisma/client';
 import type { PdfFormat } from '@/lib/pdf/types';
 import { computeTotals, roundTo, type ComputedPayload } from '@/lib/documents/payload';
 import type { UserSuggestions } from '@/lib/documents/suggestions';
+import { ScanModal } from './scan/ScanModal';
+import type { ScannedQuote } from '@/lib/validators/quote-scan';
+import { Sparkles } from 'lucide-react';
 
 type Line = { description: string; quantity: number; unitPrice: number };
 type DraftState = {
@@ -155,6 +158,7 @@ export function DocumentForm({
   const currentConfig = DOC_TYPE_CONFIG[state.type];
   const [showPrices, setShowPrices] = useState<boolean>(currentConfig.showPricesByDefault);
   const [showReceiptQty, setShowReceiptQty] = useState<boolean>(false);
+  const [isScanModalOpen, setIsScanModalOpen] = useState<boolean>(false);
 
   const [submitting, setSubmitting] = useState(false);
   useWakeLock(!submitting);
@@ -245,6 +249,59 @@ export function DocumentForm({
         lines: [...s.lines, { description: presetText, quantity: 1, unitPrice: 0 }],
       };
     });
+  };
+
+  const handleApplyScan = (scannedData: ScannedQuote, selectedType: DocType) => {
+    haptic('medium');
+    const cfg = DOC_TYPE_CONFIG[selectedType];
+    setShowPrices(cfg.showPricesByDefault);
+
+    setState((prev) => {
+      // Pré-remplissage des lignes
+      const newLines: Line[] =
+        scannedData.items.length > 0
+          ? scannedData.items.map((item) => ({
+              description: item.description || '',
+              quantity: item.quantity !== null && item.quantity > 0 ? item.quantity : 1,
+              unitPrice: item.unitPrice !== null && item.unitPrice >= 0 ? item.unitPrice : 0,
+            }))
+          : prev.lines;
+
+      // Gestion du client si détecté
+      let newClientId = prev.clientId;
+      let newClientMode = prev.clientMode;
+      let newClientObj = { ...prev.newClient };
+
+      if (scannedData.client && scannedData.client.trim()) {
+        const matchingClient = clients.find(
+          (c) => c.name.toLowerCase().includes(scannedData.client!.toLowerCase().trim())
+        );
+        if (matchingClient) {
+          newClientId = matchingClient.id;
+          newClientMode = 'existing';
+        } else {
+          newClientId = null;
+          newClientMode = 'new';
+          newClientObj.name = scannedData.client.trim();
+        }
+      }
+
+      return {
+        ...prev,
+        type: selectedType,
+        clientId: newClientId,
+        clientMode: newClientMode,
+        newClient: newClientObj,
+        lines: newLines,
+      };
+    });
+
+    toast.show(
+      isEn
+        ? 'Data imported from scan. Please review and adjust if needed.'
+        : 'Données importées depuis le scan. Vous pouvez relire et ajuster si nécessaire.',
+      'success'
+    );
   };
 
   const handleSubmit = async () => {
@@ -458,7 +515,22 @@ export function DocumentForm({
       )}
 
       <Card>
-        <label className="mb-2 block text-sm font-medium">{t('type')}</label>
+        <div className="mb-2 flex items-center justify-between">
+          <label className="text-sm font-medium">{t('type')}</label>
+          {!editDocument && (
+            <button
+              type="button"
+              onClick={() => {
+                haptic('light');
+                setIsScanModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-sage-500/40 bg-sage-500/10 px-2.5 py-1 text-xs font-semibold text-sage-800 transition-colors hover:bg-sage-500/20 dark:text-sage-300"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-sage-600 dark:text-sage-400" />
+              <span>{isEn ? 'Scan document (AI)' : 'Scanner un document (IA)'}</span>
+            </button>
+          )}
+        </div>
         {editDocument ? (
           // En édition le type est verrouillé : il fixe le préfixe de numérotation du document.
           <div className="flex items-center gap-3 rounded-card border border-sage-500 bg-sage-50 p-3 ring-1 ring-sage-500/40">
@@ -1050,6 +1122,13 @@ export function DocumentForm({
           {t('generate')}
         </Button>
       </div>
+
+      <ScanModal
+        isOpen={isScanModalOpen}
+        onClose={() => setIsScanModalOpen(false)}
+        currency={clientCurrency}
+        onApplyToForm={handleApplyScan}
+      />
     </div>
   );
 }
