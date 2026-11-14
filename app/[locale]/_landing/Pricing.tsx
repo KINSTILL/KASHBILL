@@ -78,6 +78,7 @@ export function Pricing({
             <ul className="mt-4 space-y-1.5 text-sm text-slate-600">
               <li>✓ {isFr ? 'Documents illimités' : 'Unlimited documents'}</li>
               <li>✓ {isFr ? 'Envois WhatsApp & emails illimités' : 'Unlimited WhatsApp & emails'}</li>
+              <li className="text-emerald-700 font-semibold">✓ {isFr ? 'Liaison de votre propre numéro WhatsApp incluse' : 'Your personal WhatsApp number included'}</li>
               <li>✓ {isFr ? 'Clients illimités' : 'Unlimited clients'}</li>
               <li className="text-emerald-700 font-medium">✓ {isFr ? 'Suppression du filigrane' : 'No watermark'}</li>
               <li>✓ {isFr ? 'Votre propre logo + signature' : 'Your custom logo + signature'}</li>
@@ -163,6 +164,16 @@ function LandingAddOnsSection({ isFr }: { isFr: boolean }) {
 
   const addons = [
     {
+      title: 'White-label',
+      price: isFr ? '+1 000 FCFA/mois' : '+1,000 FCFA/month',
+      shortDesc: isFr
+        ? 'Retire toute mention MyCashBill de vos PDF'
+        : 'Removes all MyCashBill mentions from your PDFs',
+      tooltip: isFr
+        ? 'Supprime la mention discrète « Généré sur MyCashBill » en bas de vos PDF et débloque la personnalisation des couleurs de votre marque sur vos factures A4.'
+        : "Removes the discreet 'Generated with MyCashBill' footer from your PDFs and unlocks custom brand colors on your A4 invoices.",
+    },
+    {
       title: isFr ? 'Appareil supplémentaire' : 'Extra device',
       price: isFr ? '+500 FCFA/mois' : '+500 FCFA/month',
       shortDesc: isFr
@@ -174,23 +185,13 @@ function LandingAddOnsSection({ isFr }: { isFr: boolean }) {
     },
     {
       title: isFr ? 'Mon propre numéro WhatsApp' : 'My own WhatsApp number',
-      price: isFr ? '+1 000 FCFA/mois' : '+1,000 FCFA/month',
+      price: isFr ? '✨ Inclus dans Pro (0 FCFA)' : '✨ Included in Pro (0 FCFA)',
       shortDesc: isFr
         ? 'Envoi direct du PDF brut depuis votre propre numéro WhatsApp'
         : 'Send raw PDFs directly from your own WhatsApp number',
       tooltip: isFr
-        ? 'Connectez votre propre WhatsApp en 1 clic : vos clients reçoivent directement le fichier PDF brut depuis votre numéro WhatsApp habituel, dans votre fil de discussion existant, sans aucune mention de MyCashBill.'
-        : 'Link your own WhatsApp in 1 click: your clients receive the raw PDF invoice directly from your personal/business WhatsApp number in your existing chat thread, with zero MyCashBill mention.',
-    },
-    {
-      title: 'White-label',
-      price: isFr ? '+3 000 FCFA/mois' : '+3,000 FCFA/month',
-      shortDesc: isFr
-        ? 'Retire toute mention MyCashBill de vos PDF'
-        : 'Removes all MyCashBill mentions from your PDFs',
-      tooltip: isFr
-        ? 'Supprime la mention discrète « Généré sur MyCashBill » en bas de vos PDF et débloque la personnalisation des couleurs de votre marque sur vos factures A4.'
-        : "Removes the discreet 'Generated with MyCashBill' footer from your PDFs and unlocks custom brand colors on your A4 invoices.",
+        ? 'Connectez votre propre compte WhatsApp en quelques secondes (via code d’association 8 chiffres sur smartphone ou code QR) : vos clients reçoivent directement le fichier PDF depuis votre numéro habituel, sans aucun surcoût.'
+        : 'Link your own WhatsApp in seconds (via 8-character pairing code or QR code): your clients receive the invoice PDF directly from your personal/business number at no extra charge.',
     },
   ];
 

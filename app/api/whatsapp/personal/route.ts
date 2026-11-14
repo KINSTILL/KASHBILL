@@ -2,7 +2,11 @@ import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/api/server';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
-import { getPersonalStatus, startPersonalConnection } from '@/lib/whatsapp/personal';
+import {
+  getPersonalStatus,
+  startPersonalConnection,
+  disconnectPersonalWhatsApp,
+} from '@/lib/whatsapp/personal';
 
 const bodySchema = z.object({ phone: z.string().min(6).max(30) });
 
@@ -18,7 +22,7 @@ export async function GET(req: NextRequest): Promise<Response> {
   }
 }
 
-/** Enregistre le numéro et renvoie le QR code à scanner. Réservé à l'add-on actif. */
+/** Enregistre le numéro et renvoie le code d'association / QR code. */
 export async function POST(req: NextRequest): Promise<Response> {
   try {
     return await requireAuth(req, async (req2, { user }) => {
@@ -35,9 +39,23 @@ export async function POST(req: NextRequest): Promise<Response> {
         if (result.reason === 'INVALID_NUMBER') {
           return jsonError('VALIDATION_ERROR', 'Numéro WhatsApp invalide.', 400);
         }
-        return jsonError('INTERNAL', "Impossible de générer le code de connexion. Réessayez.", 502);
+        return jsonError('INTERNAL', "Impossible de générer le code de connexion. Réessayez.", 502, {
+          details: result.details,
+        });
       }
       return jsonOk({ qrBase64: result.qrBase64, pairingCode: result.pairingCode, status: result.status });
+    });
+  } catch (err) {
+    return handleApiError(err);
+  }
+}
+
+/** Déconnecte le numéro WhatsApp personnel et purge l'instance. */
+export async function DELETE(req: NextRequest): Promise<Response> {
+  try {
+    return await requireAuth(req, async (_req, { user }) => {
+      const res = await disconnectPersonalWhatsApp(user.id);
+      return jsonOk(res);
     });
   } catch (err) {
     return handleApiError(err);

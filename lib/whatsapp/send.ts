@@ -235,15 +235,44 @@ export async function fetchEvolutionInstances(
     });
     if (!res.ok) return [];
     const data = await res.json();
-    if (!Array.isArray(data)) return [];
-    return data
-      .map((item) => ({
+    const list = Array.isArray(data)
+      ? data
+      : Array.isArray((data as Record<string, unknown>)?.instances)
+      ? ((data as Record<string, unknown>).instances as unknown[])
+      : Array.isArray((data as Record<string, unknown>)?.data)
+      ? ((data as Record<string, unknown>).data as unknown[])
+      : [];
+    return list
+      .map((item: any) => ({
         name: String(item?.name ?? item?.instance?.instanceName ?? item?.instanceName ?? ''),
-        status: String(item?.connectionStatus ?? item?.instance?.status ?? item?.status ?? ''),
+        status: String(item?.connectionStatus ?? item?.instance?.status ?? item?.instance?.state ?? item?.status ?? item?.state ?? ''),
       }))
       .filter((i) => i.name.length > 0);
   } catch {
     return [];
+  }
+}
+
+export async function getEvolutionConnectionState(
+  evolutionUrl: string,
+  evolutionKey: string,
+  instanceName: string
+): Promise<'open' | 'close' | 'connecting' | 'not_found'> {
+  try {
+    const res = await fetch(`${evolutionUrl}/instance/connectionState/${encodeURIComponent(instanceName)}`, {
+      method: 'GET',
+      headers: { apikey: evolutionKey },
+      cache: 'no-store',
+    });
+    if (res.status === 404) return 'not_found';
+    if (!res.ok) return 'close';
+    const data = (await res.json().catch(() => ({}))) as Record<string, any>;
+    const raw = String(data?.instance?.state ?? data?.state ?? data?.connectionStatus ?? data?.status ?? '').toLowerCase().trim();
+    if (raw === 'open' || raw === 'connected') return 'open';
+    if (raw === 'connecting') return 'connecting';
+    return 'close';
+  } catch {
+    return 'close';
   }
 }
 

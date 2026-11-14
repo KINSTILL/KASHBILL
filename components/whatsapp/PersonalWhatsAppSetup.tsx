@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { CheckCircle2, QrCode, Smartphone, Copy, Check } from 'lucide-react';
+import { CheckCircle2, Smartphone, Copy, Check, LogOut, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { InfoTip } from '@/components/ui/InfoTip';
@@ -11,8 +11,8 @@ import { useOnlineStatus } from '@/lib/device/network';
 
 type Status = { status: 'NOT_CONFIGURED' | 'NOT_CREATED' | 'PENDING' | 'CONNECTED'; number: string | null; hasAddOn: boolean };
 
-const POLL_MS = 3000;
-const MAX_POLLS = 40; // ~2 minutes
+const POLL_MS = 2500;
+const MAX_POLLS = 60; // ~2.5 minutes
 
 export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
   const fr = locale === 'fr';
@@ -26,6 +26,7 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
   const [copiedCode, setCopiedCode] = useState(false);
   const [showQrAlternate, setShowQrAlternate] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const polls = useRef(0);
 
@@ -47,7 +48,7 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Suivi de la connexion pendant que le code ou le QR est affiché
+  // Suivi en temps réel de la connexion pendant que le code ou le QR est affiché
   useEffect(() => {
     if (!qr && !pairingCode) return;
     polls.current = 0;
@@ -88,6 +89,12 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
         setError(data?.error?.message ?? (fr ? 'Impossible de générer le code.' : 'Could not generate the code.'));
         return;
       }
+      if (data.status === 'CONNECTED') {
+        setQr(null);
+        setPairingCode(null);
+        await refresh();
+        return;
+      }
       if (!data.qrBase64 && !data.pairingCode) {
         setError(fr ? 'Le code de connexion n’a pas été reçu. Réessayez dans un instant.' : 'No connection code received. Try again shortly.');
         return;
@@ -103,6 +110,21 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
       setError(fr ? 'Connexion interrompue. Réessayez.' : 'Connection lost. Try again.');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    setDisconnecting(true);
+    setError(null);
+    try {
+      await fetch('/api/whatsapp/personal', { method: 'DELETE' });
+      setQr(null);
+      setPairingCode(null);
+      await refresh();
+    } catch {
+      setError(fr ? 'Erreur lors de la déconnexion.' : 'Failed to disconnect.');
+    } finally {
+      setDisconnecting(false);
     }
   };
 
@@ -145,18 +167,32 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
       )}
 
       {connected && (
-        <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-          <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-emerald-600" />
-          <div className="text-sm">
-            <p className="font-semibold text-emerald-900">
-              {fr ? 'Votre numéro est connecté' : 'Your number is connected'}
-            </p>
-            <p className="text-emerald-800">{info?.number}</p>
-            <p className="mt-1 text-xs text-emerald-800">
-              {fr
-                ? 'Les envois WhatsApp partent désormais de ce numéro.'
-                : 'WhatsApp sends now go from this number.'}
-            </p>
+        <div className="space-y-3">
+          <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-emerald-600" />
+            <div className="text-sm flex-1">
+              <p className="font-semibold text-emerald-900">
+                {fr ? 'Votre numéro est connecté' : 'Your number is connected'}
+              </p>
+              <p className="text-emerald-800 font-mono font-bold mt-0.5">{info?.number}</p>
+              <p className="mt-1 text-xs text-emerald-800">
+                {fr
+                  ? 'Vos factures et devis partent désormais directement depuis votre propre compte WhatsApp.'
+                  : 'Your invoices and quotes are now sent directly from your own WhatsApp account.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleDisconnect}
+              disabled={disconnecting}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700 transition"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span>{disconnecting ? (fr ? 'Déconnexion…' : 'Disconnecting…') : (fr ? 'Déconnecter ce numéro ou en changer' : 'Disconnect or change number')}</span>
+            </button>
           </div>
         </div>
       )}
@@ -192,8 +228,8 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
             <InfoTip id="tip-personal-wa" label={fr ? 'Comment ça marche' : 'How it works'} title={fr ? 'Connexion' : 'Connection'}>
               <p>
                 {fr
-                  ? 'Un code QR s’affiche. Scannez-le depuis le WhatsApp de ce numéro pour lier votre compte.'
-                  : 'A QR code appears. Scan it from WhatsApp on this number to link your account.'}
+                  ? 'Un code à 8 chiffres s’affiche. Entrez-le dans WhatsApp sur ce téléphone pour lier votre compte en 5 secondes.'
+                  : 'An 8-character code appears. Enter it in WhatsApp on this phone to pair in 5 seconds.'}
               </p>
               <p>
                 {fr
@@ -248,11 +284,35 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
                   📱 {fr ? 'Comment lier depuis ce même téléphone :' : 'How to link on this same phone:'}
                 </p>
                 <ol className="space-y-1 text-xs text-slate-600">
-                  <li>1. {fr ? 'Ouvrez votre WhatsApp sur ce téléphone.' : 'Open WhatsApp on this phone.'}</li>
+                  <li>1. {fr ? 'Ouvrez WhatsApp sur ce téléphone.' : 'Open WhatsApp on this phone.'}</li>
                   <li>2. {fr ? 'Allez dans Réglages / Menu › Appareils connectés.' : 'Go to Settings / Menu › Linked devices.'}</li>
                   <li>3. {fr ? 'Touchez « Connecter un appareil » puis « Lier avec un numéro de téléphone ».' : 'Tap « Link a device » then « Link with phone number instead ».'}</li>
                   <li>4. {fr ? 'Collez ce code à 8 chiffres : la liaison est immédiate !' : 'Paste this 8-character code: pairing is instant!'}</li>
                 </ol>
+              </div>
+
+              {/* Bouton pour réinitialiser / nouveau code si expiré */}
+              <div className="flex items-center justify-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={generate}
+                  disabled={busy}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-900 underline"
+                >
+                  <RefreshCw className={`h-3 w-3 ${busy ? 'animate-spin' : ''}`} />
+                  <span>{fr ? 'Code expiré ? En générer un nouveau' : 'Expired? Generate new code'}</span>
+                </button>
+                <span className="text-slate-300">•</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPairingCode(null);
+                    setQr(null);
+                  }}
+                  className="text-xs text-slate-500 hover:text-slate-800 underline"
+                >
+                  {fr ? 'Annuler' : 'Cancel'}
+                </button>
               </div>
 
               {/* Option QR Code en repli pour ceux sur ordinateur */}
@@ -294,6 +354,17 @@ export function PersonalWhatsAppSetup({ locale }: { locale: 'fr' | 'en' }) {
                 <li>2. {fr ? 'Menu › Appareils connectés › Connecter un appareil.' : 'Menu › Linked devices › Link a device.'}</li>
                 <li>3. {fr ? 'Scannez le code affiché ici.' : 'Scan the code shown here.'}</li>
               </ol>
+              <div className="flex items-center justify-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={generate}
+                  disabled={busy}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-900 underline"
+                >
+                  <RefreshCw className={`h-3 w-3 ${busy ? 'animate-spin' : ''}`} />
+                  <span>{fr ? 'Générer un nouveau code' : 'Generate new code'}</span>
+                </button>
+              </div>
               <p className="text-xs text-slate-500">{fr ? 'En attente de la connexion…' : 'Waiting for connection…'}</p>
             </div>
           )}
