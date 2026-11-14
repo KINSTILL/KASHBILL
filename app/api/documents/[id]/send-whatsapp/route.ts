@@ -4,7 +4,8 @@ import { prisma } from '@/lib/db';
 import { jsonOk, jsonError, handleApiError } from '@/lib/api-helpers';
 import { requireAuth, writeAudit } from '@/lib/api/server';
 import { renderDocumentPdf } from '@/lib/pdf/render-document';
-import { sendDocumentViaWhatsApp } from '@/lib/whatsapp/send';
+import { sendDocumentViaWhatsApp, normalizeWhatsAppNumber } from '@/lib/whatsapp/send';
+import { getCountryByCode } from '@/lib/countries/dial-codes';
 import { loadPdfDocument } from '@/lib/documents/load-pdf-document';
 import { buildDocumentXml } from '@/lib/einvoice/ubl';
 
@@ -91,7 +92,9 @@ export async function POST(
         const isNotOnWhatsApp = detailStr.includes('exists') && detailStr.includes('false');
 
         if (isNotOnWhatsApp) {
-          const formattedTarget = parsed.phone.trim().startsWith('+') ? parsed.phone.trim() : `+${parsed.phone.trim()}`;
+          const dialCode = parsed.countryCode ? getCountryByCode(parsed.countryCode).dialCode : undefined;
+          const normalized = normalizeWhatsAppNumber(parsed.phone, dialCode);
+          const formattedTarget = normalized ? `+${normalized}` : parsed.phone.trim();
           return jsonError(
             'GATEWAY_ERROR',
             `Le numéro ${formattedTarget} ne possède pas de compte WhatsApp actif. Vérifiez le numéro de votre client ou téléchargez le PDF pour lui transmettre par un autre canal.`,
