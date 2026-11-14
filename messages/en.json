@@ -45,6 +45,7 @@
       "subtitle": "Enter your phone number and PIN to access your account.",
       "phone_label": "Phone Number",
       "phone_placeholder": "",
+      "remember_phone": "Remember my number",
       "pin_label": "PIN Code (6 digits)",
       "pin_show": "Show",
       "pin_hide": "Hide",

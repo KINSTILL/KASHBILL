@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
@@ -13,7 +13,7 @@ import { PinInput } from '@/components/auth/PinInput';
 import { ShieldCheck, AlertCircle, Loader2, ArrowRight } from '@/components/ui/icons';
 import { getOrCreateDeviceId, getDeviceName } from '@/lib/device/client-id';
 import { useCurrentUser } from '@/components/providers/SessionProvider';
-import { DEFAULT_COUNTRY, type DialCountry } from '@/lib/countries/dial-codes';
+import { DEFAULT_COUNTRY, getCountryByCode, type DialCountry } from '@/lib/countries/dial-codes';
 
 interface ActiveDevice {
   deviceId: string;
@@ -37,9 +37,27 @@ export default function LoginPage() {
 
   const [country, setCountry] = useState<DialCountry>(DEFAULT_COUNTRY);
   const [phone, setPhone] = useState('');
+  const [rememberPhone, setRememberPhone] = useState(true);
   const [pin, setPin] = useState<string[]>(Array(PIN_LENGTH).fill(''));
   const [showPin, setShowPin] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Charger le numéro mémorisé s'il existe
+  useEffect(() => {
+    try {
+      const savedPhone = localStorage.getItem('kashbill_remembered_phone');
+      const savedCountry = localStorage.getItem('kashbill_remembered_country');
+      if (savedPhone) {
+        setPhone(savedPhone);
+        setRememberPhone(true);
+      }
+      if (savedCountry) {
+        setCountry(getCountryByCode(savedCountry));
+      }
+    } catch {
+      // Ignorer les erreurs d'accès à localStorage (ex: sandbox, navigation privée stricte)
+    }
+  }, []);
 
   // Device limit sheet
   const [deviceLimitSheetOpen, setDeviceLimitSheetOpen] = useState(false);
@@ -115,6 +133,19 @@ export default function LoginPage() {
           return;
         }
 
+        // Mémoriser ou oublier le numéro de téléphone selon le choix de l'utilisateur
+        try {
+          if (rememberPhone) {
+            localStorage.setItem('kashbill_remembered_phone', phoneDigits);
+            localStorage.setItem('kashbill_remembered_country', country.code);
+          } else {
+            localStorage.removeItem('kashbill_remembered_phone');
+            localStorage.removeItem('kashbill_remembered_country');
+          }
+        } catch {
+          // Ignorer les erreurs d'accès à localStorage
+        }
+
         await refresh();
         const isAdminUser = data.user?.role === 'ADMIN' || data.user?.role === 'SUPPORT';
         // Destination demandée (ex. page de paiement) : uniquement un chemin interne de la même langue.
@@ -169,20 +200,34 @@ export default function LoginPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <PhoneInput
-          label={t('login.phone_label')}
-          placeholder=""
-          value={phone}
-          countryCode={country.code}
-          onCountryChange={setCountry}
-          onChange={(v) => {
-            setPhone(v);
-            if (errorMessage) setErrorMessage(null);
-          }}
-          disabled={isPending}
-          required
-        />
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <PhoneInput
+            label={t('login.phone_label')}
+            placeholder=""
+            value={phone}
+            countryCode={country.code}
+            onCountryChange={setCountry}
+            onChange={(v) => {
+              setPhone(v);
+              if (errorMessage) setErrorMessage(null);
+            }}
+            disabled={isPending}
+            required
+          />
+          <div className="flex items-center justify-start pt-0.5">
+            <label className="inline-flex items-center gap-2 cursor-pointer select-none text-xs text-slate-600 hover:text-slate-900 transition">
+              <input
+                type="checkbox"
+                checked={rememberPhone}
+                onChange={(e) => setRememberPhone(e.target.checked)}
+                disabled={isPending}
+                className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 transition cursor-pointer"
+              />
+              <span>{t('login.remember_phone')}</span>
+            </label>
+          </div>
+        </div>
 
         <div>
           <PinInput

@@ -45,6 +45,7 @@
       "subtitle": "Entrez votre numéro et votre code PIN pour accéder à votre espace.",
       "phone_label": "Numéro de téléphone",
       "phone_placeholder": "",
+      "remember_phone": "Se souvenir de mon numéro",
       "pin_label": "Code PIN (6 chiffres)",
       "pin_show": "Afficher",
       "pin_hide": "Masquer",
