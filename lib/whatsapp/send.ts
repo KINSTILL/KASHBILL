@@ -1,5 +1,5 @@
 import { isCustomWhatsAppActive } from '@/lib/addons/queries';
-import { getCountryByCode } from '@/lib/countries/dial-codes';
+import { COUNTRIES, getCountryByCode } from '@/lib/countries/dial-codes';
 
 /**
  * Envoi d'un document par WhatsApp. Un seul chemin pour l'envoi simple et l'envoi en masse.
@@ -56,17 +56,43 @@ export function hasInternationalPrefix(rawPhone: string): boolean {
 }
 
 /**
+ * Indicatifs connus, triés du plus long au plus court (ex. `+971` avant `+97`,
+ * `+1` après tout autre) : garantit que le préfixe le plus spécifique gagne.
+ */
+const DIAL_CODES_DESC: string[] = Array.from(
+  new Set(COUNTRIES.map((c) => c.dialCode.replace(/\D/g, '')).filter((d) => d.length > 0))
+).sort((a, b) => b.length - a.length);
+
+/** Retrouve l'indicatif pays présent en tête d'une suite de chiffres (le plus spécifique). */
+function detectDialCode(digits: string): string | null {
+  for (const cc of DIAL_CODES_DESC) {
+    if (digits.startsWith(cc)) return cc;
+  }
+  return null;
+}
+
+/** Longueur du numéro national attendue pour un indicatif donné (min/max), si connu. */
+function nationalLengthBounds(cc: string): { min: number; max: number } | null {
+  const match = COUNTRIES.find((c) => c.dialCode.replace(/\D/g, '') === cc);
+  return match ? { min: match.minDigits, max: match.maxDigits } : null;
+}
+
+/**
  * Normalise un numéro vers le format attendu par WhatsApp/Evolution :
  * chiffres uniquement, avec indicatif pays, sans `+`, sans `00` et sans `0` initial.
  *
  * Le pays est celui choisi par l'utilisateur (`dialCode`, ex. `+237`, `+33`, `+225`) :
  * n'importe quel pays fonctionne, aucun indicatif n'est imposé.
  *
- * - `+33 6 12 34 56`, `0033 6 12 34 56` → `336123456`
- * - `06 12 34 56` avec `+33` → `336123456`
- * - `6 12 34 56` avec `+33` → `336123456`
- * - `+237 06 99…` (0 parasite après l'indicatif) → `237699…`
- * - Numéro déjà préfixé par l'indicatif choisi → conservé tel quel.
+ * Le numéro n'est JAMAIS préfixé deux fois : un indicatif déjà présent est détecté
+ * et respecté, même si l'utilisateur a aussi choisi un pays dans le sélecteur.
+ *
+ * - `+33 6 12 34 56 78`, `0033 6 12 34 56 78` → `33612345678`
+ * - `06 12 34 56 78` avec `+33` → `33612345678`
+ * - `+33 06…` (0 national parasite) → `336…`
+ * - `2376XXXXXXXX` avec `+237` → `2376XXXXXXXX` (pas de double préfixe)
+ * - `+2376XXXXXXXX` avec le sélecteur resté sur `+33` → `2376XXXXXXXX`
+ * - Numéro invalide pour l'indicatif connu (longueur hors bornes) → `''`
  *
  * @param rawPhone   Numéro saisi (peut contenir +, 00, espaces, tirets, parenthèses)
  * @param dialCode   Indicatif du pays choisi, ex. `+237` (défaut `+237` pour compatibilité)
@@ -76,36 +102,75 @@ export function normalizeWhatsAppNumber(rawPhone: string, dialCode = '+237'): st
   const trimmed = rawPhone.trim();
   if (!trimmed) return '';
 
-  // Indicatif normalisé en chiffres (ex. `+33` → `33`).
-  const cc = dialCode.replace(/\D/g, '');
+  // Indicatif du pays choisi par l'utilisateur (chiffres uniquement, ex. `+33` → `33`).
+  const selected = dialCode.replace(/\D/g, '');
   const hasExplicitPrefix = /^\+|^00/.test(trimmed);
-  // On retire le préfixe international (`+` ou `00`) avant d'extraire les chiffres.
-  let digits = trimmed.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
+
+  // Chiffres bruts, sans `+` ni `00` ni séparateurs.
+  const digits = trimmed.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
   if (!digits) return '';
 
-  // Préfixe international explicite : l'indicatif saisi fait foi.
+  // 1) L'indicatif est-il déjà présent en tête ?
+  //    - préfixe explicite (`+…` / `00…`) : oui par construction ;
+  //    - sinon, on ne le suppose que si le préfixe détecté est assez spécifique
+  //      (≥ 3 chiffres) ou s'il correspond à l'indicatif choisi et que la longueur le confirme.
+  let cc: string | null = null;
+  let national: string;
+
   if (hasExplicitPrefix) {
-    // `0` parasite juste après l'indicatif : +237 06… → 2376…
-    const doubled = `${cc}0`;
-    if (cc && digits.startsWith(doubled)) digits = `${cc}${digits.slice(doubled.length)}`;
-    return digits.length >= 6 ? digits : '';
+    cc = detectDialCode(digits);
+    // Indicatif inconnu : on garde le numéro tel quel (ex. numéro satellite/régional).
+    if (!cc) return digits.length >= 6 ? digits : '';
+    national = digits.slice(cc.length);
+  } else {
+    const detected = detectDialCode(digits);
+    const detectedIsSelected = detected !== null && detected === selected;
+    const detectedIsSpecific = detected !== null && detected.length >= 3;
+    const boundsDetected = detected ? nationalLengthBounds(detected) : null;
+    const detectedFits =
+      detected !== null &&
+      boundsDetected !== null &&
+      digits.length - detected.length >= boundsDetected.min &&
+      digits.length - detected.length <= boundsDetected.max;
+
+    if (detected && (detectedIsSelected || detectedIsSpecific || detectedFits)) {
+      cc = detected;
+      national = digits.slice(cc.length);
+    } else if (selected) {
+      // Numéro national saisi sans indicatif : on préfixe avec le pays choisi.
+      cc = selected;
+      national = digits;
+    } else {
+      // Aucun indicatif ni choix : numéro nu.
+      const bare = digits.replace(/^0+/, '');
+      return bare || '';
+    }
   }
 
-  // Pas d'indicatif choisi : on renvoie le numéro nettoyé (compatibilité).
-  if (!cc) {
-    const national = digits.replace(/^0+/, '');
-    return national || '';
-  }
+  const bounds = nationalLengthBounds(cc);
 
-  // Déjà préfixé par l'indicatif choisi (ex. 2376XXXXXXXXX quand le pays est CM).
-  if (digits.startsWith(cc) && digits.length > cc.length + 4) {
-    return digits;
+  // 2) `0` national résiduel juste après l'indicatif (ex. +33 06… → 336…).
+  //    Attention : dans certains pays le `0` de tête fait PARTIE du numéro
+  //    (ex. Côte d'Ivoire : `07 07 07 07 07` = 10 chiffres significatifs).
+  //    Règle : on retire le `0` UNIQUEMENT si, en le gardant, le numéro dépasse
+  //    la longueur maximale connue pour ce pays.
+  if (bounds && national.length > bounds.max) {
+    national = national.replace(/^0+/, '');
+  } else if (!bounds) {
+    national = national.replace(/^0+/, '');
   }
-
-  // Numéro national : on retire les 0 de tête puis on ajoute l'indicatif choisi.
-  const national = digits.replace(/^0+/, '');
   if (!national) return '';
-  return `${cc}${national}`;
+
+  // 3) Validation de la longueur nationale quand l'indicatif est connu.
+  if (bounds && (national.length < bounds.min || national.length > bounds.max)) {
+    return '';
+  }
+
+  const full = `${cc}${national}`;
+  // Plausibilité générale E.164 (max 15 chiffres au total).
+  if (full.length < 6 || full.length > 15) return '';
+
+  return full;
 }
 
 /** Message encadré (Mode A) : identité de l'émetteur et clause d'outil technique. */

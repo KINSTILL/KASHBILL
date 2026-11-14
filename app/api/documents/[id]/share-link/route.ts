@@ -71,7 +71,9 @@ export async function POST(
       });
 
       const token = signDocumentShareToken(doc.id);
-      const origin = req2.nextUrl.origin || env.APP_URL.replace(/\/+$/, '');
+      // `APP_URL` fait foi (domaine public garanti). Derrière un reverse proxy,
+      // `nextUrl.origin` peut renvoyer `http://` ou `localhost` et casser le lien.
+      const origin = (env.APP_URL || req2.nextUrl.origin).replace(/\/+$/, '');
       const downloadUrl = buildDocumentShareUrl(origin, doc.id, token);
       const xmlUrl = parsedBody.includeXml ? buildDocumentXmlShareUrl(origin, doc.id, token) : undefined;
 

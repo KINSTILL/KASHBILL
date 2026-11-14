@@ -28,6 +28,68 @@ type Done = {
   xmlUrl?: string;
 };
 
+/**
+ * Aperçu du numéro tel qu'il sera envoyé (affichage seul).
+ * Reproduit la normalisation serveur pour que l'utilisateur voie immédiatement
+ * une saisie erronée, sans attendre la réponse du serveur.
+ */
+function previewNumber(raw: string, dialCode: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  const hasPrefix = /^\+|^00/.test(trimmed);
+  const digits = trimmed.replace(/^\+/, '').replace(/^00/, '').replace(/\D/g, '');
+  if (!digits) return '';
+
+  // Indicatif déjà présent en tête (sur ≥ 3 chiffres, ou `+`/`00` explicite).
+  const matches = COUNTRIES.filter((c) => digits.startsWith(c.dialCode.replace(/\D/g, ''))).sort(
+    (a, b) => b.dialCode.length - a.dialCode.length
+  );
+  const selectedCc = dialCode.replace(/\D/g, '');
+  let cc: string | null = null;
+  let national = digits;
+
+  if (hasPrefix) {
+    cc = matches[0]?.dialCode.replace(/\D/g, '') ?? null;
+    if (cc) national = digits.slice(cc.length);
+  } else {
+    const det = matches[0];
+    const detCc = det ? det.dialCode.replace(/\D/g, '') : null;
+    const fits =
+      det !== undefined &&
+      digits.length - detCc!.length >= det.minDigits &&
+      digits.length - detCc!.length <= det.maxDigits;
+    if (det && (detCc === selectedCc || detCc!.length >= 3 || fits)) {
+      cc = detCc;
+      national = digits.slice(detCc!.length);
+    } else {
+      cc = selectedCc;
+    }
+  }
+
+  if (!cc) return '';
+  const finalCc: string = cc;
+  const bounds = COUNTRIES.find((c) => c.dialCode.replace(/\D/g, '') === finalCc);
+  if (!bounds || national.length > bounds.maxDigits) national = national.replace(/^0+/, '');
+  if (!national) return '';
+  if (bounds && (national.length < bounds.minDigits || national.length > bounds.maxDigits)) return '';
+  const full = `${finalCc}${national}`;
+  if (full.length < 6 || full.length > 15) return '';
+  return full;
+}
+
+/** Formate un numéro E.164 en blocs lisibles : `+237 6 99 12 34 56`. */
+function formatPreview(full: string): string {
+  if (!full) return '';
+  const country = COUNTRIES.filter((c) => full.startsWith(c.dialCode.replace(/\D/g, ''))).sort(
+    (a, b) => b.dialCode.length - a.dialCode.length
+  )[0];
+  if (!country) return `+${full}`;
+  const cc = country.dialCode.replace(/\D/g, '');
+  const rest = full.slice(cc.length);
+  const groups = rest.match(/.{1,2}/g) ?? [rest];
+  return `${country.dialCode} ${groups.join(' ')}`;
+}
+
 export function SendDocumentView({
   documentId,
   pdfDoc,
@@ -76,6 +138,10 @@ export function SendDocumentView({
       ? `Bonjour${clientName ? ` ${clientName}` : ''}, veuillez trouver ci-joint ${docLabel.toLowerCase()} ${pdfDoc.number}. Merci pour votre confiance.`
       : `Hello${clientName ? ` ${clientName}` : ''}, please find attached ${docLabel.toLowerCase()} ${pdfDoc.number}. Thank you for your trust.`
   );
+  // Aperçu du numéro effectivement utilisé (masqué si le champ est vide).
+  const normalizedPhone = useMemo(() => previewNumber(phone, country.dialCode), [phone, country.dialCode]);
+  const phonePreview = formatPreview(normalizedPhone);
+
   const [busy, setBusy] = useState(false);
   const [includeXml, setIncludeXml] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,18 +223,14 @@ export function SendDocumentView({
       return;
     }
 
-    // Le numéro national saisi est accompagné du pays choisi : l'indicatif est ajouté côté serveur.
-    // Si l'utilisateur a tapé un indicatif explicite (`+…`), il fait foi.
-    const fullNumber = phone.trim().startsWith('+') || phone.trim().startsWith('00')
-      ? phone.trim()
-      : `${country.dialCode}${phone.replace(/\D/g, '').replace(/^0+/, '')}`;
-
+    // On envoie la SAISIE BRUTE + le pays choisi : le serveur normalise une seule fois
+  // (il détecte un indicatif déjà présent et ne le préfixe jamais deux fois).
     setBusy(true);
     try {
       const res = await fetch(`/api/documents/${documentId}/send-whatsapp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'fetch' },
-        body: JSON.stringify({ phone: fullNumber, message, filename: fileName, locale, mode: channel, includeXml, countryCode: country.code }),
+        body: JSON.stringify({ phone: phone.trim(), message, filename: fileName, locale, mode: channel, includeXml, countryCode: country.code }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -191,7 +253,7 @@ export function SendDocumentView({
         );
         return;
       }
-      setDone({ method, recipient: `+${country.dialCode.replace(/\D/g, '')} ${phone.trim()}`, xmlSent: data?.xmlSent === true });
+      setDone({ method, recipient: phonePreview || `+${country.dialCode.replace(/\D/g, '')} ${phone.trim()}`, xmlSent: data?.xmlSent === true });
     } catch {
       setError(fr ? 'Connexion interrompue. Réessayez.' : 'Connection lost. Please try again.');
     } finally {
@@ -232,9 +294,23 @@ export function SendDocumentView({
           </p>
         )}
         {done.method === 'link' && done.downloadUrl && (
-          <div className="w-full space-y-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-left">
-            <LinkRow label="PDF" url={done.downloadUrl} fr={fr} />
-            {done.xmlUrl && <LinkRow label="XML" url={done.xmlUrl} fr={fr} />}
+          <div className="w-full space-y-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-left">
+            <LinkRow
+              label={
+                fr
+                  ? `Lien de téléchargement de la ${docLabel.toLowerCase()}`
+                  : `Download link for the ${docLabel.toLowerCase()}`
+              }
+              url={done.downloadUrl}
+              fr={fr}
+            />
+            {done.xmlUrl && (
+              <LinkRow
+                label={fr ? 'Lien de téléchargement du fichier XML' : 'Download link for the XML file'}
+                url={done.xmlUrl}
+                fr={fr}
+              />
+            )}
           </div>
         )}
         <div className="flex w-full flex-col gap-2 pt-2 sm:flex-row">
@@ -401,6 +477,21 @@ export function SendDocumentView({
                 setError(null);
               }}
             />
+            {phone.trim().length > 0 && (
+              <p
+                role="status"
+                aria-live="polite"
+                className={`-mt-1 text-[12px] ${normalizedPhone ? 'text-slate-500' : 'text-red-600'}`}
+              >
+                {normalizedPhone
+                  ? fr
+                    ? <>Sera envoyé à <span className="font-mono font-semibold text-slate-800">{phonePreview}</span></>
+                    : <>Will be sent to <span className="font-mono font-semibold text-slate-800">{phonePreview}</span></>
+                  : fr
+                    ? 'Numéro invalide : vérifiez l’indicatif et le nombre de chiffres.'
+                    : 'Invalid number: check the country code and digit count.'}
+              </p>
+            )}
             <div>
               <label htmlFor="send-message" className="mb-1.5 block text-[13px] font-medium text-slate-700">
                 {fr ? 'Message (facultatif)' : 'Message (optional)'}
@@ -636,7 +727,10 @@ function CountryPhoneField({
   );
 }
 
-/** Affiche une URL de partage avec un bouton « Copier » aligné sur le style des boutons existants. */
+/**
+ * Ligne de téléchargement : le lien est directement cliquable (nouvel onglet),
+ * avec un libellé parlant pour l'utilisateur et un bouton « Copier ».
+ */
 function LinkRow({ label, url, fr }: { label: string; url: string; fr: boolean }) {
   const [copied, setCopied] = useState(false);
 
@@ -651,9 +745,15 @@ function LinkRow({ label, url, fr }: { label: string; url: string; fr: boolean }
   return (
     <div className="space-y-1.5">
       <p className="text-xs font-semibold text-slate-700">{label}</p>
-      <p className="break-all rounded-lg border border-slate-200 bg-white px-2.5 py-2 font-mono text-[11px] text-slate-600">
-        {url}
-      </p>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-white px-2.5 py-2 text-[12px] font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2 transition hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-300 break-all"
+      >
+        <Download className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <span className="break-all">{url}</span>
+      </a>
       <Button type="button" variant="outline" size="sm" fullWidth onClick={copy}>
         {copied ? (fr ? 'Copié' : 'Copied') : fr ? 'Copier le lien' : 'Copy link'}
       </Button>
