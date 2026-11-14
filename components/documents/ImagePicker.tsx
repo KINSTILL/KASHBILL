@@ -70,7 +70,7 @@ export function ImagePicker({
   return (
     <div className="space-y-2">
       {(label || guide) && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {label && <label className="text-sm font-medium text-slate-700">{label}</label>}
           {guide && (
             <InfoTip id={guide.id} label="Guide" title={guide.title}>

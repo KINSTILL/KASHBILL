@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Info } from 'lucide-react';
+import { Info, X } from 'lucide-react';
 
 const MARGIN = 8; // marge minimale avec le bord de l'écran (px)
 const PANEL_WIDTH = 288; // w-72
@@ -10,24 +10,23 @@ const PANEL_WIDTH = 288; // w-72
 type Pos = { top: number; left: number; width: number; arrowX: number; above: boolean };
 
 /**
- * Infobulle guidée.
- * - Rendue dans <body> en position fixe : elle n'est jamais rognée par un parent
- *   `overflow: hidden` (cadre de téléphone, cartes, modales).
- * - Positionnée à partir du bouton, puis resserrée dans la fenêtre ; elle passe
- *   au-dessus du bouton s'il n'y a pas de place en dessous.
- * - Tap / clic pour ouvrir et fermer (mobile et PC). Le survol n'agit que pour la
- *   souris, afin qu'un tap sur mobile ne reste pas « collé » ouvert.
- * - Se ferme au clic extérieur et à la touche Échap.
+ * Infobulle / Guide d'aide contextuelle.
+ * - Format discret par défaut dans un cercle (« ? ») pour ne pas encombrer l'interface.
+ * - Rendue dans <body> en position fixe : jamais rognée par un overflow:hidden.
+ * - Tap / clic pour ouvrir et fermer (mobile et PC), survol souris sur desktop.
+ * - Fermeture au clic extérieur, touche Échap ou bouton de fermeture.
  */
 export function InfoTip({
   id,
   label,
   title,
+  variant = 'circle',
   children,
 }: {
   id: string;
   label: string;
   title?: string;
+  variant?: 'circle' | 'pill';
   children: ReactNode;
 }) {
   const [pinned, setPinned] = useState(false); // ouvert par tap / clic
@@ -122,24 +121,38 @@ export function InfoTip({
         maxHeight: `calc(100vh - ${MARGIN * 2}px)`,
         overflowY: 'auto',
       }}
-      className={`z-[70] rounded-xl border border-emerald-200 bg-white p-3 text-xs leading-relaxed text-slate-700 shadow-lg transition-opacity duration-150 ${
+      className={`z-[70] rounded-2xl border border-slate-200/90 bg-white p-3.5 text-xs leading-relaxed text-slate-700 shadow-xl transition-opacity duration-150 ${
         open && pos ? 'visible opacity-100' : 'pointer-events-none invisible opacity-0'
       }`}
     >
       <span
         aria-hidden
         style={{ left: pos?.arrowX ?? 12 }}
-        className={`absolute h-3 w-3 rotate-45 border-emerald-200 bg-white ${
+        className={`absolute h-3 w-3 rotate-45 border-slate-200 bg-white ${
           pos?.above ? '-bottom-1.5 border-b border-r' : '-top-1.5 border-l border-t'
         }`}
       />
-      {title && <p className="mb-1.5 font-semibold text-slate-900">{title}</p>}
-      <div className="space-y-1.5">{children}</div>
+      <div className="flex items-start justify-between gap-2 mb-1.5">
+        {title ? (
+          <p className="font-bold text-slate-900 text-xs">{title}</p>
+        ) : (
+          <span />
+        )}
+        <button
+          type="button"
+          onClick={() => setPinned(false)}
+          className="text-slate-400 hover:text-slate-700 p-0.5 rounded transition shrink-0"
+          aria-label="Fermer"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <div className="space-y-1.5 text-slate-600">{children}</div>
     </div>
   );
 
   return (
-    <div className="relative inline-flex">
+    <div className="relative inline-flex items-center">
       <button
         ref={btnRef}
         type="button"
@@ -148,10 +161,26 @@ export function InfoTip({
         onPointerLeave={(e) => e.pointerType === 'mouse' && leaveMouse()}
         aria-expanded={pinned}
         aria-describedby={id}
-        className="inline-flex min-h-11 items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 sm:min-h-0 sm:px-2"
+        aria-label={title ? `${title} (${label})` : label}
+        title={title || label}
+        className={
+          variant === 'circle'
+            ? `inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-extrabold leading-none transition-colors shadow-2xs touch-manipulation select-none ${
+                open
+                  ? 'border-emerald-400 bg-emerald-50 text-emerald-700 ring-2 ring-emerald-100'
+                  : 'border-slate-300/80 bg-slate-100/90 text-slate-500 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700'
+              }`
+            : 'inline-flex min-h-11 items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-800 sm:min-h-0 sm:px-2'
+        }
       >
-        <Info className="h-3 w-3 text-emerald-600" aria-hidden="true" />
-        <span>{label}</span>
+        {variant === 'circle' ? (
+          <span>?</span>
+        ) : (
+          <>
+            <Info className="h-3 w-3 text-emerald-600" aria-hidden="true" />
+            <span>{label}</span>
+          </>
+        )}
       </button>
       {mounted && createPortal(panel, document.body)}
     </div>
